@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev Cracks - Desarrolladores Top</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #0d1117; /* Fondo oscuro tipo GitHub */
+            color: #e6edf3; /* Texto claro */
+            overflow-x: hidden; /* Evitar scroll horizontal por animaciones */
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Encabezado */
+        header {
+            background-color: #161b22; /* Un poco más claro que el fondo */
+            padding: 20px 0;
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        header .logo img {
+            height: 60px; /* Ajusta el tamaño del logo */
+            margin-right: 15px;
+        }
+
+        header .logo h1 {
+            margin: 0;
+            font-size: 2.2em;
+            font-weight: 900;
+            color: #e6edf3;
+            letter-spacing: -1px;
+            /* Efecto de texto con brillo/glitch */
+            animation: text-flicker 1.5s infinite alternate;
+        }
+
+        @keyframes text-flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                text-shadow:
+                    -0.2rem -0.2rem 1rem #00ffff,
+                    0.2rem 0.2rem 1rem #ff00ff;
+            }
+            20%, 24%, 55% {
+                text-shadow: none;
+            }
+        }
+
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        nav ul li {
+            margin-left: 30px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: #8b949e;
+            font-weight: 700;
+            font-size: 1.1em;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: #58a6ff; /* Azul GitHub */
+            transform: translateY(-3px);
+        }
+
+        /* Sección Hero */
+        .hero {
+            text-align: center;
+            padding: 100px 20px;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            border-bottom: 1px solid #30363d;
+            position: relative;
+            overflow: hidden; /* Para las partículas */
+        }
+
+        .hero h2 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            color: #c9d1d9;
+            font-weight: 900;
+            line-height: 1.2;
+            text-shadow: 0 0 10px rgba(88, 166, 255, 0.5); /* Sombra suave */
+        }
+
+        .hero p {
+            font-size: 1.4em;
+            color: #8b949e;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            background-color: #238636; /* Verde de GitHub */
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 5px 15px rgba(35, 134, 54, 0.4);
+        }
+
+        .btn-primary:hover {
+            background-color: #2ea043;
+            transform: translateY(-5px);
+        }
+
+        /* Efecto de partículas de fondo (ejemplo con CSS, JS para más dinamismo) */
+        .hero::before, .hero::after {
+            content: '';
+            position: absolute;
+            background: radial-gradient(circle, rgba(88, 166, 255, 0.2) 0%, transparent 70%);
+            animation: move-particles 15s infinite linear;
+            z-index: 0;
+            opacity: 0.3;
+        }
+
+        .hero::before {
+            width: 100px;
+            height: 100px;
+            top: 10%;
+            left: 5%;
+            animation-duration: 20s;
+        }
+
+        .hero::after {
+            width: 150px;
+            height: 150px;
+            bottom: 15%;
+            right: 10%;
+            animation-duration: 25s;
+        }
+
+        @keyframes move-particles {
+            0% { transform: translate(0, 0); opacity: 0.3; }
+            25% { transform: translate(20px, 30px); opacity: 0.4; }
+            50% { transform: translate(-10px, -20px); opacity: 0.3; }
+            75% { transform: translate(15px, 10px); opacity: 0.4; }
+            100% { transform: translate(0, 0); opacity: 0.3; }
+        }
+
+
+        /* Sección de Servicios/Qué Hacemos */
+        .services, .why-us, .contact {
+            padding: 80px 20px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .services h2, .why-us h2, .contact h2 {
+            text-align: center;
+            font-size: 2.8em;
+            margin-bottom: 60px;
+            color: #c9d1d9;
+            font-weight: 900;
+        }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+
+        .service-item {
+            background-color: #161b22;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #30363d;
+        }
+
+        .service-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
+            border-color: #58a6ff;
+        }
+
+        .service-item h3 {
+            font-size: 1.8em;
+            color: #58a6ff;
+            margin-bottom: 15px;
+        }
+
+        .service-item p {
+            font-size: 1.1em;
+            color: #8b949e;
+            line-height: 1.5;
+        }
+
+        /* Sección Por qué elegirnos */
+        .why-us .item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .why-us .item:last-child {
+            margin-bottom: 0;
+        }
+
+        .why-us .item .icon {
+            font-size: 3em;
+            color: #58a6ff;
+            margin-right: 25px;
+            flex-shrink: 0;
+        }
+
+        .why-us .item h3 {
+            font-size: 1.8em;
+            color: #c9d1d9;
+            margin-bottom: 10px;
+        }
+
+        .why-us .item p {
+            font-size: 1.1em;
+            color: #8b949e;
+            line-height: 1.6;
+        }
+
+        /* Sección de Contacto */
+        .contact {
+            text-align: center;
+        }
+
+        .contact p {
+            font-size: 1.2em;
+            color: #8b949e;
+            margin-bottom: 40px;
+        }
+
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #161b22;
+            padding: 40px;
+            border-radius: 10px;
+            border: 1px solid #30363d;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .contact-form label {
+            display: block;
+            text-align: left;
+            margin-bottom: 8px;
+            color: #c9d1d9;
+            font-weight: 700;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            width: calc(100% - 20px);
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            background-color: #0d1117;
+            color: #e6edf3;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1em;
+        }
+
+        .contact-form input:focus,
+        .contact-form textarea:focus {
+            outline: none;
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
+        }
+
+        .contact-form button {
+            background-color: #238636;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 5px 15px rgba(35, 134, 54, 0.4);
+        }
+
+        .contact-form button:hover {
+            background-color: #2ea043;
+            transform: translateY(-3px);
+        }
+
+        /* Pie de página */
+        footer {
+            background-color: #161b22;
+            padding: 30px 0;
+            text-align: center;
+            color: #8b949e;
+            font-size: 0.9em;
+            border-top: 1px solid #30363d;
+        }
+
+        footer .social-links a {
+            color: #8b949e;
+            font-size: 1.5em;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+        }
+
+        footer .social-links a:hover {
+            color: #58a6ff;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            header .logo {
+                margin-bottom: 20px;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            nav ul li {
+                margin-left: 0;
+            }
+
+            .hero h2 {
+                font-size: 2.5em;
+            }
+
+            .hero p {
+                font-size: 1.1em;
+            }
+
+            .service-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .why-us .item {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .why-us .item .icon {
+                margin: 0 0 15px 0;
+            }
+        }
+
+        /* Más efectos maravillosos (JavaScript para estos) */
+
+        /* Efecto de "typing" en el hero */
+        .typing-effect span {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 0.15em solid #58a6ff; /* Cursor */
+            animation: typing 3s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #58a6ff; }
+        }
+
+        /* Efecto de "card flip" en servicios (requiere JS para la lógica, CSS para la animación) */
+        .service-item.flipped {
+            transform: rotateY(180deg);
+        }
+        .service-item .front, .service-item .back {
+            backface-visibility: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #161b22;
+            border-radius: 10px;
+            padding: 30px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .service-item .back {
+            transform: rotateY(180deg);
+            background-color: #238636; /* Color de fondo al voltear */
+            color: white;
+        }
+
+
+        /* Animación de entrada de elementos */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .fade-in.appear {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+
+    </style>
+</head>
+<body>
+
+    <header class="container">
+        <div class="logo">
+            <img src="https://via.placeholder.com/60x60?text=DC" alt="Dev Cracks Logo"> <h1>DEV CRACKS</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#inicio">Inicio</a></li>
+                <li><a href="#servicios">Servicios</a></li>
+                <li><a href="#nosotros">Nosotros</a></li>
+                <li><a href="#contacto">Contacto</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="inicio" class="hero">
+            <h2 class="typing-effect">Construimos el Futuro del Software.</h2>
+            <p>Somos Dev Cracks, un equipo de desarrolladores top, innovando en cada línea de código para transformar ideas en soluciones excepcionales y de alto impacto.</p>
+            <a href="#contacto" class="btn-primary">¡Hablemos de tu proyecto!</a>
+        </section>
+
+        <section id="servicios" class="services container">
+            <h2>Nuestros Servicios Destacados</h2>
+            <div class="service-grid">
+                <div class="service-item fade-in">
+                    <h3>Desarrollo Web Full-Stack</h3>
+                    <p>Desde interfaces impresionantes hasta bases de datos robustas, creamos soluciones web completas y escalables.</p>
+                </div>
+                <div class="service-item fade-in">
+                    <h3>Aplicaciones Móviles Nativas</h3>
+                    <p>Diseñamos y desarrollamos apps Android e iOS con rendimiento impecable y experiencias de usuario intuitivas.</p>
+                </div>
+                <div class="service-item fade-in">
+                    <h3>Consultoría Tecnológica</h3>
+                    <p>Asesoramos a empresas para optimizar sus procesos, adoptar nuevas tecnologías y resolver desafíos complejos.</p>
+                </div>
+                <div class="service-item fade-in">
+                    <h3>Cloud & DevOps</h3>
+                    <p>Implementamos arquitecturas en la nube y pipelines de DevOps para agilizar el despliegue y la operación.</p>
+                </div>
+                <div class="service-item fade-in">
+                    <h3>Inteligencia Artificial & ML</h3>
+                    <p>Integramos soluciones de IA y Machine Learning para automatización, análisis predictivo y toma de decisiones.</p>
+                </div>
+                <div class="service-item fade-in">
+                    <h3>Seguridad y Auditoría de Código</h3>
+                    <p>Garantizamos la robustez y seguridad de tus sistemas con auditorías exhaustivas y mejores prácticas.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="nosotros" class="why-us container">
+            <h2>¿Por Qué Elegir a Dev Cracks?</h2>
+            <div class="item fade-in">
+                <span class="icon">⚡</span>
+                <div>
+                    <h3>Expertos de Élite</h3>
+                    <p>Nuestro equipo está compuesto por desarrolladores top con años de experiencia en las tecnologías más avanzadas.</p>
+                </div>
+            </div>
+            <div class="item fade-in">
+                <span class="icon">💡</span>
+                <div>
+                    <h3>Innovación Constante</h3>
+                    <p>Siempre estamos al día con las últimas tendencias y metodologías para ofrecer soluciones vanguardistas.</p>
+                </div>
+            </div>
+            <div class="item fade-in">
+                <span class="icon">✅</span>
+                <div>
+                    <h3>Calidad Impecable</h3>
+                    <p>Nos comprometemos a entregar software robusto, escalable y con un código limpio y eficiente.</p>
+                </div>
+            </div>
+            <div class="item fade-in">
+                <span class="icon">🤝</span>
+                <div>
+                    <h3>Colaboración Transparente</h3>
+                    <p>Trabajamos codo a codo contigo, manteniendo una comunicación abierta y un proceso ágil.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="contacto" class="contact container">
+            <h2>¡Hablemos de tu Próximo Gran Proyecto!</h2>
+            <p>¿Listo para llevar tu idea al siguiente nivel? Contáctanos y descubre cómo Dev Cracks puede ayudarte a construir el futuro.</p>
+            <div class="contact-form">
+                <form action="#" method="POST">
+                    <label for="name">Nombre:</label>
+                    <input type="text" id="name" name="name" required>
+
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+
+                    <label for="message">Mensaje:</label>
+                    <textarea id="message" name="message" rows="6" required></textarea>
+
+                    <button type="submit">Enviar Mensaje</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Dev Cracks. Todos los derechos reservados.</p>
+            <div class="social-links">
+                <a href="#" target="_blank">🔗</a> <a href="#" target="_blank">🌐</a> <a href="#" target="_blank">🐦</a> </div>
+        </div>
+    </footer>
+
+    <script>
+        // JavaScript para los "efectos maravillosos"
+
+        // Efecto de typing para el título del Hero
+        document.addEventListener('DOMContentLoaded', () => {
+            const typingElement = document.querySelector('.typing-effect');
+            if (typingElement) {
+                const text = typingElement.textContent;
+                typingElement.textContent = ''; // Limpiar el texto inicial
+                let i = 0;
+                function typeWriter() {
+                    if (i < text.length) {
+                        typingElement.textContent += text.charAt(i);
+                        i++;
+                        setTimeout(typeWriter, 70); // Velocidad de escritura
+                    } else {
+                        // Opcional: Eliminar el cursor después de escribir todo
+                        typingElement.style.borderRight = 'none';
+                    }
+                }
+                typeWriter();
+            }
+
+            // Animación de entrada al hacer scroll (Fade-in)
+            const faders = document.querySelectorAll('.fade-in');
+            const appearOptions = {
+                threshold: 0.1, // Elemento visible en un 10%
+                rootMargin: "0px 0px -50px 0px" // Empezar un poco antes de que esté en el centro
+            };
+
+            const appearOnScroll = new IntersectionObserver(function(entries, appearOnScroll) {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) {
+                        return;
+                    } else {
+                        entry.target.classList.add('appear');
+                        appearOnScroll.unobserve(entry.target);
+                    }
+                });
+            }, appearOptions);
+
+            faders.forEach(fader => {
+                appearOnScroll.observe(fader);
+            });
+        });
+
+        // NOTA: Para un efecto de partículas más avanzado o "card flip", necesitarías bibliotecas
+        // como particles.js o animaciones CSS más complejas con clases toggleadas por JS.
+        // Aquí te doy las ideas y un ejemplo básico de cómo se integrarían.
+
+        /*
+        // Ejemplo de cómo podrías hacer un "card flip" con JS (requiere más CSS para el 3D)
+        document.querySelectorAll('.service-item').forEach(item => {
+            item.addEventListener('click', () => {
+                item.classList.toggle('flipped');
+                // En un escenario real, tendrías un .front y .back dentro de .service-item
+                // y rotarías el contenedor de .service-item para mostrar la parte trasera.
+                // Esto es solo un ejemplo de cómo JS controlaría la clase.
+            });
+        });
+        */
+    </script>
+</body>
+</html>
