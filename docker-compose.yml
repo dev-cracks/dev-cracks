@@ -1,0 +1,14 @@
+services:
+  email-service:
+    image: fractalize/email-service:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      Brevo__ApiKey: ${BREVO_API_KEY:?Set BREVO_API_KEY}
+      Brevo__Sender__Email: ${BREVO_SENDER_EMAIL:-no-reply@example.com}
+      Brevo__Sender__Name: ${BREVO_SENDER_NAME:-Fractalize}
+
