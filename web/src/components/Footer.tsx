@@ -18,6 +18,9 @@ export const Footer = () => (
         <a href="https://www.linkedin.com/in/dev-cracks/" target="_blank" rel="noreferrer">
           💼
         </a>
+        <a href="https://hotmart.com/club/dev-cracks" target="_blank" rel="noreferrer">
+          🎓
+        </a>
         <a href="https://discord.gg/9eaBf5qR" target="_blank" rel="noreferrer">
           💬
         </a>
