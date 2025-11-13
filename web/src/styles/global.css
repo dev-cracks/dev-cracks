@@ -201,6 +201,7 @@ nav a:hover {
 
 .services,
 .why-us,
+.hotmart-promo,
 .contact {
   padding: 80px 20px;
   border-bottom: 1px solid #30363d;
@@ -208,6 +209,7 @@ nav a:hover {
 
 .services h2,
 .why-us h2,
+.hotmart-promo h2,
 .contact h2 {
   text-align: center;
   font-size: 2.8rem;
@@ -277,6 +279,42 @@ nav a:hover {
   font-size: 1.1rem;
   color: #8b949e;
   line-height: 1.6;
+}
+
+.hotmart-promo {
+  text-align: center;
+  background: radial-gradient(circle at top right, rgba(88, 166, 255, 0.1), transparent 55%);
+}
+
+.hotmart-promo__inner {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.hotmart-promo p {
+  font-size: 1.2rem;
+  color: #8b949e;
+  line-height: 1.6;
+  margin-bottom: 35px;
+}
+
+.btn-secondary {
+  display: inline-block;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-decoration: none;
+  background: linear-gradient(135deg, #1f6feb, #58a6ff);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(88, 166, 255, 0.35);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(88, 166, 255, 0.45);
+  filter: brightness(1.05);
 }
 
 .contact {
