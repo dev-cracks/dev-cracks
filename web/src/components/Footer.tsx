@@ -9,7 +9,7 @@ export const Footer = () => (
         <a href="https://www.instagram.com/devcracks/" target="_blank" rel="noreferrer">
           📸
         </a>
-        <a href="https://www.facebook.com/devcracks" target="_blank" rel="noreferrer">
+        <a href="https://www.facebook.com/profile.php?id=61583564556687" target="_blank" rel="noreferrer">
           👍
         </a>
         <a href="https://x.com/DevCracks" target="_blank" rel="noreferrer">
@@ -18,7 +18,7 @@ export const Footer = () => (
         <a href="https://www.linkedin.com/in/dev-cracks/" target="_blank" rel="noreferrer">
           💼
         </a>
-        <a href="https://discord.com/channels/@devcracks" target="_blank" rel="noreferrer">
+        <a href="https://discord.gg/9eaBf5qR" target="_blank" rel="noreferrer">
           💬
         </a>
       </div>
