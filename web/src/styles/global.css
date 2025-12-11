@@ -371,12 +371,45 @@ nav a:hover {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   border: 1px solid #30363d;
+  position: relative;
 }
 
 .service-item:hover {
   transform: translateY(-10px);
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
   border-color: #58a6ff;
+}
+
+.service-item--interactive {
+  cursor: pointer;
+}
+
+.service-item--interactive:hover {
+  border-color: #2ea043;
+  box-shadow: 0 12px 35px rgba(46, 160, 67, 0.4);
+}
+
+.service-item__badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: linear-gradient(135deg, #1f6feb, #58a6ff);
+  color: white;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(88, 166, 255, 0.4);
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+
+@keyframes pulse-badge {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 .service-item h3 {
