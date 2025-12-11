@@ -159,7 +159,7 @@ nav a:hover {
 }
 
 .hero-carousel {
-  width: 80%;
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto 40px;
   position: relative;
@@ -167,7 +167,7 @@ nav a:hover {
 
 .hero-carousel__slides {
   position: relative;
-  height: 400px;
+  min-height: 550px;
   overflow: hidden;
   border-radius: 15px;
   background: linear-gradient(135deg, rgba(22, 27, 34, 0.9) 0%, rgba(13, 17, 23, 0.9) 100%);
@@ -187,7 +187,8 @@ nav a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: 50px 40px;
+  box-sizing: border-box;
 }
 
 .hero-carousel__slide--active {
@@ -199,12 +200,17 @@ nav a:hover {
 .hero-carousel__content {
   text-align: center;
   width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box;
 }
 
 .hero-carousel__icon {
   font-size: 4rem;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   animation: float 3s ease-in-out infinite;
+  display: block;
 }
 
 @keyframes float {
@@ -219,17 +225,21 @@ nav a:hover {
 .hero-carousel__title {
   font-size: 2rem;
   color: #58a6ff;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   font-weight: 900;
+  line-height: 1.2;
+  word-wrap: break-word;
 }
 
 .hero-carousel__percentage {
   font-size: 4.5rem;
   font-weight: 900;
   color: #2ea043;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   text-shadow: 0 0 20px rgba(46, 160, 67, 0.5);
   animation: pulse 2s ease-in-out infinite;
+  line-height: 1;
+  display: block;
 }
 
 @keyframes pulse {
@@ -245,15 +255,17 @@ nav a:hover {
   font-size: 1.3rem;
   color: #c9d1d9;
   font-weight: 700;
-  margin-bottom: 15px;
+  margin-bottom: 18px;
+  line-height: 1.4;
 }
 
 .hero-carousel__description {
   font-size: 1.1rem;
   color: #8b949e;
-  line-height: 1.6;
-  max-width: 700px;
+  line-height: 1.7;
+  max-width: 750px;
   margin: 0 auto;
+  padding: 0 10px;
 }
 
 .hero-carousel__indicators {
@@ -760,36 +772,45 @@ nav a:hover {
     font-size: 2.2rem;
   }
 
+  .hero-carousel {
+    width: 95%;
+  }
+
   .hero-carousel__slides {
-    height: 350px;
+    min-height: 400px;
   }
 
   .hero-carousel__slide {
-    padding: 30px 20px;
+    padding: 40px 20px;
+  }
+
+  .hero-carousel__content {
+    padding: 0 15px;
   }
 
   .hero-carousel__icon {
     font-size: 3rem;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
   }
 
   .hero-carousel__title {
     font-size: 1.5rem;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
   }
 
   .hero-carousel__percentage {
     font-size: 3.5rem;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
   }
 
   .hero-carousel__benefit {
     font-size: 1.1rem;
-    margin-bottom: 12px;
+    margin-bottom: 15px;
   }
 
   .hero-carousel__description {
     font-size: 1rem;
+    padding: 0 5px;
   }
 }
 
