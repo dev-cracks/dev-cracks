@@ -321,10 +321,45 @@ nav a:hover {
   text-align: center;
 }
 
+.contact-header {
+  margin-bottom: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.contact-logo {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #58a6ff;
+  box-shadow: 0 8px 25px rgba(88, 166, 255, 0.3);
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 8px 25px rgba(88, 166, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 8px 35px rgba(88, 166, 255, 0.6);
+  }
+}
+
+.contact-header h2 {
+  margin-bottom: 0;
+  margin-top: 0;
+}
+
 .contact p {
   font-size: 1.2rem;
   color: #8b949e;
   margin-bottom: 40px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .contact-form {
@@ -403,6 +438,76 @@ nav a:hover {
 
 .contact-form__error {
   color: #f85149;
+  font-weight: 600;
+}
+
+.contact-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.contact-form {
+  max-width: 100%;
+}
+
+.contact-info {
+  background-color: #161b22;
+  padding: 40px;
+  border-radius: 10px;
+  border: 1px solid #30363d;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.contact-info h3 {
+  color: #c9d1d9;
+  font-size: 1.8rem;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.contact-info__item {
+  margin-bottom: 20px;
+}
+
+.contact-info__link {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: #8b949e;
+  text-decoration: none;
+  font-size: 1.2rem;
+  transition: color 0.3s ease, transform 0.3s ease;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.contact-info__link:hover {
+  color: #58a6ff;
+  transform: translateX(5px);
+  background-color: rgba(88, 166, 255, 0.1);
+}
+
+.contact-info__icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.contact-info__icon svg {
+  width: 1.8rem;
+  height: 1.8rem;
+  color: currentColor;
+}
+
+.contact-info__text {
   font-weight: 600;
 }
 
@@ -500,6 +605,32 @@ nav a:hover {
 
   .why-us .icon {
     margin-bottom: 15px;
+  }
+
+  .contact-content {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .contact-info h3 {
+    text-align: center;
+  }
+
+  .contact-info__link {
+    justify-content: center;
+  }
+
+  .contact-header {
+    margin-bottom: 40px;
+  }
+
+  .contact-logo {
+    width: 100px;
+    height: 100px;
+  }
+
+  .contact-header h2 {
+    font-size: 2.2rem;
   }
 }
 
