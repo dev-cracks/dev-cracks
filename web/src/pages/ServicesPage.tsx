@@ -106,29 +106,6 @@ export const ServicesPage = () => {
     <>
       <Header />
       <div className="services-page">
-        <div className="services-page__video-background">
-          <video
-            className="services-page__video"
-            autoPlay
-            loop
-            muted
-            playsInline
-            onError={(e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
-              // Si el video no se puede cargar, ocultarlo silenciosamente
-              const target = e.target as HTMLVideoElement;
-              if (target) {
-                target.style.display = 'none';
-              }
-            }}
-          >
-            <source src="/videos/workflow-processes.mp4" type="video/mp4" />
-            <source src="/videos/workflow-processes.webm" type="video/webm" />
-          </video>
-          <div className="services-page__video-overlay" />
-          {/* Patrón de fondo animado como fallback */}
-          <div className="services-page__video-pattern" />
-        </div>
-
         <div className="services-page__header">
           <button className="services-page__back" onClick={() => navigate('/')}>
             ← Volver

@@ -6,6 +6,7 @@ import { WhyUs } from './components/WhyUs';
 import { HotmartPromo } from './components/HotmartPromo';
 import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
+import { VideoBackground } from './components/VideoBackground';
 import { ServicesPage } from './pages/ServicesPage';
 
 const HomePage = () => (
@@ -24,6 +25,7 @@ const HomePage = () => (
 
 const App = () => (
   <BrowserRouter>
+    <VideoBackground />
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/servicios" element={<ServicesPage />} />

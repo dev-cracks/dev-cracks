@@ -19,10 +19,17 @@ body {
   color: #e6edf3;
 }
 
+main {
+  position: relative;
+  z-index: 1;
+}
+
 #root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1;
 }
 
 .container {
@@ -32,9 +39,12 @@ body {
 }
 
 .header {
-  background-color: #161b22;
+  background-color: rgba(22, 27, 34, 0.95);
   border-bottom: 1px solid #30363d;
   padding: 20px 0;
+  position: relative;
+  z-index: 10;
+  backdrop-filter: blur(10px);
 }
 
 .header__inner {
@@ -104,10 +114,11 @@ nav a:hover {
 .hero {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+  background: transparent;
   border-bottom: 1px solid #30363d;
   padding: 100px 20px;
   text-align: center;
+  z-index: 1;
 }
 
 .hero::before,
@@ -344,6 +355,8 @@ nav a:hover {
 .contact {
   padding: 80px 20px;
   border-bottom: 1px solid #30363d;
+  position: relative;
+  z-index: 1;
 }
 
 .services h2,
@@ -684,13 +697,16 @@ nav a:hover {
 }
 
 .footer {
-  background-color: #161b22;
+  background-color: rgba(22, 27, 34, 0.95);
   padding: 30px 0;
   text-align: center;
   color: #8b949e;
   font-size: 0.9rem;
   border-top: 1px solid #30363d;
   margin-top: auto;
+  position: relative;
+  z-index: 10;
+  backdrop-filter: blur(10px);
 }
 
 .social-links {
