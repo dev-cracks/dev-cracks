@@ -2,7 +2,7 @@
   min-height: 100vh;
   background: transparent;
   color: #e6edf3;
-  padding: 40px 20px;
+  padding: 120px 20px 40px 20px; /* Padding-top para compensar header fijo */
   position: relative;
   z-index: 1;
 }

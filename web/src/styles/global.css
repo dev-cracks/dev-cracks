@@ -22,6 +22,7 @@ body {
 main {
   position: relative;
   z-index: 1;
+  padding-top: 100px; /* Compensar el header fijo */
 }
 
 #root {
@@ -42,9 +43,13 @@ main {
   background-color: rgba(22, 27, 34, 0.95);
   border-bottom: 1px solid #30363d;
   padding: 20px 0;
-  position: relative;
-  z-index: 10;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
   backdrop-filter: blur(10px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .header__inner {
@@ -859,12 +864,35 @@ nav a:hover {
 
 .social-links a {
   color: #8b949e;
-  font-size: 1.5rem;
-  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  background: rgba(22, 27, 34, 0.6);
+  border: 1px solid rgba(88, 166, 255, 0.2);
+}
+
+.social-links a svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
 }
 
 .social-links a:hover {
   color: #58a6ff;
+  background: rgba(88, 166, 255, 0.1);
+  border-color: rgba(88, 166, 255, 0.5);
+  box-shadow: 
+    0 0 15px rgba(88, 166, 255, 0.3),
+    inset 0 0 10px rgba(88, 166, 255, 0.1);
+  transform: translateY(-3px);
+}
+
+.social-links a:hover svg {
+  transform: scale(1.1);
 }
 
 .fade-in {
