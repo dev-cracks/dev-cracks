@@ -2,12 +2,16 @@ import { FadeInSection } from './FadeInSection';
 
 const services = [
   {
-    title: 'Desarrollo Web Full-Stack',
-    description: 'Desde interfaces impresionantes hasta bases de datos robustas, creamos soluciones web completas y escalables.'
+    title: 'Inteligencia Artificial & ML',
+    description: 'Integramos soluciones de IA y Machine Learning para automatización, análisis predictivo y toma de decisiones inteligentes que transforman tu negocio.'
   },
   {
-    title: 'Aplicaciones Móviles Nativas',
-    description: 'Diseñamos y desarrollamos apps Android e iOS con rendimiento impecable y experiencias de usuario intuitivas.'
+    title: 'Automatización de Procesos',
+    description: 'Optimizamos y automatizamos tus procesos empresariales con soluciones personalizadas que reducen costos, eliminan errores y aumentan la productividad.'
+  },
+  {
+    title: 'Agentes Orquestados de IA',
+    description: 'Desarrollamos sistemas inteligentes con múltiples agentes de IA que trabajan coordinados para resolver tareas complejas y automatizar flujos de trabajo avanzados.'
   },
   {
     title: 'Consultoría Tecnológica',
@@ -16,10 +20,6 @@ const services = [
   {
     title: 'Cloud & DevOps',
     description: 'Implementamos arquitecturas en la nube y pipelines de DevOps para agilizar el despliegue y la operación.'
-  },
-  {
-    title: 'Inteligencia Artificial & ML',
-    description: 'Integramos soluciones de IA y Machine Learning para automatización, análisis predictivo y toma de decisiones.'
   },
   {
     title: 'Seguridad y Auditoría de Código',
