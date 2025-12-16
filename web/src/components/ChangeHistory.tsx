@@ -1,26 +1,31 @@
 import { useState, useEffect } from 'react';
-import { HistoryEntry, getHistory } from '../services/userDataService';
+import { getChangeHistory, ChangeHistoryEntry } from '../services/userDataApiService';
 
 interface ChangeHistoryProps {
   userId: string;
 }
 
 export const ChangeHistory = ({ userId }: ChangeHistoryProps) => {
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [history, setHistory] = useState<ChangeHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadHistory = () => {
-      const entries = getHistory(userId);
-      setHistory(entries);
-      setIsLoading(false);
+    const loadHistory = async () => {
+      try {
+        const entries = await getChangeHistory();
+        setHistory(entries);
+      } catch (error) {
+        console.error('Error al cargar historial:', error);
+        setHistory([]);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     loadHistory();
     
     // Recargar historial periódicamente para detectar cambios
-    // En una app real, usarías eventos o un sistema de notificaciones
-    const interval = setInterval(loadHistory, 2000);
+    const interval = setInterval(loadHistory, 5000);
     
     return () => clearInterval(interval);
   }, [userId]);
@@ -36,8 +41,14 @@ export const ChangeHistory = ({ userId }: ChangeHistoryProps) => {
     }).format(date);
   };
 
-  const getFieldLabel = (field: 'email' | 'phone'): string => {
-    return field === 'email' ? 'Correo Electrónico' : 'Número de Móvil';
+  const getFieldLabel = (field: string): string => {
+    if (field === 'contact_email') {
+      return 'Correo Electrónico';
+    }
+    if (field === 'phone') {
+      return 'Número de Móvil';
+    }
+    return field;
   };
 
   if (isLoading) {

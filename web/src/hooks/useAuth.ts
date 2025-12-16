@@ -2,7 +2,6 @@ import { useCallback, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { mapAuth0User, User } from '../services/authService';
 import { cacheUserImage, clearUserImageCache } from '../services/imageCache';
-import { clearUserData } from '../services/userDataService';
 
 interface UseAuthReturn {
   user: User | null;
@@ -51,10 +50,9 @@ export const useAuth = (): UseAuthReturn => {
   }, [loginWithRedirect]);
 
   const logout = useCallback(async () => {
-    // Limpiar el cache de imagen y datos del usuario antes de cerrar sesión
+    // Limpiar el cache de imagen antes de cerrar sesión
     if (user?.id) {
       clearUserImageCache(user.id);
-      clearUserData(user.id);
     }
     
     await auth0Logout({

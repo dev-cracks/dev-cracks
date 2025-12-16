@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { UserData, saveUserData } from '../services/userDataService';
+import { getUserContactData, updateUserContactData, UserData } from '../services/userDataApiService';
 
 interface UserDataEditorProps {
   userId: string;
   initialEmail: string;
-  onUpdate: (data: UserData) => void;
+  onUpdate: (data: { contactEmail: string | null; phone: string | null }) => void;
 }
 
 export const UserDataEditor = ({ userId, initialEmail, onUpdate }: UserDataEditorProps) => {
@@ -17,13 +17,19 @@ export const UserDataEditor = ({ userId, initialEmail, onUpdate }: UserDataEdito
   // Cargar datos iniciales
   useEffect(() => {
     const loadData = async () => {
-      const { getUserData } = await import('../services/userDataService');
-      const data = getUserData(userId);
-      
-      if (data) {
-        setEmail(data.email || initialEmail);
-        setPhone(data.phone || '');
-      } else {
+      try {
+        const data = await getUserContactData();
+        
+        if (data) {
+          setEmail(data.contactEmail || initialEmail);
+          setPhone(data.phone || '');
+        } else {
+          setEmail(initialEmail);
+          setPhone('');
+        }
+      } catch (error) {
+        console.error('Error al cargar datos:', error);
+        // En caso de error, usar valores por defecto
         setEmail(initialEmail);
         setPhone('');
       }
@@ -67,16 +73,19 @@ export const UserDataEditor = ({ userId, initialEmail, onUpdate }: UserDataEdito
     setIsSaving(true);
 
     try {
-      const updated = saveUserData(userId, {
-        email: email.trim(),
+      const updated = await updateUserContactData({
+        contactEmail: email.trim(),
         phone: phone.trim()
       });
 
+      setEmail(updated.contactEmail || initialEmail);
+      setPhone(updated.phone || '');
       onUpdate(updated);
       setIsEditing(false);
       setError(null);
     } catch (err) {
-      setError('Error al guardar los datos. Por favor, intenta de nuevo.');
+      const errorMessage = err instanceof Error ? err.message : 'Error al guardar los datos. Por favor, intenta de nuevo.';
+      setError(errorMessage);
       console.error('Error al guardar datos:', err);
     } finally {
       setIsSaving(false);
@@ -85,13 +94,18 @@ export const UserDataEditor = ({ userId, initialEmail, onUpdate }: UserDataEdito
 
   const handleCancel = async () => {
     // Restaurar valores originales
-    const { getUserData } = await import('../services/userDataService');
-    const data = getUserData(userId);
-    
-    if (data) {
-      setEmail(data.email || initialEmail);
-      setPhone(data.phone || '');
-    } else {
+    try {
+      const data = await getUserContactData();
+      
+      if (data) {
+        setEmail(data.contactEmail || initialEmail);
+        setPhone(data.phone || '');
+      } else {
+        setEmail(initialEmail);
+        setPhone('');
+      }
+    } catch (error) {
+      // En caso de error, usar valores por defecto
       setEmail(initialEmail);
       setPhone('');
     }

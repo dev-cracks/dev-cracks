@@ -1,25 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { useAuth } from '../hooks/useAuth';
 import { Avatar } from '../components/Avatar';
 import { UserDataEditor } from '../components/UserDataEditor';
 import { ChangeHistory } from '../components/ChangeHistory';
-import { UserData, initializeUserData, getUserData } from '../services/userDataService';
 
 export const AccountPage = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading } = useAuth();
-  const [userData, setUserData] = useState<UserData | null>(null);
-
-  // Inicializar datos del usuario cuando se autentica
-  useEffect(() => {
-    if (user && user.id && user.email) {
-      const initialized = initializeUserData(user.id, user.email);
-      const current = getUserData(user.id);
-      setUserData(current || initialized);
-    }
-  }, [user?.id, user?.email]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -110,8 +99,8 @@ export const AccountPage = () => {
                 <UserDataEditor
                   userId={user.id}
                   initialEmail={user.email}
-                  onUpdate={(data) => {
-                    setUserData(data);
+                  onUpdate={() => {
+                    // Los datos se actualizan automáticamente desde la API
                   }}
                 />
               </div>
