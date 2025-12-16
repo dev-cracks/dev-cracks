@@ -15,16 +15,30 @@ export interface ChangeHistoryEntry {
 }
 
 /**
+ * Helper to get headers with Auth0 token
+ */
+const getAuthHeaders = async (accessToken?: string): Promise<HeadersInit> => {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json'
+  };
+  
+  if (accessToken) {
+    headers['Authorization'] = `Bearer ${accessToken}`;
+  }
+  
+  return headers;
+};
+
+/**
  * Obtiene los datos de contacto del usuario actual
  */
-export const getUserContactData = async (): Promise<UserData | null> => {
+export const getUserContactData = async (accessToken?: string): Promise<UserData | null> => {
   try {
+    const headers = await getAuthHeaders(accessToken);
     const response = await fetch(`${env.apiBaseUrl}/users/me`, {
       method: 'GET',
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers
     });
 
     if (!response.ok) {
@@ -51,14 +65,13 @@ export const getUserContactData = async (): Promise<UserData | null> => {
 /**
  * Actualiza los datos de contacto del usuario
  */
-export const updateUserContactData = async (data: UserData): Promise<UserData> => {
+export const updateUserContactData = async (data: UserData, accessToken?: string): Promise<UserData> => {
   try {
+    const headers = await getAuthHeaders(accessToken);
     const response = await fetch(`${env.apiBaseUrl}/users/me/contact-data`, {
       method: 'PUT',
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers,
       body: JSON.stringify({
         contactEmail: data.contactEmail || null,
         phone: data.phone || null
@@ -90,14 +103,13 @@ export const updateUserContactData = async (data: UserData): Promise<UserData> =
 /**
  * Obtiene el historial de cambios del usuario
  */
-export const getChangeHistory = async (): Promise<ChangeHistoryEntry[]> => {
+export const getChangeHistory = async (accessToken?: string): Promise<ChangeHistoryEntry[]> => {
   try {
+    const headers = await getAuthHeaders(accessToken);
     const response = await fetch(`${env.apiBaseUrl}/users/me/change-history`, {
       method: 'GET',
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers
     });
 
     if (!response.ok) {

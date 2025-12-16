@@ -1,5 +1,5 @@
 # Etapa de construcción
-FROM node:20-alpine AS build
+FROM --platform=linux/amd64 node:20-slim AS build
 
 WORKDIR /app
 
@@ -26,7 +26,7 @@ COPY . .
 RUN npm run build
 
 # Etapa de producción con nginx
-FROM nginx:alpine
+FROM --platform=linux/amd64 nginx:latest
 
 # Copiar los archivos construidos
 COPY --from=build /app/dist /usr/share/nginx/html

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getUserContactData, updateUserContactData, UserData } from '../services/userDataApiService';
+import { useAuth } from '../hooks/useAuth';
 
 interface UserDataEditorProps {
   userId: string;
@@ -8,6 +9,7 @@ interface UserDataEditorProps {
 }
 
 export const UserDataEditor = ({ userId, initialEmail, onUpdate }: UserDataEditorProps) => {
+  const { getAccessToken } = useAuth();
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -18,7 +20,8 @@ export const UserDataEditor = ({ userId, initialEmail, onUpdate }: UserDataEdito
   useEffect(() => {
     const loadData = async () => {
       try {
-        const data = await getUserContactData();
+        const token = await getAccessToken();
+        const data = await getUserContactData(token);
         
         if (data) {
           setEmail(data.contactEmail || initialEmail);
@@ -73,10 +76,11 @@ export const UserDataEditor = ({ userId, initialEmail, onUpdate }: UserDataEdito
     setIsSaving(true);
 
     try {
+      const token = await getAccessToken();
       const updated = await updateUserContactData({
         contactEmail: email.trim(),
         phone: phone.trim()
-      });
+      }, token);
 
       setEmail(updated.contactEmail || initialEmail);
       setPhone(updated.phone || '');
@@ -95,7 +99,8 @@ export const UserDataEditor = ({ userId, initialEmail, onUpdate }: UserDataEdito
   const handleCancel = async () => {
     // Restaurar valores originales
     try {
-      const data = await getUserContactData();
+      const token = await getAccessToken();
+      const data = await getUserContactData(token);
       
       if (data) {
         setEmail(data.contactEmail || initialEmail);

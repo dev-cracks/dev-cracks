@@ -7,6 +7,7 @@ interface UseAuthReturn {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  getAccessToken: () => Promise<string | undefined>;
   login: (returnUrl?: string) => void;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -18,7 +19,8 @@ export const useAuth = (): UseAuthReturn => {
     isLoading,
     isAuthenticated,
     loginWithRedirect,
-    logout: auth0Logout
+    logout: auth0Logout,
+    getAccessTokenSilently
   } = useAuth0();
 
   const user = mapAuth0User(auth0User);
@@ -29,9 +31,9 @@ export const useAuth = (): UseAuthReturn => {
       // Esperar un momento para asegurar que la sesión esté establecida
       const timeoutId = setTimeout(() => {
         // Cachear la imagen en segundo plano sin bloquear la UI
-        cacheUserImage(user.id, user.picture).catch((error) => {
+        cacheUserImage(user.id, user.picture).catch((error: unknown) => {
           // Silenciar el error, solo loguear en desarrollo
-          if (process.env.NODE_ENV === 'development') {
+          if (import.meta.env.DEV) {
             console.warn('Error al cachear imagen del usuario:', error);
           }
         });
@@ -66,10 +68,23 @@ export const useAuth = (): UseAuthReturn => {
     // Auth0 automatically refreshes the user, no action needed
   }, []);
 
+  const getAccessToken = useCallback(async (): Promise<string | undefined> => {
+    if (!isAuthenticated) {
+      return undefined;
+    }
+    try {
+      return await getAccessTokenSilently();
+    } catch (error) {
+      console.error('Error getting access token:', error);
+      return undefined;
+    }
+  }, [isAuthenticated, getAccessTokenSilently]);
+
   return {
     user,
     isLoading,
     isAuthenticated,
+    getAccessToken,
     login,
     logout,
     refreshUser
