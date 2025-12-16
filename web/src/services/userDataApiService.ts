@@ -24,6 +24,10 @@ const getAuthHeaders = async (accessToken?: string): Promise<HeadersInit> => {
   
   if (accessToken) {
     headers['Authorization'] = `Bearer ${accessToken}`;
+    console.log('[userDataApiService] Token present, Authorization header set:', 
+      `Bearer ${accessToken.substring(0, 20)}...`);
+  } else {
+    console.warn('[userDataApiService] No access token provided!');
   }
   
   return headers;

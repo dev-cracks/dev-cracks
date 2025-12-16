@@ -71,18 +71,22 @@ export const useAuth = (): UseAuthReturn => {
 
   const getAccessToken = useCallback(async (): Promise<string | undefined> => {
     if (!isAuthenticated) {
+      console.warn('[useAuth] User is not authenticated, cannot get access token');
       return undefined;
     }
     try {
+      console.log('[useAuth] Requesting access token with audience:', auth0Config.authorizationParams.audience);
       // Get token with the same audience configured in Auth0Provider
       // This ensures the token is valid for the API
-      return await getAccessTokenSilently({
+      const token = await getAccessTokenSilently({
         authorizationParams: {
           audience: auth0Config.authorizationParams.audience
         }
       });
+      console.log('[useAuth] Access token obtained:', token ? `${token.substring(0, 20)}...` : 'null');
+      return token;
     } catch (error) {
-      console.error('Error getting access token:', error);
+      console.error('[useAuth] Error getting access token:', error);
       return undefined;
     }
   }, [isAuthenticated, getAccessTokenSilently]);

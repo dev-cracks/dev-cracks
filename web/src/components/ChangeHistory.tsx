@@ -30,8 +30,11 @@ export const ChangeHistory = ({ userId }: ChangeHistoryProps) => {
       }
 
       try {
+        console.log('[ChangeHistory] Loading history, getting access token...');
         const token = await getAccessToken();
+        console.log('[ChangeHistory] Token obtained:', token ? 'Yes' : 'No');
         const entries = await getChangeHistory(token);
+        console.log('[ChangeHistory] History loaded, entries:', entries.length);
         
         if (isMounted) {
           setHistory(entries);

@@ -20,8 +20,11 @@ export const UserDataEditor = ({ userId, initialEmail, onUpdate }: UserDataEdito
   useEffect(() => {
     const loadData = async () => {
       try {
+        console.log('[UserDataEditor] Loading data, getting access token...');
         const token = await getAccessToken();
+        console.log('[UserDataEditor] Token obtained:', token ? 'Yes' : 'No');
         const data = await getUserContactData(token);
+        console.log('[UserDataEditor] Data loaded:', data ? 'Yes' : 'No');
         
         if (data) {
           setEmail(data.contactEmail || initialEmail);
@@ -76,11 +79,14 @@ export const UserDataEditor = ({ userId, initialEmail, onUpdate }: UserDataEdito
     setIsSaving(true);
 
     try {
+      console.log('[UserDataEditor] Saving data, getting access token...');
       const token = await getAccessToken();
+      console.log('[UserDataEditor] Token obtained:', token ? 'Yes' : 'No');
       const updated = await updateUserContactData({
         contactEmail: email.trim(),
         phone: phone.trim()
       }, token);
+      console.log('[UserDataEditor] Data saved successfully');
 
       setEmail(updated.contactEmail || initialEmail);
       setPhone(updated.phone || '');

@@ -28,7 +28,7 @@ const apiBaseUrl = (() => {
 // API Audience should be the identifier of the Auth0 API resource
 // This is different from the ClientId - it's the API identifier from Auth0 dashboard
 const apiAudience = (import.meta.env.VITE_AUTH0_API_AUDIENCE as string | undefined) || 
-  'https://dev-cracks.onrender.com'; // Default API identifier
+  'fractalize-services-api'; // Default API identifier (must match Auth0 API Audience)
 
 export const auth0Config = {
   domain: (import.meta.env.VITE_AUTH0_DOMAIN as string | undefined) || 'dev-cracks.eu.auth0.com',
@@ -40,7 +40,7 @@ export const auth0Config = {
   }
 };
 
-const contactRecipient = (import.meta.env.VITE_CONTACT_RECIPIENT as string | undefined) ?? 'contacto@devcracks.com';
+const contactRecipient = (import.meta.env.VITE_CONTACT_RECIPIENT as string | undefined) ?? 'connect@devcracks.com';
 const contactRecipientName =
   (import.meta.env.VITE_CONTACT_RECIPIENT_NAME as string | undefined) ?? 'Equipo Dev Cracks';
 
