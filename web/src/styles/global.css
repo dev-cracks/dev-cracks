@@ -1226,27 +1226,9 @@ main {
 }
 
 .user-menu__avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(88, 166, 255, 0.3) 0%, rgba(88, 166, 255, 0.1) 100%);
-  border: 1px solid rgba(88, 166, 255, 0.3);
-}
-
-.user-menu__avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.user-menu__avatar span {
-  color: #58a6ff;
-  font-weight: 600;
-  font-size: 0.9rem;
 }
 
 .user-menu__name {
@@ -1302,28 +1284,10 @@ main {
 }
 
 .user-menu__header-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(88, 166, 255, 0.3) 0%, rgba(88, 166, 255, 0.1) 100%);
-  border: 2px solid rgba(88, 166, 255, 0.3);
   flex-shrink: 0;
-}
-
-.user-menu__header-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.user-menu__header-avatar span {
-  color: #58a6ff;
-  font-weight: 700;
-  font-size: 1.2rem;
 }
 
 .user-menu__header-info {
@@ -1394,6 +1358,89 @@ main {
 .user-menu__item--logout:hover {
   background: rgba(248, 81, 73, 0.1);
   color: #ff6b6b;
+}
+
+/* Avatar Component Styles */
+.avatar {
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(88, 166, 255, 0.3) 0%, rgba(88, 166, 255, 0.1) 100%);
+  border: 1px solid rgba(88, 166, 255, 0.3);
+  flex-shrink: 0;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatar--fallback {
+  background: linear-gradient(135deg, rgba(88, 166, 255, 0.3) 0%, rgba(88, 166, 255, 0.1) 100%);
+}
+
+.avatar--fallback span {
+  color: #58a6ff;
+  font-weight: 600;
+  user-select: none;
+}
+
+.avatar__loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(88, 166, 255, 0.3) 0%, rgba(88, 166, 255, 0.1) 100%);
+}
+
+.avatar__loading span {
+  color: #58a6ff;
+  font-weight: 600;
+  user-select: none;
+}
+
+/* Update existing avatar containers to work with Avatar component */
+.user-menu__avatar,
+.user-menu__header-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-menu__avatar .avatar,
+.user-menu__header-avatar .avatar {
+  border: none;
+}
+
+.user-menu__header-avatar .avatar {
+  border: 2px solid rgba(88, 166, 255, 0.3);
+}
+
+.account-page__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.account-page__avatar .avatar {
+  border: 3px solid rgba(88, 166, 255, 0.3);
+}
+
+.account-page__picture-avatar {
+  width: 200px !important;
+  height: 200px !important;
+  border: 3px solid rgba(88, 166, 255, 0.3) !important;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 /* Account Page Styles */
@@ -1468,28 +1515,10 @@ main {
 }
 
 .account-page__avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(88, 166, 255, 0.3) 0%, rgba(88, 166, 255, 0.1) 100%);
-  border: 3px solid rgba(88, 166, 255, 0.3);
   flex-shrink: 0;
-}
-
-.account-page__avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.account-page__avatar span {
-  color: #58a6ff;
-  font-weight: 700;
-  font-size: 2rem;
 }
 
 .account-page__profile-info {
@@ -1573,15 +1602,6 @@ main {
   text-align: center;
 }
 
-.account-page__picture {
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid rgba(88, 166, 255, 0.3);
-  margin-bottom: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-}
 
 .account-page__picture-note {
   color: #8b949e;

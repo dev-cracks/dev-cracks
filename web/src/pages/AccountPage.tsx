@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { useAuth } from '../hooks/useAuth';
+import { Avatar } from '../components/Avatar';
 
 export const AccountPage = () => {
   const navigate = useNavigate();
@@ -48,11 +49,12 @@ export const AccountPage = () => {
               <div className="account-page__card">
                 <div className="account-page__profile">
                   <div className="account-page__avatar">
-                    {user.picture ? (
-                      <img src={user.picture} alt={user.name || user.email} />
-                    ) : (
-                      <span>{user.name?.[0]?.toUpperCase() || user.email[0]?.toUpperCase()}</span>
-                    )}
+                    <Avatar
+                      picture={user.picture}
+                      name={user.name}
+                      email={user.email}
+                      size="large"
+                    />
                   </div>
                   <div className="account-page__profile-info">
                     <h2 className="account-page__profile-name">
@@ -113,21 +115,23 @@ export const AccountPage = () => {
                 </div>
               </div>
 
-              {user.picture && (
-                <div className="account-page__card">
-                  <h3 className="account-page__card-title">Foto de Perfil</h3>
-                  <div className="account-page__picture-section">
-                    <img
-                      src={user.picture}
-                      alt={user.name || user.email}
-                      className="account-page__picture"
-                    />
-                    <p className="account-page__picture-note">
-                      Foto de perfil proporcionada por Auth0
-                    </p>
-                  </div>
+              <div className="account-page__card">
+                <h3 className="account-page__card-title">Foto de Perfil</h3>
+                <div className="account-page__picture-section">
+                  <Avatar
+                    picture={user.picture}
+                    name={user.name}
+                    email={user.email}
+                    size="large"
+                    className="account-page__picture-avatar"
+                  />
+                  <p className="account-page__picture-note">
+                    {user.picture 
+                      ? 'Foto de perfil proporcionada por Auth0' 
+                      : 'No hay foto de perfil disponible'}
+                  </p>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>

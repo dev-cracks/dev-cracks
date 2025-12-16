@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { Avatar } from './Avatar';
 
 export const UserMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,11 +47,12 @@ export const UserMenu = () => {
         aria-expanded={isOpen}
       >
         <div className="user-menu__avatar">
-          {user.picture ? (
-            <img src={user.picture} alt={user.name || user.email} />
-          ) : (
-            <span>{user.name?.[0]?.toUpperCase() || user.email[0]?.toUpperCase()}</span>
-          )}
+          <Avatar
+            picture={user.picture}
+            name={user.name}
+            email={user.email}
+            size="small"
+          />
         </div>
         <span className="user-menu__name">{user.name || user.email}</span>
         <svg
@@ -75,11 +77,12 @@ export const UserMenu = () => {
         <div className="user-menu__dropdown">
           <div className="user-menu__header">
             <div className="user-menu__header-avatar">
-              {user.picture ? (
-                <img src={user.picture} alt={user.name || user.email} />
-              ) : (
-                <span>{user.name?.[0]?.toUpperCase() || user.email[0]?.toUpperCase()}</span>
-              )}
+              <Avatar
+                picture={user.picture}
+                name={user.name}
+                email={user.email}
+                size="medium"
+              />
             </div>
             <div className="user-menu__header-info">
               <div className="user-menu__header-name">{user.name || 'Usuario'}</div>
