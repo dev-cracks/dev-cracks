@@ -11,6 +11,8 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
       domain={auth0Config.domain}
       clientId={auth0Config.clientId}
       authorizationParams={auth0Config.authorizationParams}
+      cacheLocation="localstorage"
+      useRefreshTokens={true}
     >
       <App />
     </Auth0Provider>
