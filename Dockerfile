@@ -28,8 +28,11 @@ RUN npm run build
 # Etapa de producción con nginx
 FROM --platform=linux/amd64 nginx:alpine
 
-# Copiar los archivos construidos
+# Copiar los archivos construidos de la web principal
 COPY --from=build /app/dist /usr/share/nginx/html
+
+# Copiar los archivos construidos del backoffice
+COPY --from=build /app/dist-backoffice /usr/share/nginx/html/backoffice
 
 # Copiar configuración de nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf
