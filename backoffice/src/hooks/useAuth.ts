@@ -72,9 +72,23 @@ export const useAuth = (): UseAuthReturn => {
   };
 
   const login = useCallback((returnUrl?: string) => {
+    // Asegurar que el returnUrl incluya el base path si no lo tiene
+    const basePath = '/backoffice';
+    let finalReturnUrl = returnUrl || window.location.pathname;
+    
+    // Si el returnUrl no empieza con el base path, agregarlo
+    if (finalReturnUrl && !finalReturnUrl.startsWith(basePath)) {
+      // Si es una ruta relativa, agregar el base path
+      if (finalReturnUrl.startsWith('/')) {
+        finalReturnUrl = `${basePath}${finalReturnUrl}`;
+      } else {
+        finalReturnUrl = `${basePath}/${finalReturnUrl}`;
+      }
+    }
+    
     loginWithRedirect({
       appState: {
-        returnTo: returnUrl || window.location.pathname
+        returnTo: finalReturnUrl
       }
     });
   }, [loginWithRedirect]);

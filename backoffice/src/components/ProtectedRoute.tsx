@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Spinner } from '@fluentui/react-components';
 
@@ -10,6 +10,7 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading, isAdmin } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -19,8 +20,9 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
     );
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  // Evitar redirección infinita: solo redirigir si no estamos ya en /login
+  if (!isAuthenticated && location.pathname !== '/login') {
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
   if (requireAdmin && !isAdmin) {

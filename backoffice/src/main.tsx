@@ -22,6 +22,8 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
       useRefreshTokens={true}
       onRedirectCallback={(appState) => {
         console.log('Auth0 redirect callback', appState);
+        // El router de React manejará la redirección automáticamente
+        // No necesitamos hacer nada aquí ya que Auth0Provider maneja el estado
       }}
     >
       <FluentProvider theme={webLightTheme}>

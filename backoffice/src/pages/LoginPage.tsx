@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Spinner, makeStyles, tokens } from '@fluentui/react-components';
 import { useAuth } from '../hooks/useAuth';
 
@@ -28,13 +28,17 @@ const useStyles = makeStyles({
 export const LoginPage = () => {
   const styles = useStyles();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated, isLoading, login } = useAuth();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard', { replace: true });
+    // Solo redirigir si está autenticado y no estamos ya en proceso de login
+    if (isAuthenticated && !isLoading) {
+      // Obtener la ruta de destino desde el state o usar dashboard por defecto
+      const from = (location.state as any)?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, isLoading, navigate, location]);
 
   if (isLoading) {
     return (

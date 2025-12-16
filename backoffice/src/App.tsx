@@ -6,22 +6,12 @@ import { SettingsPage } from './pages/SettingsPage';
 import { LoginPage } from './pages/LoginPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
-// Detectar automáticamente el base path basado en la URL actual
-const getBasePath = () => {
-  if (typeof window !== 'undefined') {
-    // Si la URL contiene /backoffice, usar ese como base path
-    if (window.location.pathname.startsWith('/backoffice')) {
-      return '/backoffice';
-    }
-  }
-  // Si hay una variable de entorno, usarla
-  return import.meta.env.VITE_BACKOFFICE_BASE || '';
-};
+// Base path fijo para el backoffice cuando se accede a través del servidor unificado
+const BACKOFFICE_BASE = '/backoffice';
 
 const App = () => {
-  const basePath = getBasePath();
   return (
-    <BrowserRouter basename={basePath}>
+    <BrowserRouter basename={BACKOFFICE_BASE}>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route
