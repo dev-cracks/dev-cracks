@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { basePathPlugin } from './vite-plugin-base-path.js';
+import { disableHmr } from './vite-plugin-disable-hmr.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -15,13 +16,18 @@ export default defineConfig({
     host: true,
     strictPort: false,
     cors: true,
+    hmr: false, // Deshabilitar HMR completamente para evitar errores de websocket
   },
   build: {
     outDir: resolve(__dirname, '../dist-backoffice'),
     emptyOutDir: true
   },
   plugins: [
-    react()
+    react({
+      // Deshabilitar Fast Refresh para evitar problemas con websocket
+      fastRefresh: false,
+    }),
+    disableHmr(), // Deshabilitar completamente HMR y WebSocket
   ],
   resolve: {
     alias: {

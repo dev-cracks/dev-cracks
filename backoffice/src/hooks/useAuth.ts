@@ -31,10 +31,73 @@ export const useAuth = (): UseAuthReturn => {
 
   const user = mapAuth0User(auth0User);
 
+  const getAccessToken = useCallback(async (): Promise<string | undefined> => {
+    if (!isAuthenticated) {
+      return undefined;
+    }
+    try {
+      const token = await getAccessTokenSilently({
+        authorizationParams: {
+          audience: auth0Config.authorizationParams.audience
+        }
+      });
+      return token;
+    } catch (error) {
+      console.error('[useAuth] Error getting access token:', error);
+      return undefined;
+    }
+  }, [isAuthenticated, getAccessTokenSilently]);
+
   // Configurar el provider de token para apiService
   useEffect(() => {
     apiService.setAccessTokenProvider(getAccessToken);
-  }, []);
+  }, [getAccessToken]);
+
+  const loadUserDetails = useCallback(async () => {
+    if (!isAuthenticated) return;
+    
+    setIsLoadingDetails(true);
+    try {
+      const token = await getAccessToken();
+      if (!token) {
+        setIsLoadingDetails(false);
+        return;
+      }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // Timeout de 10 segundos
+
+      try {
+        const response = await fetch(`${apiBaseUrl}/users/me`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          credentials: 'include',
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const data: UserDto = await response.json();
+          setUserDetails(data);
+        } else if (response.status === 401 || response.status === 403) {
+          // Si no está autorizado, limpiar detalles del usuario
+          setUserDetails(null);
+        }
+      } catch (error: any) {
+        clearTimeout(timeoutId);
+        // Ignorar errores de abort (solicitud cancelada)
+        if (error.name !== 'AbortError') {
+          console.error('Error loading user details:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error getting access token:', error);
+    } finally {
+      setIsLoadingDetails(false);
+    }
+  }, [isAuthenticated, getAccessToken]);
 
   // Cargar detalles del usuario cuando se autentica
   useEffect(() => {
@@ -43,33 +106,8 @@ export const useAuth = (): UseAuthReturn => {
     } else {
       setUserDetails(null);
     }
-  }, [isAuthenticated, user?.id]);
+  }, [isAuthenticated, user?.id, loadUserDetails]);
 
-  const loadUserDetails = async () => {
-    if (!isAuthenticated) return;
-    
-    setIsLoadingDetails(true);
-    try {
-      const token = await getAccessToken();
-      if (!token) return;
-
-      const response = await fetch(`${apiBaseUrl}/users/me`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        credentials: 'include',
-      });
-
-      if (response.ok) {
-        const data: UserDto = await response.json();
-        setUserDetails(data);
-      }
-    } catch (error) {
-      console.error('Error loading user details:', error);
-    } finally {
-      setIsLoadingDetails(false);
-    }
-  };
 
   const login = useCallback((returnUrl?: string) => {
     // Asegurar que el returnUrl incluya el base path si no lo tiene
@@ -103,24 +141,7 @@ export const useAuth = (): UseAuthReturn => {
 
   const refreshUser = useCallback(async () => {
     await loadUserDetails();
-  }, []);
-
-  const getAccessToken = useCallback(async (): Promise<string | undefined> => {
-    if (!isAuthenticated) {
-      return undefined;
-    }
-    try {
-      const token = await getAccessTokenSilently({
-        authorizationParams: {
-          audience: auth0Config.authorizationParams.audience
-        }
-      });
-      return token;
-    } catch (error) {
-      console.error('[useAuth] Error getting access token:', error);
-      return undefined;
-    }
-  }, [isAuthenticated, getAccessTokenSilently]);
+  }, [loadUserDetails]);
 
   // TODO: WORKAROUND - Hardcodeado para testing. Revertir después del testing
   // const isAdmin = userDetails?.role === 'Admin';

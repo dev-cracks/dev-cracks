@@ -31,15 +31,17 @@ export const LoginPage = () => {
   const location = useLocation();
   const { isAuthenticated, isLoading, login } = useAuth();
 
-  // TODO: WORKAROUND - Redirección deshabilitada temporalmente para evitar redirección infinita
-  // useEffect(() => {
-  //   // Solo redirigir si está autenticado y no estamos ya en proceso de login
-  //   if (isAuthenticated && !isLoading) {
-  //     // Obtener la ruta de destino desde el state o usar dashboard por defecto
-  //     const from = (location.state as any)?.from?.pathname || '/dashboard';
-  //     navigate(from, { replace: true });
-  //   }
-  // }, [isAuthenticated, isLoading, navigate, location]);
+  useEffect(() => {
+    // Solo redirigir si está autenticado y no estamos ya en proceso de login
+    if (isAuthenticated && !isLoading) {
+      // Obtener la ruta de destino desde el state o usar dashboard por defecto
+      const from = (location.state as any)?.from?.pathname || '/dashboard';
+      // Evitar redirección infinita: solo redirigir si no estamos ya en la ruta destino
+      if (location.pathname !== from) {
+        navigate(from, { replace: true });
+      }
+    }
+  }, [isAuthenticated, isLoading, navigate, location]);
 
   if (isLoading) {
     return (

@@ -18,22 +18,36 @@ const App = () => {
           path="/"
           element={
             <ProtectedRoute>
-              {/* TODO: WORKAROUND - Navigate deshabilitado temporalmente para evitar redirección infinita */}
-              {/* <Navigate to="/dashboard" replace /> */}
-              <DashboardPage />
+              <Navigate to="/dashboard" replace />
             </ProtectedRoute>
           }
         />
         <Route
-          path="/*"
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <Layout>
-                <Routes>
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/users" element={<UsersPage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
-                </Routes>
+                <DashboardPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <UsersPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <SettingsPage />
               </Layout>
             </ProtectedRoute>
           }

@@ -25,7 +25,8 @@ async function createServer() {
     const webVite = await createViteServer({
       server: { 
         middlewareMode: true,
-        hmr: false // Deshabilitar HMR para evitar problemas con WebSocket
+        hmr: false, // Deshabilitar HMR para evitar problemas con WebSocket
+        ws: false, // Deshabilitar completamente WebSocket
       },
       appType: 'spa',
       root: resolve(__dirname, 'web'),
@@ -36,7 +37,8 @@ async function createServer() {
     const backofficeVite = await createViteServer({
       server: { 
         middlewareMode: true,
-        hmr: false // Deshabilitar HMR para evitar problemas con WebSocket
+        hmr: false, // Deshabilitar HMR para evitar problemas con WebSocket
+        ws: false, // Deshabilitar completamente WebSocket
       },
       appType: 'spa',
       root: resolve(__dirname, 'backoffice'),
@@ -46,6 +48,15 @@ async function createServer() {
 
     // Restaurar console.error después de crear los servidores Vite
     console.error = originalConsoleError;
+
+    // Middleware para rechazar explícitamente solicitudes WebSocket
+    app.use((req, res, next) => {
+      // Rechazar cualquier intento de actualización a WebSocket
+      if (req.headers.upgrade && req.headers.upgrade.toLowerCase() === 'websocket') {
+        return res.status(426).send('WebSocket connections are disabled');
+      }
+      next();
+    });
 
     // Middleware para el backoffice - debe ir antes del middleware de la web
     app.use('/backoffice', async (req, res, next) => {

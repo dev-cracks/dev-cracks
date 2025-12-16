@@ -12,12 +12,6 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
   const { isAuthenticated, isLoading, isAdmin } = useAuth();
   const location = useLocation();
 
-  // TODO: WORKAROUND - Redirecciones deshabilitadas para evitar redirección infinita
-  // Temporalmente deshabilitado para testing
-  // if (!isAuthenticated && !isLoading && location.pathname !== '/login') {
-  //   return <Navigate to="/login" replace state={{ from: location }} />;
-  // }
-  
   // Si está cargando, mostrar spinner
   if (isLoading) {
     return (
@@ -27,10 +21,15 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
     );
   }
 
-  // TODO: WORKAROUND - Validación de admin deshabilitada temporalmente
-  // if (requireAdmin && !isAdmin) {
-  //   return <Navigate to="/dashboard" replace />;
-  // }
+  // Redirigir a login si no está autenticado (evitar loop verificando que no estemos ya en /login)
+  if (!isAuthenticated && location.pathname !== '/login') {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  // Si requiere admin y no es admin, redirigir a dashboard
+  if (requireAdmin && !isAdmin) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return <>{children}</>;
 };
