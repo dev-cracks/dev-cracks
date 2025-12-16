@@ -22,7 +22,7 @@ export const VideoBackground = () => {
         <source src="/videos/workflow-processes.webm" type="video/webm" />
       </video>
       <div className="video-background__overlay" />
-      {/* Patrón de fondo animado como fallback */}
+      {/* Animated background pattern as fallback */}
       <div className="video-background__pattern" />
     </div>
   );

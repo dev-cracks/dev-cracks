@@ -70,7 +70,7 @@ export const useContactFormStore = create<ContactFormState>((set, get) => ({
         error:
           error instanceof Error
             ? error.message
-            : 'Ocurrió un error inesperado. Intenta nuevamente.'
+            : 'An unexpected error occurred. Please try again.'
       });
     }
   }

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 const navigation = [
   { href: '#inicio', label: 'Inicio', id: 'inicio' },
@@ -12,17 +13,18 @@ export const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, isLoading, isAuthenticated, login, logout } = useAuth();
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string, id: string) => {
     e.preventDefault();
     
-    // Cerrar el menú móvil al hacer clic
+    // Close mobile menu on click
     setIsMenuOpen(false);
     
-    // Si estamos en la página de servicios, navegar a home primero
+    // If we're on the services page, navigate to home first
     if (location.pathname !== '/') {
       navigate('/');
-      // Esperar a que la navegación se complete antes de hacer scroll
+      // Wait for navigation to complete before scrolling
       setTimeout(() => {
         const element = document.getElementById(id);
         if (element) {
@@ -30,7 +32,7 @@ export const Header = () => {
         }
       }, 100);
     } else {
-      // Si ya estamos en home, hacer scroll directamente
+      // If we're already on home, scroll directly
       const element = document.getElementById(id);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -59,7 +61,7 @@ export const Header = () => {
           <span></span>
           <span></span>
         </button>
-        <nav className={`header__nav ${isMenuOpen ? 'header__nav--open' : ''}`} aria-label="Navegación principal">
+        <nav className={`header__nav ${isMenuOpen ? 'header__nav--open' : ''}`} aria-label="Main navigation">
           <ul>
             {navigation.map((item) => (
               <li key={item.href}>
@@ -68,6 +70,30 @@ export const Header = () => {
                 </a>
               </li>
             ))}
+            <li className="header__auth">
+              {!isLoading && (
+                isAuthenticated ? (
+                  <>
+                    <span className="header__user-name">{user?.name || user?.email}</span>
+                    <button 
+                      className="header__auth-button header__auth-button--logout"
+                      onClick={logout}
+                      aria-label="Logout"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <button 
+                    className="header__auth-button header__auth-button--login"
+                    onClick={() => login()}
+                    aria-label="Login"
+                  >
+                    Login
+                  </button>
+                )
+              )}
+            </li>
           </ul>
         </nav>
       </div>
