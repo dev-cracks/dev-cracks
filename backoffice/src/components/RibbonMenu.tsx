@@ -10,8 +10,6 @@ import {
   mergeClasses,
 } from '@fluentui/react-components';
 import {
-  MailRegular,
-  PanelLeftRegular,
   HomeRegular,
   DocumentRegular,
   EyeRegular,
@@ -27,14 +25,9 @@ const useStyles = makeStyles({
     alignItems: 'center',
     borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
     paddingLeft: tokens.spacingHorizontalM,
+    paddingLeft: tokens.spacingHorizontalM,
     paddingRight: tokens.spacingHorizontalM,
     gap: tokens.spacingHorizontalXS,
-  },
-  leftIcons: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: tokens.spacingHorizontalXS,
-    marginRight: tokens.spacingHorizontalM,
   },
   menuButton: {
     height: '44px',
@@ -123,22 +116,6 @@ export const RibbonMenu = ({ onMenuToggle }: RibbonMenuProps) => {
 
   return (
     <div className={styles.ribbonMenu}>
-      {/* Iconos izquierda */}
-      <div className={styles.leftIcons}>
-        <Button
-          appearance="subtle"
-          icon={<MailRegular />}
-          onClick={() => navigate('/dashboard')}
-          title="Mail"
-        />
-        <Button
-          appearance="subtle"
-          icon={<PanelLeftRegular />}
-          onClick={onMenuToggle}
-          title="Menu"
-        />
-      </div>
-
       {/* Pestañas de menú */}
       {menuItems.map((item) => (
         <Menu key={item.id}>

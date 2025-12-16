@@ -57,10 +57,12 @@ const useStyles = makeStyles({
     top: '92px',
     bottom: 0,
     zIndex: 900,
+    boxSizing: 'border-box', // Incluye el border en el ancho
     '@media (min-width: 768px)': {
       position: 'relative',
       top: 0,
       width: '250px',
+      flexShrink: 0, // No se encoge, mantiene su ancho
     },
   },
   sidebarCollapsed: {
@@ -68,6 +70,8 @@ const useStyles = makeStyles({
     '@media (min-width: 768px)': {
       transform: 'translateX(0)',
       width: '64px', // Ancho suficiente para iconos completos
+      minWidth: '64px', // Asegura que no sea menor
+      maxWidth: '64px', // Asegura que no sea mayor
     },
   },
   header: {
@@ -138,6 +142,7 @@ const useStyles = makeStyles({
   navListCollapsed: {
     padding: tokens.spacingVerticalS,
     alignItems: 'center',
+    width: '100%', // Asegura que ocupe todo el ancho del sidebar colapsado
   },
   navGroup: {
     display: 'flex',
@@ -291,7 +296,7 @@ export const Layout = ({ children }: LayoutProps) => {
             isSidebarCollapsed && styles.headerCollapsed
           )}>
             {!isSidebarCollapsed && (
-              <Body1 className={styles.headerTitle}>Dev Cracks</Body1>
+              <Body1 className={styles.headerTitle}>Menú Principal</Body1>
             )}
             <Button
               appearance="subtle"
@@ -305,9 +310,6 @@ export const Layout = ({ children }: LayoutProps) => {
             isSidebarCollapsed && styles.navListCollapsed
           )}>
             <div className={styles.navGroup}>
-              {!isSidebarCollapsed && (
-                <div className={styles.navGroupHeader}>Menú Principal</div>
-              )}
               {navigationItems.map((item) => (
                 <Button
                   key={item.path}
