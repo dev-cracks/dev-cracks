@@ -1,12 +1,25 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { useAuth } from '../hooks/useAuth';
 import { Avatar } from '../components/Avatar';
+import { UserDataEditor } from '../components/UserDataEditor';
+import { ChangeHistory } from '../components/ChangeHistory';
+import { UserData, initializeUserData, getUserData } from '../services/userDataService';
 
 export const AccountPage = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading } = useAuth();
+  const [userData, setUserData] = useState<UserData | null>(null);
+
+  // Inicializar datos del usuario cuando se autentica
+  useEffect(() => {
+    if (user && user.id && user.email) {
+      const initialized = initializeUserData(user.id, user.email);
+      const current = getUserData(user.id);
+      setUserData(current || initialized);
+    }
+  }, [user?.id, user?.email]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -77,11 +90,6 @@ export const AccountPage = () => {
                   </div>
 
                   <div className="account-page__info-item">
-                    <label className="account-page__info-label">Email</label>
-                    <div className="account-page__info-value">{user.email}</div>
-                  </div>
-
-                  <div className="account-page__info-item">
                     <label className="account-page__info-label">ID de Usuario</label>
                     <div className="account-page__info-value account-page__info-value--mono">
                       {user.id}
@@ -95,6 +103,22 @@ export const AccountPage = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <div className="account-page__card">
+                <h3 className="account-page__card-title">Datos de Contacto</h3>
+                <UserDataEditor
+                  userId={user.id}
+                  initialEmail={user.email}
+                  onUpdate={(data) => {
+                    setUserData(data);
+                  }}
+                />
+              </div>
+
+              <div className="account-page__card">
+                <h3 className="account-page__card-title">Historial de Cambios</h3>
+                <ChangeHistory userId={user.id} />
               </div>
 
               <div className="account-page__card">
