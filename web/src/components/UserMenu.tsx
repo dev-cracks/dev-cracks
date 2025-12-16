@@ -36,7 +36,9 @@ export const UserMenu = () => {
   const handleBackofficeClick = () => {
     setIsOpen(false);
     // Abrir backoffice en nueva ventana/tab
-    const backofficeUrl = import.meta.env.VITE_BACKOFFICE_URL || 'http://localhost:5174';
+    // Usar la URL relativa o construir desde la URL actual
+    const backofficeUrl = import.meta.env.VITE_BACKOFFICE_URL || 
+      `${window.location.origin}/backoffice`;
     window.open(backofficeUrl, '_blank');
   };
 

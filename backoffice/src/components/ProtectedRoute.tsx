@@ -21,8 +21,18 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
   }
 
   // Evitar redirección infinita: solo redirigir si no estamos ya en /login
-  if (!isAuthenticated && location.pathname !== '/login') {
+  // y no estamos en proceso de autenticación
+  if (!isAuthenticated && !isLoading && location.pathname !== '/login') {
     return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+  
+  // Si está cargando y no está autenticado, mostrar spinner (evita redirección prematura)
+  if (isLoading && !isAuthenticated && location.pathname !== '/login') {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Spinner size="large" />
+      </div>
+    );
   }
 
   if (requireAdmin && !isAdmin) {

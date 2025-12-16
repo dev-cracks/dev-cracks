@@ -15,12 +15,19 @@ const App = () => {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Navigate to="/dashboard" replace />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/*"
           element={
             <ProtectedRoute>
               <Layout>
                 <Routes>
-                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/users" element={<UsersPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
