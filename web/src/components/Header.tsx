@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { UserMenu } from './UserMenu';
 
 const navigation = [
   { href: '#inicio', label: 'Inicio', id: 'inicio' },
@@ -73,16 +74,7 @@ export const Header = () => {
             <li className="header__auth">
               {!isLoading && (
                 isAuthenticated ? (
-                  <>
-                    <span className="header__user-name">{user?.name || user?.email}</span>
-                    <button 
-                      className="header__auth-button header__auth-button--logout"
-                      onClick={logout}
-                      aria-label="Logout"
-                    >
-                      Logout
-                    </button>
-                  </>
+                  <UserMenu />
                 ) : (
                   <button 
                     className="header__auth-button header__auth-button--login"

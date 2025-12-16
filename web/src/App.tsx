@@ -8,6 +8,7 @@ import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
 import { VideoBackground } from './components/VideoBackground';
 import { ServicesPage } from './pages/ServicesPage';
+import { AccountPage } from './pages/AccountPage';
 
 const HomePage = () => (
   <>
@@ -29,6 +30,7 @@ const App = () => (
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/servicios" element={<ServicesPage />} />
+      <Route path="/account" element={<AccountPage />} />
     </Routes>
   </BrowserRouter>
 );
