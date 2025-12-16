@@ -32,6 +32,8 @@ FROM --platform=linux/amd64 nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # Copiar los archivos construidos del backoffice
+# Vite con base: '/backoffice/' genera los archivos directamente en dist-backoffice
+# pero con rutas relativas que incluyen /backoffice/
 COPY --from=build /app/dist-backoffice /usr/share/nginx/html/backoffice
 
 # Copiar configuración de nginx
