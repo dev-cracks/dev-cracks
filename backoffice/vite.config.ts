@@ -1,9 +1,12 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react-swc';
-import { resolve } from 'path';
+import react from '@vitejs/plugin-react';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  root: resolve(__dirname),
+  root: __dirname,
   publicDir: resolve(__dirname, 'public'),
   server: {
     port: 5174,
@@ -14,6 +17,11 @@ export default defineConfig({
     outDir: resolve(__dirname, '../dist-backoffice'),
     emptyOutDir: true
   },
-  plugins: [react()]
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    },
+  },
 });
 
