@@ -28,11 +28,21 @@ const apiBaseUrl = (() => {
 const apiAudience = (import.meta.env.VITE_AUTH0_API_AUDIENCE as string | undefined) || 
   'fractalize-services-api';
 
+// Determinar el redirect URI correcto basado en si estamos en modo proxy o standalone
+const getRedirectUri = () => {
+  if (typeof window !== 'undefined') {
+    // Si estamos accediendo a través del proxy, usar la URL completa con /backoffice
+    const base = import.meta.env.VITE_BACKOFFICE_BASE || '/backoffice';
+    return `${window.location.origin}${base}/login`;
+  }
+  return 'http://localhost:5174/login';
+};
+
 export const auth0Config = {
   domain: (import.meta.env.VITE_AUTH0_DOMAIN as string | undefined) || 'dev-cracks.eu.auth0.com',
   clientId: (import.meta.env.VITE_AUTH0_CLIENT_ID as string | undefined) || 'puVivGd9KVmrSyVu8hCytE1juOlFLdht',
   authorizationParams: {
-    redirect_uri: typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5174',
+    redirect_uri: getRedirectUri(),
     audience: apiAudience,
     scope: 'openid profile email'
   }

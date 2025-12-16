@@ -12,6 +12,8 @@ export default defineConfig({
     port: 5174,
     host: true,
     strictPort: false,
+    // Configurar para que funcione como servidor backend para el proxy
+    cors: true,
   },
   build: {
     outDir: resolve(__dirname, '../dist-backoffice'),
@@ -22,6 +24,10 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'src'),
     },
+  },
+  // Definir variable de entorno para el base path
+  define: {
+    'import.meta.env.VITE_BACKOFFICE_BASE': JSON.stringify('/backoffice'),
   },
 });
 
