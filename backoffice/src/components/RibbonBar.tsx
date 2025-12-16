@@ -4,11 +4,6 @@ import {
   makeStyles,
   tokens,
   Avatar,
-  Menu,
-  MenuTrigger,
-  MenuPopover,
-  MenuList,
-  MenuItem,
   Badge,
 } from '@fluentui/react-components';
 import {
@@ -18,11 +13,10 @@ import {
   CalendarRegular,
   AlertRegular,
   SettingsRegular,
-  PersonRegular,
-  SignOutRegular,
 } from '@fluentui/react-icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { UserAccountMenu } from './UserAccountMenu';
 
 const useStyles = makeStyles({
   ribbonBar: {
@@ -161,8 +155,8 @@ export const RibbonBar = ({ onMenuToggle }: RibbonBarProps) => {
           onClick={() => navigate('/settings')}
         />
         {user && (
-          <Menu>
-            <MenuTrigger disableButtonEnhancement>
+          <UserAccountMenu
+            trigger={
               <Button
                 appearance="subtle"
                 icon={
@@ -174,21 +168,8 @@ export const RibbonBar = ({ onMenuToggle }: RibbonBarProps) => {
                 }
                 className={styles.avatarButton}
               />
-            </MenuTrigger>
-            <MenuPopover>
-              <MenuList>
-                <MenuItem
-                  icon={<PersonRegular />}
-                  onClick={() => navigate('/settings')}
-                >
-                  Mi Perfil
-                </MenuItem>
-                <MenuItem icon={<SignOutRegular />} onClick={() => logout()}>
-                  Cerrar Sesión
-                </MenuItem>
-              </MenuList>
-            </MenuPopover>
-          </Menu>
+            }
+          />
         )}
       </div>
     </div>

@@ -67,7 +67,7 @@ const useStyles = makeStyles({
     transform: 'translateX(-100%)',
     '@media (min-width: 768px)': {
       transform: 'translateX(0)',
-      width: '60px',
+      width: '64px', // Ancho suficiente para iconos completos
     },
   },
   header: {
@@ -79,6 +79,12 @@ const useStyles = makeStyles({
     paddingRight: tokens.spacingHorizontalM,
     borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
     backgroundColor: tokens.colorNeutralBackground2,
+    minWidth: 0, // Permite que se ajuste cuando está colapsado
+  },
+  headerCollapsed: {
+    justifyContent: 'center',
+    paddingLeft: tokens.spacingHorizontalXS,
+    paddingRight: tokens.spacingHorizontalXS,
   },
   headerTitle: {
     fontWeight: tokens.fontWeightSemibold,
@@ -94,12 +100,13 @@ const useStyles = makeStyles({
     transition: 'margin-left 0.3s ease',
     '@media (min-width: 768px)': {
       marginLeft: '0', // En desktop no necesita margin porque el sidebar es relative
+      width: 'auto', // Ancho automático para que se ajuste al flex
     },
   },
   mainContentCollapsed: {
     marginLeft: '0',
     '@media (min-width: 768px)': {
-      marginLeft: '0',
+      marginLeft: '0', // No necesita margin porque el sidebar colapsado es relative y ya ocupa su espacio
     },
   },
   content: {
@@ -128,6 +135,10 @@ const useStyles = makeStyles({
     flex: 1,
     overflowY: 'auto',
   },
+  navListCollapsed: {
+    padding: tokens.spacingVerticalS,
+    alignItems: 'center',
+  },
   navGroup: {
     display: 'flex',
     flexDirection: 'column',
@@ -148,10 +159,22 @@ const useStyles = makeStyles({
     paddingLeft: tokens.spacingHorizontalM,
     paddingRight: tokens.spacingHorizontalM,
     minHeight: '40px',
+    minWidth: 0, // Permite que se ajuste cuando está colapsado
+  },
+  navItemCollapsed: {
+    justifyContent: 'center',
+    paddingLeft: tokens.spacingHorizontalXS,
+    paddingRight: tokens.spacingHorizontalXS,
+    minWidth: '64px', // Ancho mínimo cuando está colapsado
+    width: '64px', // Ancho fijo para centrar iconos
   },
   navItemSelected: {
     backgroundColor: tokens.colorNeutralBackground2,
     borderLeft: `3px solid ${tokens.colorBrandForeground1}`,
+  },
+  navItemSelectedCollapsed: {
+    borderLeft: 'none',
+    borderTop: `3px solid ${tokens.colorBrandForeground1}`,
   },
 });
 
@@ -263,7 +286,10 @@ export const Layout = ({ children }: LayoutProps) => {
             isSidebarCollapsed && styles.sidebarCollapsed
           )}
         >
-          <div className={styles.header}>
+          <div className={mergeClasses(
+            styles.header,
+            isSidebarCollapsed && styles.headerCollapsed
+          )}>
             {!isSidebarCollapsed && (
               <Body1 className={styles.headerTitle}>Dev Cracks</Body1>
             )}
@@ -274,7 +300,10 @@ export const Layout = ({ children }: LayoutProps) => {
             />
           </div>
 
-          <nav className={styles.navList}>
+          <nav className={mergeClasses(
+            styles.navList,
+            isSidebarCollapsed && styles.navListCollapsed
+          )}>
             <div className={styles.navGroup}>
               {!isSidebarCollapsed && (
                 <div className={styles.navGroupHeader}>Menú Principal</div>
@@ -290,7 +319,9 @@ export const Layout = ({ children }: LayoutProps) => {
                   }}
                   className={mergeClasses(
                     styles.navItem,
-                    location.pathname === item.path && styles.navItemSelected
+                    isSidebarCollapsed && styles.navItemCollapsed,
+                    location.pathname === item.path && styles.navItemSelected,
+                    location.pathname === item.path && isSidebarCollapsed && styles.navItemSelectedCollapsed
                   )}
                   title={isSidebarCollapsed ? item.name : undefined}
                 >
