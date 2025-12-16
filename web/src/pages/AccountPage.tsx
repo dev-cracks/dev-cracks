@@ -79,23 +79,23 @@ export const AccountPage = () => {
                   </div>
 
                   <div className="account-page__info-item">
+                    <label className="account-page__info-label">Email</label>
+                    <div className="account-page__info-value">
+                      {user.email}
+                    </div>
+                  </div>
+
+                  <div className="account-page__info-item">
                     <label className="account-page__info-label">ID de Usuario</label>
                     <div className="account-page__info-value account-page__info-value--mono">
                       {user.id}
                     </div>
                   </div>
-
-                  <div className="account-page__info-item">
-                    <label className="account-page__info-label">Auth0 Sub</label>
-                    <div className="account-page__info-value account-page__info-value--mono">
-                      {user.sub}
-                    </div>
-                  </div>
                 </div>
-              </div>
-
-              <div className="account-page__card">
-                <h3 className="account-page__card-title">Datos de Contacto</h3>
+                
+                <div className="account-page__section-divider"></div>
+                
+                <div className="account-page__section-subtitle">Datos de Contacto</div>
                 <UserDataEditor
                   userId={user.id}
                   initialEmail={user.email}
@@ -103,11 +103,6 @@ export const AccountPage = () => {
                     // Los datos se actualizan automáticamente desde la API
                   }}
                 />
-              </div>
-
-              <div className="account-page__card">
-                <h3 className="account-page__card-title">Historial de Cambios</h3>
-                <ChangeHistory userId={user.id} />
               </div>
 
               <div className="account-page__card">
@@ -126,11 +121,18 @@ export const AccountPage = () => {
                     <label className="account-page__info-label">Proveedor</label>
                     <div className="account-page__info-value">Auth0</div>
                   </div>
-                </div>
-              </div>
 
-              <div className="account-page__card">
-                <h3 className="account-page__card-title">Foto de Perfil</h3>
+                  <div className="account-page__info-item">
+                    <label className="account-page__info-label">Auth0 Sub</label>
+                    <div className="account-page__info-value account-page__info-value--mono">
+                      {user.sub}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="account-page__section-divider"></div>
+                
+                <div className="account-page__section-subtitle">Foto de Perfil</div>
                 <div className="account-page__picture-section">
                   <Avatar
                     picture={user.picture}
@@ -146,6 +148,11 @@ export const AccountPage = () => {
                       : 'No hay foto de perfil disponible'}
                   </p>
                 </div>
+              </div>
+
+              <div className="account-page__card">
+                <h3 className="account-page__card-title">Historial de Cambios</h3>
+                <ChangeHistory userId={user.id} />
               </div>
             </div>
           </div>

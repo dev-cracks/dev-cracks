@@ -1598,6 +1598,22 @@ main {
   border: 1px solid rgba(56, 139, 253, 0.3);
 }
 
+.account-page__section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(88, 166, 255, 0.2), transparent);
+  margin: 24px 0;
+  border: none;
+}
+
+.account-page__section-subtitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #c9d1d9;
+  margin: 0 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(88, 166, 255, 0.1);
+}
+
 .account-page__picture-section {
   text-align: center;
 }
