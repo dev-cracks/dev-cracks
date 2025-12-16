@@ -14,12 +14,11 @@ import {
 } from '@fluentui/react-components';
 import {
   HomeRegular,
-  People,
-  Settings,
-  PanelLeft,
-  SignOut,
-  Person,
-  Building,
+  PeopleRegular,
+  SettingsRegular,
+  PanelLeftRegular,
+  SignOutRegular,
+  PersonRegular,
 } from '@fluentui/react-icons';
 import { useState, ReactNode, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -207,14 +206,14 @@ export const Layout = ({ children }: LayoutProps) => {
       ? [
           {
             name: 'Usuarios',
-            icon: <People />,
+            icon: <PeopleRegular />,
             path: '/users',
           },
         ]
       : []),
     {
       name: 'Configuración',
-      icon: <Settings />,
+      icon: <SettingsRegular />,
       path: '/settings',
     },
   ];
@@ -245,7 +244,7 @@ export const Layout = ({ children }: LayoutProps) => {
           )}
           <Button
             appearance="subtle"
-            icon={<PanelLeft />}
+            icon={<PanelLeftRegular />}
             onClick={toggleSidebar}
           />
         </div>
@@ -285,7 +284,7 @@ export const Layout = ({ children }: LayoutProps) => {
         <div className={styles.topBar}>
           <Button
             appearance="subtle"
-            icon={<PanelLeft />}
+            icon={<PanelLeftRegular />}
             onClick={toggleSidebar}
           />
           <div style={{ flex: 1 }} />
@@ -313,13 +312,13 @@ export const Layout = ({ children }: LayoutProps) => {
               <MenuPopover>
                 <MenuList>
                   <MenuItem
-                    icon={<Person />}
+                    icon={<PersonRegular />}
                     onClick={() => navigate('/settings')}
                   >
                     Mi Perfil
                   </MenuItem>
                   <MenuItem
-                    icon={<SignOut />}
+                    icon={<SignOutRegular />}
                     onClick={() => logout()}
                   >
                     Cerrar Sesión

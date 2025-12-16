@@ -8,7 +8,7 @@ import {
   tokens,
   Spinner,
 } from '@fluentui/react-components';
-import { HomeRegular, GridDots } from '@fluentui/react-icons';
+import { HomeRegular } from '@fluentui/react-icons';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { backofficeService } from '../services/backofficeService';

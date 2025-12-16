@@ -10,7 +10,7 @@ import {
   Label,
   Button,
 } from '@fluentui/react-components';
-import { Settings } from '@fluentui/react-icons';
+import { SettingsRegular } from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
   container: {
@@ -43,7 +43,7 @@ export const SettingsPage = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <Settings fontSize={32} />
+        <SettingsRegular fontSize={32} />
         <h1 className={styles.title}>Configuración</h1>
       </div>
 

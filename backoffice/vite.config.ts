@@ -1,7 +1,8 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react-swc';
+import react from '@vitejs/plugin-react';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { basePathPlugin } from './vite-plugin-base-path.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -12,20 +13,21 @@ export default defineConfig({
     port: 5174,
     host: true,
     strictPort: false,
-    // Configurar para que funcione como servidor backend para el proxy
     cors: true,
   },
   build: {
     outDir: resolve(__dirname, '../dist-backoffice'),
     emptyOutDir: true
   },
-  plugins: [react()],
+  plugins: [
+    react(),
+    basePathPlugin('/backoffice')
+  ],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
     },
   },
-  // Definir variable de entorno para el base path
   define: {
     'import.meta.env.VITE_BACKOFFICE_BASE': JSON.stringify('/backoffice'),
   },
