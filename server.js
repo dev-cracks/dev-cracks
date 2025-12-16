@@ -33,6 +33,8 @@ async function createServer() {
           server: httpServer,
           protocol: 'ws',
           host: 'localhost',
+          port: 5173, // Usar el mismo puerto que el servidor unificado
+          clientPort: 5173, // El cliente debe conectarse al puerto 5173
         },
       },
       appType: 'spa',

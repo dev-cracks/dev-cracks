@@ -61,10 +61,13 @@ export const DashboardPage = () => {
       const users = await backofficeService.getUsers();
       setUserCount(users.length);
     } catch (error: any) {
-      console.error('Error loading stats:', error);
-      // Si es un error 403, simplemente mostrar 0 usuarios en lugar de causar un reinicio
-      if (error?.statusCode === 403) {
+      // Si es un error de red (API no disponible), solo mostrar warning en desarrollo
+      if (error?.statusCode === undefined && import.meta.env.DEV) {
+        console.warn('[Dev] API server not available. Stats will show 0.');
+      } else if (error?.statusCode === 403) {
         console.warn('Acceso denegado a usuarios. Mostrando 0 usuarios.');
+      } else {
+        console.error('Error loading stats:', error);
       }
       // Para todos los errores, mostrar 0 usuarios
       setUserCount(0);

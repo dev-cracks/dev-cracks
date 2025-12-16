@@ -87,9 +87,12 @@ export const useAuth = (): UseAuthReturn => {
         }
       } catch (error: any) {
         clearTimeout(timeoutId);
-        // Ignorar errores de abort (solicitud cancelada)
-        if (error.name !== 'AbortError') {
+        // Ignorar errores de abort (solicitud cancelada) y errores de red
+        if (error.name !== 'AbortError' && error.name !== 'TypeError') {
           console.error('Error loading user details:', error);
+        } else if (error.name === 'TypeError' && import.meta.env.DEV) {
+          // En desarrollo, solo mostrar un warning silencioso si la API no está disponible
+          console.warn('[Dev] API server not available. User details will not be loaded.');
         }
       }
     } catch (error) {

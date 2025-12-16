@@ -14,8 +14,9 @@ export default defineConfig({
     host: true,
     strictPort: false,
     cors: true,
+    // Cuando se usa el servidor unificado (server.js), el HMR se maneja allí
+    // Cuando se ejecuta standalone, usar el puerto 5174
     hmr: {
-      // Configurar HMR para funcionar correctamente con el base path
       clientPort: 5174,
     },
   },

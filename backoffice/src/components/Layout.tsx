@@ -3,12 +3,6 @@ import {
   Button,
   makeStyles,
   tokens,
-  Avatar,
-  Menu,
-  MenuTrigger,
-  MenuPopover,
-  MenuList,
-  MenuItem,
   Text,
   shorthands,
   mergeClasses,
@@ -18,13 +12,13 @@ import {
   PeopleRegular,
   SettingsRegular,
   PanelLeftRegular,
-  SignOutRegular,
-  PersonRegular,
 } from '@fluentui/react-icons';
 import { useState, ReactNode, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { tenantService, TenantDto } from '../services/tenantService';
+import { RibbonBar } from './RibbonBar';
+import { RibbonMenu } from './RibbonMenu';
 
 const useStyles = makeStyles({
   container: {
@@ -43,7 +37,7 @@ const useStyles = makeStyles({
     left: 0,
     top: 0,
     bottom: 0,
-    zIndex: 1000,
+    zIndex: 900,
     '@media (min-width: 768px)': {
       position: 'relative',
       width: '250px',
@@ -86,14 +80,12 @@ const useStyles = makeStyles({
       marginLeft: '60px',
     },
   },
-  topBar: {
-    height: '60px',
+  ribbonContainer: {
     display: 'flex',
-    alignItems: 'center',
-    paddingLeft: tokens.spacingHorizontalM,
-    paddingRight: tokens.spacingHorizontalM,
-    borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
-    backgroundColor: tokens.colorNeutralBackground1,
+    flexDirection: 'column',
+    position: 'sticky',
+    top: 0,
+    zIndex: 100,
   },
   content: {
     flex: 1,
@@ -293,52 +285,10 @@ export const Layout = ({ children }: LayoutProps) => {
           isSidebarCollapsed && styles.mainContentCollapsed
         )}
       >
-        <div className={styles.topBar}>
-          <Button
-            appearance="subtle"
-            icon={<PanelLeftRegular />}
-            onClick={toggleSidebar}
-          />
-          <div style={{ flex: 1 }} />
-          {tenant && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS, marginRight: tokens.spacingHorizontalM }}>
-              <Text weight="semibold">{tenant.name}</Text>
-            </div>
-          )}
-          {user && (
-            <Menu>
-              <MenuTrigger disableButtonEnhancement>
-                <Button
-                  appearance="subtle"
-                  icon={
-                    <Avatar
-                      name={user.name || user.email}
-                      image={user.picture}
-                      size={24}
-                    />
-                  }
-                >
-                  {user.name || user.email}
-                </Button>
-              </MenuTrigger>
-              <MenuPopover>
-                <MenuList>
-                  <MenuItem
-                    icon={<PersonRegular />}
-                    onClick={() => navigate('/settings')}
-                  >
-                    Mi Perfil
-                  </MenuItem>
-                  <MenuItem
-                    icon={<SignOutRegular />}
-                    onClick={() => logout()}
-                  >
-                    Cerrar Sesión
-                  </MenuItem>
-                </MenuList>
-              </MenuPopover>
-            </Menu>
-          )}
+        {/* Cintas estilo Outlook */}
+        <div className={styles.ribbonContainer}>
+          <RibbonBar onMenuToggle={toggleSidebar} />
+          <RibbonMenu onMenuToggle={toggleSidebar} />
         </div>
         <div className={styles.content}>{children}</div>
       </div>
