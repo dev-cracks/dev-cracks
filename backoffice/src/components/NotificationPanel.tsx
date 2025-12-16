@@ -16,12 +16,14 @@ import {
   DismissCircleRegular,
   DismissRegular,
 } from '@fluentui/react-icons';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Notification } from '../hooks/useNotifications';
 import { useNotificationContext } from '../contexts/NotificationContext';
+import { NotificationDrawer } from './NotificationDrawer';
 
 interface NotificationPanelProps {
-  trigger: React.ReactNode;
+  trigger: React.ReactElement;
 }
 
 const useStyles = makeStyles({
@@ -216,6 +218,7 @@ const formatTimeAgo = (date: Date): string => {
 export const NotificationPanel = ({ trigger }: NotificationPanelProps) => {
   const styles = useStyles();
   const navigate = useNavigate();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const {
     notifications,
     unreadCount,
@@ -239,93 +242,98 @@ export const NotificationPanel = ({ trigger }: NotificationPanelProps) => {
   };
 
   return (
-    <Menu>
-      <MenuTrigger disableButtonEnhancement>{trigger}</MenuTrigger>
-      <MenuPopover className={styles.menuPopover}>
-        {/* Header */}
-        <div className={styles.header}>
-          <Text className={styles.headerTitle}>Notificaciones</Text>
-          {unreadCount > 0 && (
-            <div className={styles.headerActions}>
+    <>
+      <Menu>
+        <MenuTrigger disableButtonEnhancement>{trigger}</MenuTrigger>
+        <MenuPopover className={styles.menuPopover}>
+          {/* Header */}
+          <div className={styles.header}>
+            <Text className={styles.headerTitle}>Notificaciones</Text>
+            {unreadCount > 0 && (
+              <div className={styles.headerActions}>
+                <a
+                  className={styles.markAllReadButton}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    markAllAsRead();
+                  }}
+                >
+                  Marcar todas como leídas
+                </a>
+              </div>
+            )}
+          </div>
+
+          {/* Lista de notificaciones */}
+          <div className={styles.notificationsList}>
+            {notifications.length === 0 ? (
+              <div className={styles.emptyState}>
+                <AlertRegular className={styles.emptyStateIcon} />
+                <Text className={styles.emptyStateText}>
+                  No hay notificaciones
+                </Text>
+              </div>
+            ) : (
+              notifications.map((notification: Notification) => (
+                <div
+                  key={notification.id}
+                  className={`${styles.notificationItem} ${
+                    !notification.read ? styles.notificationItemUnread : ''
+                  }`}
+                  onClick={() => handleNotificationClick(notification)}
+                >
+                  {!notification.read && (
+                    <div className={styles.unreadIndicator} />
+                  )}
+                  <div className={styles.notificationIcon}>
+                    {getNotificationIcon(notification.type)}
+                  </div>
+                  <div className={styles.notificationContent}>
+                    <Text className={styles.notificationTitle}>
+                      {notification.title}
+                    </Text>
+                    <Text className={styles.notificationMessage}>
+                      {notification.message}
+                    </Text>
+                    <Text className={styles.notificationTime}>
+                      {formatTimeAgo(notification.timestamp)}
+                    </Text>
+                  </div>
+                  <div className={styles.notificationActions}>
+                    <Button
+                      appearance="subtle"
+                      icon={<DismissRegular />}
+                      className={styles.dismissButton}
+                      onClick={(e) => handleDismiss(e, notification.id)}
+                      title="Descartar"
+                    />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Footer */}
+          {notifications.length > 0 && (
+            <div className={styles.footer}>
               <a
-                className={styles.markAllReadButton}
+                className={styles.viewAllButton}
                 onClick={(e) => {
                   e.stopPropagation();
-                  markAllAsRead();
+                  setIsDrawerOpen(true);
                 }}
               >
-                Marcar todas como leídas
+                Ver todas las notificaciones
               </a>
             </div>
           )}
-        </div>
-
-        {/* Lista de notificaciones */}
-        <div className={styles.notificationsList}>
-          {notifications.length === 0 ? (
-            <div className={styles.emptyState}>
-              <AlertRegular className={styles.emptyStateIcon} />
-              <Text className={styles.emptyStateText}>
-                No hay notificaciones
-              </Text>
-            </div>
-          ) : (
-            notifications.map((notification) => (
-              <div
-                key={notification.id}
-                className={`${styles.notificationItem} ${
-                  !notification.read ? styles.notificationItemUnread : ''
-                }`}
-                onClick={() => handleNotificationClick(notification)}
-              >
-                {!notification.read && (
-                  <div className={styles.unreadIndicator} />
-                )}
-                <div className={styles.notificationIcon}>
-                  {getNotificationIcon(notification.type)}
-                </div>
-                <div className={styles.notificationContent}>
-                  <Text className={styles.notificationTitle}>
-                    {notification.title}
-                  </Text>
-                  <Text className={styles.notificationMessage}>
-                    {notification.message}
-                  </Text>
-                  <Text className={styles.notificationTime}>
-                    {formatTimeAgo(notification.timestamp)}
-                  </Text>
-                </div>
-                <div className={styles.notificationActions}>
-                  <Button
-                    appearance="subtle"
-                    icon={<DismissRegular />}
-                    className={styles.dismissButton}
-                    onClick={(e) => handleDismiss(e, notification.id)}
-                    title="Descartar"
-                  />
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* Footer */}
-        {notifications.length > 0 && (
-          <div className={styles.footer}>
-            <a
-              className={styles.viewAllButton}
-              onClick={(e) => {
-                e.stopPropagation();
-                // Aquí podrías navegar a una página de todas las notificaciones
-                console.log('Ver todas las notificaciones');
-              }}
-            >
-              Ver todas las notificaciones
-            </a>
-          </div>
-        )}
-      </MenuPopover>
-    </Menu>
+        </MenuPopover>
+      </Menu>
+      <NotificationDrawer 
+        open={isDrawerOpen} 
+        onOpenChange={setIsDrawerOpen} 
+      />
+    </>
   );
 };
 

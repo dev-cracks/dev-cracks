@@ -136,28 +136,28 @@ export const RibbonBar = ({ onMenuToggle }: RibbonBarProps) => {
           className={styles.actionButton}
           title="Calendar"
         />
-        <NotificationPanel
-          trigger={
-            <div className={styles.badgeContainer}>
+        <div className={styles.badgeContainer}>
+          <NotificationPanel
+            trigger={
               <Button
                 appearance="subtle"
                 icon={<AlertRegular />}
                 className={styles.actionButton}
                 title="Notifications"
               />
-              {unreadCount > 0 && (
-                <Badge
-                  appearance="filled"
-                  color="important"
-                  size="small"
-                  className={styles.badge}
-                >
-                  {unreadCount > 99 ? '99+' : unreadCount}
-                </Badge>
-              )}
-            </div>
-          }
-        />
+            }
+          />
+          {unreadCount > 0 && (
+            <Badge
+              appearance="filled"
+              color="important"
+              size="small"
+              className={styles.badge}
+            >
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </Badge>
+          )}
+        </div>
         <Button
           appearance="subtle"
           icon={<SettingsRegular />}
