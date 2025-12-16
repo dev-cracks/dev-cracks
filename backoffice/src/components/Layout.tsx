@@ -23,8 +23,26 @@ import { RibbonMenu } from './RibbonMenu';
 const useStyles = makeStyles({
   container: {
     display: 'flex',
+    flexDirection: 'column',
     height: '100vh',
     width: '100%',
+  },
+  ribbonContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+  },
+  bodyContainer: {
+    display: 'flex',
+    flex: 1,
+    marginTop: '92px', // Altura de RibbonBar (48px) + RibbonMenu (44px)
+    overflow: 'hidden',
+    gap: 0, // Sin espacio entre sidebar y contenido
   },
   sidebar: {
     width: '250px',
@@ -33,13 +51,15 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     transition: 'width 0.3s ease, transform 0.3s ease',
+    flexShrink: 0,
     position: 'fixed',
     left: 0,
-    top: 0,
+    top: '92px',
     bottom: 0,
     zIndex: 900,
     '@media (min-width: 768px)': {
       position: 'relative',
+      top: 0,
       width: '250px',
     },
   },
@@ -69,23 +89,18 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
-    marginLeft: '0',
+    minWidth: 0, // Permite que el contenido se ajuste correctamente
+    marginLeft: '250px', // Para móviles cuando el sidebar está fijo
+    transition: 'margin-left 0.3s ease',
     '@media (min-width: 768px)': {
-      marginLeft: '250px',
-      transition: 'margin-left 0.3s ease',
+      marginLeft: '0', // En desktop no necesita margin porque el sidebar es relative
     },
   },
   mainContentCollapsed: {
+    marginLeft: '0',
     '@media (min-width: 768px)': {
-      marginLeft: '60px',
+      marginLeft: '0',
     },
-  },
-  ribbonContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    position: 'sticky',
-    top: 0,
-    zIndex: 100,
   },
   content: {
     flex: 1,
@@ -95,7 +110,7 @@ const useStyles = makeStyles({
   },
   overlay: {
     position: 'fixed',
-    top: 0,
+    top: '92px', // Debajo de las cintas
     left: 0,
     right: 0,
     bottom: 0,
@@ -225,72 +240,76 @@ export const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className={styles.container}>
-      {/* Overlay para móviles */}
-      {!isSidebarCollapsed && (
-        <div
-          className={styles.overlay}
-          onClick={() => setIsSidebarCollapsed(true)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <div
-        className={mergeClasses(
-          styles.sidebar,
-          isSidebarCollapsed && styles.sidebarCollapsed
-        )}
-      >
-        <div className={styles.header}>
-          {!isSidebarCollapsed && (
-            <Body1 className={styles.headerTitle}>Dev Cracks</Body1>
-          )}
-          <Button
-            appearance="subtle"
-            icon={<PanelLeftRegular />}
-            onClick={toggleSidebar}
-          />
-        </div>
-
-        <nav className={styles.navList}>
-          <div className={styles.navGroup}>
-            {!isSidebarCollapsed && (
-              <div className={styles.navGroupHeader}>Menú Principal</div>
-            )}
-            {navigationItems.map((item) => (
-              <Button
-                key={item.path}
-                appearance={location.pathname === item.path ? 'subtle' : 'subtle'}
-                icon={item.icon}
-                onClick={() => {
-                  navigate(item.path);
-                  setIsSidebarCollapsed(true);
-                }}
-                className={mergeClasses(
-                  styles.navItem,
-                  location.pathname === item.path && styles.navItemSelected
-                )}
-                title={isSidebarCollapsed ? item.name : undefined}
-              >
-                {!isSidebarCollapsed && item.name}
-              </Button>
-            ))}
-          </div>
-        </nav>
+      {/* Cintas estilo Outlook - Arriba ocupando 100% del ancho */}
+      <div className={styles.ribbonContainer}>
+        <RibbonBar onMenuToggle={toggleSidebar} />
+        <RibbonMenu onMenuToggle={toggleSidebar} />
       </div>
 
-      {/* Contenido principal */}
-      <div
-        className={mergeClasses(
-          styles.mainContent,
-          isSidebarCollapsed && styles.mainContentCollapsed
+      {/* Contenedor del cuerpo: Sidebar + Contenido */}
+      <div className={styles.bodyContainer}>
+        {/* Overlay para móviles */}
+        {!isSidebarCollapsed && (
+          <div
+            className={styles.overlay}
+            onClick={() => setIsSidebarCollapsed(true)}
+          />
         )}
-      >
-        {/* Cintas estilo Outlook */}
-        <div className={styles.ribbonContainer}>
-          <RibbonBar onMenuToggle={toggleSidebar} />
-          <RibbonMenu onMenuToggle={toggleSidebar} />
+
+        {/* Sidebar */}
+        <div
+          className={mergeClasses(
+            styles.sidebar,
+            isSidebarCollapsed && styles.sidebarCollapsed
+          )}
+        >
+          <div className={styles.header}>
+            {!isSidebarCollapsed && (
+              <Body1 className={styles.headerTitle}>Dev Cracks</Body1>
+            )}
+            <Button
+              appearance="subtle"
+              icon={<PanelLeftRegular />}
+              onClick={toggleSidebar}
+            />
+          </div>
+
+          <nav className={styles.navList}>
+            <div className={styles.navGroup}>
+              {!isSidebarCollapsed && (
+                <div className={styles.navGroupHeader}>Menú Principal</div>
+              )}
+              {navigationItems.map((item) => (
+                <Button
+                  key={item.path}
+                  appearance={location.pathname === item.path ? 'subtle' : 'subtle'}
+                  icon={item.icon}
+                  onClick={() => {
+                    navigate(item.path);
+                    setIsSidebarCollapsed(true);
+                  }}
+                  className={mergeClasses(
+                    styles.navItem,
+                    location.pathname === item.path && styles.navItemSelected
+                  )}
+                  title={isSidebarCollapsed ? item.name : undefined}
+                >
+                  {!isSidebarCollapsed && item.name}
+                </Button>
+              ))}
+            </div>
+          </nav>
         </div>
-        <div className={styles.content}>{children}</div>
+
+        {/* Contenido principal */}
+        <div
+          className={mergeClasses(
+            styles.mainContent,
+            isSidebarCollapsed && styles.mainContentCollapsed
+          )}
+        >
+          <div className={styles.content}>{children}</div>
+        </div>
       </div>
     </div>
   );

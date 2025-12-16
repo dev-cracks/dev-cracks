@@ -40,7 +40,7 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     gap: tokens.spacingHorizontalS,
-    minWidth: '200px',
+    flexShrink: 0,
   },
   logoIcon: {
     color: 'white',
@@ -68,8 +68,8 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     gap: tokens.spacingHorizontalS,
-    minWidth: '200px',
-    justifyContent: 'flex-end',
+    flexShrink: 0,
+    marginLeft: 'auto', // Empuja los iconos hacia la derecha
   },
   actionButton: {
     color: 'white',
