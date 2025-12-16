@@ -7,6 +7,7 @@ import { basePathPlugin } from './vite-plugin-base-path.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  base: '/backoffice/', // Configurar base path directamente en Vite
   root: resolve(__dirname),
   publicDir: resolve(__dirname, 'public'),
   server: {
@@ -20,8 +21,7 @@ export default defineConfig({
     emptyOutDir: true
   },
   plugins: [
-    react(),
-    basePathPlugin('/backoffice')
+    react()
   ],
   resolve: {
     alias: {

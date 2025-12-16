@@ -34,10 +34,24 @@ export class ApiService {
     });
 
     if (!response.ok) {
-      const error: ApiError = await response.json().catch(() => ({
-        message: `HTTP error! status: ${response.status}`,
+      // Intentar obtener el mensaje de error del cuerpo de la respuesta
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      let errorData: any = null;
+      
+      try {
+        errorData = await response.json();
+        if (errorData?.message) {
+          errorMessage = errorData.message;
+        }
+      } catch {
+        // Si no se puede parsear JSON, usar el mensaje por defecto
+      }
+
+      const error: ApiError = {
+        message: errorMessage,
         statusCode: response.status,
-      }));
+      };
+      
       throw error;
     }
 

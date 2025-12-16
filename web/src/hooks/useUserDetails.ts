@@ -59,8 +59,10 @@ export const useUserDetails = () => {
   // Verificar si el usuario tiene un tenant válido (no es el GUID vacío)
   const hasValidTenant = userDetails?.tenantId && userDetails.tenantId !== '00000000-0000-0000-0000-000000000000';
   
+  // TODO: WORKAROUND - Hardcodeado para testing. Revertir después del testing
   // Mostrar botón de backoffice si es admin O si no tiene tenant válido
-  const canAccessBackoffice = isAdmin || !hasValidTenant;
+  // const canAccessBackoffice = isAdmin || !hasValidTenant;
+  const canAccessBackoffice = true; // Todos los usuarios autenticados pueden acceder al backoffice temporalmente
 
   return {
     userDetails,

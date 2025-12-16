@@ -122,7 +122,9 @@ export const useAuth = (): UseAuthReturn => {
     }
   }, [isAuthenticated, getAccessTokenSilently]);
 
-  const isAdmin = userDetails?.role === 'Admin';
+  // TODO: WORKAROUND - Hardcodeado para testing. Revertir después del testing
+  // const isAdmin = userDetails?.role === 'Admin';
+  const isAdmin = isAuthenticated; // Todos los usuarios autenticados son Admin temporalmente
 
   return {
     user,

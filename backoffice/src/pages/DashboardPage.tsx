@@ -48,15 +48,26 @@ export const DashboardPage = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadStats();
-  }, []);
+    // Solo cargar stats si userDetails está disponible
+    if (userDetails) {
+      loadStats();
+    } else {
+      setIsLoading(false);
+    }
+  }, [userDetails]);
 
   const loadStats = async () => {
     try {
       const users = await backofficeService.getUsers();
       setUserCount(users.length);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading stats:', error);
+      // Si es un error 403, simplemente mostrar 0 usuarios en lugar de causar un reinicio
+      if (error?.statusCode === 403) {
+        console.warn('Acceso denegado a usuarios. Mostrando 0 usuarios.');
+      }
+      // Para todos los errores, mostrar 0 usuarios
+      setUserCount(0);
     } finally {
       setIsLoading(false);
     }

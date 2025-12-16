@@ -25,26 +25,23 @@ async function createServer() {
     const webVite = await createViteServer({
       server: { 
         middlewareMode: true,
-        hmr: {
-          port: 5174 // Usar puerto diferente para HMR de web
-        }
+        hmr: false // Deshabilitar HMR para evitar problemas con WebSocket
       },
       appType: 'spa',
       root: resolve(__dirname, 'web'),
       publicDir: resolve(__dirname, 'web/public'),
     });
 
-    // Crear servidor Vite para el backoffice SIN base path (lo manejamos manualmente)
+    // Crear servidor Vite para el backoffice con base path
     const backofficeVite = await createViteServer({
       server: { 
         middlewareMode: true,
-        hmr: {
-          port: 5175 // Usar puerto diferente para HMR de backoffice
-        }
+        hmr: false // Deshabilitar HMR para evitar problemas con WebSocket
       },
       appType: 'spa',
       root: resolve(__dirname, 'backoffice'),
       publicDir: resolve(__dirname, 'backoffice/public'),
+      base: '/backoffice/', // Configurar base path directamente
     });
 
     // Restaurar console.error después de crear los servidores Vite
@@ -52,48 +49,24 @@ async function createServer() {
 
     // Middleware para el backoffice - debe ir antes del middleware de la web
     app.use('/backoffice', async (req, res, next) => {
-      // Guardar la URL original completa
-      const originalUrl = req.originalUrl;
-      // Remover /backoffice del path para que Vite lo procese internamente
-      const viteUrl = originalUrl.replace(/^\/backoffice/, '') || '/';
-      
-      // Modificar temporalmente la request para Vite
-      const originalUrlProp = req.url;
-      const originalOriginalUrl = req.originalUrl;
-      const originalPath = req.path;
-      
-      req.url = viteUrl;
-      req.originalUrl = viteUrl;
-      req.path = viteUrl;
-      
-      // Restaurar después de procesar
-      const restoreReq = () => {
-        req.url = originalUrlProp;
-        req.originalUrl = originalOriginalUrl;
-        req.path = originalPath;
-      };
-      
-      res.on('finish', restoreReq);
-      res.on('close', restoreReq);
-      
-      // Si es un archivo estático, módulo o asset, usar el middleware de Vite directamente
-      if (viteUrl.match(/^\/(src|node_modules|@vite|@id|@fs|@react-refresh|assets)/) || 
-          viteUrl.match(/\.(tsx?|jsx?|css|json|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot|map)$/)) {
+      // Para archivos estáticos y módulos, usar el middleware de Vite directamente
+      if (req.originalUrl.match(/\.(tsx?|jsx?|css|json|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot|map)$/) ||
+          req.originalUrl.match(/^\/(backoffice\/)?(src|node_modules|@vite|@id|@fs|@react-refresh|assets)/)) {
         return backofficeVite.middlewares(req, res, (err) => {
-          restoreReq();
-          if (err) next(err);
+          // Si hay un error (como 404), continuar al siguiente handler
+          if (err) {
+            next(err);
+          }
         });
       }
       
-      // Para todas las demás rutas del backoffice, servir el index.html transformado
+      // Para todas las demás rutas (HTML/SPA), servir el index.html transformado
       try {
         const template = readFileSync(resolve(__dirname, 'backoffice/index.html'), 'utf-8');
-        const html = await backofficeVite.transformIndexHtml(viteUrl, template);
-        restoreReq();
+        const html = await backofficeVite.transformIndexHtml(req.originalUrl, template);
         res.setHeader('Content-Type', 'text/html');
         return res.send(html);
       } catch (e) {
-        restoreReq();
         backofficeVite.ssrFixStacktrace(e);
         return next(e);
       }

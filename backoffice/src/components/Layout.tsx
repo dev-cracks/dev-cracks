@@ -11,6 +11,7 @@ import {
   MenuItem,
   Text,
   shorthands,
+  mergeClasses,
 } from '@fluentui/react-components';
 import {
   HomeRegular,
@@ -175,8 +176,16 @@ export const Layout = ({ children }: LayoutProps) => {
         // Si no tiene tenant, inicializarlo automáticamente
         await initializeTenant();
       }
-    } catch (error) {
-      console.error('Error loading tenant:', error);
+    } catch (error: any) {
+      // Si es un 404 (usuario sin tenant), es esperado y se inicializará automáticamente
+      // No loguear este error ya que es parte del flujo normal
+      if (error?.statusCode !== 404 && error?.statusCode !== undefined) {
+        console.error('Error loading tenant:', error);
+      }
+      // Si no tiene tenant y no estamos inicializando, intentar inicializar
+      if (!isInitializing && (error?.statusCode === 404 || !error?.statusCode)) {
+        await initializeTenant();
+      }
     }
   };
 
@@ -234,9 +243,10 @@ export const Layout = ({ children }: LayoutProps) => {
 
       {/* Sidebar */}
       <div
-        className={`${styles.sidebar} ${
-          isSidebarCollapsed ? styles.sidebarCollapsed : ''
-        }`}
+        className={mergeClasses(
+          styles.sidebar,
+          isSidebarCollapsed && styles.sidebarCollapsed
+        )}
       >
         <div className={styles.header}>
           {!isSidebarCollapsed && (
@@ -263,9 +273,10 @@ export const Layout = ({ children }: LayoutProps) => {
                   navigate(item.path);
                   setIsSidebarCollapsed(true);
                 }}
-                className={`${styles.navItem} ${
-                  location.pathname === item.path ? styles.navItemSelected : ''
-                }`}
+                className={mergeClasses(
+                  styles.navItem,
+                  location.pathname === item.path && styles.navItemSelected
+                )}
                 title={isSidebarCollapsed ? item.name : undefined}
               >
                 {!isSidebarCollapsed && item.name}
@@ -277,9 +288,10 @@ export const Layout = ({ children }: LayoutProps) => {
 
       {/* Contenido principal */}
       <div
-        className={`${styles.mainContent} ${
-          isSidebarCollapsed ? styles.mainContentCollapsed : ''
-        }`}
+        className={mergeClasses(
+          styles.mainContent,
+          isSidebarCollapsed && styles.mainContentCollapsed
+        )}
       >
         <div className={styles.topBar}>
           <Button

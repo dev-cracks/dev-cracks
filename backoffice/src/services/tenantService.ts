@@ -17,10 +17,11 @@ export const tenantService = {
     try {
       return await apiService.request<TenantDto>('/tenants/me');
     } catch (error: any) {
-      // Si el usuario no tiene tenant, retornar null
+      // Si el usuario no tiene tenant (404), retornar null silenciosamente
       if (error?.statusCode === 404) {
         return null;
       }
+      // Para otros errores, lanzar la excepción
       throw error;
     }
   },

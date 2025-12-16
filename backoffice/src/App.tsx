@@ -18,7 +18,9 @@ const App = () => {
           path="/"
           element={
             <ProtectedRoute>
-              <Navigate to="/dashboard" replace />
+              {/* TODO: WORKAROUND - Navigate deshabilitado temporalmente para evitar redirección infinita */}
+              {/* <Navigate to="/dashboard" replace /> */}
+              <DashboardPage />
             </ProtectedRoute>
           }
         />
