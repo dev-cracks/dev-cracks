@@ -25,12 +25,17 @@ const apiBaseUrl = (() => {
 })();
 
 // Auth0 Configuration
+// API Audience should be the identifier of the Auth0 API resource
+// This is different from the ClientId - it's the API identifier from Auth0 dashboard
+const apiAudience = (import.meta.env.VITE_AUTH0_API_AUDIENCE as string | undefined) || 
+  'https://dev-cracks.onrender.com'; // Default API identifier
+
 export const auth0Config = {
   domain: (import.meta.env.VITE_AUTH0_DOMAIN as string | undefined) || 'dev-cracks.eu.auth0.com',
   clientId: (import.meta.env.VITE_AUTH0_CLIENT_ID as string | undefined) || 'puVivGd9KVmrSyVu8hCytE1juOlFLdht',
   authorizationParams: {
     redirect_uri: typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173',
-    audience: undefined, // Optional: add if you have an API
+    audience: apiAudience, // API identifier for token validation
     scope: 'openid profile email'
   }
 };

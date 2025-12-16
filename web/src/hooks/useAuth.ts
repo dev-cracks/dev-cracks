@@ -2,6 +2,7 @@ import { useCallback, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { mapAuth0User, User } from '../services/authService';
 import { cacheUserImage, clearUserImageCache } from '../services/imageCache';
+import { auth0Config } from '../config/env';
 
 interface UseAuthReturn {
   user: User | null;
@@ -73,7 +74,13 @@ export const useAuth = (): UseAuthReturn => {
       return undefined;
     }
     try {
-      return await getAccessTokenSilently();
+      // Get token with the same audience configured in Auth0Provider
+      // This ensures the token is valid for the API
+      return await getAccessTokenSilently({
+        authorizationParams: {
+          audience: auth0Config.authorizationParams.audience
+        }
+      });
     } catch (error) {
       console.error('Error getting access token:', error);
       return undefined;
