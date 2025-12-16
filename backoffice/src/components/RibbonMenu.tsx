@@ -25,7 +25,6 @@ const useStyles = makeStyles({
     alignItems: 'center',
     borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
     paddingLeft: tokens.spacingHorizontalM,
-    paddingLeft: tokens.spacingHorizontalM,
     paddingRight: tokens.spacingHorizontalM,
     gap: tokens.spacingHorizontalXS,
   },
