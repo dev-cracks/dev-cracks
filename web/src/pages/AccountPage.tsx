@@ -53,6 +53,7 @@ export const AccountPage = () => {
                       picture={user.picture}
                       name={user.name}
                       email={user.email}
+                      userId={user.id}
                       size="large"
                     />
                   </div>
@@ -122,6 +123,7 @@ export const AccountPage = () => {
                     picture={user.picture}
                     name={user.name}
                     email={user.email}
+                    userId={user.id}
                     size="large"
                     className="account-page__picture-avatar"
                   />

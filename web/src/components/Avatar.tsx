@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getUserImageUrl } from '../services/imageCache';
 
 interface AvatarProps {
   picture?: string | null;
   name?: string | null;
   email: string;
+  userId?: string;
   size?: 'small' | 'medium' | 'large';
   className?: string;
 }
@@ -20,14 +22,44 @@ const fontSizeMap = {
   large: '2rem'
 };
 
-export const Avatar = ({ picture, name, email, size = 'medium', className = '' }: AvatarProps) => {
+export const Avatar = ({ picture, name, email, userId, size = 'medium', className = '' }: AvatarProps) => {
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const displayName = name || email;
   const initial = displayName[0]?.toUpperCase() || '?';
   const sizeValue = sizeMap[size];
   const fontSize = fontSizeMap[size];
+
+  // Obtener la imagen cacheada o la original
+  useEffect(() => {
+    if (userId && picture) {
+      // Intentar obtener del caché primero
+      const cachedUrl = getCachedUserImage(userId);
+      
+      if (cachedUrl) {
+        // Si hay caché, usarlo
+        setImageUrl(cachedUrl);
+      } else {
+        // Si no hay caché, mostrar la imagen original inmediatamente
+        // El caché se hará en segundo plano
+        setImageUrl(picture);
+      }
+      
+      // Resetear el estado de error cuando cambia la URL
+      setImageError(false);
+      setIsLoading(true);
+    } else if (picture) {
+      setImageUrl(picture);
+      setImageError(false);
+      setIsLoading(true);
+    } else {
+      setImageUrl(null);
+      setImageError(false);
+      setIsLoading(false);
+    }
+  }, [userId, picture]);
 
   const handleImageError = () => {
     setImageError(true);
@@ -39,7 +71,7 @@ export const Avatar = ({ picture, name, email, size = 'medium', className = '' }
   };
 
   // Si no hay imagen o hubo un error, mostrar inicial
-  if (!picture || imageError) {
+  if (!imageUrl || imageError) {
     return (
       <div
         className={`avatar avatar--fallback ${className}`}
@@ -68,13 +100,13 @@ export const Avatar = ({ picture, name, email, size = 'medium', className = '' }
         </div>
       )}
       <img
-        src={picture}
+        src={imageUrl}
         alt={displayName}
         onError={handleImageError}
         onLoad={handleImageLoad}
         style={{ display: isLoading ? 'none' : 'block' }}
         loading="lazy"
-        crossOrigin="anonymous"
+        crossOrigin={imageUrl?.startsWith('data:') ? undefined : 'anonymous'}
       />
     </div>
   );

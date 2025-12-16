@@ -51,6 +51,7 @@ export const UserMenu = () => {
             picture={user.picture}
             name={user.name}
             email={user.email}
+            userId={user.id}
             size="small"
           />
         </div>
@@ -81,6 +82,7 @@ export const UserMenu = () => {
                 picture={user.picture}
                 name={user.name}
                 email={user.email}
+                userId={user.id}
                 size="medium"
               />
             </div>
