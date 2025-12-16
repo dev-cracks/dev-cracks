@@ -17,10 +17,11 @@ async function createServer() {
     publicDir: resolve(__dirname, 'web/public'),
   });
 
-  // Crear servidor Vite para el backoffice
+  // Crear servidor Vite para el backoffice con base path
   const backofficeVite = await createViteServer({
     server: { middlewareMode: true },
     appType: 'spa',
+    base: '/backoffice/',
     root: resolve(__dirname, 'backoffice'),
     publicDir: resolve(__dirname, 'backoffice/public'),
   });
@@ -29,37 +30,22 @@ async function createServer() {
   app.use('/backoffice', async (req, res, next) => {
     // Guardar la URL original
     const originalUrl = req.originalUrl;
-    // Remover /backoffice del path para el servidor Vite del backoffice
-    const viteUrl = originalUrl.replace(/^\/backoffice/, '') || '/';
     
-    // Si es un archivo estático, módulo o asset, modificar la request y pasar al middleware de Vite
-    if (viteUrl.match(/^\/(src|node_modules|@vite|@id|@fs|@react-refresh)/) || 
-        viteUrl.match(/\.(tsx?|jsx?|css|json|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot|map)$/)) {
-      // Modificar temporalmente la URL de la request
-      const originalUrlProp = req.url;
-      const originalOriginalUrl = req.originalUrl;
-      req.url = viteUrl;
-      req.originalUrl = viteUrl;
-      
-      // Restaurar después de que el middleware procese
-      const restoreUrl = () => {
-        req.url = originalUrlProp;
-        req.originalUrl = originalOriginalUrl;
-      };
-      
-      res.on('finish', restoreUrl);
-      res.on('close', restoreUrl);
-      
-      return backofficeVite.middlewares(req, res, (err) => {
-        restoreUrl();
-        if (err) next(err);
-      });
+    // Si es un archivo estático, módulo o asset, pasar directamente al middleware de Vite
+    // Vite con base path manejará las rutas correctamente, manteniendo la URL original
+    if (originalUrl.match(/\/backoffice\/(src|node_modules|@vite|@id|@fs|@react-refresh|assets)/) || 
+        originalUrl.match(/\.(tsx?|jsx?|css|json|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot|map)$/)) {
+      // Pasar la request directamente al middleware de Vite con la URL original
+      // Vite con base path configurado manejará correctamente la ruta
+      return backofficeVite.middlewares(req, res, next);
     }
     
     // Para todas las demás rutas del backoffice, servir el index.html transformado
+    // Usar la URL original completa para que Vite pueda transformar correctamente con el base path
     try {
       const template = readFileSync(resolve(__dirname, 'backoffice/index.html'), 'utf-8');
-      const html = await backofficeVite.transformIndexHtml(viteUrl, template);
+      // Pasar la URL original completa para que Vite transforme las rutas con el base path
+      const html = await backofficeVite.transformIndexHtml(originalUrl, template);
       res.setHeader('Content-Type', 'text/html');
       return res.send(html);
     } catch (e) {
