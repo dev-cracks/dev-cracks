@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: dev-cracks
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /backoffice/*
+        destination: /backoffice/index.html
+      - type: rewrite
+        source: /*
+        destination: /index.html
+

@@ -16,7 +16,10 @@ import {
 } from '@fluentui/react-icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useNotificationContext } from '../contexts/NotificationContext';
+import { useSettings } from '../contexts/SettingsContext';
 import { UserAccountMenu } from './UserAccountMenu';
+import { NotificationPanel } from './NotificationPanel';
 
 const useStyles = makeStyles({
   ribbonBar: {
@@ -98,6 +101,8 @@ export const RibbonBar = ({ onMenuToggle }: RibbonBarProps) => {
   const styles = useStyles();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { unreadCount } = useNotificationContext();
+  const { openSettings } = useSettings();
 
   return (
     <div className={styles.ribbonBar}>
@@ -131,28 +136,34 @@ export const RibbonBar = ({ onMenuToggle }: RibbonBarProps) => {
           className={styles.actionButton}
           title="Calendar"
         />
-        <div className={styles.badgeContainer}>
-          <Button
-            appearance="subtle"
-            icon={<AlertRegular />}
-            className={styles.actionButton}
-            title="Notifications"
-          />
-          <Badge
-            appearance="filled"
-            color="important"
-            size="small"
-            className={styles.badge}
-          >
-            3
-          </Badge>
-        </div>
+        <NotificationPanel
+          trigger={
+            <div className={styles.badgeContainer}>
+              <Button
+                appearance="subtle"
+                icon={<AlertRegular />}
+                className={styles.actionButton}
+                title="Notifications"
+              />
+              {unreadCount > 0 && (
+                <Badge
+                  appearance="filled"
+                  color="important"
+                  size="small"
+                  className={styles.badge}
+                >
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Badge>
+              )}
+            </div>
+          }
+        />
         <Button
           appearance="subtle"
           icon={<SettingsRegular />}
           className={styles.actionButton}
           title="Settings"
-          onClick={() => navigate('/settings')}
+          onClick={openSettings}
         />
         {user && (
           <UserAccountMenu

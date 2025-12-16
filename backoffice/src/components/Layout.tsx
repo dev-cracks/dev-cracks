@@ -19,6 +19,8 @@ import { useAuth } from '../hooks/useAuth';
 import { tenantService, TenantDto } from '../services/tenantService';
 import { RibbonBar } from './RibbonBar';
 import { RibbonMenu } from './RibbonMenu';
+import { SettingsDialog } from './SettingsDialog';
+import { useSettings } from '../contexts/SettingsContext';
 
 const useStyles = makeStyles({
   container: {
@@ -192,6 +194,7 @@ export const Layout = ({ children }: LayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, userDetails, isAdmin, logout, refreshUser } = useAuth();
+  const { isOpen: isSettingsOpen, closeSettings } = useSettings();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [tenant, setTenant] = useState<TenantDto | null>(null);
   const [isInitializing, setIsInitializing] = useState(false);
@@ -344,6 +347,7 @@ export const Layout = ({ children }: LayoutProps) => {
           <div className={styles.content}>{children}</div>
         </div>
       </div>
+      <SettingsDialog open={isSettingsOpen} onOpenChange={(open: boolean) => (!open && closeSettings())} />
     </div>
   );
 };

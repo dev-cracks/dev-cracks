@@ -16,6 +16,7 @@ import {
   QuestionCircleRegular,
 } from '@fluentui/react-icons';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useSettings } from '../contexts/SettingsContext';
 
 const useStyles = makeStyles({
   ribbonMenu: {
@@ -63,6 +64,7 @@ export const RibbonMenu = ({ onMenuToggle }: RibbonMenuProps) => {
   const styles = useStyles();
   const location = useLocation();
   const navigate = useNavigate();
+  const { openSettings } = useSettings();
 
   const menuItems = [
     {
@@ -73,7 +75,7 @@ export const RibbonMenu = ({ onMenuToggle }: RibbonMenuProps) => {
         { label: 'New', action: () => console.log('New') },
         { label: 'Open', action: () => console.log('Open') },
         { label: 'Save', action: () => console.log('Save') },
-        { label: 'Settings', action: () => navigate('/settings') },
+        { label: 'Settings', action: () => openSettings() },
       ],
     },
     {

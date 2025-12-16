@@ -12,6 +12,7 @@ import {
 } from '@fluentui/react-icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useSettings } from '../contexts/SettingsContext';
 
 interface UserAccountMenuProps {
   trigger: React.ReactNode;
@@ -159,6 +160,7 @@ export const UserAccountMenu = ({ trigger }: UserAccountMenuProps) => {
   const styles = useStyles();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { openSettings } = useSettings();
 
   if (!user) return null;
 
@@ -167,7 +169,7 @@ export const UserAccountMenu = ({ trigger }: UserAccountMenuProps) => {
   };
 
   const handleViewAccount = () => {
-    navigate('/settings');
+    openSettings();
   };
 
   const handleSignInDifferent = () => {

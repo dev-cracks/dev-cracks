@@ -5,35 +5,31 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dirname, '..');
 
-// Directorio de salida para Render
-const renderDistDir = resolve(rootDir, 'dist-render');
+// Directorio de salida para Render (usar dist que es el default)
+const renderDistDir = resolve(rootDir, 'dist');
 
-// Crear directorio de salida si no existe
-if (!existsSync(renderDistDir)) {
-  mkdirSync(renderDistDir, { recursive: true });
-}
-
-// Copiar archivos de la web principal
-const webDistDir = resolve(rootDir, 'dist');
-if (existsSync(webDistDir)) {
-  console.log('📦 Copiando archivos de la web principal...');
-  cpSync(webDistDir, renderDistDir, { recursive: true });
-}
-
-// Copiar archivos del backoffice a /backoffice
+// Copiar archivos del backoffice a /backoffice dentro de dist
 const backofficeDistDir = resolve(rootDir, 'dist-backoffice');
 if (existsSync(backofficeDistDir)) {
-  console.log('📦 Copiando archivos del backoffice...');
+  console.log('📦 Copiando archivos del backoffice a dist/backoffice...');
   const backofficeTargetDir = resolve(renderDistDir, 'backoffice');
-  mkdirSync(backofficeTargetDir, { recursive: true });
+  if (!existsSync(backofficeTargetDir)) {
+    mkdirSync(backofficeTargetDir, { recursive: true });
+  }
   cpSync(backofficeDistDir, backofficeTargetDir, { recursive: true });
+  console.log('✅ Backoffice copiado correctamente');
+} else {
+  console.warn('⚠️  dist-backoffice no existe. Asegúrate de ejecutar npm run build:backoffice primero.');
 }
 
-// Copiar archivo _redirects
+// Copiar archivo _redirects a dist
 const redirectsFile = resolve(rootDir, '_redirects');
 if (existsSync(redirectsFile)) {
-  console.log('📦 Copiando archivo _redirects...');
+  console.log('📦 Copiando archivo _redirects a dist...');
   cpSync(redirectsFile, resolve(renderDistDir, '_redirects'));
+  console.log('✅ _redirects copiado correctamente');
+} else {
+  console.warn('⚠️  _redirects no existe en la raíz del proyecto.');
 }
 
 console.log('✅ Build preparado para Render en:', renderDistDir);

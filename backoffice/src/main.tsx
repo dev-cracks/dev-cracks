@@ -4,6 +4,8 @@ import { Auth0Provider } from '@auth0/auth0-react';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import App from './App';
 import { auth0Config } from './config/env';
+import { NotificationProvider } from './contexts/NotificationContext';
+import { SettingsProvider } from './contexts/SettingsContext';
 import './styles/global.css';
 
 console.log('Backoffice starting...', { 
@@ -28,7 +30,11 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
       skipRedirectCallback={false}
     >
       <FluentProvider theme={webLightTheme}>
-        <App />
+        <NotificationProvider>
+          <SettingsProvider>
+            <App />
+          </SettingsProvider>
+        </NotificationProvider>
       </FluentProvider>
     </Auth0Provider>
   </React.StrictMode>
