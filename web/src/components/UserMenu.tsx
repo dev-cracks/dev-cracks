@@ -1,13 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { Avatar } from './Avatar';
+import { useAuth } from '../hooks/useAuth.js';
+import { useUserDetails } from '../hooks/useUserDetails.js';
+import { Avatar } from './Avatar.js';
 
 export const UserMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { canAccessBackoffice } = useUserDetails();
 
   // Cerrar el menú al hacer clic fuera
   useEffect(() => {
@@ -29,6 +31,13 @@ export const UserMenu = () => {
   const handleAccountClick = () => {
     setIsOpen(false);
     navigate('/account');
+  };
+
+  const handleBackofficeClick = () => {
+    setIsOpen(false);
+    // Abrir backoffice en nueva ventana/tab
+    const backofficeUrl = import.meta.env.VITE_BACKOFFICE_URL || 'http://localhost:5174';
+    window.open(backofficeUrl, '_blank');
   };
 
   const handleLogout = async () => {
@@ -117,6 +126,27 @@ export const UserMenu = () => {
               </svg>
               <span>Account</span>
             </button>
+
+            {canAccessBackoffice && (
+              <button
+                className="user-menu__item"
+                onClick={handleBackofficeClick}
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 18 18"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M2 2H6V6H2V2ZM8 2H16V6H8V2ZM2 8H6V16H2V8ZM8 8H16V16H8V8Z"
+                    fill="currentColor"
+                  />
+                </svg>
+                <span>Backoffice</span>
+              </button>
+            )}
 
             <button
               className="user-menu__item user-menu__item--logout"

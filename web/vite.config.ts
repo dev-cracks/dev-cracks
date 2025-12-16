@@ -1,19 +1,17 @@
-// Este archivo ya no se usa - cada aplicación tiene su propio vite.config.ts
-// Se mantiene para compatibilidad con scripts antiguos
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import { resolve } from 'path';
 
 export default defineConfig({
-  root: resolve(__dirname, 'web'),
-  publicDir: resolve(__dirname, 'web/public'),
+  root: resolve(__dirname),
+  publicDir: resolve(__dirname, 'public'),
   server: {
     port: 5173,
     host: true,
     strictPort: false,
   },
   build: {
-    outDir: resolve(__dirname, 'dist'),
+    outDir: resolve(__dirname, '../dist'),
     emptyOutDir: true
   },
   plugins: [react()]

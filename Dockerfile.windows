@@ -1,0 +1,18 @@
+# Dockerfile para Windows containers - Frontend
+# Este Dockerfile asume que el frontend ya está construido localmente
+# Para construir: cd dev-cracks && npm run build
+FROM mcr.microsoft.com/windows/servercore:ltsc2022
+
+WORKDIR C:/app
+
+# Copiar los archivos estáticos construidos (debe existir dist/ en el contexto)
+COPY dist C:/app/wwwroot
+
+# Copiar el script PowerShell para servir archivos estáticos
+COPY server.ps1 C:/app/server.ps1
+
+EXPOSE 80
+
+# Ejecutar el servidor HTTP
+CMD ["powershell", "-ExecutionPolicy", "Bypass", "-File", "C:/app/server.ps1"]
+

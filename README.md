@@ -1,68 +1,123 @@
-# Dev Cracks
+# Dev Cracks - Aplicación Multi-Tenant
 
-Sitio oficial de Dev Cracks. La página está construida con React (Vite + TypeScript) y gestiona el formulario de contacto a través del servicio `Fractalize.EmailService`.
+Este proyecto incluye dos aplicaciones React:
+- **Web**: Aplicación principal de Dev Cracks (puerto 5173)
+- **Backoffice**: Panel de administración con Fluent UI (puerto 5174)
 
-## Frontend (React + Vite)
+## Requisitos Previos
 
-1. Instala dependencias:
+- Node.js 18+ 
+- npm o yarn
+- .NET 9.0 (para el backend)
 
-   ```powershell
-   cd web
-   npm install
-   ```
+## Instalación
 
-2. Crea un archivo `.env` en `web/` con la URL base del servicio de correos y los datos del destinatario:
+### Instalar todas las dependencias
 
-   ```env
-   VITE_EMAIL_API_BASE_URL=http://localhost:5020
-   VITE_CONTACT_RECIPIENT=contacto@devcracks.com
-   VITE_CONTACT_RECIPIENT_NAME=Equipo Dev Cracks
-   ```
+```bash
+npm run install:all
+```
 
-   > Ajusta los valores según el entorno. El proyecto recorta las barras finales automáticamente.
+Esto instalará las dependencias en:
+- Raíz del proyecto
+- `web/`
+- `backoffice/`
 
-3. Ejecuta en modo desarrollo:
+### Instalación manual
 
-   ```powershell
-   npm run dev
-   ```
+Si prefieres instalar manualmente:
 
-4. Genera la versión de producción:
+```bash
+npm install
+cd web && npm install && cd ..
+cd backoffice && npm install && cd ..
+```
 
-   ```powershell
-   npm run build
-   ```
+## Desarrollo
 
-   El resultado queda en `dist/`.
+### Ejecutar ambas aplicaciones simultáneamente
 
-## Backend (Fractalize.EmailService)
+```bash
+npm run dev
+```
 
-El repositorio mantiene el servicio minimal API para el envío de correos (ASP.NET Core 9).
+Esto iniciará:
+- **Web** en `http://localhost:5173`
+- **Backoffice** en `http://localhost:5174`
 
-### Ejecutar con Docker
+### Ejecutar aplicaciones individualmente
 
-1. Define las variables mínimas (al menos `BREVO_API_KEY`):
+```bash
+# Solo Web
+npm run dev:web
 
-   ```powershell
-   $Env:BREVO_API_KEY="tu-api-key"
-   $Env:BREVO_SENDER_EMAIL="no-reply@example.com" # Opcional
-   $Env:BREVO_SENDER_NAME="Fractalize"            # Opcional
-   ```
+# Solo Backoffice
+npm run dev:backoffice
+```
 
-2. Construye y levanta el contenedor:
+## Build
 
-   ```powershell
-   docker compose up --build
-   ```
+### Build de ambas aplicaciones
 
-3. La API quedará disponible en `http://localhost:8080`.
+```bash
+npm run build
+```
 
-### Variables de entorno relevantes
+### Build individual
 
-| Variable             | Descripción                                            | Obligatoria | Valor por defecto      |
-| -------------------- | ------------------------------------------------------ | ----------- | ---------------------- |
-| `BREVO_API_KEY`      | API key de Brevo para el envío de correos.             | Sí          | _N/A_                  |
-| `BREVO_SENDER_EMAIL` | Correo del remitente que usará Brevo.                  | No          | `no-reply@example.com` |
-| `BREVO_SENDER_NAME`  | Nombre del remitente que usará Brevo.                  | No          | `Fractalize`           |
+```bash
+# Build Web
+npm run build:web
 
-> La configuración interna del servicio utiliza las variables anteriores mediante `Brevo__*`, siguiendo la convención de ASP.NET Core para enlazar secciones de configuración.
+# Build Backoffice
+npm run build:backoffice
+```
+
+## Configuración
+
+### Variables de Entorno
+
+Crea archivos `.env` en cada aplicación si necesitas configuraciones personalizadas:
+
+#### `web/.env`
+```
+VITE_EMAIL_API_BASE_URL=http://localhost:5020
+VITE_AUTH0_DOMAIN=dev-cracks.eu.auth0.com
+VITE_AUTH0_CLIENT_ID=tu-client-id
+VITE_AUTH0_API_AUDIENCE=fractalize-services-api
+VITE_BACKOFFICE_URL=http://localhost:5174
+```
+
+#### `backoffice/.env`
+```
+VITE_API_BASE_URL=http://localhost:5020
+VITE_AUTH0_DOMAIN=dev-cracks.eu.auth0.com
+VITE_AUTH0_CLIENT_ID=tu-client-id
+VITE_AUTH0_AUDIENCE=fractalize-services-api
+```
+
+## Estructura del Proyecto
+
+```
+dev-cracks/
+├── web/              # Aplicación principal
+│   ├── src/
+│   ├── public/
+│   └── package.json
+├── backoffice/       # Panel de administración
+│   ├── src/
+│   ├── public/
+│   └── package.json
+└── package.json      # Scripts para ejecutar ambas apps
+```
+
+## Backend
+
+El backend está en `../fractalize-services/`. Asegúrate de que esté corriendo en el puerto 5020 antes de usar las aplicaciones.
+
+## Características Multi-Tenant
+
+- Cada usuario puede crear su propio tenant
+- Los usuarios pueden ser Admin o User
+- Solo los Admins pueden acceder al backoffice
+- Si un usuario no tiene tenant, puede inicializarlo desde el backoffice
