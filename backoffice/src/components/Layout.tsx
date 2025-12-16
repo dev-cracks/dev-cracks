@@ -13,7 +13,7 @@ import {
   shorthands,
 } from '@fluentui/react-components';
 import {
-  Home,
+  HomeRegular,
   People,
   Settings,
   PanelLeft,
@@ -200,7 +200,7 @@ export const Layout = ({ children }: LayoutProps) => {
   const navigationItems = [
     {
       name: 'Dashboard',
-      icon: <Home />,
+      icon: <HomeRegular />,
       path: '/dashboard',
     },
     ...(isAdmin
@@ -291,7 +291,6 @@ export const Layout = ({ children }: LayoutProps) => {
           <div style={{ flex: 1 }} />
           {tenant && (
             <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS, marginRight: tokens.spacingHorizontalM }}>
-              <Building />
               <Text weight="semibold">{tenant.name}</Text>
             </div>
           )}
