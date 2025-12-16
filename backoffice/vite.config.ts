@@ -1,19 +1,17 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import react from '@vitejs/plugin-react-swc';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  root: __dirname,
+  root: resolve(__dirname),
   publicDir: resolve(__dirname, 'public'),
   server: {
     port: 5174,
     host: true,
     strictPort: false,
-    // Asegurar que todas las rutas devuelvan index.html para SPA routing
-    middlewareMode: false,
   },
   build: {
     outDir: resolve(__dirname, '../dist-backoffice'),
@@ -25,7 +23,5 @@ export default defineConfig({
       '@': resolve(__dirname, 'src'),
     },
   },
-  // Configuración para asegurar que el HTML se sirva correctamente
-  appType: 'spa',
 });
 
