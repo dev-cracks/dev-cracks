@@ -10,22 +10,16 @@ import {
   MenuList,
   MenuItem,
   Text,
+  shorthands,
 } from '@fluentui/react-components';
 import {
-  Navigation,
-  NavigationList,
-  NavigationItem,
-  NavigationGroup,
-  NavigationGroupHeader,
-} from '@fluentui/react-components';
-import {
-  Home24Regular,
-  People24Regular,
-  Settings24Regular,
-  PanelLeft24Regular,
-  SignOut24Regular,
-  Person24Regular,
-  Building24Regular,
+  Home,
+  People,
+  Settings,
+  PanelLeft,
+  SignOut,
+  Person,
+  Building,
 } from '@fluentui/react-icons';
 import { useState, ReactNode, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -119,6 +113,39 @@ const useStyles = makeStyles({
       display: 'none',
     },
   },
+  navList: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap(tokens.spacingVerticalXS),
+    padding: tokens.spacingVerticalM,
+    flex: 1,
+    overflowY: 'auto',
+  },
+  navGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap(tokens.spacingVerticalXS),
+    marginBottom: tokens.spacingVerticalL,
+  },
+  navGroupHeader: {
+    fontSize: tokens.fontSizeBase300,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground3,
+    padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalM}`,
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+  },
+  navItem: {
+    width: '100%',
+    justifyContent: 'flex-start',
+    paddingLeft: tokens.spacingHorizontalM,
+    paddingRight: tokens.spacingHorizontalM,
+    minHeight: '40px',
+  },
+  navItemSelected: {
+    backgroundColor: tokens.colorNeutralBackground2,
+    borderLeft: `3px solid ${tokens.colorBrandForeground1}`,
+  },
 });
 
 interface LayoutProps {
@@ -173,21 +200,21 @@ export const Layout = ({ children }: LayoutProps) => {
   const navigationItems = [
     {
       name: 'Dashboard',
-      icon: <Home24Regular />,
+      icon: <Home />,
       path: '/dashboard',
     },
     ...(isAdmin
       ? [
           {
             name: 'Usuarios',
-            icon: <People24Regular />,
+            icon: <People />,
             path: '/users',
           },
         ]
       : []),
     {
       name: 'Configuración',
-      icon: <Settings24Regular />,
+      icon: <Settings />,
       path: '/settings',
     },
   ];
@@ -218,32 +245,35 @@ export const Layout = ({ children }: LayoutProps) => {
           )}
           <Button
             appearance="subtle"
-            icon={<PanelLeft24Regular />}
+            icon={<PanelLeft />}
             onClick={toggleSidebar}
           />
         </div>
 
-        <Navigation>
-          <NavigationList>
-            <NavigationGroup>
-              <NavigationGroupHeader>Menú Principal</NavigationGroupHeader>
-              {navigationItems.map((item) => (
-                <NavigationItem
-                  key={item.path}
-                  icon={item.icon}
-                  onClick={() => {
-                    navigate(item.path);
-                    setIsSidebarCollapsed(true);
-                  }}
-                  value={item.path}
-                  selected={location.pathname === item.path}
-                >
-                  {!isSidebarCollapsed && item.name}
-                </NavigationItem>
-              ))}
-            </NavigationGroup>
-          </NavigationList>
-        </Navigation>
+        <nav className={styles.navList}>
+          <div className={styles.navGroup}>
+            {!isSidebarCollapsed && (
+              <div className={styles.navGroupHeader}>Menú Principal</div>
+            )}
+            {navigationItems.map((item) => (
+              <Button
+                key={item.path}
+                appearance={location.pathname === item.path ? 'subtle' : 'subtle'}
+                icon={item.icon}
+                onClick={() => {
+                  navigate(item.path);
+                  setIsSidebarCollapsed(true);
+                }}
+                className={`${styles.navItem} ${
+                  location.pathname === item.path ? styles.navItemSelected : ''
+                }`}
+                title={isSidebarCollapsed ? item.name : undefined}
+              >
+                {!isSidebarCollapsed && item.name}
+              </Button>
+            ))}
+          </div>
+        </nav>
       </div>
 
       {/* Contenido principal */}
@@ -255,13 +285,13 @@ export const Layout = ({ children }: LayoutProps) => {
         <div className={styles.topBar}>
           <Button
             appearance="subtle"
-            icon={<PanelLeft24Regular />}
+            icon={<PanelLeft />}
             onClick={toggleSidebar}
           />
           <div style={{ flex: 1 }} />
           {tenant && (
             <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS, marginRight: tokens.spacingHorizontalM }}>
-              <Building24Regular />
+              <Building />
               <Text weight="semibold">{tenant.name}</Text>
             </div>
           )}
@@ -284,13 +314,13 @@ export const Layout = ({ children }: LayoutProps) => {
               <MenuPopover>
                 <MenuList>
                   <MenuItem
-                    icon={<Person24Regular />}
+                    icon={<Person />}
                     onClick={() => navigate('/settings')}
                   >
                     Mi Perfil
                   </MenuItem>
                   <MenuItem
-                    icon={<SignOut24Regular />}
+                    icon={<SignOut />}
                     onClick={() => logout()}
                   >
                     Cerrar Sesión

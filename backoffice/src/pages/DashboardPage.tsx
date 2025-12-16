@@ -8,7 +8,7 @@ import {
   tokens,
   Spinner,
 } from '@fluentui/react-components';
-import { Dashboard24Regular } from '@fluentui/react-icons';
+import { Home, GridDots } from '@fluentui/react-icons';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { backofficeService } from '../services/backofficeService';
@@ -65,7 +65,7 @@ export const DashboardPage = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <Dashboard24Regular fontSize={32} />
+        <Home fontSize={32} />
         <h1 className={styles.title}>Dashboard</h1>
       </div>
 

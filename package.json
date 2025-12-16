@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently -n \"WEB,BACKOFFICE\" -c \"blue,green\" \"npm:dev:web\" \"npm:dev:backoffice\"",
-    "dev:web": "cd web && npm run dev",
-    "dev:backoffice": "cd backoffice && npm run dev",
+    "dev:web": "npm --prefix web run dev",
+    "dev:backoffice": "npm --prefix backoffice run dev",
     "build": "npm run build:web && npm run build:backoffice",
-    "build:web": "cd web && npm run build",
-    "build:backoffice": "cd backoffice && npm run build",
-    "install:all": "npm install && cd web && npm install && cd ../backoffice && npm install"
+    "build:web": "npm --prefix web run build",
+    "build:backoffice": "npm --prefix backoffice run build",
+    "install:all": "npm install && npm --prefix web install && npm --prefix backoffice install"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

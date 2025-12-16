@@ -28,12 +28,12 @@ import {
   Badge,
 } from '@fluentui/react-components';
 import {
-  People24Regular,
-  Search24Regular,
-  Add24Regular,
-  Delete24Regular,
-  Edit24Regular,
-  Dismiss24Regular,
+  People,
+  Search,
+  Add,
+  Delete,
+  Edit,
+  Dismiss,
 } from '@fluentui/react-icons';
 import { backofficeService, CreateUserRequest } from '../services/backofficeService';
 import { UserDto } from '../services/authService';
@@ -179,10 +179,10 @@ export const UsersPage = () => {
 
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <People24Regular fontSize={32} />
+          <People fontSize={32} />
           <h1 className={styles.title}>Usuarios del Tenant</h1>
         </div>
-        <Button appearance="primary" icon={<Add24Regular />} onClick={() => setIsDialogOpen(true)}>
+        <Button appearance="primary" icon={<Add />} onClick={() => setIsDialogOpen(true)}>
           Nuevo Usuario
         </Button>
       </div>
@@ -194,7 +194,7 @@ export const UsersPage = () => {
             placeholder="Buscar usuarios..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            contentBefore={<Search24Regular />}
+            contentBefore={<Search />}
             style={{ flex: 1 }}
           />
         </div>
@@ -242,7 +242,7 @@ export const UsersPage = () => {
                         <Button
                           appearance="subtle"
                           size="small"
-                          icon={<Edit24Regular />}
+                          icon={<Edit />}
                           onClick={() => {
                             const newRole = user.role === 'Admin' ? 'User' : 'Admin';
                             handleUpdateRole(user.id, newRole);
@@ -254,7 +254,7 @@ export const UsersPage = () => {
                           <Button
                             appearance="subtle"
                             size="small"
-                            icon={<Delete24Regular />}
+                            icon={<Delete />}
                             onClick={() => {
                               setSelectedUser(user);
                               setIsDeleteDialogOpen(true);
