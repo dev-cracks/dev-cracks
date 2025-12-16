@@ -4,17 +4,17 @@ import { useAuth } from '../hooks/useAuth';
 
 interface ChangeHistoryProps {
   userId: string;
+  refreshTrigger?: number; // Trigger to refresh the history
 }
 
 const MAX_RETRY_ATTEMPTS = 5;
 
-export const ChangeHistory = ({ userId }: ChangeHistoryProps) => {
+export const ChangeHistory = ({ userId, refreshTrigger }: ChangeHistoryProps) => {
   const { getAccessToken } = useAuth();
   const [history, setHistory] = useState<ChangeHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const failedAttemptsRef = useRef(0);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -22,10 +22,6 @@ export const ChangeHistory = ({ userId }: ChangeHistoryProps) => {
     const loadHistory = async () => {
       // Si ya alcanzamos el límite de intentos, no intentar más
       if (failedAttemptsRef.current >= MAX_RETRY_ATTEMPTS) {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
-        }
         return;
       }
 
@@ -49,11 +45,6 @@ export const ChangeHistory = ({ userId }: ChangeHistoryProps) => {
           failedAttemptsRef.current += 1;
           
           if (failedAttemptsRef.current >= MAX_RETRY_ATTEMPTS) {
-            // Detener el intervalo si alcanzamos el límite
-            if (intervalRef.current) {
-              clearInterval(intervalRef.current);
-              intervalRef.current = null;
-            }
             setError('No se pudo cargar el historial de cambios después de varios intentos. Por favor, recarga la página.');
           } else {
             setHistory([]);
@@ -68,22 +59,10 @@ export const ChangeHistory = ({ userId }: ChangeHistoryProps) => {
 
     loadHistory();
     
-    // Recargar historial periódicamente para detectar cambios
-    // Solo crear el intervalo si no hemos alcanzado el límite
-    if (failedAttemptsRef.current < MAX_RETRY_ATTEMPTS) {
-      intervalRef.current = setInterval(() => {
-        loadHistory();
-      }, 5000);
-    }
-    
     return () => {
       isMounted = false;
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
     };
-  }, [userId, getAccessToken]);
+  }, [userId, getAccessToken, refreshTrigger]);
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { useAuth } from '../hooks/useAuth';
@@ -9,6 +9,7 @@ import { ChangeHistory } from '../components/ChangeHistory';
 export const AccountPage = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading } = useAuth();
+  const [historyRefreshTrigger, setHistoryRefreshTrigger] = useState(0);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -100,7 +101,8 @@ export const AccountPage = () => {
                   userId={user.id}
                   initialEmail={user.email}
                   onUpdate={() => {
-                    // Los datos se actualizan automáticamente desde la API
+                    // Refrescar el historial de cambios cuando se actualizan los datos
+                    setHistoryRefreshTrigger(prev => prev + 1);
                   }}
                 />
               </div>
@@ -152,7 +154,7 @@ export const AccountPage = () => {
 
               <div className="account-page__card">
                 <h3 className="account-page__card-title">Historial de Cambios</h3>
-                <ChangeHistory userId={user.id} />
+                <ChangeHistory userId={user.id} refreshTrigger={historyRefreshTrigger} />
               </div>
             </div>
           </div>
