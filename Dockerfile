@@ -1,7 +1,7 @@
 # Etapa de construcción
-FROM --platform=linux/amd64 node:20-slim AS build
+FROM node:20-windowsservercore-ltsc2022 AS build
 
-WORKDIR /app
+WORKDIR C:/app
 
 # Argumentos de build para variables de entorno de Vite
 ARG VITE_EMAIL_API_BASE_URL=http://localhost:5020
@@ -25,16 +25,19 @@ COPY . .
 # Construir la aplicación (el script build está en package.json de la raíz)
 RUN npm run build
 
-# Etapa de producción con nginx
-FROM --platform=linux/amd64 nginx:latest
+# Etapa de producción con Node.js para servir archivos estáticos
+FROM node:20-windowsservercore-ltsc2022 AS final
+
+WORKDIR C:/app
+
+# Instalar serve globalmente para servir archivos estáticos
+RUN npm install -g serve
 
 # Copiar los archivos construidos
-COPY --from=build /app/dist /usr/share/nginx/html
-
-# Copiar configuración de nginx
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build C:/app/dist C:/app/dist
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+# Servir los archivos estáticos en el puerto 80
+CMD ["serve", "-s", "dist", "-l", "80"]
 
