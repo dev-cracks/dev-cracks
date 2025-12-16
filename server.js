@@ -27,16 +27,39 @@ async function createServer() {
 
   // Middleware para el backoffice - debe ir antes del middleware de la web
   app.use('/backoffice', async (req, res, next) => {
-    // Si es un archivo estático o módulo (src/, node_modules/, .tsx, .ts, .jsx, .js, etc.)
-    if (req.url.match(/^\/(src|node_modules|@vite|@id|@fs)/) || 
-        req.url.match(/\.(tsx?|jsx?|css|json|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot)$/)) {
-      return backofficeVite.middlewares(req, res, next);
+    // Guardar la URL original
+    const originalUrl = req.originalUrl;
+    // Remover /backoffice del path para el servidor Vite del backoffice
+    const viteUrl = originalUrl.replace(/^\/backoffice/, '') || '/';
+    
+    // Si es un archivo estático, módulo o asset, modificar la request y pasar al middleware de Vite
+    if (viteUrl.match(/^\/(src|node_modules|@vite|@id|@fs|@react-refresh)/) || 
+        viteUrl.match(/\.(tsx?|jsx?|css|json|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot|map)$/)) {
+      // Modificar temporalmente la URL de la request
+      const originalUrlProp = req.url;
+      const originalOriginalUrl = req.originalUrl;
+      req.url = viteUrl;
+      req.originalUrl = viteUrl;
+      
+      // Restaurar después de que el middleware procese
+      const restoreUrl = () => {
+        req.url = originalUrlProp;
+        req.originalUrl = originalOriginalUrl;
+      };
+      
+      res.on('finish', restoreUrl);
+      res.on('close', restoreUrl);
+      
+      return backofficeVite.middlewares(req, res, (err) => {
+        restoreUrl();
+        if (err) next(err);
+      });
     }
     
     // Para todas las demás rutas del backoffice, servir el index.html transformado
     try {
       const template = readFileSync(resolve(__dirname, 'backoffice/index.html'), 'utf-8');
-      const html = await backofficeVite.transformIndexHtml(req.originalUrl, template);
+      const html = await backofficeVite.transformIndexHtml(viteUrl, template);
       res.setHeader('Content-Type', 'text/html');
       return res.send(html);
     } catch (e) {
