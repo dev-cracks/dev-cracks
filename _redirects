@@ -1,0 +1,7 @@
+# Redirects para Render
+# Manejar rutas SPA del backoffice
+/backoffice/* /backoffice/index.html 200
+
+# Manejar rutas SPA de la web principal
+/* /index.html 200
+
