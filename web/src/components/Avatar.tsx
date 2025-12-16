@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { getUserImageUrl } from '../services/imageCache';
+import { useState, useEffect, useRef } from 'react';
+import { getCachedUserImage, cacheUserImage } from '../services/imageCache';
 
 interface AvatarProps {
   picture?: string | null;
@@ -26,6 +26,7 @@ export const Avatar = ({ picture, name, email, userId, size = 'medium', classNam
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const currentPictureRef = useRef<string | null>(null);
 
   const displayName = name || email;
   const initial = displayName[0]?.toUpperCase() || '?';
@@ -34,6 +35,10 @@ export const Avatar = ({ picture, name, email, userId, size = 'medium', classNam
 
   // Obtener la imagen cacheada o la original
   useEffect(() => {
+    // Resetear estados cuando cambian las props
+    setImageError(false);
+    setIsLoading(true);
+    
     if (userId && picture) {
       // Intentar obtener del caché primero
       const cachedUrl = getCachedUserImage(userId);
@@ -41,23 +46,33 @@ export const Avatar = ({ picture, name, email, userId, size = 'medium', classNam
       if (cachedUrl) {
         // Si hay caché, usarlo
         setImageUrl(cachedUrl);
+        currentPictureRef.current = picture;
       } else {
         // Si no hay caché, mostrar la imagen original inmediatamente
-        // El caché se hará en segundo plano
         setImageUrl(picture);
+        currentPictureRef.current = picture;
+        
+        // Intentar cachear en segundo plano (sin bloquear la UI)
+        cacheUserImage(userId, picture)
+          .then((cachedImage) => {
+            // Si se cacheó exitosamente y la imagen actual sigue siendo la original, actualizar
+            if (cachedImage && currentPictureRef.current === picture) {
+              setImageUrl(cachedImage);
+            }
+          })
+          .catch(() => {
+            // Silenciar errores de caché, la imagen original ya se está mostrando
+          });
       }
-      
-      // Resetear el estado de error cuando cambia la URL
-      setImageError(false);
-      setIsLoading(true);
     } else if (picture) {
+      // Si hay imagen pero no userId, mostrar directamente
       setImageUrl(picture);
-      setImageError(false);
-      setIsLoading(true);
+      currentPictureRef.current = picture;
     } else {
+      // No hay imagen
       setImageUrl(null);
-      setImageError(false);
       setIsLoading(false);
+      currentPictureRef.current = null;
     }
   }, [userId, picture]);
 
@@ -106,7 +121,7 @@ export const Avatar = ({ picture, name, email, userId, size = 'medium', classNam
         onLoad={handleImageLoad}
         style={{ display: isLoading ? 'none' : 'block' }}
         loading="lazy"
-        crossOrigin={imageUrl?.startsWith('data:') ? undefined : 'anonymous'}
+        crossOrigin={imageUrl?.startsWith('data:') ? undefined : imageUrl?.includes('googleusercontent.com') ? undefined : 'anonymous'}
       />
     </div>
   );
