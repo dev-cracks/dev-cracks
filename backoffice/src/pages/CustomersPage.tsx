@@ -38,6 +38,12 @@ import {
   Tab,
 } from '@fluentui/react-components';
 import {
+  Drawer,
+  DrawerBody,
+  DrawerHeader,
+  DrawerHeaderTitle,
+} from '@fluentui/react-drawer';
+import {
   ReactFlow,
   Node,
   Edge,
@@ -376,6 +382,7 @@ export const CustomersPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerDto | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
@@ -866,8 +873,10 @@ export const CustomersPage = () => {
 
     try {
       setError(null);
+      setIsCreating(true);
       await customerService.createCustomer(formData);
       setIsCreateDialogOpen(false);
+      setIsCreating(false);
       setFormData({
         name: '',
         identification: '',
@@ -880,6 +889,42 @@ export const CustomersPage = () => {
       await loadCustomers();
     } catch (err: any) {
       setError(err.message || 'Error al crear cliente');
+      setIsCreating(false);
+    }
+  };
+
+  const handleDrawerOpenChange = (event: any, data: { open: boolean }) => {
+    // Prevenir el cierre si está creando o si hay datos sin guardar
+    if (isCreating) {
+      return;
+    }
+    
+    // Verificar si hay datos en el formulario
+    const hasData = formData.name.trim() || 
+                    formData.identification.trim() || 
+                    formData.countryId || 
+                    formData.stateProvince.trim() || 
+                    formData.city.trim() || 
+                    formData.phone.trim() || 
+                    formData.email.trim();
+    
+    if (hasData && data.open === false) {
+      // Si hay datos y se intenta cerrar, mostrar confirmación
+      if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
+        setIsCreateDialogOpen(false);
+        setFormData({
+          name: '',
+          identification: '',
+          countryId: '',
+          stateProvince: '',
+          city: '',
+          phone: '',
+          email: '',
+        });
+        setError(null);
+      }
+    } else {
+      setIsCreateDialogOpen(data.open);
     }
   };
 
@@ -1486,85 +1531,119 @@ export const CustomersPage = () => {
         </CardPreview>
       </Card>
 
-      {/* Dialog de creación */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={(_, data) => setIsCreateDialogOpen(data.open)}>
-        <DialogSurface>
-          <DialogTitle>Crear Cliente</DialogTitle>
-          <DialogBody>
-            <DialogContent>
-              <div className={styles.detailsContent}>
-                <Field label="Nombre" required className={styles.formField}>
-                  <Input
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  />
-                </Field>
-                <Field label="Identificación" required className={styles.formField}>
-                  <Input
-                    value={formData.identification}
-                    onChange={(e) => setFormData({ ...formData, identification: e.target.value })}
-                  />
-                </Field>
-                <Field label="País" required className={styles.formField}>
-                  <Combobox
-                    value={countries.find((c) => c.id === formData.countryId)?.name || ''}
-                    onOptionSelect={(_, data) => {
-                      const country = countries.find((c) => c.name === data.optionValue);
-                      if (country) {
-                        setFormData({ ...formData, countryId: country.id });
-                      }
-                    }}
-                  >
-                    {countries.map((country) => (
-                      <Option key={country.id} value={country.name}>
-                        {country.name} ({country.isoCode})
-                      </Option>
-                    ))}
-                  </Combobox>
-                </Field>
-                <Field label="Estado/Provincia" className={styles.formField}>
-                  <Input
-                    value={formData.stateProvince}
-                    onChange={(e) => setFormData({ ...formData, stateProvince: e.target.value })}
-                  />
-                </Field>
-                <Field label="Ciudad" className={styles.formField}>
-                  <Input
-                    value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  />
-                </Field>
-                <Field label="Teléfono" className={styles.formField}>
-                  <Input
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  />
-                </Field>
-                <Field label="Correo electrónico" className={styles.formField}>
-                  <Input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </Field>
-                <MessageBar intent="info">
-                  <MessageBarBody>
-                    Se creará automáticamente un tenant para este cliente.
-                  </MessageBarBody>
-                </MessageBar>
-              </div>
-            </DialogContent>
-          </DialogBody>
-          <DialogActions>
-            <Button appearance="secondary" onClick={() => setIsCreateDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button appearance="primary" onClick={handleCreate}>
-              Crear
-            </Button>
-          </DialogActions>
-        </DialogSurface>
-      </Dialog>
+      {/* Drawer de creación */}
+      <Drawer
+        type="overlay"
+        position="end"
+        size="large"
+        open={isCreateDialogOpen}
+        onOpenChange={handleDrawerOpenChange}
+      >
+        <DrawerHeader>
+          <DrawerHeaderTitle>Crear Cliente</DrawerHeaderTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
+            <Field label="Nombre" required className={styles.formField}>
+              <Input
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </Field>
+            <Field label="Identificación" required className={styles.formField}>
+              <Input
+                value={formData.identification}
+                onChange={(e) => setFormData({ ...formData, identification: e.target.value })}
+              />
+            </Field>
+            <Field label="País" required className={styles.formField}>
+              <Combobox
+                value={countries.find((c) => c.id === formData.countryId)?.name || ''}
+                onOptionSelect={(_, data) => {
+                  const country = countries.find((c) => c.name === data.optionValue);
+                  if (country) {
+                    setFormData({ ...formData, countryId: country.id });
+                  }
+                }}
+              >
+                {countries.map((country) => (
+                  <Option key={country.id} value={country.name}>
+                    {country.name} ({country.isoCode})
+                  </Option>
+                ))}
+              </Combobox>
+            </Field>
+            <Field label="Estado/Provincia" className={styles.formField}>
+              <Input
+                value={formData.stateProvince}
+                onChange={(e) => setFormData({ ...formData, stateProvince: e.target.value })}
+              />
+            </Field>
+            <Field label="Ciudad" className={styles.formField}>
+              <Input
+                value={formData.city}
+                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+              />
+            </Field>
+            <Field label="Teléfono" className={styles.formField}>
+              <Input
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              />
+            </Field>
+            <Field label="Correo electrónico" className={styles.formField}>
+              <Input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+            </Field>
+            <MessageBar intent="info" style={{ marginTop: tokens.spacingVerticalM }}>
+              <MessageBarBody>
+                Se creará automáticamente un tenant para este cliente.
+              </MessageBarBody>
+            </MessageBar>
+            <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
+              <Button 
+                appearance="secondary" 
+                onClick={() => {
+                  const hasData = formData.name.trim() || 
+                                  formData.identification.trim() || 
+                                  formData.countryId || 
+                                  formData.stateProvince.trim() || 
+                                  formData.city.trim() || 
+                                  formData.phone.trim() || 
+                                  formData.email.trim();
+                  
+                  if (hasData) {
+                    if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los datos no guardados.')) {
+                      setIsCreateDialogOpen(false);
+                      setFormData({
+                        name: '',
+                        identification: '',
+                        countryId: '',
+                        stateProvince: '',
+                        city: '',
+                        phone: '',
+                        email: '',
+                      });
+                      setError(null);
+                    }
+                  } else {
+                    setIsCreateDialogOpen(false);
+                  }
+                }}
+                disabled={isCreating}
+              >
+                Cancelar
+              </Button>
+              <Button appearance="primary" onClick={handleCreate} disabled={isCreating}>
+                {isCreating ? 'Creando...' : 'Crear'}
+              </Button>
+            </div>
+          </div>
+        </DrawerBody>
+      </Drawer>
 
       {/* Dialog de edición */}
       <Dialog open={isEditDialogOpen} onOpenChange={(_, data) => setIsEditDialogOpen(data.open)}>
