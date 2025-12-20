@@ -7,14 +7,29 @@ export interface ApiError {
 
 export class ApiService {
   private baseUrl: string;
+  private retryAttempts: Map<string, number> = new Map();
+  private readonly MAX_RETRIES = 2; // Máximo 2 intentos (primero + 1 reintento)
 
   constructor(baseUrl: string = apiBaseUrl) {
     this.baseUrl = baseUrl;
   }
 
+  private getRetryKey(endpoint: string, options: RequestInit): string {
+    return `${options.method || 'GET'}:${endpoint}`;
+  }
+
+  private shouldRetry(statusCode?: number, attempt: number): boolean {
+    if (attempt >= this.MAX_RETRIES) {
+      return false;
+    }
+    // Solo reintentar en errores de red o timeouts (sin statusCode) o errores 5xx
+    return statusCode === undefined || (statusCode >= 500 && statusCode < 600);
+  }
+
   async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    retryCount: number = 0
   ): Promise<T> {
     // Logging para depuración - mostrar stack trace para identificar origen
     const stackTrace = new Error().stack;
@@ -101,9 +116,37 @@ export class ApiService {
       }
 
       return response.json();
-    } catch (error: any) {
-      // Si es un error de ApiError, re-lanzarlo
+      } catch (error: any) {
+      // Si es un error de ApiError, verificar si debemos reintentar
       if (error.statusCode !== undefined || error.message) {
+        const apiError = error as ApiError;
+        
+        // Verificar si debemos reintentar
+        if (this.shouldRetry(apiError.statusCode, retryCount)) {
+          const retryKey = this.getRetryKey(endpoint, options);
+          const currentAttempts = this.retryAttempts.get(retryKey) || 0;
+          
+          if (currentAttempts < this.MAX_RETRIES) {
+            this.retryAttempts.set(retryKey, currentAttempts + 1);
+            console.log(`[apiService] Reintentando ${endpoint} (intento ${currentAttempts + 1}/${this.MAX_RETRIES})`);
+            
+            // Esperar un poco antes de reintentar (backoff exponencial)
+            await new Promise(resolve => setTimeout(resolve, Math.min(1000 * Math.pow(2, currentAttempts), 5000)));
+            
+            // Limpiar el contador después de un tiempo para evitar acumulación
+            setTimeout(() => {
+              this.retryAttempts.delete(retryKey);
+            }, 60000); // Limpiar después de 1 minuto
+            
+            // Reintentar
+            return this.request<T>(endpoint, options, retryCount + 1);
+          }
+        }
+        
+        // Limpiar el contador de intentos
+        const retryKey = this.getRetryKey(endpoint, options);
+        this.retryAttempts.delete(retryKey);
+        
         throw error;
       }
       
@@ -112,6 +155,33 @@ export class ApiService {
         message: error.message || 'Unknown error occurred',
         statusCode: undefined,
       };
+      
+      // Verificar si debemos reintentar errores desconocidos (probablemente de red)
+      if (this.shouldRetry(undefined, retryCount)) {
+        const retryKey = this.getRetryKey(endpoint, options);
+        const currentAttempts = this.retryAttempts.get(retryKey) || 0;
+        
+        if (currentAttempts < this.MAX_RETRIES) {
+          this.retryAttempts.set(retryKey, currentAttempts + 1);
+          console.log(`[apiService] Reintentando ${endpoint} (intento ${currentAttempts + 1}/${this.MAX_RETRIES})`);
+          
+          // Esperar un poco antes de reintentar
+          await new Promise(resolve => setTimeout(resolve, Math.min(1000 * Math.pow(2, currentAttempts), 5000)));
+          
+          // Limpiar el contador después de un tiempo
+          setTimeout(() => {
+            this.retryAttempts.delete(retryKey);
+          }, 60000);
+          
+          // Reintentar
+          return this.request<T>(endpoint, options, retryCount + 1);
+        }
+      }
+      
+      // Limpiar el contador de intentos
+      const retryKey = this.getRetryKey(endpoint, options);
+      this.retryAttempts.delete(retryKey);
+      
       throw apiError;
     }
   }

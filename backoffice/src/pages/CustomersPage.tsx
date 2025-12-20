@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   Card,
   CardHeader,
@@ -34,6 +34,23 @@ import {
   Option,
 } from '@fluentui/react-components';
 import {
+  ReactFlow,
+  Node,
+  Edge,
+  Background,
+  Controls,
+  MiniMap,
+  addEdge,
+  Connection,
+  ReactFlowProvider,
+  Panel,
+  NodeChange,
+  EdgeChange,
+  applyNodeChanges,
+  applyEdgeChanges,
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+import {
   BuildingRegular,
   SearchRegular,
   MoreHorizontalRegular,
@@ -48,6 +65,8 @@ import {
   ChevronRightRegular,
   ChevronDownRegular,
   ArrowMoveRegular,
+  StarRegular,
+  HomeRegular,
 } from '@fluentui/react-icons';
 import {
   customerService,
@@ -108,7 +127,7 @@ const useStyles = makeStyles({
   treeRow: {
     display: 'flex',
     alignItems: 'center',
-    padding: tokens.spacingVerticalS,
+    padding: `${tokens.spacingVerticalS} 0`,
     borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
     cursor: 'pointer',
     '&:hover': {
@@ -141,14 +160,88 @@ const useStyles = makeStyles({
     },
   },
   treeContent: {
-    display: 'flex',
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr 120px 80px 80px 100px',
     alignItems: 'center',
     flex: 1,
     ...shorthands.gap(tokens.spacingHorizontalM),
+    width: '100%',
   },
   treeCell: {
-    flex: '1 1 0',
-    minWidth: '100px',
+    display: 'flex',
+    alignItems: 'center',
+    padding: `0 ${tokens.spacingHorizontalS}`,
+  },
+  treeRowContent: {
+    display: 'grid',
+    gridTemplateColumns: '24px 24px 24px minmax(150px, 1fr) minmax(150px, 1fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(150px, 1fr) 120px 80px 80px 100px',
+    alignItems: 'center',
+    width: '100%',
+    ...shorthands.gap(tokens.spacingHorizontalS),
+    padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalM}`,
+  },
+  levelBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: '24px',
+    height: '24px',
+    ...shorthands.padding('0', tokens.spacingHorizontalXS),
+    ...shorthands.borderRadius(tokens.borderRadiusSmall),
+    backgroundColor: tokens.colorNeutralBackground3,
+    color: tokens.colorNeutralForeground2,
+    fontSize: tokens.fontSizeBase200,
+    fontWeight: tokens.fontWeightSemibold,
+  },
+  rootIcon: {
+    color: tokens.colorPaletteGoldForeground1,
+  },
+  flowContainer: {
+    width: '100%',
+    height: '600px',
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    overflow: 'hidden',
+  },
+  flowNode: {
+    padding: tokens.spacingVerticalM,
+    backgroundColor: tokens.colorNeutralBackground1,
+    border: `2px solid ${tokens.colorNeutralStroke1}`,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    minWidth: '200px',
+    boxShadow: tokens.shadow4,
+  },
+  flowNodeHeader: {
+    fontWeight: tokens.fontWeightSemibold,
+    fontSize: tokens.fontSizeBase400,
+    marginBottom: tokens.spacingVerticalXS,
+    color: tokens.colorNeutralForeground1,
+  },
+  flowNodeContent: {
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground2,
+    ...shorthands.margin(0),
+  },
+  flowNodeCustomer: {
+    backgroundColor: tokens.colorBrandBackground2,
+    borderTop: `2px solid ${tokens.colorBrandForeground1}`,
+    borderRight: `2px solid ${tokens.colorBrandForeground1}`,
+    borderBottom: `2px solid ${tokens.colorBrandForeground1}`,
+    borderLeft: `2px solid ${tokens.colorBrandForeground1}`,
+  },
+  flowNodeTenant: {
+    backgroundColor: tokens.colorPaletteBlueBackground2,
+    borderTop: `2px solid ${tokens.colorPaletteBlueForeground1}`,
+    borderRight: `2px solid ${tokens.colorPaletteBlueForeground1}`,
+    borderBottom: `2px solid ${tokens.colorPaletteBlueForeground1}`,
+    borderLeft: `2px solid ${tokens.colorPaletteBlueForeground1}`,
+  },
+  flowNodeUser: {
+    backgroundColor: tokens.colorPaletteGreenBackground2,
+    borderTop: `2px solid ${tokens.colorPaletteGreenForeground1}`,
+    borderRight: `2px solid ${tokens.colorPaletteGreenForeground1}`,
+    borderBottom: `2px solid ${tokens.colorPaletteGreenForeground1}`,
+    borderLeft: `2px solid ${tokens.colorPaletteGreenForeground1}`,
   },
   dragHandle: {
     cursor: 'grab',
@@ -262,6 +355,15 @@ export const CustomersPage = () => {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [draggedCustomerId, setDraggedCustomerId] = useState<string | null>(null);
   const [dragOverCustomerId, setDragOverCustomerId] = useState<string | null>(null);
+  
+  // Estado para la vista de React Flow
+  const [selectedView, setSelectedView] = useState<'table' | 'flow'>('table');
+  const [flowNodes, setFlowNodes] = useState<Node[]>([]);
+  const [flowEdges, setFlowEdges] = useState<Edge[]>([]);
+  const [flowLoading, setFlowLoading] = useState(false);
+  const flowLoadingRef = useRef(false);
+  const [customerTenantsMap, setCustomerTenantsMap] = useState<Map<string, TenantDto[]>>(new Map());
+  const [tenantUsersMap, setTenantUsersMap] = useState<Map<string, UserDto[]>>(new Map());
 
   // Organizar clientes en estructura jerárquica
   interface CustomerNode extends CustomerDto {
@@ -398,39 +500,49 @@ export const CustomersPage = () => {
     const isExpanded = expandedNodes.has(node.id);
     const isDragging = draggedCustomerId === node.id;
     const isDragOver = dragOverCustomerId === node.id;
+    const isRoot = !node.parentId;
 
     return (
       <div key={node.id}>
         <div
           className={`${styles.treeRow} ${isDragging ? styles.treeRowDragging : ''} ${isDragOver ? styles.treeRowDragOver : ''}`}
-          style={{ paddingLeft: `${node.level * 24 + 8}px` }}
           draggable
           onDragStart={(e) => handleDragStart(e, node.id)}
           onDragOver={(e) => handleDragOver(e, node.id)}
           onDragLeave={handleDragLeave}
           onDrop={(e) => handleDrop(e, node.id)}
+          style={{ paddingLeft: `${node.level * 24}px` }}
         >
-          <div className={styles.treeIndent}>
-            {hasChildren ? (
-              <button
-                className={styles.treeExpandButton}
-                onClick={() => toggleExpand(node.id)}
-                type="button"
-              >
-                {isExpanded ? (
-                  <ChevronDownRegular fontSize={16} />
-                ) : (
-                  <ChevronRightRegular fontSize={16} />
-                )}
-              </button>
-            ) : (
-              <div style={{ width: '24px' }} />
-            )}
-          </div>
-          <div className={styles.dragHandle}>
-            <ArrowMoveRegular fontSize={16} />
-          </div>
-          <div className={styles.treeContent}>
+          <div className={styles.treeRowContent}>
+            <div className={styles.treeIndent}>
+              {hasChildren ? (
+                <button
+                  className={styles.treeExpandButton}
+                  onClick={() => toggleExpand(node.id)}
+                  type="button"
+                >
+                  {isExpanded ? (
+                    <ChevronDownRegular fontSize={16} />
+                  ) : (
+                    <ChevronRightRegular fontSize={16} />
+                  )}
+                </button>
+              ) : (
+                <div style={{ width: '24px' }} />
+              )}
+            </div>
+            <div className={styles.dragHandle}>
+              <ArrowMoveRegular fontSize={16} />
+            </div>
+            <div className={styles.treeCell} style={{ justifyContent: 'center' }}>
+              {isRoot ? (
+                <StarRegular fontSize={16} className={styles.rootIcon} title="Cliente raíz" />
+              ) : (
+                <span className={styles.levelBadge} title={`Nivel ${node.level}`}>
+                  {node.level}
+                </span>
+              )}
+            </div>
             <div className={styles.treeCell}>{node.name}</div>
             <div className={styles.treeCell}>{node.identification}</div>
             <div className={styles.treeCell}>{node.countryName || 'N/A'}</div>
@@ -446,8 +558,8 @@ export const CustomersPage = () => {
                 <Badge appearance="outline">Inactivo</Badge>
               )}
             </div>
-            <div className={styles.treeCell}>{node.tenantCount || 0}</div>
-            <div className={styles.treeCell}>{node.userCount || 0}</div>
+            <div className={styles.treeCell} style={{ justifyContent: 'center' }}>{node.tenantCount || 0}</div>
+            <div className={styles.treeCell} style={{ justifyContent: 'center' }}>{node.userCount || 0}</div>
             <div className={styles.treeCell}>
               <Menu>
                 <MenuTrigger disableButtonEnhancement>
@@ -632,10 +744,190 @@ export const CustomersPage = () => {
       setIsAssignParentDialogOpen(false);
       setSelectedParentId('');
       await loadCustomers();
+      if (selectedView === 'flow') {
+        await loadFlowData();
+      }
     } catch (err: any) {
       setError(err.message || 'Error al asignar cliente padre');
     }
   };
+
+  // Función para cargar datos del flow
+  const loadFlowData = useCallback(async () => {
+    if (filteredCustomers.length === 0) {
+      setFlowNodes([]);
+      setFlowEdges([]);
+      return;
+    }
+
+    // Prevenir múltiples cargas simultáneas
+    if (flowLoadingRef.current) {
+      console.log('[CustomersPage] loadFlowData ya está en ejecución, ignorando llamada duplicada');
+      return;
+    }
+
+    flowLoadingRef.current = true;
+    setFlowLoading(true);
+    try {
+      const newCustomerTenantsMap = new Map<string, TenantDto[]>();
+      const newTenantUsersMap = new Map<string, UserDto[]>();
+      
+      // Cargar tenants para cada cliente
+      for (const customer of filteredCustomers) {
+        try {
+          const tenants = await customerService.getCustomerTenants(customer.id);
+          newCustomerTenantsMap.set(customer.id, tenants);
+          
+          // Cargar usuarios para cada tenant
+          for (const tenant of tenants) {
+            try {
+              const users = await tenantService.getTenantUsers(tenant.id);
+              newTenantUsersMap.set(tenant.id, users);
+            } catch (err) {
+              console.error(`Error cargando usuarios del tenant ${tenant.id}:`, err);
+              newTenantUsersMap.set(tenant.id, []);
+            }
+          }
+        } catch (err) {
+          console.error(`Error cargando tenants del cliente ${customer.id}:`, err);
+          newCustomerTenantsMap.set(customer.id, []);
+        }
+      }
+
+      setCustomerTenantsMap(newCustomerTenantsMap);
+      setTenantUsersMap(newTenantUsersMap);
+
+      // Crear nodos y edges
+      const nodes: Node[] = [];
+      const edges: Edge[] = [];
+      let customerY = 0;
+      const customerSpacing = 300;
+      const tenantSpacing = 150;
+      const userSpacing = 100;
+
+      // Crear nodos de clientes
+      filteredCustomers.forEach((customer, customerIndex) => {
+        const customerX = customerIndex * customerSpacing;
+        const customerNodeId = `customer-${customer.id}`;
+        
+        nodes.push({
+          id: customerNodeId,
+          type: 'default',
+          position: { x: customerX, y: customerY },
+          data: {
+            label: (
+              <div className={`${styles.flowNode} ${styles.flowNodeCustomer}`}>
+                <div className={styles.flowNodeHeader}>{customer.name}</div>
+                <div className={styles.flowNodeContent}>ID: {customer.identification}</div>
+                <div className={styles.flowNodeContent}>País: {customer.countryName || 'N/A'}</div>
+                {customer.email && (
+                  <div className={styles.flowNodeContent}>Email: {customer.email}</div>
+                )}
+              </div>
+            ),
+          },
+        });
+
+        // Crear nodos de tenants para este cliente
+        const tenants = newCustomerTenantsMap.get(customer.id) || [];
+        tenants.forEach((tenant, tenantIndex) => {
+          const tenantX = customerX + (tenantIndex - tenants.length / 2 + 0.5) * tenantSpacing;
+          const tenantY = customerY + 200;
+          const tenantNodeId = `tenant-${tenant.id}`;
+          
+          nodes.push({
+            id: tenantNodeId,
+            type: 'default',
+            position: { x: tenantX, y: tenantY },
+            data: {
+              label: (
+                <div className={`${styles.flowNode} ${styles.flowNodeTenant}`}>
+                  <div className={styles.flowNodeHeader}>{tenant.name}</div>
+                  <div className={styles.flowNodeContent}>
+                    {tenant.isSuspended ? 'Suspendido' : tenant.isActive ? 'Activo' : 'Inactivo'}
+                  </div>
+                </div>
+              ),
+            },
+          });
+
+          // Edge de cliente a tenant
+          edges.push({
+            id: `edge-${customerNodeId}-${tenantNodeId}`,
+            source: customerNodeId,
+            target: tenantNodeId,
+            type: 'smoothstep',
+          });
+
+          // Crear nodos de usuarios para este tenant
+          const users = newTenantUsersMap.get(tenant.id) || [];
+          users.forEach((user, userIndex) => {
+            const userX = tenantX + (userIndex - users.length / 2 + 0.5) * userSpacing;
+            const userY = tenantY + 150;
+            const userNodeId = `user-${user.id}`;
+            
+            nodes.push({
+              id: userNodeId,
+              type: 'default',
+              position: { x: userX, y: userY },
+              data: {
+                label: (
+                  <div className={`${styles.flowNode} ${styles.flowNodeUser}`}>
+                    <div className={styles.flowNodeHeader}>{user.name || user.email}</div>
+                    <div className={styles.flowNodeContent}>{user.email}</div>
+                    <div className={styles.flowNodeContent}>Rol: {user.role}</div>
+                  </div>
+                ),
+              },
+            });
+
+            // Edge de tenant a usuario
+            edges.push({
+              id: `edge-${tenantNodeId}-${userNodeId}`,
+              source: tenantNodeId,
+              target: userNodeId,
+              type: 'smoothstep',
+            });
+          });
+        });
+      });
+
+      setFlowNodes(nodes);
+      setFlowEdges(edges);
+    } catch (err: any) {
+      console.error('Error cargando datos del flow:', err);
+      setError(err.message || 'Error al cargar datos para la vista interactiva');
+    } finally {
+      setFlowLoading(false);
+      flowLoadingRef.current = false;
+    }
+  }, [filteredCustomers, styles]);
+
+  // Cargar datos del flow cuando cambia la vista o los clientes
+  const flowLoadAttemptsRef = useRef(0);
+  useEffect(() => {
+    if (selectedView === 'flow' && filteredCustomers.length > 0) {
+      // Resetear contador cuando cambian las dependencias válidas
+      flowLoadAttemptsRef.current = 0;
+      loadFlowData().catch((err) => {
+        console.error('[CustomersPage] Error en loadFlowData:', err);
+        // No reintentar automáticamente, el usuario puede cambiar de vista
+      });
+    }
+  }, [selectedView, filteredCustomers.length]); // Solo dependencias esenciales, no loadFlowData
+
+  const onNodesChange = useCallback((changes: NodeChange[]) => {
+    setFlowNodes((nds) => applyNodeChanges(changes, nds));
+  }, []);
+
+  const onEdgesChange = useCallback((changes: EdgeChange[]) => {
+    setFlowEdges((eds) => applyEdgeChanges(changes, eds));
+  }, []);
+
+  const onConnect = useCallback(
+    (params: Connection) => setFlowEdges((eds) => addEdge(params, eds)),
+    []
+  );
 
   const handleSave = async () => {
     if (!selectedCustomer) return;
@@ -699,6 +991,23 @@ export const CustomersPage = () => {
           </MessageBar>
         )}
 
+        <div style={{ display: 'flex', gap: tokens.spacingHorizontalS, marginBottom: tokens.spacingVerticalM }}>
+          <Button
+            appearance={selectedView === 'table' ? 'primary' : 'secondary'}
+            onClick={() => setSelectedView('table')}
+          >
+            Vista de Tabla
+          </Button>
+          <Button
+            appearance={selectedView === 'flow' ? 'primary' : 'secondary'}
+            onClick={() => setSelectedView('flow')}
+          >
+            Vista Interactiva
+          </Button>
+        </div>
+
+        {selectedView === 'table' && (
+          <>
         <div className={styles.toolbar}>
           <Input
             placeholder="Buscar por nombre, identificación o país..."
@@ -729,24 +1038,36 @@ export const CustomersPage = () => {
 
         {/* Vista jerárquica con drag and drop */}
         <div className={styles.treeContainer}>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHeaderCell style={{ width: '24px' }}></TableHeaderCell>
-                <TableHeaderCell style={{ width: '24px' }}></TableHeaderCell>
-                <TableHeaderCell>Nombre</TableHeaderCell>
-                <TableHeaderCell>Identificación</TableHeaderCell>
-                <TableHeaderCell>País</TableHeaderCell>
-                <TableHeaderCell>Ciudad</TableHeaderCell>
-                <TableHeaderCell>Teléfono</TableHeaderCell>
-                <TableHeaderCell>Email</TableHeaderCell>
-                <TableHeaderCell>Estado</TableHeaderCell>
-                <TableHeaderCell>Tenants</TableHeaderCell>
-                <TableHeaderCell>Usuarios</TableHeaderCell>
-                <TableHeaderCell className={styles.actionsCell}>Acciones</TableHeaderCell>
-              </TableRow>
-            </TableHeader>
-          </Table>
+          <div style={{ overflowX: 'auto' }}>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHeaderCell style={{ width: '24px', padding: tokens.spacingVerticalXS }}></TableHeaderCell>
+                  <TableHeaderCell style={{ width: '24px', padding: tokens.spacingVerticalXS }}></TableHeaderCell>
+                  <TableHeaderCell style={{ width: '24px', padding: tokens.spacingVerticalXS, textAlign: 'center' }}>Nivel</TableHeaderCell>
+                  <TableHeaderCell style={{ minWidth: '150px' }}>Nombre</TableHeaderCell>
+                  <TableHeaderCell style={{ minWidth: '150px' }}>Identificación</TableHeaderCell>
+                  <TableHeaderCell style={{ minWidth: '120px' }}>País</TableHeaderCell>
+                  <TableHeaderCell style={{ minWidth: '120px' }}>Ciudad</TableHeaderCell>
+                  <TableHeaderCell style={{ minWidth: '120px' }}>Teléfono</TableHeaderCell>
+                  <TableHeaderCell style={{ minWidth: '150px' }}>Email</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '120px', textAlign: 'center' }}>Estado</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '80px', textAlign: 'center' }}>Tenants</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '80px', textAlign: 'center' }}>Usuarios</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '100px', textAlign: 'center' }}>Acciones</TableHeaderCell>
+                </TableRow>
+              </TableHeader>
+            </Table>
+          </div>
+          <div>
+            {customerTree.length === 0 ? (
+              <div style={{ padding: tokens.spacingVerticalXXL, textAlign: 'center' }}>
+                <Text>No se encontraron clientes</Text>
+              </div>
+            ) : (
+              customerTree.map((node) => renderCustomerNode(node))
+            )}
+          </div>
           <div
             onDragOver={(e) => {
               e.preventDefault();
@@ -758,23 +1079,44 @@ export const CustomersPage = () => {
               padding: tokens.spacingVerticalM,
               border: `2px dashed ${tokens.colorNeutralStroke2}`,
               ...shorthands.borderRadius(tokens.borderRadiusMedium),
-              marginBottom: tokens.spacingVerticalM,
+              marginTop: tokens.spacingVerticalM,
               textAlign: 'center',
               color: tokens.colorNeutralForeground3,
             }}
           >
             <Text>Arrastra aquí para convertir en cliente raíz (sin padre)</Text>
           </div>
-          <div>
-            {customerTree.length === 0 ? (
-              <div style={{ padding: tokens.spacingVerticalXXL, textAlign: 'center' }}>
-                <Text>No se encontraron clientes</Text>
+        </div>
+          </>
+        )}
+
+        {selectedView === 'flow' && (
+          <div className={styles.flowContainer}>
+            {flowLoading ? (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                <Spinner size="large" label="Cargando vista interactiva..." />
               </div>
             ) : (
-              customerTree.map((node) => renderCustomerNode(node))
+              <ReactFlowProvider>
+                <ReactFlow
+                  nodes={flowNodes}
+                  edges={flowEdges}
+                  onNodesChange={onNodesChange}
+                  onEdgesChange={onEdgesChange}
+                  onConnect={onConnect}
+                  fitView
+                >
+                  <Background />
+                  <Controls />
+                  <MiniMap />
+                  <Panel position="top-left">
+                    <Text weight="semibold">Vista Interactiva: Clientes → Tenants → Usuarios</Text>
+                  </Panel>
+                </ReactFlow>
+              </ReactFlowProvider>
             )}
           </div>
-        </div>
+        )}
       </Card>
 
       {/* Dialog de creación */}
