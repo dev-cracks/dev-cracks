@@ -138,6 +138,7 @@ const useStyles = makeStyles({
   },
   toolbar: {
     display: 'flex',
+    width: '100%',
     ...shorthands.gap(tokens.spacingHorizontalM),
     marginBottom: tokens.spacingVerticalL,
   },
@@ -1470,47 +1471,32 @@ export const CustomersPage = () => {
                       onDragOver={(e) => handleDragOver(e, customer.id)}
                       onDragLeave={handleDragLeave}
                       onDrop={(e) => handleDrop(e, customer.id)}
-                      style={{
-                        paddingLeft: `${customer.level * 24}px`,
-                        backgroundColor: isRoot 
-                          ? tokens.colorPaletteBlueBackground2 
-                          : customer.level === 1 
-                          ? tokens.colorPaletteTealBackground2 
-                          : customer.level === 2 
-                          ? tokens.colorPaletteGreenBackground2 
-                          : tokens.colorPaletteLavenderBackground2,
-                      }}
                     >
                       <TableCell>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS }}>
-                          {hasChildren ? (
-                            <button
-                              onClick={() => toggleExpand(customer.id)}
-                              type="button"
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                padding: tokens.spacingVerticalXS,
-                                display: 'flex',
-                                alignItems: 'center',
-                              }}
-                            >
-                              {isExpanded ? (
-                                <ChevronDownRegular fontSize={16} />
-                              ) : (
-                                <ChevronRightRegular fontSize={16} />
-                              )}
-                            </button>
-                          ) : (
-                            <div style={{ width: '24px' }} />
-                          )}
-                          <ArrowMoveRegular fontSize={16} style={{ cursor: 'grab' }} />
-                        </div>
+                        {hasChildren ? (
+                          <button
+                            onClick={() => toggleExpand(customer.id)}
+                            type="button"
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              padding: tokens.spacingVerticalXS,
+                              display: 'flex',
+                              alignItems: 'center',
+                            }}
+                          >
+                            {isExpanded ? (
+                              <ChevronDownRegular fontSize={16} />
+                            ) : (
+                              <ChevronRightRegular fontSize={16} />
+                            )}
+                          </button>
+                        ) : null}
                       </TableCell>
                       <TableCell>
                         {isRoot ? (
-                          <StarRegular fontSize={16} style={{ color: tokens.colorPaletteGoldForeground2 }} title="Cliente raíz" />
+                          <StarRegular fontSize={16} title="Cliente raíz" />
                         ) : (
                           <Badge appearance="outline" size="small">
                             {customer.level}
@@ -1536,49 +1522,52 @@ export const CustomersPage = () => {
                       <TableCell style={{ textAlign: 'center' }}>{customer.tenantCount || 0}</TableCell>
                       <TableCell style={{ textAlign: 'center' }}>{customer.userCount || 0}</TableCell>
                       <TableCell>
-                        <Menu>
-                          <MenuTrigger disableButtonEnhancement>
-                            <Button
-                              appearance="subtle"
-                              icon={<MoreHorizontalRegular />}
-                              aria-label="Más acciones"
-                            />
-                          </MenuTrigger>
-                          <MenuPopover>
-                            <MenuList>
-                              <MenuItem icon={<EyeRegular />} onClick={() => handleViewDetails(customer)}>
-                                Ver detalles
-                              </MenuItem>
-                              <MenuItem icon={<EditRegular />} onClick={() => handleEdit(customer)}>
-                                Editar
-                              </MenuItem>
-                              <MenuItem icon={<BuildingRegular />} onClick={() => handleViewTenants(customer)}>
-                                Ver Tenants
-                              </MenuItem>
-                              <MenuItem icon={<PeopleRegular />} onClick={() => handleViewUsers(customer)}>
-                                Ver usuarios
-                              </MenuItem>
-                              <MenuItem icon={<PeopleRegular />} onClick={() => handleNotifyUsers(customer)}>
-                                Enviar notificación
-                              </MenuItem>
-                              <MenuItem icon={<LinkRegular />} onClick={() => handleAssignParent(customer)}>
-                                Asignar a otro cliente
-                              </MenuItem>
-                              {customer.isSuspended ? (
-                                <MenuItem icon={<PlayRegular />} onClick={() => handleActivate(customer)}>
-                                  Activar
+                        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS }}>
+                          <Menu>
+                            <MenuTrigger disableButtonEnhancement>
+                              <Button
+                                appearance="subtle"
+                                icon={<MoreHorizontalRegular />}
+                                aria-label="Más acciones"
+                              />
+                            </MenuTrigger>
+                            <MenuPopover>
+                              <MenuList>
+                                <MenuItem icon={<EyeRegular />} onClick={() => handleViewDetails(customer)}>
+                                  Ver detalles
                                 </MenuItem>
-                              ) : (
-                                <MenuItem icon={<PauseRegular />} onClick={() => handleSuspend(customer)}>
-                                  Suspender
+                                <MenuItem icon={<EditRegular />} onClick={() => handleEdit(customer)}>
+                                  Editar
                                 </MenuItem>
-                              )}
-                              <MenuItem icon={<DeleteRegular />} onClick={() => handleDelete(customer)}>
-                                Eliminar
-                              </MenuItem>
-                            </MenuList>
-                          </MenuPopover>
-                        </Menu>
+                                <MenuItem icon={<BuildingRegular />} onClick={() => handleViewTenants(customer)}>
+                                  Ver Tenants
+                                </MenuItem>
+                                <MenuItem icon={<PeopleRegular />} onClick={() => handleViewUsers(customer)}>
+                                  Ver usuarios
+                                </MenuItem>
+                                <MenuItem icon={<PeopleRegular />} onClick={() => handleNotifyUsers(customer)}>
+                                  Enviar notificación
+                                </MenuItem>
+                                <MenuItem icon={<LinkRegular />} onClick={() => handleAssignParent(customer)}>
+                                  Asignar a otro cliente
+                                </MenuItem>
+                                {customer.isSuspended ? (
+                                  <MenuItem icon={<PlayRegular />} onClick={() => handleActivate(customer)}>
+                                    Activar
+                                  </MenuItem>
+                                ) : (
+                                  <MenuItem icon={<PauseRegular />} onClick={() => handleSuspend(customer)}>
+                                    Suspender
+                                  </MenuItem>
+                                )}
+                                <MenuItem icon={<DeleteRegular />} onClick={() => handleDelete(customer)}>
+                                  Eliminar
+                                </MenuItem>
+                              </MenuList>
+                            </MenuPopover>
+                          </Menu>
+                          <ArrowMoveRegular fontSize={16} style={{ cursor: 'grab' }} />
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
