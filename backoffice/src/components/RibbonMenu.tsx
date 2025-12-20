@@ -10,11 +10,9 @@ import {
   mergeClasses,
 } from '@fluentui/react-components';
 import {
-  HomeRegular,
   DocumentRegular,
   EyeRegular,
   QuestionCircleRegular,
-  BuildingRegular,
 } from '@fluentui/react-icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSettings } from '../contexts/SettingsContext';
@@ -77,18 +75,6 @@ export const RibbonMenu = ({ onMenuToggle }: RibbonMenuProps) => {
         { label: 'Open', action: () => console.log('Open') },
         { label: 'Save', action: () => console.log('Save') },
         { label: 'Settings', action: () => openSettings() },
-      ],
-    },
-    {
-      id: 'home',
-      label: 'Home',
-      icon: <HomeRegular />,
-      path: '/dashboard',
-      items: [
-        { label: 'Dashboard', action: () => navigate('/dashboard') },
-        { label: 'Users', action: () => navigate('/users') },
-        { label: 'Tenants', action: () => navigate('/tenants') },
-        { label: 'Customers', action: () => navigate('/customers') },
       ],
     },
     {
