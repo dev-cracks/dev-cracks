@@ -13,6 +13,7 @@ import {
   SettingsRegular,
   PanelLeftRegular,
   BuildingRegular,
+  LocationRegular,
 } from '@fluentui/react-icons';
 import { useState, ReactNode, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -264,6 +265,11 @@ export const Layout = ({ children }: LayoutProps) => {
       name: 'Clientes',
       icon: <BuildingRegular />,
       path: '/customers',
+    },
+    {
+      name: 'Sedes',
+      icon: <LocationRegular />,
+      path: '/offices',
     },
     {
       name: 'Configuración',

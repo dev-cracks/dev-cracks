@@ -4,6 +4,8 @@ import { UserDto } from './authService';
 export interface TenantDto {
   id: string;
   name: string;
+  officeId?: string;
+  officeName?: string;
   createdAt: string;
   updatedAt: string;
   isActive?: boolean;
@@ -78,6 +80,10 @@ export const tenantService = {
 
   async getTenantUsers(id: string): Promise<UserDto[]> {
     return apiService.request<UserDto[]>(`/tenants/${id}/users`);
+  },
+
+  async getTenantsByOffice(officeId: string): Promise<TenantDto[]> {
+    return apiService.request<TenantDto[]>(`/tenants/office/${officeId}`);
   },
 };
 

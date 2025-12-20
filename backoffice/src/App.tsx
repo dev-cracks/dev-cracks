@@ -4,6 +4,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { UsersPage } from './pages/UsersPage';
 import { TenantsPage } from './pages/TenantsPage';
 import { CustomersPage } from './pages/CustomersPage';
+import { OfficesPage } from './pages/OfficesPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { LoginPage } from './pages/LoginPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -60,6 +61,16 @@ const App = () => {
             <ProtectedRoute>
               <Layout>
                 <CustomersPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/offices"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <OfficesPage />
               </Layout>
             </ProtectedRoute>
           }
