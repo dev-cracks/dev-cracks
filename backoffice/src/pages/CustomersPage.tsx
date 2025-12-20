@@ -584,6 +584,23 @@ export const CustomersPage = () => {
 
   const customerTree = buildCustomerTree(filteredCustomers);
 
+  // Función para aplanar el árbol en una lista plana para la tabla
+  const flattenCustomerTree = useCallback((nodes: CustomerNode[]): CustomerNode[] => {
+    const result: CustomerNode[] = [];
+    const flatten = (nodeList: CustomerNode[]) => {
+      nodeList.forEach((node) => {
+        result.push(node);
+        if (expandedNodes.has(node.id) && node.children.length > 0) {
+          flatten(node.children);
+        }
+      });
+    };
+    flatten(nodes);
+    return result;
+  }, [expandedNodes]);
+
+  const flattenedCustomers = flattenCustomerTree(customerTree);
+
   // Función recursiva para renderizar el árbol
   const toggleExpand = (customerId: string) => {
     setExpandedNodes((prev) => {
@@ -771,9 +788,6 @@ export const CustomersPage = () => {
                     </MenuItem>
                     <MenuItem icon={<EditRegular />} onClick={() => handleEdit(node)}>
                       Editar
-                    </MenuItem>
-                    <MenuItem icon={<HomeRegular />} onClick={() => handleViewOffices(node)}>
-                      Ver Sedes
                     </MenuItem>
                     <MenuItem icon={<BuildingRegular />} onClick={() => handleViewTenants(node)}>
                       Ver Tenants
@@ -973,6 +987,20 @@ export const CustomersPage = () => {
       setError(err.message || 'Error al cargar usuarios');
     } finally {
       setIsLoadingUsers(false);
+    }
+  };
+
+  const handleViewTenants = async (customer: CustomerDto) => {
+    setSelectedCustomer(customer);
+    setIsLoadingTenants(true);
+    setIsTenantsDialogOpen(true);
+    try {
+      const tenants = await customerService.getCustomerTenants(customer.id);
+      setCustomerTenants(tenants);
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar tenants');
+    } finally {
+      setIsLoadingTenants(false);
     }
   };
 
@@ -1384,8 +1412,8 @@ export const CustomersPage = () => {
           />
         </div>
 
-        {/* Vista jerárquica con drag and drop */}
-        <div className={styles.treeContainer} style={{ position: 'relative' }}>
+        {/* Vista de tabla */}
+        <div style={{ position: 'relative' }}>
           {isReordering && (
             <div
               style={{
@@ -1405,35 +1433,159 @@ export const CustomersPage = () => {
               <Spinner size="large" label="Reubicando cliente..." />
             </div>
           )}
-          <div style={{ overflowX: 'auto' }}>
-            <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '0px' }}>
-              <div className={styles.expandColumn} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', minWidth: '32px', maxWidth: '32px' }}></div>
-              <div className={styles.treeHeaderContent}>
-              <div></div>
-              <div>Nivel</div>
-              <div>Nombre</div>
-              <div>Identificación</div>
-              <div>País</div>
-              <div>Ciudad</div>
-              <div>Teléfono</div>
-              <div>Email</div>
-              <div>Estado</div>
-              <div>Sedes</div>
-              <div>Tenants</div>
-              <div>Usuarios</div>
-              <div>Acciones</div>
-              </div>
+          {flattenedCustomers.length === 0 ? (
+            <div style={{ padding: tokens.spacingVerticalXXL, textAlign: 'center' }}>
+              <Text>No se encontraron clientes</Text>
             </div>
-          </div>
-          <div>
-            {customerTree.length === 0 ? (
-              <div style={{ padding: tokens.spacingVerticalXXL, textAlign: 'center' }}>
-                <Text>No se encontraron clientes</Text>
-              </div>
-            ) : (
-              customerTree.map((node) => renderCustomerNode(node))
-            )}
-          </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHeaderCell></TableHeaderCell>
+                  <TableHeaderCell>Nivel</TableHeaderCell>
+                  <TableHeaderCell>Nombre</TableHeaderCell>
+                  <TableHeaderCell>Identificación</TableHeaderCell>
+                  <TableHeaderCell>País</TableHeaderCell>
+                  <TableHeaderCell>Ciudad</TableHeaderCell>
+                  <TableHeaderCell>Teléfono</TableHeaderCell>
+                  <TableHeaderCell>Email</TableHeaderCell>
+                  <TableHeaderCell>Estado</TableHeaderCell>
+                  <TableHeaderCell>Sedes</TableHeaderCell>
+                  <TableHeaderCell>Tenants</TableHeaderCell>
+                  <TableHeaderCell>Usuarios</TableHeaderCell>
+                  <TableHeaderCell>Acciones</TableHeaderCell>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {flattenedCustomers.map((customer) => {
+                  const hasChildren = customer.children.length > 0;
+                  const isExpanded = expandedNodes.has(customer.id);
+                  const isRoot = !customer.parentId;
+                  
+                  return (
+                    <TableRow
+                      key={customer.id}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, customer.id)}
+                      onDragOver={(e) => handleDragOver(e, customer.id)}
+                      onDragLeave={handleDragLeave}
+                      onDrop={(e) => handleDrop(e, customer.id)}
+                      style={{
+                        paddingLeft: `${customer.level * 24}px`,
+                        backgroundColor: isRoot 
+                          ? tokens.colorPaletteBlueBackground2 
+                          : customer.level === 1 
+                          ? tokens.colorPaletteTealBackground2 
+                          : customer.level === 2 
+                          ? tokens.colorPaletteGreenBackground2 
+                          : tokens.colorPaletteLavenderBackground2,
+                      }}
+                    >
+                      <TableCell>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS }}>
+                          {hasChildren ? (
+                            <button
+                              onClick={() => toggleExpand(customer.id)}
+                              type="button"
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: tokens.spacingVerticalXS,
+                                display: 'flex',
+                                alignItems: 'center',
+                              }}
+                            >
+                              {isExpanded ? (
+                                <ChevronDownRegular fontSize={16} />
+                              ) : (
+                                <ChevronRightRegular fontSize={16} />
+                              )}
+                            </button>
+                          ) : (
+                            <div style={{ width: '24px' }} />
+                          )}
+                          <ArrowMoveRegular fontSize={16} style={{ cursor: 'grab' }} />
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {isRoot ? (
+                          <StarRegular fontSize={16} style={{ color: tokens.colorPaletteGoldForeground2 }} title="Cliente raíz" />
+                        ) : (
+                          <Badge appearance="outline" size="small">
+                            {customer.level}
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>{customer.name}</TableCell>
+                      <TableCell>{customer.identification}</TableCell>
+                      <TableCell>{customer.countryName || 'N/A'}</TableCell>
+                      <TableCell>{customer.city || 'N/A'}</TableCell>
+                      <TableCell>{customer.phone || 'N/A'}</TableCell>
+                      <TableCell>{customer.email || 'N/A'}</TableCell>
+                      <TableCell>
+                        {customer.isSuspended ? (
+                          <Badge appearance="filled" color="danger">Suspendido</Badge>
+                        ) : customer.isActive ? (
+                          <Badge appearance="filled" color="success">Activo</Badge>
+                        ) : (
+                          <Badge appearance="outline">Inactivo</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell style={{ textAlign: 'center' }}>{customer.officeCount || 0}</TableCell>
+                      <TableCell style={{ textAlign: 'center' }}>{customer.tenantCount || 0}</TableCell>
+                      <TableCell style={{ textAlign: 'center' }}>{customer.userCount || 0}</TableCell>
+                      <TableCell>
+                        <Menu>
+                          <MenuTrigger disableButtonEnhancement>
+                            <Button
+                              appearance="subtle"
+                              icon={<MoreHorizontalRegular />}
+                              aria-label="Más acciones"
+                            />
+                          </MenuTrigger>
+                          <MenuPopover>
+                            <MenuList>
+                              <MenuItem icon={<EyeRegular />} onClick={() => handleViewDetails(customer)}>
+                                Ver detalles
+                              </MenuItem>
+                              <MenuItem icon={<EditRegular />} onClick={() => handleEdit(customer)}>
+                                Editar
+                              </MenuItem>
+                              <MenuItem icon={<BuildingRegular />} onClick={() => handleViewTenants(customer)}>
+                                Ver Tenants
+                              </MenuItem>
+                              <MenuItem icon={<PeopleRegular />} onClick={() => handleViewUsers(customer)}>
+                                Ver usuarios
+                              </MenuItem>
+                              <MenuItem icon={<PeopleRegular />} onClick={() => handleNotifyUsers(customer)}>
+                                Enviar notificación
+                              </MenuItem>
+                              <MenuItem icon={<LinkRegular />} onClick={() => handleAssignParent(customer)}>
+                                Asignar a otro cliente
+                              </MenuItem>
+                              {customer.isSuspended ? (
+                                <MenuItem icon={<PlayRegular />} onClick={() => handleActivate(customer)}>
+                                  Activar
+                                </MenuItem>
+                              ) : (
+                                <MenuItem icon={<PauseRegular />} onClick={() => handleSuspend(customer)}>
+                                  Suspender
+                                </MenuItem>
+                              )}
+                              <MenuItem icon={<DeleteRegular />} onClick={() => handleDelete(customer)}>
+                                Eliminar
+                              </MenuItem>
+                            </MenuList>
+                          </MenuPopover>
+                        </Menu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
           <div
             onDragOver={(e) => {
               e.preventDefault();
