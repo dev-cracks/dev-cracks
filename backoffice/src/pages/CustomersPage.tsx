@@ -33,6 +33,8 @@ import {
   Combobox,
   Option,
   Textarea,
+  TabList,
+  Tab,
 } from '@fluentui/react-components';
 import {
   ReactFlow,
@@ -477,13 +479,19 @@ export const CustomersPage = () => {
           id: 'view-table',
           label: 'Vista de Tabla',
           icon: <TableRegular />,
-          action: () => setSelectedView('table'),
+          action: () => {
+            setSelectedView('table');
+            setSelectedTabValue('table');
+          },
         },
         {
           id: 'view-flow',
           label: 'Vista Interactiva',
           icon: <FlowchartRegular />,
-          action: () => setSelectedView('flow'),
+          action: () => {
+            setSelectedView('flow');
+            setSelectedTabValue('flow');
+          },
         },
       ],
     });
@@ -507,6 +515,9 @@ export const CustomersPage = () => {
   
   // Estado para la vista de React Flow
   const [selectedView, setSelectedView] = useState<'table' | 'flow'>('table');
+  
+  // Valor del tab seleccionado
+  const [selectedTabValue, setSelectedTabValue] = useState<'table' | 'flow'>('table');
   const [flowNodes, setFlowNodes] = useState<Node[]>([]);
   const [flowEdges, setFlowEdges] = useState<Edge[]>([]);
   const [flowLoading, setFlowLoading] = useState(false);
@@ -1316,20 +1327,22 @@ export const CustomersPage = () => {
           </MessageBar>
         )}
 
-        <div style={{ display: 'flex', gap: tokens.spacingHorizontalS, marginBottom: tokens.spacingVerticalM }}>
-          <Button
-            appearance={selectedView === 'table' ? 'primary' : 'secondary'}
-            onClick={() => setSelectedView('table')}
-          >
+        <TabList
+          selectedValue={selectedTabValue}
+          onTabSelect={(_, data) => {
+            const value = data.value as 'table' | 'flow';
+            setSelectedTabValue(value);
+            setSelectedView(value);
+          }}
+          style={{ marginBottom: tokens.spacingVerticalM }}
+        >
+          <Tab value="table" icon={<TableRegular />}>
             Vista de Tabla
-          </Button>
-          <Button
-            appearance={selectedView === 'flow' ? 'primary' : 'secondary'}
-            onClick={() => setSelectedView('flow')}
-          >
+          </Tab>
+          <Tab value="flow" icon={<FlowchartRegular />}>
             Vista Interactiva
-          </Button>
-        </div>
+          </Tab>
+        </TabList>
 
         {selectedView === 'table' && (
           <>
