@@ -44,6 +44,7 @@ import {
   EyeRegular,
   PeopleRegular,
   AddRegular,
+  LinkRegular,
 } from '@fluentui/react-icons';
 import {
   customerService,
@@ -126,11 +127,13 @@ export const CustomersPage = () => {
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isUsersDialogOpen, setIsUsersDialogOpen] = useState(false);
   const [isAssignTenantDialogOpen, setIsAssignTenantDialogOpen] = useState(false);
+  const [isAssignParentDialogOpen, setIsAssignParentDialogOpen] = useState(false);
   const [customerUsers, setCustomerUsers] = useState<UserDto[]>([]);
   const [customerTenants, setCustomerTenants] = useState<TenantDto[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [isLoadingTenants, setIsLoadingTenants] = useState(false);
   const [tenantName, setTenantName] = useState('');
+  const [selectedParentId, setSelectedParentId] = useState<string>('');
 
   // Form state
   const [formData, setFormData] = useState<CreateCustomerRequest>({
@@ -305,6 +308,29 @@ export const CustomersPage = () => {
     }
   };
 
+  const handleAssignParent = (customer: CustomerDto) => {
+    setSelectedCustomer(customer);
+    setSelectedParentId(customer.parentId || '');
+    setIsAssignParentDialogOpen(true);
+  };
+
+  const handleConfirmAssignParent = async () => {
+    if (!selectedCustomer) return;
+
+    try {
+      setError(null);
+      await customerService.assignParentToCustomer(
+        selectedCustomer.id,
+        selectedParentId || undefined
+      );
+      setIsAssignParentDialogOpen(false);
+      setSelectedParentId('');
+      await loadCustomers();
+    } catch (err: any) {
+      setError(err.message || 'Error al asignar cliente padre');
+    }
+  };
+
   const handleSave = async () => {
     if (!selectedCustomer) return;
 
@@ -446,6 +472,9 @@ export const CustomersPage = () => {
                         </MenuItem>
                         <MenuItem icon={<PeopleRegular />} onClick={() => handleViewUsers(customer)}>
                           Ver usuarios
+                        </MenuItem>
+                        <MenuItem icon={<LinkRegular />} onClick={() => handleAssignParent(customer)}>
+                          Asignar a otro cliente
                         </MenuItem>
                         {customer.isSuspended ? (
                           <MenuItem icon={<PlayRegular />} onClick={() => handleActivate(customer)}>
@@ -816,6 +845,70 @@ export const CustomersPage = () => {
           <DialogActions>
             <Button appearance="primary" onClick={() => setIsUsersDialogOpen(false)}>
               Cerrar
+            </Button>
+          </DialogActions>
+        </DialogSurface>
+      </Dialog>
+
+      {/* Dialog de asignar cliente padre */}
+      <Dialog open={isAssignParentDialogOpen} onOpenChange={(_, data) => setIsAssignParentDialogOpen(data.open)}>
+        <DialogSurface>
+          <DialogTitle>Asignar Cliente Padre</DialogTitle>
+          <DialogBody>
+            <DialogContent>
+              <div className={styles.detailsContent}>
+                <MessageBar intent="info">
+                  <MessageBarBody>
+                    Seleccione un cliente padre para "{selectedCustomer?.name}". 
+                    Si no selecciona ninguno, el cliente será un cliente raíz.
+                  </MessageBarBody>
+                </MessageBar>
+                <Field label="Cliente Padre" className={styles.formField}>
+                  <Combobox
+                    value={selectedParentId ? customers.find((c) => c.id === selectedParentId)?.name || '' : ''}
+                    onOptionSelect={(_, data) => {
+                      const customer = customers.find((c) => c.name === data.optionValue);
+                      if (customer) {
+                        setSelectedParentId(customer.id);
+                      } else {
+                        setSelectedParentId('');
+                      }
+                    }}
+                    onInput={(e) => {
+                      if (!e.target.value) {
+                        setSelectedParentId('');
+                      }
+                    }}
+                  >
+                    <Option value="">(Cliente raíz - sin padre)</Option>
+                    {customers
+                      .filter((c) => c.id !== selectedCustomer?.id) // Excluir el cliente actual
+                      .map((customer) => (
+                        <Option key={customer.id} value={customer.name}>
+                          {customer.name} ({customer.identification})
+                        </Option>
+                      ))}
+                  </Combobox>
+                </Field>
+                {selectedCustomer?.parentName && (
+                  <MessageBar intent="warning">
+                    <MessageBarBody>
+                      Cliente padre actual: {selectedCustomer.parentName}
+                    </MessageBarBody>
+                  </MessageBar>
+                )}
+              </div>
+            </DialogContent>
+          </DialogBody>
+          <DialogActions>
+            <Button appearance="secondary" onClick={() => {
+              setIsAssignParentDialogOpen(false);
+              setSelectedParentId('');
+            }}>
+              Cancelar
+            </Button>
+            <Button appearance="primary" onClick={handleConfirmAssignParent}>
+              Asignar
             </Button>
           </DialogActions>
         </DialogSurface>

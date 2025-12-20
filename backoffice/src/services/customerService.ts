@@ -24,6 +24,8 @@ export interface CustomerDto {
   updatedAt: string;
   isActive?: boolean;
   isSuspended?: boolean;
+  parentId?: string;
+  parentName?: string;
   tenantCount?: number;
   userCount?: number;
 }
@@ -99,6 +101,13 @@ export const customerService = {
     return apiService.request<{ tenant: TenantDto; message: string }>(`/customers/${id}/assign-tenant`, {
       method: 'POST',
       body: JSON.stringify({ tenantName }),
+    });
+  },
+
+  async assignParentToCustomer(id: string, parentId?: string): Promise<{ customer: CustomerDto; message: string }> {
+    return apiService.request<{ customer: CustomerDto; message: string }>(`/customers/${id}/assign-parent`, {
+      method: 'POST',
+      body: JSON.stringify({ parentId: parentId || null }),
     });
   },
 };
