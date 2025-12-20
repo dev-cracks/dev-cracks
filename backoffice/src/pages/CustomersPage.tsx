@@ -396,6 +396,7 @@ export const CustomersPage = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isUsersDialogOpen, setIsUsersDialogOpen] = useState(false);
@@ -479,7 +480,7 @@ export const CustomersPage = () => {
       items: [
         {
           id: 'create',
-          label: 'Crear Cliente',
+          label: 'Nuevo',
           icon: <AddRegular />,
           action: () => {
             setFormData({
@@ -950,6 +951,11 @@ export const CustomersPage = () => {
     // Con modalType="alert", el Drawer no se puede cerrar con clic fuera o ESC
     // Solo se puede cerrar programáticamente, así que solo necesitamos manejar la confirmación
     if (data.open === false) {
+      // Prevenir el cierre si está guardando
+      if (isSaving) {
+        return;
+      }
+      
       // Verificar si hay datos modificados en el formulario
       if (!selectedCustomer) {
         setIsEditDialogOpen(false);
@@ -1427,6 +1433,7 @@ export const CustomersPage = () => {
 
     try {
       setError(null);
+      setIsSaving(true);
       await customerService.updateCustomer(selectedCustomer.id, formData);
       setIsEditDialogOpen(false);
       setSelectedCustomer(null);
@@ -1441,8 +1448,10 @@ export const CustomersPage = () => {
         email: '',
       });
       await loadCustomers();
+      setIsSaving(false);
     } catch (err: any) {
       setError(err.message || 'Error al guardar cliente');
+      setIsSaving(false);
     }
   };
 
@@ -1541,7 +1550,7 @@ export const CustomersPage = () => {
               <>
         {/* Vista de tabla */}
         <div style={{ position: 'relative' }}>
-          {isReordering && (
+          {(isLoading || isReordering) && (
             <div
               style={{
                 position: 'absolute',
@@ -1557,7 +1566,7 @@ export const CustomersPage = () => {
                 ...shorthands.borderRadius(tokens.borderRadiusMedium),
               }}
             >
-              <Spinner size="large" label="Reubicando cliente..." />
+              <Spinner size="large" label={isReordering ? 'Reubicando cliente...' : 'Cargando clientes...'} />
             </div>
           )}
           {flattenedCustomers.length === 0 ? (
@@ -1724,7 +1733,26 @@ export const CustomersPage = () => {
         )}
 
             {selectedView === 'flow' && (
-              <div className={styles.flowContainer}>
+              <div className={styles.flowContainer} style={{ position: 'relative' }}>
+                {isLoading && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      zIndex: 1000,
+                      ...shorthands.borderRadius(tokens.borderRadiusMedium),
+                    }}
+                  >
+                    <Spinner size="large" label="Cargando clientes..." />
+                  </div>
+                )}
                 {flowLoading ? (
                   <FlowSkeleton />
                 ) : (
@@ -1772,10 +1800,14 @@ export const CustomersPage = () => {
         onOpenChange={handleDrawerOpenChange}
       >
         <DrawerHeader>
-          <DrawerHeaderTitle>Crear Cliente</DrawerHeaderTitle>
+          <DrawerHeaderTitle>Nuevo</DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
           <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
+            {isCreating ? (
+              <DetailsSkeleton rows={8} />
+            ) : (
+              <>
             <Field label="Nombre" required className={styles.formField}>
               <Input
                 value={formData.name}
@@ -1915,6 +1947,8 @@ export const CustomersPage = () => {
                 {isCreating ? 'Creando...' : 'Crear'}
               </Button>
             </div>
+              </>
+            )}
           </div>
         </DrawerBody>
       </OverlayDrawer>
@@ -1933,7 +1967,9 @@ export const CustomersPage = () => {
         </DrawerHeader>
         <DrawerBody>
           <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
-            {isLoadingTenants ? (
+            {isSaving ? (
+              <DetailsSkeleton rows={8} />
+            ) : isLoadingTenants ? (
               <DetailsSkeleton rows={3} />
             ) : customerTenants.length === 0 ? (
               <>
@@ -2069,11 +2105,12 @@ export const CustomersPage = () => {
                         setError(null);
                       }
                     }}
+                    disabled={isSaving}
                   >
                     Cancelar
                   </Button>
-                  <Button appearance="primary" onClick={handleSave}>
-                    Guardar
+                  <Button appearance="primary" onClick={handleSave} disabled={isSaving}>
+                    {isSaving ? 'Guardando...' : 'Guardar'}
                   </Button>
                 </div>
               </>
