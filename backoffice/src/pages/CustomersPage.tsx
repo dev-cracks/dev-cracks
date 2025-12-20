@@ -1379,6 +1379,24 @@ export const CustomersPage = () => {
         <BuildingRegular fontSize={32} />
         <h1 className={styles.title}>Clientes</h1>
       </div>
+      
+      <TabList
+        selectedValue={selectedTabValue}
+        onTabSelect={(_, data) => {
+          const value = data.value as 'table' | 'flow';
+          setSelectedTabValue(value);
+          setSelectedView(value);
+        }}
+        style={{ marginBottom: tokens.spacingVerticalM }}
+      >
+        <Tab value="table" icon={<TableRegular />}>
+          Vista de Tabla
+        </Tab>
+        <Tab value="flow" icon={<FlowchartRegular />}>
+          Vista Interactiva
+        </Tab>
+      </TabList>
+
       <Card>
         <CardPreview>
           <div style={{ padding: tokens.spacingVerticalXL }}>
@@ -1387,23 +1405,6 @@ export const CustomersPage = () => {
                 <MessageBarBody>{error}</MessageBarBody>
               </MessageBar>
             )}
-
-            <TabList
-              selectedValue={selectedTabValue}
-              onTabSelect={(_, data) => {
-                const value = data.value as 'table' | 'flow';
-                setSelectedTabValue(value);
-                setSelectedView(value);
-              }}
-              style={{ marginBottom: tokens.spacingVerticalM }}
-            >
-              <Tab value="table" icon={<TableRegular />}>
-                Vista de Tabla
-              </Tab>
-              <Tab value="flow" icon={<FlowchartRegular />}>
-                Vista Interactiva
-              </Tab>
-            </TabList>
 
             {selectedView === 'table' && (
               <>
