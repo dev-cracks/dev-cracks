@@ -9,24 +9,17 @@ import {
   MenuItem,
   mergeClasses,
 } from '@fluentui/react-components';
-import { ReactNode } from 'react';
 import {
   DocumentRegular,
   EyeRegular,
   QuestionCircleRegular,
-  AddRegular,
-  SearchRegular,
-  TableRegular,
-  FlowchartRegular,
-  BuildingRegular,
 } from '@fluentui/react-icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSettings } from '../contexts/SettingsContext';
-import { useRibbonMenu } from '../contexts/RibbonMenuContext';
 
 const useStyles = makeStyles({
   ribbonMenu: {
-    height: '44px',
+    height: '60px', // Misma altura que el header del sidebar (Menú Principal)
     backgroundColor: 'white',
     display: 'flex',
     alignItems: 'center',
@@ -34,6 +27,9 @@ const useStyles = makeStyles({
     paddingLeft: tokens.spacingHorizontalM,
     paddingRight: tokens.spacingHorizontalM,
     gap: tokens.spacingHorizontalXS,
+    margin: 0,
+    width: '100%',
+    boxSizing: 'border-box',
   },
   menuButton: {
     height: '44px',
@@ -71,10 +67,9 @@ export const RibbonMenu = ({ onMenuToggle }: RibbonMenuProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { openSettings } = useSettings();
-  const { groups } = useRibbonMenu();
 
   // Menú base siempre disponible
-  const baseMenuItems = [
+  const menuItems = [
     {
       id: 'file',
       label: 'File',
@@ -106,21 +101,7 @@ export const RibbonMenu = ({ onMenuToggle }: RibbonMenuProps) => {
     },
   ];
 
-  // Convertir grupos del contexto a formato de menú
-  const contextualMenuItems = groups.map((group: { id: string; label: string; icon?: ReactNode; items: Array<{ id: string; label: string; icon?: ReactNode; action: () => void; disabled?: boolean }> }) => ({
-    id: group.id,
-    label: group.label,
-    icon: group.icon,
-    items: group.items.map((item: { id: string; label: string; icon?: ReactNode; action: () => void; disabled?: boolean }) => ({
-      label: item.label,
-      action: item.action,
-    })),
-  }));
-
-  // Combinar menús base con menús contextuales
-  const menuItems = [...baseMenuItems, ...contextualMenuItems];
-
-  const isActive = (item: typeof menuItems[0]) => {
+  const isActive = (item: { id: string; label: string; items: Array<{ label: string; action: () => void }>; path?: string }) => {
     if (item.path) {
       return location.pathname === item.path;
     }

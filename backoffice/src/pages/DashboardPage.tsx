@@ -3,6 +3,8 @@ import {
   CardHeader,
   CardPreview,
   Text,
+  Skeleton,
+  SkeletonItem,
   makeStyles,
   shorthands,
   tokens,
@@ -41,14 +43,28 @@ const useStyles = makeStyles({
   card: {
     height: '100%',
   },
+  numberSkeleton: {
+    width: '80px',
+    height: '48px',
+    marginTop: tokens.spacingVerticalM,
+  },
+  previewContent: {
+    padding: '20px',
+    fontSize: '32px',
+    fontWeight: 'bold',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: '60px',
+  },
 });
 
 export const DashboardPage = () => {
   const styles = useStyles();
   const { userDetails } = useAuth();
-  const [userCount, setUserCount] = useState(0);
-  const [tenantCount, setTenantCount] = useState(0);
-  const [customerCount, setCustomerCount] = useState(0);
+  const [userCount, setUserCount] = useState<number | null>(null);
+  const [tenantCount, setTenantCount] = useState<number | null>(null);
+  const [customerCount, setCustomerCount] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -126,64 +142,59 @@ export const DashboardPage = () => {
       </div>
 
       <div className={styles.statsGrid}>
-        {isLoading ? (
-          <>
-            <StatsCardSkeleton />
-            <StatsCardSkeleton />
-            <StatsCardSkeleton />
-            <StatsCardSkeleton />
-          </>
-        ) : (
-          <>
-            <Card className={styles.card}>
-              <CardHeader
-                header={<Text weight="semibold">Clientes</Text>}
-                description="Total de clientes en el sistema"
-              />
-              <CardPreview>
-                <div style={{ padding: '20px', fontSize: '32px', fontWeight: 'bold' }}>
-                  {customerCount}
-                </div>
-              </CardPreview>
-            </Card>
+        <Card className={styles.card}>
+          <CardHeader
+            header={<Text weight="semibold">Clientes</Text>}
+            description="Total de clientes en el sistema"
+          />
+          <CardPreview>
+            <div className={styles.previewContent}>
+              {isLoading || customerCount === null ? (
+                <Skeleton className={styles.numberSkeleton}>
+                  <SkeletonItem size={48} />
+                </Skeleton>
+              ) : (
+                customerCount
+              )}
+            </div>
+          </CardPreview>
+        </Card>
 
-            <Card className={styles.card}>
-              <CardHeader
-                header={<Text weight="semibold">Tenants</Text>}
-                description="Total de tenants en el sistema"
-              />
-              <CardPreview>
-                <div style={{ padding: '20px', fontSize: '32px', fontWeight: 'bold' }}>
-                  {tenantCount}
-                </div>
-              </CardPreview>
-            </Card>
+        <Card className={styles.card}>
+          <CardHeader
+            header={<Text weight="semibold">Tenants</Text>}
+            description="Total de tenants en el sistema"
+          />
+          <CardPreview>
+            <div className={styles.previewContent}>
+              {isLoading || tenantCount === null ? (
+                <Skeleton className={styles.numberSkeleton}>
+                  <SkeletonItem size={48} />
+                </Skeleton>
+              ) : (
+                tenantCount
+              )}
+            </div>
+          </CardPreview>
+        </Card>
 
-            <Card className={styles.card}>
-              <CardHeader
-                header={<Text weight="semibold">Usuarios</Text>}
-                description="Total de usuarios en el sistema"
-              />
-              <CardPreview>
-                <div style={{ padding: '20px', fontSize: '32px', fontWeight: 'bold' }}>
-                  {userCount}
-                </div>
-              </CardPreview>
-            </Card>
-
-            <Card className={styles.card}>
-              <CardHeader
-                header={<Text weight="semibold">Rol</Text>}
-                description="Tu rol en la organización"
-              />
-              <CardPreview>
-                <div style={{ padding: '20px', fontSize: '32px', fontWeight: 'bold' }}>
-                  {userDetails?.role || 'N/A'}
-                </div>
-              </CardPreview>
-            </Card>
-          </>
-        )}
+        <Card className={styles.card}>
+          <CardHeader
+            header={<Text weight="semibold">Usuarios</Text>}
+            description="Total de usuarios en el sistema"
+          />
+          <CardPreview>
+            <div className={styles.previewContent}>
+              {isLoading || userCount === null ? (
+                <Skeleton className={styles.numberSkeleton}>
+                  <SkeletonItem size={48} />
+                </Skeleton>
+              ) : (
+                userCount
+              )}
+            </div>
+          </CardPreview>
+        </Card>
       </div>
 
       <Card>

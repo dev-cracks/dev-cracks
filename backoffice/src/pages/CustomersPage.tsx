@@ -89,12 +89,22 @@ import { TreeSkeleton } from '../components/TreeSkeleton';
 import { DetailsSkeleton } from '../components/DetailsSkeleton';
 import { FlowSkeleton } from '../components/FlowSkeleton';
 import { useRibbonMenu } from '../contexts/RibbonMenuContext';
+import { RibbonMenu } from '../components/RibbonMenu';
 
 const useStyles = makeStyles({
   container: {
     display: 'flex',
     flexDirection: 'column',
-    ...shorthands.gap(tokens.spacingVerticalXL),
+    ...shorthands.gap(0),
+    margin: 0,
+    padding: 0,
+  },
+  ribbonMenuContainer: {
+    marginLeft: `calc(-1 * ${tokens.spacingVerticalXL})`,
+    marginRight: `calc(-1 * ${tokens.spacingVerticalXL})`,
+    marginTop: `calc(-1 * ${tokens.spacingVerticalXL})`,
+    marginBottom: tokens.spacingVerticalL,
+    width: `calc(100% + ${tokens.spacingVerticalXL} * 2)`,
   },
   header: {
     display: 'flex',
@@ -1285,6 +1295,9 @@ export const CustomersPage = () => {
 
   return (
     <div className={styles.container}>
+      <div className={styles.ribbonMenuContainer}>
+        <RibbonMenu />
+      </div>
       <Card>
         <CardHeader
           header={
