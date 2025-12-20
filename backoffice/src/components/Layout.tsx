@@ -252,9 +252,9 @@ export const Layout = ({ children }: LayoutProps) => {
       path: '/dashboard',
     },
     {
-      name: 'Usuarios',
-      icon: <PeopleRegular />,
-      path: '/users',
+      name: 'Clientes',
+      icon: <BuildingRegular />,
+      path: '/customers',
     },
     {
       name: 'Tenants',
@@ -262,14 +262,14 @@ export const Layout = ({ children }: LayoutProps) => {
       path: '/tenants',
     },
     {
-      name: 'Clientes',
-      icon: <BuildingRegular />,
-      path: '/customers',
-    },
-    {
       name: 'Sedes',
       icon: <LocationRegular />,
       path: '/offices',
+    },
+    {
+      name: 'Usuarios',
+      icon: <PeopleRegular />,
+      path: '/users',
     },
     {
       name: 'Configuración',

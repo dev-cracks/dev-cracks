@@ -79,7 +79,6 @@ import {
 } from '../services/customerService';
 import { UserDto } from '../services/authService';
 import { tenantService, TenantDto } from '../services/tenantService';
-import { officeService, OfficeDto } from '../services/officeService';
 
 const useStyles = makeStyles({
   container: {
@@ -200,11 +199,20 @@ const useStyles = makeStyles({
   },
   treeRowContent: {
     display: 'grid',
-    gridTemplateColumns: '32px 32px 60px 180px 160px 120px 120px 130px 180px 110px 70px 70px 80px 100px',
+    gridTemplateColumns: '32px 60px 180px 160px 120px 120px 130px 180px 110px 70px 70px 80px 100px',
     alignItems: 'center',
     width: '100%',
     ...shorthands.gap(tokens.spacingHorizontalS),
-    padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalM}`,
+    padding: `${tokens.spacingVerticalS} 0`,
+  },
+  expandColumn: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    width: '32px',
+    minWidth: '32px',
+    maxWidth: '32px',
+    flexShrink: 0,
   },
   levelBadge: {
     display: 'inline-flex',
@@ -344,6 +352,7 @@ export const CustomersPage = () => {
   const [customerTenants, setCustomerTenants] = useState<TenantDto[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [isLoadingTenants, setIsLoadingTenants] = useState(false);
+  const [isReordering, setIsReordering] = useState(false);
   const [tenantName, setTenantName] = useState('');
   const [selectedParentId, setSelectedParentId] = useState<string>('');
 
@@ -536,11 +545,13 @@ export const CustomersPage = () => {
 
     try {
       setError(null);
+      setIsReordering(true);
       await customerService.assignParentToCustomer(draggedCustomerId, targetCustomerId);
       await loadCustomers();
     } catch (err: any) {
       setError(err.message || 'Error al reasignar cliente');
     } finally {
+      setIsReordering(false);
       setDraggedCustomerId(null);
     }
   };
@@ -553,11 +564,13 @@ export const CustomersPage = () => {
 
     try {
       setError(null);
+      setIsReordering(true);
       await customerService.assignParentToCustomer(draggedCustomerId, undefined);
       await loadCustomers();
     } catch (err: any) {
       setError(err.message || 'Error al convertir cliente en raíz');
     } finally {
+      setIsReordering(false);
       setDraggedCustomerId(null);
     }
   };
@@ -590,10 +603,9 @@ export const CustomersPage = () => {
           onDragOver={(e) => handleDragOver(e, node.id)}
           onDragLeave={handleDragLeave}
           onDrop={(e) => handleDrop(e, node.id)}
-          style={{ paddingLeft: `${24 + (node.level * 24)}px` }}
         >
-          <div className={styles.treeRowContent}>
-            <div className={styles.treeIndent} style={{ justifyContent: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', position: 'relative', paddingLeft: isRoot ? '0px' : `${node.level * 24}px` }}>
+            <div className={styles.expandColumn}>
               {hasChildren ? (
                 <button
                   className={styles.treeExpandButton}
@@ -610,18 +622,19 @@ export const CustomersPage = () => {
                 <div style={{ width: '24px' }} />
               )}
             </div>
-            <div className={styles.dragHandle} style={{ justifyContent: 'center' }}>
-              <ArrowMoveRegular fontSize={16} />
-            </div>
-            <div className={styles.treeCell} style={{ justifyContent: 'center', alignItems: 'center', width: '100%' }}>
-              {isRoot ? (
-                <StarRegular fontSize={16} className={styles.rootIcon} title="Cliente raíz" />
-              ) : (
-                <span className={styles.levelBadge} title={`Nivel ${node.level}`}>
-                  {node.level}
-                </span>
-              )}
-            </div>
+            <div className={styles.treeRowContent}>
+              <div className={styles.dragHandle} style={{ justifyContent: 'center' }}>
+                <ArrowMoveRegular fontSize={16} />
+              </div>
+              <div className={styles.treeCell} style={{ justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+                {isRoot ? (
+                  <StarRegular fontSize={16} className={styles.rootIcon} title="Cliente raíz" />
+                ) : (
+                  <span className={styles.levelBadge} title={`Nivel ${node.level}`}>
+                    {node.level}
+                  </span>
+                )}
+              </div>
             <div className={styles.treeCell} style={{ minWidth: '180px' }}>{node.name}</div>
             <div className={styles.treeCell} style={{ minWidth: '160px' }}>{node.identification}</div>
             <div className={styles.treeCell} style={{ minWidth: '120px' }}>{node.countryName || 'N/A'}</div>
@@ -684,6 +697,7 @@ export const CustomersPage = () => {
                   </MenuList>
                 </MenuPopover>
               </Menu>
+            </div>
             </div>
           </div>
         </div>
@@ -1190,7 +1204,26 @@ export const CustomersPage = () => {
         </div>
 
         {/* Vista jerárquica con drag and drop */}
-        <div className={styles.treeContainer}>
+        <div className={styles.treeContainer} style={{ position: 'relative' }}>
+          {isReordering && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1000,
+                ...shorthands.borderRadius(tokens.borderRadiusMedium),
+              }}
+            >
+              <Spinner size="large" label="Reubicando cliente..." />
+            </div>
+          )}
           <div style={{ overflowX: 'auto' }}>
             <Table>
               <TableHeader>
