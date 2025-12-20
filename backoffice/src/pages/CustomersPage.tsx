@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   Card,
   CardHeader,
+  CardPreview,
   Text,
   makeStyles,
   shorthands,
@@ -111,7 +112,7 @@ const useStyles = makeStyles({
   header: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    ...shorthands.gap(tokens.spacingHorizontalM),
     marginBottom: tokens.spacingVerticalM,
   },
   headerLeft: {
@@ -1287,17 +1288,11 @@ export const CustomersPage = () => {
   if (isLoading && customers.length === 0) {
     return (
       <div className={styles.container}>
+        <div className={styles.header}>
+          <BuildingRegular fontSize={32} />
+          <h1 className={styles.title}>Clientes</h1>
+        </div>
         <Card>
-          <CardHeader
-            header={
-              <div className={styles.header}>
-                <div className={styles.headerLeft}>
-                  <BuildingRegular fontSize={24} />
-                  <Text className={styles.title}>Clientes</Text>
-                </div>
-              </div>
-            }
-          />
           <div className={styles.toolbar}>
             <Input
               placeholder="Buscar por nombre, identificación o país..."
@@ -1320,44 +1315,39 @@ export const CustomersPage = () => {
       <div className={styles.ribbonMenuContainer}>
         <RibbonMenu />
       </div>
+      <div className={styles.header}>
+        <BuildingRegular fontSize={32} />
+        <h1 className={styles.title}>Clientes</h1>
+      </div>
       <Card>
-        <CardHeader
-          header={
-            <div className={styles.header}>
-              <div className={styles.headerLeft}>
-                <BuildingRegular fontSize={24} />
-                <Text className={styles.title}>Clientes</Text>
-              </div>
-            </div>
-          }
-        />
+        <CardPreview>
+          <div style={{ padding: tokens.spacingVerticalXL }}>
+            {error && (
+              <MessageBar intent="error" style={{ marginBottom: tokens.spacingVerticalM }}>
+                <MessageBarBody>{error}</MessageBarBody>
+              </MessageBar>
+            )}
 
-        {error && (
-          <MessageBar intent="error">
-            <MessageBarBody>{error}</MessageBarBody>
-          </MessageBar>
-        )}
+            <TabList
+              selectedValue={selectedTabValue}
+              onTabSelect={(_, data) => {
+                const value = data.value as 'table' | 'flow';
+                setSelectedTabValue(value);
+                setSelectedView(value);
+              }}
+              style={{ marginBottom: tokens.spacingVerticalM }}
+            >
+              <Tab value="table" icon={<TableRegular />}>
+                Vista de Tabla
+              </Tab>
+              <Tab value="flow" icon={<FlowchartRegular />}>
+                Vista Interactiva
+              </Tab>
+            </TabList>
 
-        <TabList
-          selectedValue={selectedTabValue}
-          onTabSelect={(_, data) => {
-            const value = data.value as 'table' | 'flow';
-            setSelectedTabValue(value);
-            setSelectedView(value);
-          }}
-          style={{ marginBottom: tokens.spacingVerticalM }}
-        >
-          <Tab value="table" icon={<TableRegular />}>
-            Vista de Tabla
-          </Tab>
-          <Tab value="flow" icon={<FlowchartRegular />}>
-            Vista Interactiva
-          </Tab>
-        </TabList>
-
-        {selectedView === 'table' && (
-          <>
-        <div className={styles.toolbar}>
+            {selectedView === 'table' && (
+              <>
+            <div className={styles.toolbar}>
           <Input
             placeholder="Buscar por nombre, identificación o país..."
             value={searchTerm}
@@ -1457,41 +1447,43 @@ export const CustomersPage = () => {
           </>
         )}
 
-        {selectedView === 'flow' && (
-          <div className={styles.flowContainer}>
-            {flowLoading ? (
-              <FlowSkeleton />
-            ) : (
-              <ReactFlowProvider>
-                <ReactFlow
-                  nodes={flowNodes}
-                  edges={flowEdges}
-                  onNodesChange={onNodesChange}
-                  onEdgesChange={onEdgesChange}
-                  onConnect={onConnect}
-                  fitView
-                  minZoom={0.2}
-                  maxZoom={2}
-                  defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
-                >
-                  <Background />
-                  <Controls />
-                  <MiniMap />
-                  <Panel position="top-left">
-                    <div style={{ backgroundColor: tokens.colorNeutralBackground1, padding: tokens.spacingVerticalS, ...shorthands.borderRadius(tokens.borderRadiusMedium) }}>
-                      <Text weight="semibold">Vista Interactiva: Clientes → Tenants → Usuarios</Text>
-                      <div style={{ marginTop: tokens.spacingVerticalXS }}>
-                        <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-                          Nivel: Clientes (1) → Tenants (2) → Usuarios (3)
-                        </Text>
-                      </div>
-                    </div>
-                  </Panel>
-                </ReactFlow>
-              </ReactFlowProvider>
+            {selectedView === 'flow' && (
+              <div className={styles.flowContainer}>
+                {flowLoading ? (
+                  <FlowSkeleton />
+                ) : (
+                  <ReactFlowProvider>
+                    <ReactFlow
+                      nodes={flowNodes}
+                      edges={flowEdges}
+                      onNodesChange={onNodesChange}
+                      onEdgesChange={onEdgesChange}
+                      onConnect={onConnect}
+                      fitView
+                      minZoom={0.2}
+                      maxZoom={2}
+                      defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
+                    >
+                      <Background />
+                      <Controls />
+                      <MiniMap />
+                      <Panel position="top-left">
+                        <div style={{ backgroundColor: tokens.colorNeutralBackground1, padding: tokens.spacingVerticalS, ...shorthands.borderRadius(tokens.borderRadiusMedium) }}>
+                          <Text weight="semibold">Vista Interactiva: Clientes → Tenants → Usuarios</Text>
+                          <div style={{ marginTop: tokens.spacingVerticalXS }}>
+                            <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                              Nivel: Clientes (1) → Tenants (2) → Usuarios (3)
+                            </Text>
+                          </div>
+                        </div>
+                      </Panel>
+                    </ReactFlow>
+                  </ReactFlowProvider>
+                )}
+              </div>
             )}
           </div>
-        )}
+        </CardPreview>
       </Card>
 
       {/* Dialog de creación */}
