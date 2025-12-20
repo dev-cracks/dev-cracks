@@ -29,6 +29,7 @@ export interface CustomerDto {
   parentName?: string;
   tenantCount?: number;
   userCount?: number;
+  officeCount?: number;
 }
 
 export interface CreateCustomerRequest {

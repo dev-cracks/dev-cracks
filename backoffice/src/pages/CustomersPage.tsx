@@ -136,6 +136,30 @@ const useStyles = makeStyles({
       backgroundColor: tokens.colorNeutralBackground2,
     },
   },
+  treeRowRoot: {
+    backgroundColor: tokens.colorPaletteBlueBackground1,
+    '&:hover': {
+      backgroundColor: tokens.colorPaletteBlueBackground2,
+    },
+  },
+  treeRowLevel1: {
+    backgroundColor: tokens.colorPaletteTealBackground1,
+    '&:hover': {
+      backgroundColor: tokens.colorPaletteTealBackground2,
+    },
+  },
+  treeRowLevel2: {
+    backgroundColor: tokens.colorPaletteGreenBackground1,
+    '&:hover': {
+      backgroundColor: tokens.colorPaletteGreenBackground2,
+    },
+  },
+  treeRowLevel3Plus: {
+    backgroundColor: tokens.colorPaletteLavenderBackground1,
+    '&:hover': {
+      backgroundColor: tokens.colorPaletteLavenderBackground2,
+    },
+  },
   treeRowDragging: {
     opacity: 0.5,
   },
@@ -176,7 +200,7 @@ const useStyles = makeStyles({
   },
   treeRowContent: {
     display: 'grid',
-    gridTemplateColumns: '24px 24px 24px minmax(150px, 1fr) minmax(150px, 1fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(150px, 1fr) 120px 80px 80px 100px',
+    gridTemplateColumns: '32px 32px 60px 180px 160px 120px 120px 130px 180px 110px 70px 70px 80px 100px',
     alignItems: 'center',
     width: '100%',
     ...shorthands.gap(tokens.spacingHorizontalS),
@@ -186,17 +210,24 @@ const useStyles = makeStyles({
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    minWidth: '24px',
+    width: '24px',
     height: '24px',
-    ...shorthands.padding('0', tokens.spacingHorizontalXS),
+    ...shorthands.padding('0'),
     ...shorthands.borderRadius(tokens.borderRadiusSmall),
     backgroundColor: tokens.colorNeutralBackground3,
     color: tokens.colorNeutralForeground2,
     fontSize: tokens.fontSizeBase200,
     fontWeight: tokens.fontWeightSemibold,
+    flexShrink: 0,
   },
   rootIcon: {
     color: tokens.colorPaletteGoldForeground1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '24px',
+    height: '24px',
+    flexShrink: 0,
   },
   flowContainer: {
     width: '100%',
@@ -538,19 +569,31 @@ export const CustomersPage = () => {
     const isDragOver = dragOverCustomerId === node.id;
     const isRoot = !node.parentId;
 
+    // Determinar la clase de estilo según el nivel
+    let levelClass = '';
+    if (isRoot) {
+      levelClass = styles.treeRowRoot;
+    } else if (node.level === 1) {
+      levelClass = styles.treeRowLevel1;
+    } else if (node.level === 2) {
+      levelClass = styles.treeRowLevel2;
+    } else {
+      levelClass = styles.treeRowLevel3Plus;
+    }
+
     return (
       <div key={node.id}>
         <div
-          className={`${styles.treeRow} ${isDragging ? styles.treeRowDragging : ''} ${isDragOver ? styles.treeRowDragOver : ''}`}
+          className={`${styles.treeRow} ${levelClass} ${isDragging ? styles.treeRowDragging : ''} ${isDragOver ? styles.treeRowDragOver : ''}`}
           draggable
           onDragStart={(e) => handleDragStart(e, node.id)}
           onDragOver={(e) => handleDragOver(e, node.id)}
           onDragLeave={handleDragLeave}
           onDrop={(e) => handleDrop(e, node.id)}
-          style={{ paddingLeft: `${node.level * 24}px` }}
+          style={{ paddingLeft: `${24 + (node.level * 24)}px` }}
         >
           <div className={styles.treeRowContent}>
-            <div className={styles.treeIndent}>
+            <div className={styles.treeIndent} style={{ justifyContent: 'center' }}>
               {hasChildren ? (
                 <button
                   className={styles.treeExpandButton}
@@ -567,10 +610,10 @@ export const CustomersPage = () => {
                 <div style={{ width: '24px' }} />
               )}
             </div>
-            <div className={styles.dragHandle}>
+            <div className={styles.dragHandle} style={{ justifyContent: 'center' }}>
               <ArrowMoveRegular fontSize={16} />
             </div>
-            <div className={styles.treeCell} style={{ justifyContent: 'center' }}>
+            <div className={styles.treeCell} style={{ justifyContent: 'center', alignItems: 'center', width: '100%' }}>
               {isRoot ? (
                 <StarRegular fontSize={16} className={styles.rootIcon} title="Cliente raíz" />
               ) : (
@@ -579,13 +622,13 @@ export const CustomersPage = () => {
                 </span>
               )}
             </div>
-            <div className={styles.treeCell}>{node.name}</div>
-            <div className={styles.treeCell}>{node.identification}</div>
-            <div className={styles.treeCell}>{node.countryName || 'N/A'}</div>
-            <div className={styles.treeCell}>{node.city || 'N/A'}</div>
-            <div className={styles.treeCell}>{node.phone || 'N/A'}</div>
-            <div className={styles.treeCell}>{node.email || 'N/A'}</div>
-            <div className={styles.treeCell}>
+            <div className={styles.treeCell} style={{ minWidth: '180px' }}>{node.name}</div>
+            <div className={styles.treeCell} style={{ minWidth: '160px' }}>{node.identification}</div>
+            <div className={styles.treeCell} style={{ minWidth: '120px' }}>{node.countryName || 'N/A'}</div>
+            <div className={styles.treeCell} style={{ minWidth: '120px' }}>{node.city || 'N/A'}</div>
+            <div className={styles.treeCell} style={{ minWidth: '130px' }}>{node.phone || 'N/A'}</div>
+            <div className={styles.treeCell} style={{ minWidth: '180px' }}>{node.email || 'N/A'}</div>
+            <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '110px' }}>
               {node.isSuspended ? (
                 <Badge appearance="filled" color="danger">Suspendido</Badge>
               ) : node.isActive ? (
@@ -594,8 +637,9 @@ export const CustomersPage = () => {
                 <Badge appearance="outline">Inactivo</Badge>
               )}
             </div>
-            <div className={styles.treeCell} style={{ justifyContent: 'center' }}>{node.tenantCount || 0}</div>
-            <div className={styles.treeCell} style={{ justifyContent: 'center' }}>{node.userCount || 0}</div>
+            <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '70px' }}>{node.officeCount || 0}</div>
+            <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '70px' }}>{node.tenantCount || 0}</div>
+            <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '80px' }}>{node.userCount || 0}</div>
             <div className={styles.treeCell}>
               <Menu>
                 <MenuTrigger disableButtonEnhancement>
@@ -1151,17 +1195,18 @@ export const CustomersPage = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHeaderCell style={{ width: '24px', padding: tokens.spacingVerticalXS }}></TableHeaderCell>
-                  <TableHeaderCell style={{ width: '24px', padding: tokens.spacingVerticalXS }}></TableHeaderCell>
-                  <TableHeaderCell style={{ width: '24px', padding: tokens.spacingVerticalXS, textAlign: 'center' }}>Nivel</TableHeaderCell>
-                  <TableHeaderCell style={{ minWidth: '150px' }}>Nombre</TableHeaderCell>
-                  <TableHeaderCell style={{ minWidth: '150px' }}>Identificación</TableHeaderCell>
-                  <TableHeaderCell style={{ minWidth: '120px' }}>País</TableHeaderCell>
-                  <TableHeaderCell style={{ minWidth: '120px' }}>Ciudad</TableHeaderCell>
-                  <TableHeaderCell style={{ minWidth: '120px' }}>Teléfono</TableHeaderCell>
-                  <TableHeaderCell style={{ minWidth: '150px' }}>Email</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '120px', textAlign: 'center' }}>Estado</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '80px', textAlign: 'center' }}>Tenants</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '32px', padding: tokens.spacingVerticalXS, textAlign: 'center' }}></TableHeaderCell>
+                  <TableHeaderCell style={{ width: '32px', padding: tokens.spacingVerticalXS, textAlign: 'center' }}></TableHeaderCell>
+                  <TableHeaderCell style={{ width: '60px', padding: tokens.spacingVerticalXS, textAlign: 'center' }}>Nivel</TableHeaderCell>
+                  <TableHeaderCell style={{ minWidth: '180px', width: '180px' }}>Nombre</TableHeaderCell>
+                  <TableHeaderCell style={{ minWidth: '160px', width: '160px' }}>Identificación</TableHeaderCell>
+                  <TableHeaderCell style={{ minWidth: '120px', width: '120px' }}>País</TableHeaderCell>
+                  <TableHeaderCell style={{ minWidth: '120px', width: '120px' }}>Ciudad</TableHeaderCell>
+                  <TableHeaderCell style={{ minWidth: '130px', width: '130px' }}>Teléfono</TableHeaderCell>
+                  <TableHeaderCell style={{ minWidth: '180px', width: '180px' }}>Email</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '110px', textAlign: 'center' }}>Estado</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '70px', textAlign: 'center' }}>Sedes</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '70px', textAlign: 'center' }}>Tenants</TableHeaderCell>
                   <TableHeaderCell style={{ width: '80px', textAlign: 'center' }}>Usuarios</TableHeaderCell>
                   <TableHeaderCell style={{ width: '100px', textAlign: 'center' }}>Acciones</TableHeaderCell>
                 </TableRow>
