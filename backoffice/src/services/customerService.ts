@@ -1,4 +1,6 @@
 import { apiService } from './apiService';
+import { TenantDto } from './tenantService';
+import { UserDto } from './authService';
 
 export interface CountryDto {
   id: string;
@@ -85,12 +87,19 @@ export const customerService = {
     });
   },
 
-  async getCustomerTenants(id: string): Promise<any[]> {
-    return apiService.request<any[]>(`/customers/${id}/tenants`);
+  async getCustomerTenants(id: string): Promise<TenantDto[]> {
+    return apiService.request<TenantDto[]>(`/customers/${id}/tenants`);
   },
 
-  async getCustomerUsers(id: string): Promise<any[]> {
-    return apiService.request<any[]>(`/customers/${id}/users`);
+  async getCustomerUsers(id: string): Promise<UserDto[]> {
+    return apiService.request<UserDto[]>(`/customers/${id}/users`);
+  },
+
+  async assignTenantToCustomer(id: string, tenantName?: string): Promise<{ tenant: TenantDto; message: string }> {
+    return apiService.request<{ tenant: TenantDto; message: string }>(`/customers/${id}/assign-tenant`, {
+      method: 'POST',
+      body: JSON.stringify({ tenantName }),
+    });
   },
 };
 
