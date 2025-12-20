@@ -38,11 +38,15 @@ import {
   Tab,
 } from '@fluentui/react-components';
 import {
-  Drawer,
+  OverlayDrawer,
   DrawerBody,
   DrawerHeader,
   DrawerHeaderTitle,
 } from '@fluentui/react-drawer';
+import {
+  useRestoreFocusSource,
+  useRestoreFocusTarget,
+} from '@fluentui/react-components';
 import {
   ReactFlow,
   Node,
@@ -375,6 +379,10 @@ const useStyles = makeStyles({
 export const CustomersPage = () => {
   const styles = useStyles();
   const { addGroup, removeGroup } = useRibbonMenu();
+  
+  // Hooks para restauración de foco en el Drawer
+  const restoreFocusTargetAttributes = useRestoreFocusTarget();
+  const restoreFocusSourceAttributes = useRestoreFocusSource();
   const [customers, setCustomers] = useState<CustomerDto[]>([]);
   const [countries, setCountries] = useState<CountryDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -894,38 +902,45 @@ export const CustomersPage = () => {
   };
 
   const handleDrawerOpenChange = (event: any, data: { open: boolean }) => {
-    // Prevenir el cierre si está creando o si hay datos sin guardar
-    if (isCreating) {
-      return;
-    }
-    
-    // Verificar si hay datos en el formulario
-    const hasData = formData.name.trim() || 
-                    formData.identification.trim() || 
-                    formData.countryId || 
-                    formData.stateProvince.trim() || 
-                    formData.city.trim() || 
-                    formData.phone.trim() || 
-                    formData.email.trim();
-    
-    if (hasData && data.open === false) {
-      // Si hay datos y se intenta cerrar, mostrar confirmación
-      if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
-        setIsCreateDialogOpen(false);
-        setFormData({
-          name: '',
-          identification: '',
-          countryId: '',
-          stateProvince: '',
-          city: '',
-          phone: '',
-          email: '',
-        });
-        setError(null);
+    // Con modalType="alert", el Drawer no se puede cerrar con clic fuera o ESC
+    // Solo se puede cerrar programáticamente, así que solo necesitamos manejar la confirmación
+    if (data.open === false) {
+      // Prevenir el cierre si está creando
+      if (isCreating) {
+        return;
       }
-    } else {
-      setIsCreateDialogOpen(data.open);
+      
+      // Verificar si hay datos en el formulario
+      const hasData = formData.name.trim() || 
+                      formData.identification.trim() || 
+                      formData.countryId || 
+                      formData.stateProvince.trim() || 
+                      formData.city.trim() || 
+                      formData.phone.trim() || 
+                      formData.email.trim();
+      
+      if (hasData) {
+        // Si hay datos y se intenta cerrar, mostrar confirmación
+        if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
+          setIsCreateDialogOpen(false);
+          setFormData({
+            name: '',
+            identification: '',
+            countryId: '',
+            stateProvince: '',
+            city: '',
+            phone: '',
+            email: '',
+          });
+          setError(null);
+        }
+        // Si el usuario cancela, no actualizamos el estado (mantiene el Drawer abierto)
+        return;
+      }
     }
+    
+    // Permitir abrir normalmente o cerrar si no hay datos
+    setIsCreateDialogOpen(data.open);
   };
 
   const handleAssignTenant = async () => {
@@ -1532,11 +1547,12 @@ export const CustomersPage = () => {
       </Card>
 
       {/* Drawer de creación */}
-      <Drawer
-        type="overlay"
+      <OverlayDrawer
+        {...restoreFocusSourceAttributes}
         position="end"
         size="large"
         open={isCreateDialogOpen}
+        modalType="alert"
         onOpenChange={handleDrawerOpenChange}
       >
         <DrawerHeader>
@@ -1643,7 +1659,7 @@ export const CustomersPage = () => {
             </div>
           </div>
         </DrawerBody>
-      </Drawer>
+      </OverlayDrawer>
 
       {/* Dialog de edición */}
       <Dialog open={isEditDialogOpen} onOpenChange={(_, data) => setIsEditDialogOpen(data.open)}>
