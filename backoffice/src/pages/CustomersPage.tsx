@@ -45,6 +45,9 @@ import {
   PeopleRegular,
   AddRegular,
   LinkRegular,
+  ChevronRightRegular,
+  ChevronDownRegular,
+  ArrowMoveRegular,
 } from '@fluentui/react-icons';
 import {
   customerService,
@@ -97,6 +100,66 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     ...shorthands.gap(tokens.spacingVerticalM),
+  },
+  treeContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  treeRow: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: tokens.spacingVerticalS,
+    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+    cursor: 'pointer',
+    '&:hover': {
+      backgroundColor: tokens.colorNeutralBackground2,
+    },
+  },
+  treeRowDragging: {
+    opacity: 0.5,
+  },
+  treeRowDragOver: {
+    backgroundColor: tokens.colorBrandBackground2,
+    borderTop: `2px solid ${tokens.colorBrandForeground1}`,
+  },
+  treeIndent: {
+    width: '24px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  treeExpandButton: {
+    width: '24px',
+    height: '24px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    ...shorthands.borderRadius(tokens.borderRadiusSmall),
+    '&:hover': {
+      backgroundColor: tokens.colorNeutralBackground3,
+    },
+  },
+  treeContent: {
+    display: 'flex',
+    alignItems: 'center',
+    flex: 1,
+    ...shorthands.gap(tokens.spacingHorizontalM),
+  },
+  treeCell: {
+    flex: '1 1 0',
+    minWidth: '100px',
+  },
+  dragHandle: {
+    cursor: 'grab',
+    padding: tokens.spacingVerticalXS,
+    ...shorthands.borderRadius(tokens.borderRadiusSmall),
+    '&:hover': {
+      backgroundColor: tokens.colorNeutralBackground3,
+    },
+    '&:active': {
+      cursor: 'grabbing',
+    },
   },
   detailsRow: {
     display: 'flex',
@@ -194,6 +257,246 @@ export const CustomersPage = () => {
     customer.identification.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.countryName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Estado para controlar qué nodos están expandidos y drag and drop
+  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
+  const [draggedCustomerId, setDraggedCustomerId] = useState<string | null>(null);
+  const [dragOverCustomerId, setDragOverCustomerId] = useState<string | null>(null);
+
+  // Organizar clientes en estructura jerárquica
+  interface CustomerNode extends CustomerDto {
+    children: CustomerNode[];
+    level: number;
+  }
+
+  const buildCustomerTree = useCallback((customerList: CustomerDto[]): CustomerNode[] => {
+    const customerMap = new Map<string, CustomerNode>();
+    const rootNodes: CustomerNode[] = [];
+
+    // Primero, crear todos los nodos
+    customerList.forEach((customer) => {
+      customerMap.set(customer.id, {
+        ...customer,
+        children: [],
+        level: 0,
+      });
+    });
+
+    // Luego, construir el árbol
+    customerList.forEach((customer) => {
+      const node = customerMap.get(customer.id)!;
+      if (customer.parentId) {
+        const parent = customerMap.get(customer.parentId);
+        if (parent) {
+          parent.children.push(node);
+          node.level = parent.level + 1;
+        } else {
+          // Si el padre no existe, tratarlo como raíz
+          rootNodes.push(node);
+        }
+      } else {
+        rootNodes.push(node);
+      }
+    });
+
+    return rootNodes;
+  }, []);
+
+  const customerTree = buildCustomerTree(filteredCustomers);
+
+  // Función recursiva para renderizar el árbol
+  const toggleExpand = (customerId: string) => {
+    setExpandedNodes((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(customerId)) {
+        newSet.delete(customerId);
+      } else {
+        newSet.add(customerId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleDragStart = (e: React.DragEvent, customerId: string) => {
+    setDraggedCustomerId(customerId);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', customerId);
+  };
+
+  const handleDragOver = (e: React.DragEvent, customerId: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (draggedCustomerId && draggedCustomerId !== customerId) {
+      setDragOverCustomerId(customerId);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOverCustomerId(null);
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetCustomerId: string) => {
+    e.preventDefault();
+    setDragOverCustomerId(null);
+
+    if (!draggedCustomerId || draggedCustomerId === targetCustomerId) {
+      setDraggedCustomerId(null);
+      return;
+    }
+
+    // Verificar que no se está intentando asignar un cliente como padre de sí mismo o de su descendiente
+    const draggedCustomer = customers.find((c) => c.id === draggedCustomerId);
+    if (!draggedCustomer) {
+      setDraggedCustomerId(null);
+      return;
+    }
+
+    // Verificar que el cliente objetivo no es descendiente del cliente arrastrado
+    const isDescendant = (parentId: string, childId: string): boolean => {
+      const child = customers.find((c) => c.id === childId);
+      if (!child || !child.parentId) return false;
+      if (child.parentId === parentId) return true;
+      return isDescendant(parentId, child.parentId);
+    };
+
+    if (isDescendant(draggedCustomerId, targetCustomerId)) {
+      setError('No se puede asignar un cliente como padre de su descendiente');
+      setDraggedCustomerId(null);
+      return;
+    }
+
+    try {
+      setError(null);
+      await customerService.assignParentToCustomer(draggedCustomerId, targetCustomerId);
+      await loadCustomers();
+    } catch (err: any) {
+      setError(err.message || 'Error al reasignar cliente');
+    } finally {
+      setDraggedCustomerId(null);
+    }
+  };
+
+  const handleDropOnRoot = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOverCustomerId(null);
+
+    if (!draggedCustomerId) return;
+
+    try {
+      setError(null);
+      await customerService.assignParentToCustomer(draggedCustomerId, undefined);
+      await loadCustomers();
+    } catch (err: any) {
+      setError(err.message || 'Error al convertir cliente en raíz');
+    } finally {
+      setDraggedCustomerId(null);
+    }
+  };
+
+  const renderCustomerNode = (node: CustomerNode): React.ReactNode => {
+    const hasChildren = node.children.length > 0;
+    const isExpanded = expandedNodes.has(node.id);
+    const isDragging = draggedCustomerId === node.id;
+    const isDragOver = dragOverCustomerId === node.id;
+
+    return (
+      <div key={node.id}>
+        <div
+          className={`${styles.treeRow} ${isDragging ? styles.treeRowDragging : ''} ${isDragOver ? styles.treeRowDragOver : ''}`}
+          style={{ paddingLeft: `${node.level * 24 + 8}px` }}
+          draggable
+          onDragStart={(e) => handleDragStart(e, node.id)}
+          onDragOver={(e) => handleDragOver(e, node.id)}
+          onDragLeave={handleDragLeave}
+          onDrop={(e) => handleDrop(e, node.id)}
+        >
+          <div className={styles.treeIndent}>
+            {hasChildren ? (
+              <button
+                className={styles.treeExpandButton}
+                onClick={() => toggleExpand(node.id)}
+                type="button"
+              >
+                {isExpanded ? (
+                  <ChevronDownRegular fontSize={16} />
+                ) : (
+                  <ChevronRightRegular fontSize={16} />
+                )}
+              </button>
+            ) : (
+              <div style={{ width: '24px' }} />
+            )}
+          </div>
+          <div className={styles.dragHandle}>
+            <ArrowMoveRegular fontSize={16} />
+          </div>
+          <div className={styles.treeContent}>
+            <div className={styles.treeCell}>{node.name}</div>
+            <div className={styles.treeCell}>{node.identification}</div>
+            <div className={styles.treeCell}>{node.countryName || 'N/A'}</div>
+            <div className={styles.treeCell}>{node.city || 'N/A'}</div>
+            <div className={styles.treeCell}>{node.phone || 'N/A'}</div>
+            <div className={styles.treeCell}>{node.email || 'N/A'}</div>
+            <div className={styles.treeCell}>
+              {node.isSuspended ? (
+                <Badge appearance="filled" color="danger">Suspendido</Badge>
+              ) : node.isActive ? (
+                <Badge appearance="filled" color="success">Activo</Badge>
+              ) : (
+                <Badge appearance="outline">Inactivo</Badge>
+              )}
+            </div>
+            <div className={styles.treeCell}>{node.tenantCount || 0}</div>
+            <div className={styles.treeCell}>{node.userCount || 0}</div>
+            <div className={styles.treeCell}>
+              <Menu>
+                <MenuTrigger disableButtonEnhancement>
+                  <Button
+                    appearance="subtle"
+                    icon={<MoreHorizontalRegular />}
+                    aria-label="Más acciones"
+                  />
+                </MenuTrigger>
+                <MenuPopover>
+                  <MenuList>
+                    <MenuItem icon={<EyeRegular />} onClick={() => handleViewDetails(node)}>
+                      Ver detalles
+                    </MenuItem>
+                    <MenuItem icon={<EditRegular />} onClick={() => handleEdit(node)}>
+                      Editar
+                    </MenuItem>
+                    <MenuItem icon={<PeopleRegular />} onClick={() => handleViewUsers(node)}>
+                      Ver usuarios
+                    </MenuItem>
+                    <MenuItem icon={<LinkRegular />} onClick={() => handleAssignParent(node)}>
+                      Asignar a otro cliente
+                    </MenuItem>
+                    {node.isSuspended ? (
+                      <MenuItem icon={<PlayRegular />} onClick={() => handleActivate(node)}>
+                        Activar
+                      </MenuItem>
+                    ) : (
+                      <MenuItem icon={<PauseRegular />} onClick={() => handleSuspend(node)}>
+                        Suspender
+                      </MenuItem>
+                    )}
+                    <MenuItem icon={<DeleteRegular />} onClick={() => handleDelete(node)}>
+                      Eliminar
+                    </MenuItem>
+                  </MenuList>
+                </MenuPopover>
+              </Menu>
+            </div>
+          </div>
+        </div>
+        {hasChildren && isExpanded && (
+          <div>
+            {node.children.map((child) => renderCustomerNode(child))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const handleEdit = async (customer: CustomerDto) => {
     setSelectedCustomer(customer);
@@ -424,90 +727,54 @@ export const CustomersPage = () => {
           </Button>
         </div>
 
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHeaderCell>Nombre</TableHeaderCell>
-              <TableHeaderCell>Identificación</TableHeaderCell>
-              <TableHeaderCell>País</TableHeaderCell>
-              <TableHeaderCell>Ciudad</TableHeaderCell>
-              <TableHeaderCell>Teléfono</TableHeaderCell>
-              <TableHeaderCell>Email</TableHeaderCell>
-              <TableHeaderCell>Estado</TableHeaderCell>
-              <TableHeaderCell>Tenants</TableHeaderCell>
-              <TableHeaderCell>Usuarios</TableHeaderCell>
-              <TableHeaderCell className={styles.actionsCell}>Acciones</TableHeaderCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredCustomers.map((customer) => (
-              <TableRow key={customer.id}>
-                <TableCell>{customer.name}</TableCell>
-                <TableCell>{customer.identification}</TableCell>
-                <TableCell>{customer.countryName || 'N/A'}</TableCell>
-                <TableCell>{customer.city || 'N/A'}</TableCell>
-                <TableCell>{customer.phone || 'N/A'}</TableCell>
-                <TableCell>{customer.email || 'N/A'}</TableCell>
-                <TableCell>
-                  {customer.isSuspended ? (
-                    <Badge appearance="filled" color="danger">Suspendido</Badge>
-                  ) : customer.isActive ? (
-                    <Badge appearance="filled" color="success">Activo</Badge>
-                  ) : (
-                    <Badge appearance="outline">Inactivo</Badge>
-                  )}
-                </TableCell>
-                <TableCell>{customer.tenantCount || 0}</TableCell>
-                <TableCell>{customer.userCount || 0}</TableCell>
-                <TableCell>
-                  <Menu>
-                    <MenuTrigger disableButtonEnhancement>
-                      <Button
-                        appearance="subtle"
-                        icon={<MoreHorizontalRegular />}
-                        aria-label="Más acciones"
-                      />
-                    </MenuTrigger>
-                    <MenuPopover>
-                      <MenuList>
-                        <MenuItem icon={<EyeRegular />} onClick={() => handleViewDetails(customer)}>
-                          Ver detalles
-                        </MenuItem>
-                        <MenuItem icon={<EditRegular />} onClick={() => handleEdit(customer)}>
-                          Editar
-                        </MenuItem>
-                        <MenuItem icon={<PeopleRegular />} onClick={() => handleViewUsers(customer)}>
-                          Ver usuarios
-                        </MenuItem>
-                        <MenuItem icon={<LinkRegular />} onClick={() => handleAssignParent(customer)}>
-                          Asignar a otro cliente
-                        </MenuItem>
-                        {customer.isSuspended ? (
-                          <MenuItem icon={<PlayRegular />} onClick={() => handleActivate(customer)}>
-                            Activar
-                          </MenuItem>
-                        ) : (
-                          <MenuItem icon={<PauseRegular />} onClick={() => handleSuspend(customer)}>
-                            Suspender
-                          </MenuItem>
-                        )}
-                        <MenuItem icon={<DeleteRegular />} onClick={() => handleDelete(customer)}>
-                          Eliminar
-                        </MenuItem>
-                      </MenuList>
-                    </MenuPopover>
-                  </Menu>
-                </TableCell>
+        {/* Vista jerárquica con drag and drop */}
+        <div className={styles.treeContainer}>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHeaderCell style={{ width: '24px' }}></TableHeaderCell>
+                <TableHeaderCell style={{ width: '24px' }}></TableHeaderCell>
+                <TableHeaderCell>Nombre</TableHeaderCell>
+                <TableHeaderCell>Identificación</TableHeaderCell>
+                <TableHeaderCell>País</TableHeaderCell>
+                <TableHeaderCell>Ciudad</TableHeaderCell>
+                <TableHeaderCell>Teléfono</TableHeaderCell>
+                <TableHeaderCell>Email</TableHeaderCell>
+                <TableHeaderCell>Estado</TableHeaderCell>
+                <TableHeaderCell>Tenants</TableHeaderCell>
+                <TableHeaderCell>Usuarios</TableHeaderCell>
+                <TableHeaderCell className={styles.actionsCell}>Acciones</TableHeaderCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-
-        {filteredCustomers.length === 0 && !isLoading && (
-          <div style={{ padding: tokens.spacingVerticalXXL, textAlign: 'center' }}>
-            <Text>No se encontraron clientes</Text>
+            </TableHeader>
+          </Table>
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.dataTransfer.dropEffect = 'move';
+            }}
+            onDrop={handleDropOnRoot}
+            style={{
+              minHeight: '50px',
+              padding: tokens.spacingVerticalM,
+              border: `2px dashed ${tokens.colorNeutralStroke2}`,
+              ...shorthands.borderRadius(tokens.borderRadiusMedium),
+              marginBottom: tokens.spacingVerticalM,
+              textAlign: 'center',
+              color: tokens.colorNeutralForeground3,
+            }}
+          >
+            <Text>Arrastra aquí para convertir en cliente raíz (sin padre)</Text>
           </div>
-        )}
+          <div>
+            {customerTree.length === 0 ? (
+              <div style={{ padding: tokens.spacingVerticalXXL, textAlign: 'center' }}>
+                <Text>No se encontraron clientes</Text>
+              </div>
+            ) : (
+              customerTree.map((node) => renderCustomerNode(node))
+            )}
+          </div>
+        </div>
       </Card>
 
       {/* Dialog de creación */}
