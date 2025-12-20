@@ -1439,22 +1439,22 @@ export const CustomersPage = () => {
               <Text>No se encontraron clientes</Text>
             </div>
           ) : (
-            <Table>
+            <Table style={{ tableLayout: 'auto', width: '100%' }}>
               <TableHeader>
                 <TableRow>
-                  <TableHeaderCell></TableHeaderCell>
-                  <TableHeaderCell>Nivel</TableHeaderCell>
-                  <TableHeaderCell>Nombre</TableHeaderCell>
-                  <TableHeaderCell>Identificación</TableHeaderCell>
-                  <TableHeaderCell>País</TableHeaderCell>
-                  <TableHeaderCell>Ciudad</TableHeaderCell>
-                  <TableHeaderCell>Teléfono</TableHeaderCell>
-                  <TableHeaderCell>Email</TableHeaderCell>
-                  <TableHeaderCell>Estado</TableHeaderCell>
-                  <TableHeaderCell>Sedes</TableHeaderCell>
-                  <TableHeaderCell>Tenants</TableHeaderCell>
-                  <TableHeaderCell>Usuarios</TableHeaderCell>
-                  <TableHeaderCell>Acciones</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '40px', minWidth: '40px' }}></TableHeaderCell>
+                  <TableHeaderCell style={{ width: '80px', minWidth: '80px' }}>Nivel</TableHeaderCell>
+                  <TableHeaderCell style={{ width: 'auto', minWidth: '150px' }}>Nombre</TableHeaderCell>
+                  <TableHeaderCell style={{ width: 'auto', minWidth: '150px' }}>Identificación</TableHeaderCell>
+                  <TableHeaderCell style={{ width: 'auto', minWidth: '120px' }}>País</TableHeaderCell>
+                  <TableHeaderCell style={{ width: 'auto', minWidth: '120px' }}>Ciudad</TableHeaderCell>
+                  <TableHeaderCell style={{ width: 'auto', minWidth: '130px' }}>Teléfono</TableHeaderCell>
+                  <TableHeaderCell style={{ width: 'auto', minWidth: '180px' }}>Email</TableHeaderCell>
+                  <TableHeaderCell style={{ width: 'auto', minWidth: '110px' }}>Estado</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '80px', minWidth: '80px' }}>Sedes</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '80px', minWidth: '80px' }}>Tenants</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '80px', minWidth: '80px' }}>Usuarios</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '120px', minWidth: '120px' }}>Acciones</TableHeaderCell>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1518,9 +1518,9 @@ export const CustomersPage = () => {
                           <Badge appearance="outline">Inactivo</Badge>
                         )}
                       </TableCell>
-                      <TableCell style={{ textAlign: 'center' }}>{customer.officeCount || 0}</TableCell>
-                      <TableCell style={{ textAlign: 'center' }}>{customer.tenantCount || 0}</TableCell>
-                      <TableCell style={{ textAlign: 'center' }}>{customer.userCount || 0}</TableCell>
+                      <TableCell>{customer.officeCount || 0}</TableCell>
+                      <TableCell>{customer.tenantCount || 0}</TableCell>
+                      <TableCell>{customer.userCount || 0}</TableCell>
                       <TableCell>
                         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS }}>
                           <Menu>
