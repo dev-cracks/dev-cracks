@@ -1019,6 +1019,16 @@ export const CustomersPage = () => {
     }
   };
 
+  const handleDetailsDrawerOpenChange = (event: any, data: { open: boolean }) => {
+    // El drawer de detalles es solo lectura, se puede cerrar sin confirmación
+    if (data.open === false) {
+      setIsDetailsDialogOpen(false);
+      setSelectedCustomer(null);
+    } else {
+      setIsDetailsDialogOpen(true);
+    }
+  };
+
   const handleAssignTenant = async () => {
     if (!selectedCustomer) return;
 
@@ -2120,44 +2130,45 @@ export const CustomersPage = () => {
         </DialogSurface>
       </Dialog>
 
-      {/* Dialog de detalles */}
-      <Dialog open={isDetailsDialogOpen} onOpenChange={(_, data) => setIsDetailsDialogOpen(data.open)}>
-        <DialogSurface>
-          <DialogTitle>Detalles del Cliente</DialogTitle>
-          <DialogBody>
-            <DialogContent>
-              {selectedCustomer && (
-                <div className={styles.detailsContent}>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Nombre:</Text>
-                    <Text>{selectedCustomer.name}</Text>
-                  </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Identificación:</Text>
-                    <Text>{selectedCustomer.identification}</Text>
-                  </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>País:</Text>
-                    <Text>{selectedCustomer.countryName || 'N/A'}</Text>
-                  </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Estado/Provincia:</Text>
-                    <Text>{selectedCustomer.stateProvince || 'N/A'}</Text>
-                  </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Ciudad:</Text>
-                    <Text>{selectedCustomer.city || 'N/A'}</Text>
-                  </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Teléfono:</Text>
-                    <Text>{selectedCustomer.phone || 'N/A'}</Text>
-                  </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Correo electrónico:</Text>
-                    <Text>{selectedCustomer.email || 'N/A'}</Text>
-                  </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Estado:</Text>
+      {/* Drawer de detalles */}
+      <OverlayDrawer
+        {...restoreFocusSourceAttributes}
+        position="end"
+        size="large"
+        open={isDetailsDialogOpen}
+        modalType="alert"
+        onOpenChange={handleDetailsDrawerOpenChange}
+      >
+        <DrawerHeader>
+          <DrawerHeaderTitle>Detalles del Cliente</DrawerHeaderTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
+            {selectedCustomer && (
+              <>
+                <Field label="Nombre" className={styles.formField}>
+                  <Input value={selectedCustomer.name} readOnly />
+                </Field>
+                <Field label="Identificación" className={styles.formField}>
+                  <Input value={selectedCustomer.identification} readOnly />
+                </Field>
+                <Field label="País" className={styles.formField}>
+                  <Input value={selectedCustomer.countryName || 'N/A'} readOnly />
+                </Field>
+                <Field label="Estado/Provincia" className={styles.formField}>
+                  <Input value={selectedCustomer.stateProvince || 'N/A'} readOnly />
+                </Field>
+                <Field label="Ciudad" className={styles.formField}>
+                  <Input value={selectedCustomer.city || 'N/A'} readOnly />
+                </Field>
+                <Field label="Teléfono" className={styles.formField}>
+                  <Input value={selectedCustomer.phone || 'N/A'} readOnly />
+                </Field>
+                <Field label="Correo electrónico" className={styles.formField}>
+                  <Input value={selectedCustomer.email || 'N/A'} readOnly />
+                </Field>
+                <Field label="Estado" className={styles.formField}>
+                  <div>
                     {selectedCustomer.isSuspended ? (
                       <Badge appearance="filled" color="danger">Suspendido</Badge>
                     ) : selectedCustomer.isActive ? (
@@ -2166,33 +2177,29 @@ export const CustomersPage = () => {
                       <Badge appearance="outline">Inactivo</Badge>
                     )}
                   </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Tenants:</Text>
-                    <Text>{selectedCustomer.tenantCount || 0}</Text>
-                  </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Usuarios:</Text>
-                    <Text>{selectedCustomer.userCount || 0}</Text>
-                  </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Creado:</Text>
-                    <Text>{new Date(selectedCustomer.createdAt).toLocaleString()}</Text>
-                  </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Actualizado:</Text>
-                    <Text>{new Date(selectedCustomer.updatedAt).toLocaleString()}</Text>
-                  </div>
+                </Field>
+                <Field label="Tenants" className={styles.formField}>
+                  <Input value={String(selectedCustomer.tenantCount || 0)} readOnly />
+                </Field>
+                <Field label="Usuarios" className={styles.formField}>
+                  <Input value={String(selectedCustomer.userCount || 0)} readOnly />
+                </Field>
+                <Field label="Creado" className={styles.formField}>
+                  <Input value={new Date(selectedCustomer.createdAt).toLocaleString()} readOnly />
+                </Field>
+                <Field label="Actualizado" className={styles.formField}>
+                  <Input value={new Date(selectedCustomer.updatedAt).toLocaleString()} readOnly />
+                </Field>
+                <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
+                  <Button appearance="primary" onClick={() => setIsDetailsDialogOpen(false)}>
+                    Cerrar
+                  </Button>
                 </div>
-              )}
-            </DialogContent>
-          </DialogBody>
-          <DialogActions>
-            <Button appearance="primary" onClick={() => setIsDetailsDialogOpen(false)}>
-              Cerrar
-            </Button>
-          </DialogActions>
-        </DialogSurface>
-      </Dialog>
+              </>
+            )}
+          </div>
+        </DrawerBody>
+      </OverlayDrawer>
 
       {/* Dialog de usuarios */}
       <Dialog open={isUsersDialogOpen} onOpenChange={(_, data) => setIsUsersDialogOpen(data.open)}>
