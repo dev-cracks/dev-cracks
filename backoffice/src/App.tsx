@@ -3,6 +3,7 @@ import { Layout } from './components/Layout';
 import { DashboardPage } from './pages/DashboardPage';
 import { UsersPage } from './pages/UsersPage';
 import { TenantsPage } from './pages/TenantsPage';
+import { CustomersPage } from './pages/CustomersPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { LoginPage } from './pages/LoginPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -49,6 +50,16 @@ const App = () => {
             <ProtectedRoute>
               <Layout>
                 <TenantsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customers"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <CustomersPage />
               </Layout>
             </ProtectedRoute>
           }

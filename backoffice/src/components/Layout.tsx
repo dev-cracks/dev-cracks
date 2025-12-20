@@ -261,6 +261,11 @@ export const Layout = ({ children }: LayoutProps) => {
       path: '/tenants',
     },
     {
+      name: 'Clientes',
+      icon: <BuildingRegular />,
+      path: '/customers',
+    },
+    {
       name: 'Configuración',
       icon: <SettingsRegular />,
       path: '/settings',

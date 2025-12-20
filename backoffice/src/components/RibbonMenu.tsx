@@ -88,6 +88,7 @@ export const RibbonMenu = ({ onMenuToggle }: RibbonMenuProps) => {
         { label: 'Dashboard', action: () => navigate('/dashboard') },
         { label: 'Users', action: () => navigate('/users') },
         { label: 'Tenants', action: () => navigate('/tenants') },
+        { label: 'Customers', action: () => navigate('/customers') },
       ],
     },
     {
