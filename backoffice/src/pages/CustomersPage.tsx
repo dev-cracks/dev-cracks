@@ -879,7 +879,7 @@ export const CustomersPage = () => {
       setIsCreating(true);
       const createData: CreateCustomerRequest = {
         ...formData,
-        parentId: hasParent ? createParentId : undefined,
+        parentId: hasParent && createParentId ? createParentId : undefined,
       };
       await customerService.createCustomer(createData);
       setIsCreateDialogOpen(false);
@@ -944,6 +944,79 @@ export const CustomersPage = () => {
     
     // Permitir abrir normalmente o cerrar si no hay datos
     setIsCreateDialogOpen(data.open);
+  };
+
+  const handleEditDrawerOpenChange = (event: any, data: { open: boolean }) => {
+    // Con modalType="alert", el Drawer no se puede cerrar con clic fuera o ESC
+    // Solo se puede cerrar programáticamente, así que solo necesitamos manejar la confirmación
+    if (data.open === false) {
+      // Verificar si hay datos modificados en el formulario
+      if (!selectedCustomer) {
+        setIsEditDialogOpen(false);
+        setCustomerTenants([]);
+        setSelectedCustomer(null);
+        setFormData({
+          name: '',
+          identification: '',
+          countryId: '',
+          stateProvince: '',
+          city: '',
+          phone: '',
+          email: '',
+        });
+        return;
+      }
+
+      const hasChanges = 
+        formData.name !== selectedCustomer.name ||
+        formData.identification !== selectedCustomer.identification ||
+        formData.countryId !== selectedCustomer.countryId ||
+        formData.stateProvince !== (selectedCustomer.stateProvince || '') ||
+        formData.city !== (selectedCustomer.city || '') ||
+        formData.phone !== (selectedCustomer.phone || '') ||
+        formData.email !== (selectedCustomer.email || '');
+      
+      if (hasChanges) {
+        // Si hay cambios y se intenta cerrar, mostrar confirmación
+        if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los cambios no guardados.')) {
+          setIsEditDialogOpen(false);
+          setCustomerTenants([]);
+          setSelectedCustomer(null);
+          setFormData({
+            name: '',
+            identification: '',
+            countryId: '',
+            stateProvince: '',
+            city: '',
+            phone: '',
+            email: '',
+          });
+          setError(null);
+        }
+        // Si el usuario cancela, no actualizamos el estado (mantiene el Drawer abierto)
+        return;
+      } else {
+        // Si no hay cambios, cerrar y limpiar estado
+        setIsEditDialogOpen(false);
+        setCustomerTenants([]);
+        setSelectedCustomer(null);
+        setFormData({
+          name: '',
+          identification: '',
+          countryId: '',
+          stateProvince: '',
+          city: '',
+          phone: '',
+          email: '',
+        });
+        setError(null);
+      }
+    }
+    
+    // Permitir abrir normalmente
+    if (data.open === true) {
+      setIsEditDialogOpen(true);
+    }
   };
 
   const handleAssignTenant = async () => {
@@ -1337,12 +1410,26 @@ export const CustomersPage = () => {
       return;
     }
 
+    if (!formData.name.trim() || !formData.identification.trim() || !formData.countryId) {
+      setError('Nombre, identificación y país son requeridos');
+      return;
+    }
+
     try {
       setError(null);
       await customerService.updateCustomer(selectedCustomer.id, formData);
       setIsEditDialogOpen(false);
       setSelectedCustomer(null);
       setCustomerTenants([]);
+      setFormData({
+        name: '',
+        identification: '',
+        countryId: '',
+        stateProvince: '',
+        city: '',
+        phone: '',
+        email: '',
+      });
       await loadCustomers();
     } catch (err: any) {
       setError(err.message || 'Error al guardar cliente');
@@ -1812,114 +1899,168 @@ export const CustomersPage = () => {
         </DrawerBody>
       </OverlayDrawer>
 
-      {/* Dialog de edición */}
-      <Dialog open={isEditDialogOpen} onOpenChange={(_, data) => setIsEditDialogOpen(data.open)}>
-        <DialogSurface>
-          <DialogTitle>Editar Cliente</DialogTitle>
-          <DialogBody>
-            <DialogContent>
-              {isLoadingTenants ? (
-                <DetailsSkeleton rows={3} />
-              ) : customerTenants.length === 0 ? (
-                <div className={styles.detailsContent}>
-                  <MessageBar intent="warning">
-                    <MessageBarBody>
-                      Este cliente no tiene tenants asociados. Debe asignar un tenant antes de poder editar el cliente.
-                    </MessageBarBody>
-                  </MessageBar>
-                  <div style={{ marginTop: tokens.spacingVerticalM }}>
-                    <Button
-                      appearance="primary"
-                      icon={<AddRegular />}
-                      onClick={() => setIsAssignTenantDialogOpen(true)}
-                    >
-                      Asignar Tenant
-                    </Button>
-                  </div>
+      {/* Drawer de edición */}
+      <OverlayDrawer
+        {...restoreFocusSourceAttributes}
+        position="end"
+        size="large"
+        open={isEditDialogOpen}
+        modalType="alert"
+        onOpenChange={handleEditDrawerOpenChange}
+      >
+        <DrawerHeader>
+          <DrawerHeaderTitle>Editar Cliente</DrawerHeaderTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
+            {isLoadingTenants ? (
+              <DetailsSkeleton rows={3} />
+            ) : customerTenants.length === 0 ? (
+              <>
+                <MessageBar intent="warning">
+                  <MessageBarBody>
+                    Este cliente no tiene tenants asociados. Debe asignar un tenant antes de poder editar el cliente.
+                  </MessageBarBody>
+                </MessageBar>
+                <div style={{ marginTop: tokens.spacingVerticalM }}>
+                  <Button
+                    appearance="primary"
+                    icon={<AddRegular />}
+                    onClick={() => setIsAssignTenantDialogOpen(true)}
+                  >
+                    Asignar Tenant
+                  </Button>
                 </div>
-              ) : (
-                <div className={styles.detailsContent}>
-                  <Field label="Nombre" required className={styles.formField}>
-                    <Input
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      disabled={customerTenants.length === 0}
-                    />
-                  </Field>
-                  <Field label="Identificación" required className={styles.formField}>
-                    <Input
-                      value={formData.identification}
-                      onChange={(e) => setFormData({ ...formData, identification: e.target.value })}
-                      disabled={customerTenants.length === 0}
-                    />
-                  </Field>
-                  <Field label="País" required className={styles.formField}>
-                    <Combobox
-                      value={countries.find((c) => c.id === formData.countryId)?.name || ''}
-                      onOptionSelect={(_, data) => {
-                        const country = countries.find((c) => c.name === data.optionValue);
-                        if (country) {
-                          setFormData({ ...formData, countryId: country.id });
+              </>
+            ) : (
+              <>
+                <Field label="Nombre" required className={styles.formField}>
+                  <Input
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  />
+                </Field>
+                <Field label="Identificación" required className={styles.formField}>
+                  <Input
+                    value={formData.identification}
+                    onChange={(e) => setFormData({ ...formData, identification: e.target.value })}
+                  />
+                </Field>
+                <Field label="País" required className={styles.formField}>
+                  <Combobox
+                    value={countries.find((c) => c.id === formData.countryId)?.name || ''}
+                    onOptionSelect={(_, data) => {
+                      const country = countries.find((c) => c.name === data.optionValue);
+                      if (country) {
+                        setFormData({ ...formData, countryId: country.id });
+                      }
+                    }}
+                  >
+                    {countries.map((country) => (
+                      <Option key={country.id} value={country.name}>
+                        {country.name} ({country.isoCode})
+                      </Option>
+                    ))}
+                  </Combobox>
+                </Field>
+                <Field label="Estado/Provincia" className={styles.formField}>
+                  <Input
+                    value={formData.stateProvince}
+                    onChange={(e) => setFormData({ ...formData, stateProvince: e.target.value })}
+                  />
+                </Field>
+                <Field label="Ciudad" className={styles.formField}>
+                  <Input
+                    value={formData.city}
+                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  />
+                </Field>
+                <Field label="Teléfono" className={styles.formField}>
+                  <Input
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  />
+                </Field>
+                <Field label="Correo electrónico" className={styles.formField}>
+                  <Input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </Field>
+                <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
+                  <Button 
+                    appearance="secondary" 
+                    onClick={() => {
+                      if (!selectedCustomer) {
+                        setIsEditDialogOpen(false);
+                        setCustomerTenants([]);
+                        setSelectedCustomer(null);
+                        setFormData({
+                          name: '',
+                          identification: '',
+                          countryId: '',
+                          stateProvince: '',
+                          city: '',
+                          phone: '',
+                          email: '',
+                        });
+                        return;
+                      }
+
+                      const hasChanges = 
+                        formData.name !== selectedCustomer.name ||
+                        formData.identification !== selectedCustomer.identification ||
+                        formData.countryId !== selectedCustomer.countryId ||
+                        formData.stateProvince !== (selectedCustomer.stateProvince || '') ||
+                        formData.city !== (selectedCustomer.city || '') ||
+                        formData.phone !== (selectedCustomer.phone || '') ||
+                        formData.email !== (selectedCustomer.email || '');
+                      
+                      if (hasChanges) {
+                        if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los cambios no guardados.')) {
+                          setIsEditDialogOpen(false);
+                          setCustomerTenants([]);
+                          setSelectedCustomer(null);
+                          setFormData({
+                            name: '',
+                            identification: '',
+                            countryId: '',
+                            stateProvince: '',
+                            city: '',
+                            phone: '',
+                            email: '',
+                          });
+                          setError(null);
                         }
-                      }}
-                      disabled={customerTenants.length === 0}
-                    >
-                      {countries.map((country) => (
-                        <Option key={country.id} value={country.name}>
-                          {country.name} ({country.isoCode})
-                        </Option>
-                      ))}
-                    </Combobox>
-                  </Field>
-                  <Field label="Estado/Provincia" className={styles.formField}>
-                    <Input
-                      value={formData.stateProvince}
-                      onChange={(e) => setFormData({ ...formData, stateProvince: e.target.value })}
-                      disabled={customerTenants.length === 0}
-                    />
-                  </Field>
-                  <Field label="Ciudad" className={styles.formField}>
-                    <Input
-                      value={formData.city}
-                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      disabled={customerTenants.length === 0}
-                    />
-                  </Field>
-                  <Field label="Teléfono" className={styles.formField}>
-                    <Input
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      disabled={customerTenants.length === 0}
-                    />
-                  </Field>
-                  <Field label="Correo electrónico" className={styles.formField}>
-                    <Input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      disabled={customerTenants.length === 0}
-                    />
-                  </Field>
+                      } else {
+                        setIsEditDialogOpen(false);
+                        setCustomerTenants([]);
+                        setSelectedCustomer(null);
+                        setFormData({
+                          name: '',
+                          identification: '',
+                          countryId: '',
+                          stateProvince: '',
+                          city: '',
+                          phone: '',
+                          email: '',
+                        });
+                        setError(null);
+                      }
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button appearance="primary" onClick={handleSave}>
+                    Guardar
+                  </Button>
                 </div>
-              )}
-            </DialogContent>
-          </DialogBody>
-          <DialogActions>
-            <Button appearance="secondary" onClick={() => {
-              setIsEditDialogOpen(false);
-              setCustomerTenants([]);
-              setSelectedCustomer(null);
-            }}>
-              {customerTenants.length === 0 ? 'Cerrar' : 'Cancelar'}
-            </Button>
-            {customerTenants.length > 0 && (
-              <Button appearance="primary" onClick={handleSave}>
-                Guardar
-              </Button>
+              </>
             )}
-          </DialogActions>
-        </DialogSurface>
-      </Dialog>
+          </div>
+        </DrawerBody>
+      </OverlayDrawer>
 
       {/* Dialog de asignar tenant */}
       <Dialog open={isAssignTenantDialogOpen} onOpenChange={(_, data) => setIsAssignTenantDialogOpen(data.open)}>
