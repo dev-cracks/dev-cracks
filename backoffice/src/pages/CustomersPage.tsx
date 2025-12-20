@@ -199,18 +199,40 @@ const useStyles = makeStyles({
   },
   flowContainer: {
     width: '100%',
-    height: '600px',
+    height: 'calc(100vh - 300px)',
+    minHeight: '500px',
+    maxHeight: '800px',
     border: `1px solid ${tokens.colorNeutralStroke2}`,
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     overflow: 'hidden',
+    '@media (max-width: 768px)': {
+      height: 'calc(100vh - 250px)',
+      minHeight: '400px',
+    },
+    '@media (max-width: 480px)': {
+      height: 'calc(100vh - 200px)',
+      minHeight: '350px',
+    },
   },
   flowNode: {
     padding: tokens.spacingVerticalM,
     backgroundColor: tokens.colorNeutralBackground1,
     border: `2px solid ${tokens.colorNeutralStroke1}`,
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    minWidth: '200px',
+    minWidth: '180px',
+    maxWidth: '250px',
+    width: 'auto',
     boxShadow: tokens.shadow4,
+    '@media (max-width: 768px)': {
+      minWidth: '150px',
+      maxWidth: '200px',
+      padding: tokens.spacingVerticalS,
+    },
+    '@media (max-width: 480px)': {
+      minWidth: '120px',
+      maxWidth: '160px',
+      padding: tokens.spacingVerticalXS,
+    },
   },
   flowNodeHeader: {
     fontWeight: tokens.fontWeightSemibold,
@@ -365,6 +387,17 @@ export const CustomersPage = () => {
   const flowLoadingRef = useRef(false);
   const [customerTenantsMap, setCustomerTenantsMap] = useState<Map<string, TenantDto[]>>(new Map());
   const [tenantUsersMap, setTenantUsersMap] = useState<Map<string, UserDto[]>>(new Map());
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+  
+  // Detectar cambios en el tamaño de ventana
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Organizar clientes en estructura jerárquica
   interface CustomerNode extends CustomerDto {
@@ -753,20 +786,30 @@ export const CustomersPage = () => {
     }
   };
 
-  // Función para aplicar layout automático con Dagre
-  const getLayoutedElements = (nodes: Node[], edges: Edge[], direction: 'TB' | 'LR' = 'TB') => {
+  // Función para aplicar layout automático con Dagre (responsive)
+  const getLayoutedElements = useCallback((nodes: Node[], edges: Edge[], direction: 'TB' | 'LR' = 'TB') => {
     const dagreGraph = new dagre.graphlib.Graph();
     dagreGraph.setDefaultEdgeLabel(() => ({}));
+    
+    // Detectar tamaño de pantalla para ajustar espaciado
+    const isMobile = window.innerWidth < 768;
+    const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+    
+    const nodesep = isMobile ? 50 : isTablet ? 75 : 100; // Separación horizontal
+    const ranksep = isMobile ? 100 : isTablet ? 120 : 150; // Separación vertical
+    const marginx = isMobile ? 20 : 50;
+    const marginy = isMobile ? 20 : 50;
+    
     dagreGraph.setGraph({ 
       rankdir: direction,
-      nodesep: 100, // Separación horizontal entre nodos
-      ranksep: 150, // Separación vertical entre niveles
-      marginx: 50,
-      marginy: 50,
+      nodesep,
+      ranksep,
+      marginx,
+      marginy,
     });
 
-    const nodeWidth = 220;
-    const nodeHeight = 120;
+    const nodeWidth = isMobile ? 150 : isTablet ? 180 : 220;
+    const nodeHeight = isMobile ? 100 : isTablet ? 110 : 120;
 
     nodes.forEach((node) => {
       dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
@@ -790,7 +833,31 @@ export const CustomersPage = () => {
     });
 
     return { nodes: layoutedNodes, edges };
-  };
+  }, []);
+
+  // Recalcular layout cuando cambia el tamaño de ventana (con debounce)
+  const layoutRecalcRef = useRef(false);
+  useEffect(() => {
+    if (selectedView === 'flow' && flowNodes.length > 0 && !layoutRecalcRef.current) {
+      layoutRecalcRef.current = true;
+      const timeoutId = setTimeout(() => {
+        // Obtener los nodos y edges actuales sin posiciones calculadas
+        const nodesWithoutLayout = flowNodes.map(node => ({
+          ...node,
+          position: { x: 0, y: 0 }
+        }));
+        const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(nodesWithoutLayout, flowEdges, 'TB');
+        setFlowNodes(layoutedNodes);
+        setFlowEdges(layoutedEdges);
+        layoutRecalcRef.current = false;
+      }, 300); // Debounce de 300ms
+
+      return () => {
+        clearTimeout(timeoutId);
+        layoutRecalcRef.current = false;
+      };
+    }
+  }, [windowSize.width, selectedView, getLayoutedElements]);
 
   // Función para cargar datos del flow
   const loadFlowData = useCallback(async () => {
@@ -1139,6 +1206,9 @@ export const CustomersPage = () => {
                   onEdgesChange={onEdgesChange}
                   onConnect={onConnect}
                   fitView
+                  minZoom={0.2}
+                  maxZoom={2}
+                  defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
                 >
                   <Background />
                   <Controls />
