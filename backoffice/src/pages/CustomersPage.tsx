@@ -82,6 +82,10 @@ import { UserDto } from '../services/authService';
 import { tenantService, TenantDto } from '../services/tenantService';
 import { officeService, OfficeDto } from '../services/officeService';
 import { notificationService } from '../services/notificationService';
+import { TableSkeleton } from '../components/TableSkeleton';
+import { TreeSkeleton } from '../components/TreeSkeleton';
+import { DetailsSkeleton } from '../components/DetailsSkeleton';
+import { FlowSkeleton } from '../components/FlowSkeleton';
 
 const useStyles = makeStyles({
   container: {
@@ -474,7 +478,6 @@ export const CustomersPage = () => {
         const parent = customerMap.get(customer.parentId);
         if (parent) {
           parent.children.push(node);
-          node.level = parent.level + 1;
         } else {
           // Si el padre no existe, tratarlo como raíz
           rootNodes.push(node);
@@ -482,6 +485,18 @@ export const CustomersPage = () => {
       } else {
         rootNodes.push(node);
       }
+    });
+
+    // Calcular niveles recursivamente después de construir el árbol
+    const calculateLevels = (node: CustomerNode, currentLevel: number) => {
+      node.level = currentLevel;
+      node.children.forEach((child) => {
+        calculateLevels(child, currentLevel + 1);
+      });
+    };
+
+    rootNodes.forEach((root) => {
+      calculateLevels(root, 0);
     });
 
     return rootNodes;
@@ -1176,8 +1191,31 @@ export const CustomersPage = () => {
 
   if (isLoading && customers.length === 0) {
     return (
-      <div className={styles.loadingContainer}>
-        <Spinner size="large" label="Cargando clientes..." />
+      <div className={styles.container}>
+        <Card>
+          <CardHeader
+            header={
+              <div className={styles.header}>
+                <div className={styles.headerLeft}>
+                  <BuildingRegular fontSize={24} />
+                  <Text className={styles.title}>Clientes</Text>
+                </div>
+              </div>
+            }
+          />
+          <div className={styles.toolbar}>
+            <Input
+              placeholder="Buscar por nombre, identificación o país..."
+              disabled
+              contentBefore={<SearchRegular />}
+              style={{ flex: 1 }}
+            />
+            <Button appearance="primary" icon={<AddRegular />} disabled>
+              Crear Cliente
+            </Button>
+          </div>
+          <TreeSkeleton rows={8} />
+        </Card>
       </div>
     );
   }
@@ -1324,9 +1362,7 @@ export const CustomersPage = () => {
         {selectedView === 'flow' && (
           <div className={styles.flowContainer}>
             {flowLoading ? (
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                <Spinner size="large" label="Cargando vista interactiva..." />
-              </div>
+              <FlowSkeleton />
             ) : (
               <ReactFlowProvider>
                 <ReactFlow
@@ -1447,9 +1483,7 @@ export const CustomersPage = () => {
           <DialogBody>
             <DialogContent>
               {isLoadingTenants ? (
-                <div className={styles.loadingContainer}>
-                  <Spinner size="medium" label="Verificando tenants..." />
-                </div>
+                <DetailsSkeleton rows={3} />
               ) : customerTenants.length === 0 ? (
                 <div className={styles.detailsContent}>
                   <MessageBar intent="warning">
@@ -1690,9 +1724,7 @@ export const CustomersPage = () => {
           <DialogBody>
             <DialogContent>
               {isLoadingUsers ? (
-                <div className={styles.loadingContainer}>
-                  <Spinner size="medium" label="Cargando usuarios..." />
-                </div>
+                <TableSkeleton rows={5} columns={3} />
               ) : customerUsers.length === 0 ? (
                 <Text>No hay usuarios asociados a este cliente.</Text>
               ) : (
@@ -1732,9 +1764,7 @@ export const CustomersPage = () => {
           <DialogBody>
             <DialogContent>
               {isLoadingTenants ? (
-                <div className={styles.loadingContainer}>
-                  <Spinner size="medium" label="Cargando tenants..." />
-                </div>
+                <TableSkeleton rows={5} columns={3} />
               ) : customerTenants.length === 0 ? (
                 <Text>No hay tenants asociados a este cliente.</Text>
               ) : (

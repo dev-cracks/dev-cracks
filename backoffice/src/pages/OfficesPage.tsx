@@ -57,6 +57,7 @@ import {
   CustomerDto,
 } from '../services/customerService';
 import { notificationService } from '../services/notificationService';
+import { TableSkeleton } from '../components/TableSkeleton';
 
 const useStyles = makeStyles({
   container: {
@@ -332,8 +333,31 @@ export const OfficesPage = () => {
 
   if (isLoading && offices.length === 0) {
     return (
-      <div className={styles.loadingContainer}>
-        <Spinner size="large" label="Cargando sedes..." />
+      <div className={styles.container}>
+        <Card>
+          <CardHeader
+            header={
+              <div className={styles.header}>
+                <div className={styles.headerLeft}>
+                  <HomeRegular fontSize={24} />
+                  <Text className={styles.title}>Gestión de Sedes</Text>
+                </div>
+                <Button appearance="primary" icon={<AddRegular />} disabled>
+                  Nueva Sede
+                </Button>
+              </div>
+            }
+          />
+          <div className={styles.toolbar}>
+            <Input
+              placeholder="Buscar por nombre, cliente, dirección o ciudad..."
+              disabled
+              contentBefore={<SearchRegular />}
+              style={{ width: '400px' }}
+            />
+          </div>
+          <TableSkeleton rows={8} columns={9} />
+        </Card>
       </div>
     );
   }

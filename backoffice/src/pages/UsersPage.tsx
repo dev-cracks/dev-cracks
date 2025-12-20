@@ -37,6 +37,7 @@ import {
 import { backofficeService, CreateUserRequest } from '../services/backofficeService';
 import { UserDto } from '../services/authService';
 import { useAuth } from '../hooks/useAuth';
+import { TableSkeleton } from '../components/TableSkeleton';
 
 const useStyles = makeStyles({
   container: {
@@ -185,9 +186,7 @@ export const UsersPage = () => {
         </div>
 
         {isLoading ? (
-          <div className={styles.loadingContainer}>
-            <Spinner size="large" />
-          </div>
+          <TableSkeleton rows={8} columns={5} />
         ) : (
           <Table>
             <TableHeader>

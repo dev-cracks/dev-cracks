@@ -47,6 +47,8 @@ import { tenantService, TenantDto, UpdateTenantRequest } from '../services/tenan
 import { UserDto } from '../services/authService';
 import { useAuth } from '../hooks/useAuth';
 import { notificationService } from '../services/notificationService';
+import { TableSkeleton } from '../components/TableSkeleton';
+import { DetailsSkeleton } from '../components/DetailsSkeleton';
 
 const useStyles = makeStyles({
   container: {
@@ -329,9 +331,7 @@ export const TenantsPage = () => {
         </div>
 
         {isLoading ? (
-          <div className={styles.loadingContainer}>
-            <Spinner size="large" />
-          </div>
+          <TableSkeleton rows={8} columns={5} />
         ) : (
           <Table>
             <TableHeader>
@@ -529,9 +529,7 @@ export const TenantsPage = () => {
           <DialogBody>
             <DialogContent>
               {isLoadingDetails ? (
-                <div className={styles.loadingContainer}>
-                  <Spinner size="large" />
-                </div>
+                <DetailsSkeleton rows={6} />
               ) : tenantDetails ? (
                 <div className={styles.detailsContent}>
                   <div className={styles.detailsRow}>
@@ -609,9 +607,7 @@ export const TenantsPage = () => {
           <DialogBody>
             <DialogContent>
               {isLoadingUsers ? (
-                <div className={styles.loadingContainer}>
-                  <Spinner size="large" />
-                </div>
+                <TableSkeleton rows={5} columns={3} />
               ) : tenantUsers.length === 0 ? (
                 <Text>No hay usuarios asociados a este tenant</Text>
               ) : (
