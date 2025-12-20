@@ -306,6 +306,7 @@ export const CustomersPage = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isUsersDialogOpen, setIsUsersDialogOpen] = useState(false);
+  const [isTenantsDialogOpen, setIsTenantsDialogOpen] = useState(false);
   const [isAssignTenantDialogOpen, setIsAssignTenantDialogOpen] = useState(false);
   const [isAssignParentDialogOpen, setIsAssignParentDialogOpen] = useState(false);
   const [customerUsers, setCustomerUsers] = useState<UserDto[]>([]);
@@ -377,18 +378,8 @@ export const CustomersPage = () => {
 
   // Estado para controlar qué nodos están expandidos y drag and drop
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
-  const [expandedOffices, setExpandedOffices] = useState<Set<string>>(new Set());
-  const [expandedTenants, setExpandedTenants] = useState<Set<string>>(new Set());
   const [draggedCustomerId, setDraggedCustomerId] = useState<string | null>(null);
   const [dragOverCustomerId, setDragOverCustomerId] = useState<string | null>(null);
-  
-  // Estado para almacenar offices, tenants y users
-  const [customerOffices, setCustomerOffices] = useState<Map<string, OfficeDto[]>>(new Map());
-  const [officeTenants, setOfficeTenants] = useState<Map<string, TenantDto[]>>(new Map());
-  const [tenantUsers, setTenantUsers] = useState<Map<string, UserDto[]>>(new Map());
-  const [loadingOffices, setLoadingOffices] = useState<Set<string>>(new Set());
-  const [loadingTenants, setLoadingTenants] = useState<Set<string>>(new Set());
-  const [loadingUsers, setLoadingUsers] = useState<Set<string>>(new Set());
   
   // Estado para la vista de React Flow
   const [selectedView, setSelectedView] = useState<'table' | 'flow'>('table');
@@ -459,108 +450,9 @@ export const CustomersPage = () => {
         newSet.delete(customerId);
       } else {
         newSet.add(customerId);
-        // Cargar offices cuando se expande un customer
-        loadOfficesForCustomer(customerId);
       }
       return newSet;
     });
-  };
-
-  const toggleExpandOffice = (officeId: string) => {
-    setExpandedOffices((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(officeId)) {
-        newSet.delete(officeId);
-      } else {
-        newSet.add(officeId);
-        // Cargar tenants cuando se expande una office
-        loadTenantsForOffice(officeId);
-      }
-      return newSet;
-    });
-  };
-
-  const toggleExpandTenant = (tenantId: string) => {
-    setExpandedTenants((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(tenantId)) {
-        newSet.delete(tenantId);
-      } else {
-        newSet.add(tenantId);
-        // Cargar users cuando se expande un tenant
-        loadUsersForTenant(tenantId);
-      }
-      return newSet;
-    });
-  };
-
-  const loadOfficesForCustomer = async (customerId: string) => {
-    if (loadingOffices.has(customerId) || customerOffices.has(customerId)) {
-      return;
-    }
-    setLoadingOffices((prev) => new Set(prev).add(customerId));
-    try {
-      const offices = await officeService.getOfficesByCustomer(customerId);
-      setCustomerOffices((prev) => {
-        const newMap = new Map(prev);
-        newMap.set(customerId, offices);
-        return newMap;
-      });
-    } catch (err: any) {
-      console.error(`[CustomersPage] Error cargando offices para customer ${customerId}:`, err);
-    } finally {
-      setLoadingOffices((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(customerId);
-        return newSet;
-      });
-    }
-  };
-
-  const loadTenantsForOffice = async (officeId: string) => {
-    if (loadingTenants.has(officeId) || officeTenants.has(officeId)) {
-      return;
-    }
-    setLoadingTenants((prev) => new Set(prev).add(officeId));
-    try {
-      const tenants = await tenantService.getTenantsByOffice(officeId);
-      setOfficeTenants((prev) => {
-        const newMap = new Map(prev);
-        newMap.set(officeId, tenants);
-        return newMap;
-      });
-    } catch (err: any) {
-      console.error(`[CustomersPage] Error cargando tenants para office ${officeId}:`, err);
-    } finally {
-      setLoadingTenants((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(officeId);
-        return newSet;
-      });
-    }
-  };
-
-  const loadUsersForTenant = async (tenantId: string) => {
-    if (loadingUsers.has(tenantId) || tenantUsers.has(tenantId)) {
-      return;
-    }
-    setLoadingUsers((prev) => new Set(prev).add(tenantId));
-    try {
-      const users = await tenantService.getTenantUsers(tenantId);
-      setTenantUsers((prev) => {
-        const newMap = new Map(prev);
-        newMap.set(tenantId, users);
-        return newMap;
-      });
-    } catch (err: any) {
-      console.error(`[CustomersPage] Error cargando users para tenant ${tenantId}:`, err);
-    } finally {
-      setLoadingUsers((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(tenantId);
-        return newSet;
-      });
-    }
   };
 
   const handleDragStart = (e: React.DragEvent, customerId: string) => {
@@ -721,6 +613,12 @@ export const CustomersPage = () => {
                     <MenuItem icon={<EditRegular />} onClick={() => handleEdit(node)}>
                       Editar
                     </MenuItem>
+                    <MenuItem icon={<HomeRegular />} onClick={() => handleViewOffices(node)}>
+                      Ver Sedes
+                    </MenuItem>
+                    <MenuItem icon={<BuildingRegular />} onClick={() => handleViewTenants(node)}>
+                      Ver Tenants
+                    </MenuItem>
                     <MenuItem icon={<PeopleRegular />} onClick={() => handleViewUsers(node)}>
                       Ver usuarios
                     </MenuItem>
@@ -748,162 +646,6 @@ export const CustomersPage = () => {
         {hasChildren && isExpanded && (
           <div>
             {node.children.map((child) => renderCustomerNode(child))}
-          </div>
-        )}
-        {/* Mostrar offices cuando el customer está expandido */}
-        {isExpanded && (
-          <div>
-            {loadingOffices.has(node.id) ? (
-              <div style={{ paddingLeft: `${(node.level + 1) * 24}px`, padding: tokens.spacingVerticalS }}>
-                <Spinner size="tiny" />
-              </div>
-            ) : (
-              customerOffices.get(node.id)?.map((office) => {
-                const isOfficeExpanded = expandedOffices.has(office.id);
-                const officeTenantsList = officeTenants.get(office.id) || [];
-                const isLoadingOfficeTenants = loadingTenants.has(office.id);
-                return (
-                  <div key={office.id}>
-                    <div
-                      className={styles.treeRow}
-                      style={{ paddingLeft: `${(node.level + 1) * 24}px`, backgroundColor: tokens.colorNeutralBackground2 }}
-                    >
-                      <div className={styles.treeRowContent}>
-                        <div className={styles.treeIndent}>
-                          <button
-                            className={styles.treeExpandButton}
-                            onClick={() => toggleExpandOffice(office.id)}
-                            type="button"
-                          >
-                            {isOfficeExpanded ? (
-                              <ChevronDownRegular fontSize={16} />
-                            ) : (
-                              <ChevronRightRegular fontSize={16} />
-                            )}
-                          </button>
-                        </div>
-                        <div className={styles.treeCell} style={{ justifyContent: 'center' }}>
-                          <HomeRegular fontSize={16} />
-                        </div>
-                        <div className={styles.treeCell}>{office.name}</div>
-                        <div className={styles.treeCell}>{office.address || 'N/A'}</div>
-                        <div className={styles.treeCell}>{office.city || 'N/A'}</div>
-                        <div className={styles.treeCell}>{office.phone || 'N/A'}</div>
-                        <div className={styles.treeCell}>{office.email || 'N/A'}</div>
-                        <div className={styles.treeCell}>
-                          {office.isActive ? (
-                            <Badge appearance="filled" color="success">Activo</Badge>
-                          ) : (
-                            <Badge appearance="outline">Inactivo</Badge>
-                          )}
-                        </div>
-                        <div className={styles.treeCell} style={{ justifyContent: 'center' }}>{office.tenantCount || 0}</div>
-                        <div className={styles.treeCell} style={{ justifyContent: 'center' }}>-</div>
-                        <div className={styles.treeCell}></div>
-                      </div>
-                    </div>
-                    {/* Mostrar tenants cuando la office está expandida */}
-                    {isOfficeExpanded && (
-                      <div>
-                        {isLoadingOfficeTenants ? (
-                          <div style={{ paddingLeft: `${(node.level + 2) * 24}px`, padding: tokens.spacingVerticalS }}>
-                            <Spinner size="tiny" />
-                          </div>
-                        ) : (
-                          officeTenantsList.map((tenant) => {
-                            const isTenantExpanded = expandedTenants.has(tenant.id);
-                            const tenantUsersList = tenantUsers.get(tenant.id) || [];
-                            const isLoadingTenantUsers = loadingUsers.has(tenant.id);
-                            return (
-                              <div key={tenant.id}>
-                                <div
-                                  className={styles.treeRow}
-                                  style={{ paddingLeft: `${(node.level + 2) * 24}px`, backgroundColor: tokens.colorNeutralBackground3 }}
-                                >
-                                  <div className={styles.treeRowContent}>
-                                    <div className={styles.treeIndent}>
-                                      <button
-                                        className={styles.treeExpandButton}
-                                        onClick={() => toggleExpandTenant(tenant.id)}
-                                        type="button"
-                                      >
-                                        {isTenantExpanded ? (
-                                          <ChevronDownRegular fontSize={16} />
-                                        ) : (
-                                          <ChevronRightRegular fontSize={16} />
-                                        )}
-                                      </button>
-                                    </div>
-                                    <div className={styles.treeCell} style={{ justifyContent: 'center' }}>
-                                      <BuildingRegular fontSize={16} />
-                                    </div>
-                                    <div className={styles.treeCell}>{tenant.name}</div>
-                                    <div className={styles.treeCell}>-</div>
-                                    <div className={styles.treeCell}>-</div>
-                                    <div className={styles.treeCell}>-</div>
-                                    <div className={styles.treeCell}>-</div>
-                                    <div className={styles.treeCell}>
-                                      {tenant.isSuspended ? (
-                                        <Badge appearance="filled" color="danger">Suspendido</Badge>
-                                      ) : tenant.isActive ? (
-                                        <Badge appearance="filled" color="success">Activo</Badge>
-                                      ) : (
-                                        <Badge appearance="outline">Inactivo</Badge>
-                                      )}
-                                    </div>
-                                    <div className={styles.treeCell} style={{ justifyContent: 'center' }}>-</div>
-                                    <div className={styles.treeCell} style={{ justifyContent: 'center' }}>{tenantUsersList.length}</div>
-                                    <div className={styles.treeCell}></div>
-                                  </div>
-                                </div>
-                                {/* Mostrar users cuando el tenant está expandido */}
-                                {isTenantExpanded && (
-                                  <div>
-                                    {isLoadingTenantUsers ? (
-                                      <div style={{ paddingLeft: `${(node.level + 3) * 24}px`, padding: tokens.spacingVerticalS }}>
-                                        <Spinner size="tiny" />
-                                      </div>
-                                    ) : (
-                                      tenantUsersList.map((user) => (
-                                        <div
-                                          key={user.id}
-                                          className={styles.treeRow}
-                                          style={{ paddingLeft: `${(node.level + 3) * 24}px`, backgroundColor: tokens.colorNeutralBackground4 }}
-                                        >
-                                          <div className={styles.treeRowContent}>
-                                            <div className={styles.treeIndent}>
-                                              <div style={{ width: '24px' }} />
-                                            </div>
-                                            <div className={styles.treeCell} style={{ justifyContent: 'center' }}>
-                                              <PeopleRegular fontSize={16} />
-                                            </div>
-                                            <div className={styles.treeCell}>{user.name || user.email}</div>
-                                            <div className={styles.treeCell}>-</div>
-                                            <div className={styles.treeCell}>-</div>
-                                            <div className={styles.treeCell}>-</div>
-                                            <div className={styles.treeCell}>{user.email}</div>
-                                            <div className={styles.treeCell}>
-                                              <Badge appearance="outline">{user.role || 'N/A'}</Badge>
-                                            </div>
-                                            <div className={styles.treeCell} style={{ justifyContent: 'center' }}>-</div>
-                                            <div className={styles.treeCell} style={{ justifyContent: 'center' }}>-</div>
-                                            <div className={styles.treeCell}></div>
-                                          </div>
-                                        </div>
-                                      ))
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })
-            )}
           </div>
         )}
       </div>
@@ -1480,7 +1222,14 @@ export const CustomersPage = () => {
                   <Controls />
                   <MiniMap />
                   <Panel position="top-left">
-                    <Text weight="semibold">Vista Interactiva: Clientes → Tenants → Usuarios</Text>
+                    <div style={{ backgroundColor: tokens.colorNeutralBackground1, padding: tokens.spacingVerticalS, ...shorthands.borderRadius(tokens.borderRadiusMedium) }}>
+                      <Text weight="semibold">Vista Interactiva: Clientes → Tenants → Usuarios</Text>
+                      <div style={{ marginTop: tokens.spacingVerticalXS }}>
+                        <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                          Nivel: Clientes (1) → Tenants (2) → Usuarios (3)
+                        </Text>
+                      </div>
+                    </div>
                   </Panel>
                 </ReactFlow>
               </ReactFlowProvider>
@@ -1848,6 +1597,56 @@ export const CustomersPage = () => {
           </DialogBody>
           <DialogActions>
             <Button appearance="primary" onClick={() => setIsUsersDialogOpen(false)}>
+              Cerrar
+            </Button>
+          </DialogActions>
+        </DialogSurface>
+      </Dialog>
+
+      {/* Dialog de tenants */}
+      <Dialog open={isTenantsDialogOpen} onOpenChange={(_, data) => setIsTenantsDialogOpen(data.open)}>
+        <DialogSurface style={{ minWidth: '600px' }}>
+          <DialogTitle>Tenants del Cliente</DialogTitle>
+          <DialogBody>
+            <DialogContent>
+              {isLoadingTenants ? (
+                <div className={styles.loadingContainer}>
+                  <Spinner size="medium" label="Cargando tenants..." />
+                </div>
+              ) : customerTenants.length === 0 ? (
+                <Text>No hay tenants asociados a este cliente.</Text>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHeaderCell>Nombre</TableHeaderCell>
+                      <TableHeaderCell>Estado</TableHeaderCell>
+                      <TableHeaderCell>Creado</TableHeaderCell>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {customerTenants.map((tenant) => (
+                      <TableRow key={tenant.id}>
+                        <TableCell>{tenant.name}</TableCell>
+                        <TableCell>
+                          {tenant.isSuspended ? (
+                            <Badge appearance="filled" color="danger">Suspendido</Badge>
+                          ) : tenant.isActive ? (
+                            <Badge appearance="filled" color="success">Activo</Badge>
+                          ) : (
+                            <Badge appearance="outline">Inactivo</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>{new Date(tenant.createdAt).toLocaleDateString()}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </DialogContent>
+          </DialogBody>
+          <DialogActions>
+            <Button appearance="primary" onClick={() => setIsTenantsDialogOpen(false)}>
               Cerrar
             </Button>
           </DialogActions>
