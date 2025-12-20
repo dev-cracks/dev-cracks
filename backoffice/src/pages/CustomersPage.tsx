@@ -232,7 +232,7 @@ const useStyles = makeStyles({
   },
   treeHeaderContent: {
     display: 'grid',
-    gridTemplateColumns: '32px 60px 180px 160px 120px 120px 130px 180px 110px 70px 70px 80px 100px',
+    gridTemplateColumns: '32PX 60px 180px 160px 120px 120px 130px 180px 110px 70px 70px 80px 100px',
     alignItems: 'center',
     width: '100%',
     ...shorthands.gap(tokens.spacingHorizontalS),
@@ -1459,10 +1459,10 @@ export const CustomersPage = () => {
           )}
           <div style={{ overflowX: 'auto' }}>
             <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '0px' }}>
-              <div className={styles.expandColumn}></div>
+              <div className={styles.expandColumn} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', minWidth: '32px', maxWidth: '32px' }}></div>
               <div className={styles.treeHeaderContent}>
-                <div style={{ textAlign: 'center' }}></div>
-                <div style={{ textAlign: 'center' }}>Nivel</div>
+              <div style={{ textAlign: 'center' }}></div>
+              <div style={{ textAlign: 'center' }}>Nivel</div>
                 <div>Nombre</div>
                 <div>Identificación</div>
                 <div>País</div>
