@@ -232,7 +232,7 @@ const useStyles = makeStyles({
   },
   treeHeaderContent: {
     display: 'grid',
-    gridTemplateColumns: '32PX 60px 180px 160px 120px 120px 130px 180px 110px 70px 70px 80px 100px',
+    gridTemplateColumns: '60px 60px 180px 160px 120px 120px 130px 180px 110px 70px 70px 80px 100px',
     alignItems: 'center',
     width: '100%',
     ...shorthands.gap(tokens.spacingHorizontalS),
