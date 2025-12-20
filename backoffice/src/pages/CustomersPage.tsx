@@ -1466,8 +1466,8 @@ export const CustomersPage = () => {
           <BuildingRegular fontSize={32} />
           <h1 className={styles.title}>Clientes</h1>
         </div>
-        <Card>
-          <div className={styles.toolbar}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalM }}>
+          <div style={{ flex: 1 }}>
             <SearchBox
               placeholder="Buscar por nombre, identificación o país..."
               disabled
@@ -1475,6 +1475,16 @@ export const CustomersPage = () => {
               style={{ width: '100%' }}
             />
           </div>
+          <TabList selectedValue="table" disabled>
+            <Tab value="table" icon={<TableRegular />}>
+              Vista de Tabla
+            </Tab>
+            <Tab value="flow" icon={<FlowchartRegular />}>
+              Vista Interactiva
+            </Tab>
+          </TabList>
+        </div>
+        <Card>
           <TreeSkeleton rows={8} />
         </Card>
       </div>
@@ -1491,22 +1501,32 @@ export const CustomersPage = () => {
         <h1 className={styles.title}>Clientes</h1>
       </div>
       
-      <TabList
-        selectedValue={selectedTabValue}
-        onTabSelect={(_, data) => {
-          const value = data.value as 'table' | 'flow';
-          setSelectedTabValue(value);
-          setSelectedView(value);
-        }}
-        style={{ marginBottom: tokens.spacingVerticalM }}
-      >
-        <Tab value="table" icon={<TableRegular />}>
-          Vista de Tabla
-        </Tab>
-        <Tab value="flow" icon={<FlowchartRegular />}>
-          Vista Interactiva
-        </Tab>
-      </TabList>
+      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalM }}>
+        <div style={{ flex: 1 }}>
+          <SearchBox
+            placeholder="Buscar por nombre, identificación o país..."
+            value={searchTerm}
+            onChange={(e, data) => setSearchTerm(data.value)}
+            size="large"
+            style={{ width: '100%' }}
+          />
+        </div>
+        <TabList
+          selectedValue={selectedTabValue}
+          onTabSelect={(_, data) => {
+            const value = data.value as 'table' | 'flow';
+            setSelectedTabValue(value);
+            setSelectedView(value);
+          }}
+        >
+          <Tab value="table" icon={<TableRegular />}>
+            Vista de Tabla
+          </Tab>
+          <Tab value="flow" icon={<FlowchartRegular />}>
+            Vista Interactiva
+          </Tab>
+        </TabList>
+      </div>
 
       <Card>
         <CardPreview>
@@ -1519,16 +1539,6 @@ export const CustomersPage = () => {
 
             {selectedView === 'table' && (
               <>
-            <div className={styles.toolbar}>
-          <SearchBox
-            placeholder="Buscar por nombre, identificación o país..."
-            value={searchTerm}
-            onChange={(e, data) => setSearchTerm(data.value)}
-            size="large"
-            style={{ width: '100%' }}
-          />
-        </div>
-
         {/* Vista de tabla */}
         <div style={{ position: 'relative' }}>
           {isReordering && (
