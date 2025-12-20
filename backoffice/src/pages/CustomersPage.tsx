@@ -69,6 +69,8 @@ import {
   ArrowMoveRegular,
   StarRegular,
   HomeRegular,
+  TableRegular,
+  FlowchartRegular,
 } from '@fluentui/react-icons';
 import {
   customerService,
@@ -86,6 +88,7 @@ import { TableSkeleton } from '../components/TableSkeleton';
 import { TreeSkeleton } from '../components/TreeSkeleton';
 import { DetailsSkeleton } from '../components/DetailsSkeleton';
 import { FlowSkeleton } from '../components/FlowSkeleton';
+import { useRibbonMenu } from '../contexts/RibbonMenuContext';
 
 const useStyles = makeStyles({
   container: {
@@ -341,6 +344,7 @@ const useStyles = makeStyles({
 
 export const CustomersPage = () => {
   const styles = useStyles();
+  const { addGroup, removeGroup } = useRibbonMenu();
   const [customers, setCustomers] = useState<CustomerDto[]>([]);
   const [countries, setCountries] = useState<CountryDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -420,6 +424,65 @@ export const CustomersPage = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Registrar acciones en el RibbonMenu
+  useEffect(() => {
+    addGroup({
+      id: 'customers',
+      label: 'Clientes',
+      icon: <BuildingRegular />,
+      items: [
+        {
+          id: 'create',
+          label: 'Crear Cliente',
+          icon: <AddRegular />,
+          action: () => {
+            setFormData({
+              name: '',
+              identification: '',
+              countryId: '',
+              stateProvince: '',
+              city: '',
+              phone: '',
+              email: '',
+            });
+            setIsCreateDialogOpen(true);
+          },
+        },
+        {
+          id: 'search',
+          label: 'Buscar',
+          icon: <SearchRegular />,
+          action: () => {
+            // Focus en el campo de búsqueda
+            setTimeout(() => {
+              const searchInput = document.querySelector('input[placeholder*="Buscar"]') as HTMLInputElement;
+              if (searchInput) {
+                searchInput.focus();
+              }
+            }, 100);
+          },
+        },
+        {
+          id: 'view-table',
+          label: 'Vista de Tabla',
+          icon: <TableRegular />,
+          action: () => setSelectedView('table'),
+        },
+        {
+          id: 'view-flow',
+          label: 'Vista Interactiva',
+          icon: <FlowchartRegular />,
+          action: () => setSelectedView('flow'),
+        },
+      ],
+    });
+
+    // Limpiar al desmontar
+    return () => {
+      removeGroup('customers');
+    };
+  }, [addGroup, removeGroup]);
 
   const filteredCustomers = customers.filter((customer) =>
     customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

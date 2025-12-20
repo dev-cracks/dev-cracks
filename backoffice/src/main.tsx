@@ -6,6 +6,7 @@ import App from './App';
 import { auth0Config } from './config/env';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { RibbonMenuProvider } from './contexts/RibbonMenuContext';
 import './styles/global.css';
 
 console.log('Backoffice starting...', { 
@@ -32,7 +33,9 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
       <FluentProvider theme={webLightTheme}>
         <NotificationProvider>
           <SettingsProvider>
-            <App />
+            <RibbonMenuProvider>
+              <App />
+            </RibbonMenuProvider>
           </SettingsProvider>
         </NotificationProvider>
       </FluentProvider>

@@ -6,13 +6,15 @@ import {
   makeStyles,
   shorthands,
   tokens,
-  Spinner,
 } from '@fluentui/react-components';
 import { HomeRegular } from '@fluentui/react-icons';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { backofficeService } from '../services/backofficeService';
 import { tenantService } from '../services/tenantService';
+import { customerService } from '../services/customerService';
+import { StatsCardSkeleton } from '../components/StatsCardSkeleton';
+import { DetailsSkeleton } from '../components/DetailsSkeleton';
 
 const useStyles = makeStyles({
   container: {
@@ -45,6 +47,8 @@ export const DashboardPage = () => {
   const styles = useStyles();
   const { userDetails } = useAuth();
   const [userCount, setUserCount] = useState(0);
+  const [tenantCount, setTenantCount] = useState(0);
+  const [customerCount, setCustomerCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -58,21 +62,59 @@ export const DashboardPage = () => {
 
   const loadStats = async () => {
     try {
-      const users = await backofficeService.getUsers();
-      setUserCount(users.length);
+      // Cargar todas las estadísticas en paralelo
+      const [users, tenants, customers] = await Promise.allSettled([
+        backofficeService.getUsers(),
+        tenantService.getAllTenants(),
+        customerService.getAllCustomers(),
+      ]);
+
+      // Procesar usuarios
+      if (users.status === 'fulfilled') {
+        setUserCount(users.value.length);
+      } else {
+        handleError(users.reason, 'usuarios');
+        setUserCount(0);
+      }
+
+      // Procesar tenants
+      if (tenants.status === 'fulfilled') {
+        setTenantCount(tenants.value.length);
+      } else {
+        handleError(tenants.reason, 'tenants');
+        setTenantCount(0);
+      }
+
+      // Procesar clientes
+      if (customers.status === 'fulfilled') {
+        setCustomerCount(customers.value.length);
+      } else {
+        handleError(customers.reason, 'clientes');
+        setCustomerCount(0);
+      }
     } catch (error: any) {
       // Si es un error de red (API no disponible), solo mostrar warning en desarrollo
       if (error?.statusCode === undefined && import.meta.env.DEV) {
         console.warn('[Dev] API server not available. Stats will show 0.');
-      } else if (error?.statusCode === 403) {
-        console.warn('Acceso denegado a usuarios. Mostrando 0 usuarios.');
       } else {
         console.error('Error loading stats:', error);
       }
-      // Para todos los errores, mostrar 0 usuarios
+      // Para todos los errores, mostrar 0
       setUserCount(0);
+      setTenantCount(0);
+      setCustomerCount(0);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleError = (error: any, resource: string) => {
+    if (error?.statusCode === undefined && import.meta.env.DEV) {
+      console.warn(`[Dev] API server not available for ${resource}. Stats will show 0.`);
+    } else if (error?.statusCode === 403) {
+      console.warn(`Acceso denegado a ${resource}. Mostrando 0.`);
+    } else {
+      console.error(`Error loading ${resource}:`, error);
     }
   };
 
@@ -84,35 +126,64 @@ export const DashboardPage = () => {
       </div>
 
       <div className={styles.statsGrid}>
-        <Card className={styles.card}>
-          <CardHeader
-            header={<Text weight="semibold">Usuarios del Tenant</Text>}
-            description="Total de usuarios en tu organización"
-          />
-          <CardPreview>
-            {isLoading ? (
-              <div style={{ padding: '20px', display: 'flex', justifyContent: 'center' }}>
-                <Spinner />
-              </div>
-            ) : (
-              <div style={{ padding: '20px', fontSize: '32px', fontWeight: 'bold' }}>
-                {userCount}
-              </div>
-            )}
-          </CardPreview>
-        </Card>
+        {isLoading ? (
+          <>
+            <StatsCardSkeleton />
+            <StatsCardSkeleton />
+            <StatsCardSkeleton />
+            <StatsCardSkeleton />
+          </>
+        ) : (
+          <>
+            <Card className={styles.card}>
+              <CardHeader
+                header={<Text weight="semibold">Clientes</Text>}
+                description="Total de clientes en el sistema"
+              />
+              <CardPreview>
+                <div style={{ padding: '20px', fontSize: '32px', fontWeight: 'bold' }}>
+                  {customerCount}
+                </div>
+              </CardPreview>
+            </Card>
 
-        <Card className={styles.card}>
-          <CardHeader
-            header={<Text weight="semibold">Rol</Text>}
-            description="Tu rol en la organización"
-          />
-          <CardPreview>
-            <div style={{ padding: '20px', fontSize: '32px', fontWeight: 'bold' }}>
-              {userDetails?.role || 'N/A'}
-            </div>
-          </CardPreview>
-        </Card>
+            <Card className={styles.card}>
+              <CardHeader
+                header={<Text weight="semibold">Tenants</Text>}
+                description="Total de tenants en el sistema"
+              />
+              <CardPreview>
+                <div style={{ padding: '20px', fontSize: '32px', fontWeight: 'bold' }}>
+                  {tenantCount}
+                </div>
+              </CardPreview>
+            </Card>
+
+            <Card className={styles.card}>
+              <CardHeader
+                header={<Text weight="semibold">Usuarios</Text>}
+                description="Total de usuarios en el sistema"
+              />
+              <CardPreview>
+                <div style={{ padding: '20px', fontSize: '32px', fontWeight: 'bold' }}>
+                  {userCount}
+                </div>
+              </CardPreview>
+            </Card>
+
+            <Card className={styles.card}>
+              <CardHeader
+                header={<Text weight="semibold">Rol</Text>}
+                description="Tu rol en la organización"
+              />
+              <CardPreview>
+                <div style={{ padding: '20px', fontSize: '32px', fontWeight: 'bold' }}>
+                  {userDetails?.role || 'N/A'}
+                </div>
+              </CardPreview>
+            </Card>
+          </>
+        )}
       </div>
 
       <Card>
@@ -122,7 +193,11 @@ export const DashboardPage = () => {
         />
         <CardPreview>
           <div style={{ padding: '20px' }}>
-            <Text>Aquí irá la actividad reciente...</Text>
+            {isLoading ? (
+              <DetailsSkeleton rows={5} />
+            ) : (
+              <Text>Aquí irá la actividad reciente...</Text>
+            )}
           </div>
         </CardPreview>
       </Card>

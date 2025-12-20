@@ -9,13 +9,20 @@ import {
   MenuItem,
   mergeClasses,
 } from '@fluentui/react-components';
+import { ReactNode } from 'react';
 import {
   DocumentRegular,
   EyeRegular,
   QuestionCircleRegular,
+  AddRegular,
+  SearchRegular,
+  TableRegular,
+  FlowchartRegular,
+  BuildingRegular,
 } from '@fluentui/react-icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSettings } from '../contexts/SettingsContext';
+import { useRibbonMenu } from '../contexts/RibbonMenuContext';
 
 const useStyles = makeStyles({
   ribbonMenu: {
@@ -64,8 +71,10 @@ export const RibbonMenu = ({ onMenuToggle }: RibbonMenuProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { openSettings } = useSettings();
+  const { groups } = useRibbonMenu();
 
-  const menuItems = [
+  // Menú base siempre disponible
+  const baseMenuItems = [
     {
       id: 'file',
       label: 'File',
@@ -97,6 +106,20 @@ export const RibbonMenu = ({ onMenuToggle }: RibbonMenuProps) => {
     },
   ];
 
+  // Convertir grupos del contexto a formato de menú
+  const contextualMenuItems = groups.map((group: { id: string; label: string; icon?: ReactNode; items: Array<{ id: string; label: string; icon?: ReactNode; action: () => void; disabled?: boolean }> }) => ({
+    id: group.id,
+    label: group.label,
+    icon: group.icon,
+    items: group.items.map((item: { id: string; label: string; icon?: ReactNode; action: () => void; disabled?: boolean }) => ({
+      label: item.label,
+      action: item.action,
+    })),
+  }));
+
+  // Combinar menús base con menús contextuales
+  const menuItems = [...baseMenuItems, ...contextualMenuItems];
+
   const isActive = (item: typeof menuItems[0]) => {
     if (item.path) {
       return location.pathname === item.path;
@@ -122,7 +145,7 @@ export const RibbonMenu = ({ onMenuToggle }: RibbonMenuProps) => {
           </MenuTrigger>
           <MenuPopover>
             <MenuList>
-              {item.items.map((subItem, index) => (
+              {item.items.map((subItem: { label: string; action: () => void }, index: number) => (
                 <MenuItem key={index} onClick={subItem.action}>
                   {subItem.label}
                 </MenuItem>

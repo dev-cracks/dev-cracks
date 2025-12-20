@@ -20,6 +20,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { tenantService, TenantDto } from '../services/tenantService';
 import { RibbonBar } from './RibbonBar';
+import { RibbonMenu } from './RibbonMenu';
 import { SettingsDialog } from './SettingsDialog';
 import { useSettings } from '../contexts/SettingsContext';
 
@@ -43,7 +44,7 @@ const useStyles = makeStyles({
   bodyContainer: {
     display: 'flex',
     flex: 1,
-    marginTop: '48px', // Altura de RibbonBar (48px)
+    marginTop: '92px', // Altura de RibbonBar (48px) + RibbonMenu (44px)
     overflow: 'hidden',
     gap: 0, // Sin espacio entre sidebar y contenido
   },
@@ -57,7 +58,7 @@ const useStyles = makeStyles({
     flexShrink: 0,
     position: 'fixed',
     left: 0,
-    top: '48px',
+    top: '92px', // Debajo de RibbonBar (48px) + RibbonMenu (44px)
     bottom: 0,
     zIndex: 900,
     boxSizing: 'border-box', // Incluye el border en el ancho
@@ -124,7 +125,7 @@ const useStyles = makeStyles({
   },
   overlay: {
     position: 'fixed',
-    top: '48px', // Debajo de las cintas
+    top: '92px', // Debajo de RibbonBar (48px) + RibbonMenu (44px)
     left: 0,
     right: 0,
     bottom: 0,
@@ -286,6 +287,7 @@ export const Layout = ({ children }: LayoutProps) => {
       {/* Cinta estilo Outlook - Arriba ocupando 100% del ancho */}
       <div className={styles.ribbonContainer}>
         <RibbonBar onMenuToggle={toggleSidebar} />
+        <RibbonMenu onMenuToggle={toggleSidebar} />
       </div>
 
       {/* Contenedor del cuerpo: Sidebar + Contenido */}
