@@ -143,6 +143,7 @@ export const CustomersPage = () => {
     stateProvince: '',
     city: '',
     phone: '',
+    email: '',
   });
 
   const isLoadingRef = useRef(false);
@@ -203,6 +204,7 @@ export const CustomersPage = () => {
       stateProvince: customer.stateProvince || '',
       city: customer.city || '',
       phone: customer.phone || '',
+      email: customer.email || '',
     });
     
     // Cargar tenants del cliente para verificar si tiene
@@ -237,6 +239,7 @@ export const CustomersPage = () => {
         stateProvince: '',
         city: '',
         phone: '',
+        email: '',
       });
       await loadCustomers();
     } catch (err: any) {
@@ -405,15 +408,16 @@ export const CustomersPage = () => {
             appearance="primary"
             icon={<AddRegular />}
             onClick={() => {
-              setFormData({
-                name: '',
-                identification: '',
-                countryId: '',
-                stateProvince: '',
-                city: '',
-                phone: '',
-              });
-              setIsCreateDialogOpen(true);
+      setFormData({
+        name: '',
+        identification: '',
+        countryId: '',
+        stateProvince: '',
+        city: '',
+        phone: '',
+        email: '',
+      });
+      setIsCreateDialogOpen(true);
             }}
           >
             Crear Cliente
@@ -428,6 +432,7 @@ export const CustomersPage = () => {
               <TableHeaderCell>País</TableHeaderCell>
               <TableHeaderCell>Ciudad</TableHeaderCell>
               <TableHeaderCell>Teléfono</TableHeaderCell>
+              <TableHeaderCell>Email</TableHeaderCell>
               <TableHeaderCell>Estado</TableHeaderCell>
               <TableHeaderCell>Tenants</TableHeaderCell>
               <TableHeaderCell>Usuarios</TableHeaderCell>
@@ -442,6 +447,7 @@ export const CustomersPage = () => {
                 <TableCell>{customer.countryName || 'N/A'}</TableCell>
                 <TableCell>{customer.city || 'N/A'}</TableCell>
                 <TableCell>{customer.phone || 'N/A'}</TableCell>
+                <TableCell>{customer.email || 'N/A'}</TableCell>
                 <TableCell>
                   {customer.isSuspended ? (
                     <Badge appearance="filled" color="danger">Suspendido</Badge>
@@ -558,6 +564,13 @@ export const CustomersPage = () => {
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   />
                 </Field>
+                <Field label="Correo electrónico" className={styles.formField}>
+                  <Input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </Field>
                 <MessageBar intent="info">
                   <MessageBarBody>
                     Se creará automáticamente un tenant para este cliente.
@@ -656,6 +669,14 @@ export const CustomersPage = () => {
                     <Input
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      disabled={customerTenants.length === 0}
+                    />
+                  </Field>
+                  <Field label="Correo electrónico" className={styles.formField}>
+                    <Input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       disabled={customerTenants.length === 0}
                     />
                   </Field>
@@ -769,6 +790,10 @@ export const CustomersPage = () => {
                   <div className={styles.detailsRow}>
                     <Text className={styles.detailsLabel}>Teléfono:</Text>
                     <Text>{selectedCustomer.phone || 'N/A'}</Text>
+                  </div>
+                  <div className={styles.detailsRow}>
+                    <Text className={styles.detailsLabel}>Correo electrónico:</Text>
+                    <Text>{selectedCustomer.email || 'N/A'}</Text>
                   </div>
                   <div className={styles.detailsRow}>
                     <Text className={styles.detailsLabel}>Estado:</Text>

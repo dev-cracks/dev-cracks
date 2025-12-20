@@ -20,6 +20,7 @@ export interface CustomerDto {
   stateProvince?: string;
   city?: string;
   phone?: string;
+  email?: string;
   createdAt: string;
   updatedAt: string;
   isActive?: boolean;
@@ -37,6 +38,7 @@ export interface CreateCustomerRequest {
   stateProvince?: string;
   city?: string;
   phone?: string;
+  email?: string;
 }
 
 export interface UpdateCustomerRequest {
@@ -46,6 +48,7 @@ export interface UpdateCustomerRequest {
   stateProvince?: string;
   city?: string;
   phone?: string;
+  email?: string;
 }
 
 export const customerService = {
@@ -117,4 +120,3 @@ export const countryService = {
     return apiService.request<CountryDto[]>('/countries');
   },
 };
-
