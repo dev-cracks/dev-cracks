@@ -219,6 +219,17 @@ const useStyles = makeStyles({
     alignItems: 'center',
     padding: `0 ${tokens.spacingHorizontalS}`,
   },
+  treeHeaderContent: {
+    display: 'grid',
+    gridTemplateColumns: '32px 60px 180px 160px 120px 120px 130px 180px 110px 70px 70px 80px 100px',
+    alignItems: 'center',
+    width: '100%',
+    ...shorthands.gap(tokens.spacingHorizontalS),
+    padding: `${tokens.spacingVerticalS} 0`,
+    backgroundColor: tokens.colorNeutralBackground2,
+    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+    fontWeight: tokens.fontWeightSemibold,
+  },
   treeRowContent: {
     display: 'grid',
     gridTemplateColumns: '32px 60px 180px 160px 120px 120px 130px 180px 110px 70px 70px 80px 100px',
@@ -1396,26 +1407,24 @@ export const CustomersPage = () => {
             </div>
           )}
           <div style={{ overflowX: 'auto' }}>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHeaderCell style={{ width: '32px', padding: tokens.spacingVerticalXS, textAlign: 'center' }}></TableHeaderCell>
-                  <TableHeaderCell style={{ width: '32px', padding: tokens.spacingVerticalXS, textAlign: 'center' }}></TableHeaderCell>
-                  <TableHeaderCell style={{ width: '60px', padding: tokens.spacingVerticalXS, textAlign: 'center' }}>Nivel</TableHeaderCell>
-                  <TableHeaderCell style={{ minWidth: '180px', width: '180px' }}>Nombre</TableHeaderCell>
-                  <TableHeaderCell style={{ minWidth: '160px', width: '160px' }}>Identificación</TableHeaderCell>
-                  <TableHeaderCell style={{ minWidth: '120px', width: '120px' }}>País</TableHeaderCell>
-                  <TableHeaderCell style={{ minWidth: '120px', width: '120px' }}>Ciudad</TableHeaderCell>
-                  <TableHeaderCell style={{ minWidth: '130px', width: '130px' }}>Teléfono</TableHeaderCell>
-                  <TableHeaderCell style={{ minWidth: '180px', width: '180px' }}>Email</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '110px', textAlign: 'center' }}>Estado</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '70px', textAlign: 'center' }}>Sedes</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '70px', textAlign: 'center' }}>Tenants</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '80px', textAlign: 'center' }}>Usuarios</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '100px', textAlign: 'center' }}>Acciones</TableHeaderCell>
-                </TableRow>
-              </TableHeader>
-            </Table>
+            <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '0px' }}>
+              <div className={styles.expandColumn}></div>
+              <div className={styles.treeHeaderContent}>
+                <div style={{ textAlign: 'center' }}></div>
+                <div style={{ textAlign: 'center' }}>Nivel</div>
+                <div>Nombre</div>
+                <div>Identificación</div>
+                <div>País</div>
+                <div>Ciudad</div>
+                <div>Teléfono</div>
+                <div>Email</div>
+                <div style={{ textAlign: 'center' }}>Estado</div>
+                <div style={{ textAlign: 'center' }}>Sedes</div>
+                <div style={{ textAlign: 'center' }}>Tenants</div>
+                <div style={{ textAlign: 'center' }}>Usuarios</div>
+                <div style={{ textAlign: 'center' }}>Acciones</div>
+              </div>
+            </div>
           </div>
           <div>
             {customerTree.length === 0 ? (
