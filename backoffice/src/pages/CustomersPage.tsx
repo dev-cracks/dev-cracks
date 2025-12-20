@@ -37,6 +37,8 @@ import {
   Textarea,
   TabList,
   Tab,
+  Switch,
+  Label,
 } from '@fluentui/react-components';
 import {
   OverlayDrawer,
@@ -411,6 +413,8 @@ export const CustomersPage = () => {
   const [isReordering, setIsReordering] = useState(false);
   const [tenantName, setTenantName] = useState('');
   const [selectedParentId, setSelectedParentId] = useState<string>('');
+  const [hasParent, setHasParent] = useState(false);
+  const [createParentId, setCreateParentId] = useState<string>('');
 
   // Form state
   const [formData, setFormData] = useState<CreateCustomerRequest>({
@@ -487,6 +491,8 @@ export const CustomersPage = () => {
               phone: '',
               email: '',
             });
+            setHasParent(false);
+            setCreateParentId('');
             setIsCreateDialogOpen(true);
           },
         },
@@ -863,10 +869,19 @@ export const CustomersPage = () => {
       return;
     }
 
+    if (hasParent && !createParentId) {
+      setError('Debe seleccionar un cliente padre');
+      return;
+    }
+
     try {
       setError(null);
       setIsCreating(true);
-      await customerService.createCustomer(formData);
+      const createData: CreateCustomerRequest = {
+        ...formData,
+        parentId: hasParent ? createParentId : undefined,
+      };
+      await customerService.createCustomer(createData);
       setIsCreateDialogOpen(false);
       setIsCreating(false);
       setFormData({
@@ -878,6 +893,8 @@ export const CustomersPage = () => {
         phone: '',
         email: '',
       });
+      setHasParent(false);
+      setCreateParentId('');
       await loadCustomers();
     } catch (err: any) {
       setError(err.message || 'Error al crear cliente');
@@ -903,7 +920,7 @@ export const CustomersPage = () => {
                       formData.phone.trim() || 
                       formData.email.trim();
       
-      if (hasData) {
+      if (hasData || hasParent || createParentId) {
         // Si hay datos y se intenta cerrar, mostrar confirmación
         if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
           setIsCreateDialogOpen(false);
@@ -916,6 +933,8 @@ export const CustomersPage = () => {
             phone: '',
             email: '',
           });
+          setHasParent(false);
+          setCreateParentId('');
           setError(null);
         }
         // Si el usuario cancela, no actualizamos el estado (mantiene el Drawer abierto)
@@ -1704,6 +1723,46 @@ export const CustomersPage = () => {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
             </Field>
+            <div className={styles.formField} style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS }}>
+              <Label>Asignar cliente padre</Label>
+              <Switch
+                checked={hasParent}
+                onChange={(_, data) => {
+                  setHasParent(data.checked);
+                  if (!data.checked) {
+                    setCreateParentId('');
+                  }
+                }}
+                label="El nuevo cliente será hijo de otro cliente"
+              />
+            </div>
+            {hasParent && (
+              <Field label="Cliente Padre" required className={styles.formField}>
+                <Combobox
+                  value={createParentId ? customers.find((c) => c.id === createParentId)?.name || '' : ''}
+                  onOptionSelect={(_, data) => {
+                    const customer = customers.find((c) => c.name === data.optionValue);
+                    if (customer) {
+                      setCreateParentId(customer.id);
+                    } else {
+                      setCreateParentId('');
+                    }
+                  }}
+                  onInput={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    if (!target.value) {
+                      setCreateParentId('');
+                    }
+                  }}
+                >
+                  {customers.map((customer) => (
+                    <Option key={customer.id} value={customer.name}>
+                      {customer.name} ({customer.identification})
+                    </Option>
+                  ))}
+                </Combobox>
+              </Field>
+            )}
             <MessageBar intent="info" style={{ marginTop: tokens.spacingVerticalM }}>
               <MessageBarBody>
                 Se creará automáticamente un tenant para este cliente.
@@ -1733,6 +1792,8 @@ export const CustomersPage = () => {
                         phone: '',
                         email: '',
                       });
+                      setHasParent(false);
+                      setCreateParentId('');
                       setError(null);
                     }
                   } else {

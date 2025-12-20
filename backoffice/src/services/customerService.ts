@@ -40,6 +40,7 @@ export interface CreateCustomerRequest {
   city?: string;
   phone?: string;
   email?: string;
+  parentId?: string;
 }
 
 export interface UpdateCustomerRequest {
