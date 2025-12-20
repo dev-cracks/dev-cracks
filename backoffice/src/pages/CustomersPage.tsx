@@ -32,6 +32,7 @@ import {
   MenuItem,
   Combobox,
   Option,
+  Textarea,
 } from '@fluentui/react-components';
 import {
   ReactFlow,
@@ -79,6 +80,8 @@ import {
 } from '../services/customerService';
 import { UserDto } from '../services/authService';
 import { tenantService, TenantDto } from '../services/tenantService';
+import { officeService, OfficeDto } from '../services/officeService';
+import { notificationService } from '../services/notificationService';
 
 const useStyles = makeStyles({
   container: {
@@ -348,6 +351,10 @@ export const CustomersPage = () => {
   const [isTenantsDialogOpen, setIsTenantsDialogOpen] = useState(false);
   const [isAssignTenantDialogOpen, setIsAssignTenantDialogOpen] = useState(false);
   const [isAssignParentDialogOpen, setIsAssignParentDialogOpen] = useState(false);
+  const [isNotifyUsersDialogOpen, setIsNotifyUsersDialogOpen] = useState(false);
+  const [notificationTitle, setNotificationTitle] = useState('');
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [isSendingNotification, setIsSendingNotification] = useState(false);
   const [customerUsers, setCustomerUsers] = useState<UserDto[]>([]);
   const [customerTenants, setCustomerTenants] = useState<TenantDto[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
@@ -679,6 +686,9 @@ export const CustomersPage = () => {
                     <MenuItem icon={<PeopleRegular />} onClick={() => handleViewUsers(node)}>
                       Ver usuarios
                     </MenuItem>
+                    <MenuItem icon={<PeopleRegular />} onClick={() => handleNotifyUsers(node)}>
+                      Enviar notificación
+                    </MenuItem>
                     <MenuItem icon={<LinkRegular />} onClick={() => handleAssignParent(node)}>
                       Asignar a otro cliente
                     </MenuItem>
@@ -823,6 +833,40 @@ export const CustomersPage = () => {
       setError(err.message || 'Error al cargar usuarios');
     } finally {
       setIsLoadingUsers(false);
+    }
+  };
+
+  const handleNotifyUsers = (customer: CustomerDto) => {
+    setSelectedCustomer(customer);
+    setNotificationTitle('');
+    setNotificationMessage('');
+    setIsNotifyUsersDialogOpen(true);
+  };
+
+  const handleSendNotification = async () => {
+    if (!selectedCustomer || !notificationTitle.trim() || !notificationMessage.trim()) {
+      setError('El título y el mensaje son requeridos');
+      return;
+    }
+
+    try {
+      setError(null);
+      setIsSendingNotification(true);
+      const response = await notificationService.notifyCustomerUsers(selectedCustomer.id, {
+        title: notificationTitle,
+        message: notificationMessage,
+      });
+      setIsNotifyUsersDialogOpen(false);
+      setNotificationTitle('');
+      setNotificationMessage('');
+      // Mostrar mensaje de éxito
+      setError(null);
+      // Aquí podrías usar el contexto de notificaciones si lo prefieres
+      alert(response.message);
+    } catch (err: any) {
+      setError(err.message || 'Error al enviar notificaciones');
+    } finally {
+      setIsSendingNotification(false);
     }
   };
 
@@ -1790,6 +1834,59 @@ export const CustomersPage = () => {
             </Button>
             <Button appearance="primary" onClick={handleConfirmAssignParent}>
               Asignar
+            </Button>
+          </DialogActions>
+        </DialogSurface>
+      </Dialog>
+
+      {/* Dialog de enviar notificación */}
+      <Dialog open={isNotifyUsersDialogOpen} onOpenChange={(_, data) => setIsNotifyUsersDialogOpen(data.open)}>
+        <DialogSurface>
+          <DialogTitle>Enviar Notificación a Usuarios</DialogTitle>
+          <DialogBody>
+            <DialogContent>
+              <div className={styles.detailsContent}>
+                <MessageBar intent="info">
+                  <MessageBarBody>
+                    Se enviará una notificación por email a todos los usuarios del cliente "{selectedCustomer?.name}".
+                  </MessageBarBody>
+                </MessageBar>
+                <Field label="Título" required className={styles.formField}>
+                  <Input
+                    value={notificationTitle}
+                    onChange={(e) => setNotificationTitle(e.target.value)}
+                    placeholder="Título de la notificación"
+                  />
+                </Field>
+                <Field label="Mensaje" required className={styles.formField}>
+                  <Textarea
+                    value={notificationMessage}
+                    onChange={(e) => setNotificationMessage(e.target.value)}
+                    placeholder="Mensaje de la notificación"
+                    rows={5}
+                  />
+                </Field>
+              </div>
+            </DialogContent>
+          </DialogBody>
+          <DialogActions>
+            <Button 
+              appearance="secondary" 
+              onClick={() => {
+                setIsNotifyUsersDialogOpen(false);
+                setNotificationTitle('');
+                setNotificationMessage('');
+              }}
+              disabled={isSendingNotification}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              appearance="primary" 
+              onClick={handleSendNotification}
+              disabled={isSendingNotification || !notificationTitle.trim() || !notificationMessage.trim()}
+            >
+              {isSendingNotification ? 'Enviando...' : 'Enviar Notificación'}
             </Button>
           </DialogActions>
         </DialogSurface>

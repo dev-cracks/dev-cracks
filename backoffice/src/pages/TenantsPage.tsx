@@ -30,6 +30,7 @@ import {
   MenuPopover,
   MenuList,
   MenuItem,
+  Textarea,
 } from '@fluentui/react-components';
 import {
   BuildingRegular,
@@ -45,6 +46,7 @@ import {
 import { tenantService, TenantDto, UpdateTenantRequest } from '../services/tenantService';
 import { UserDto } from '../services/authService';
 import { useAuth } from '../hooks/useAuth';
+import { notificationService } from '../services/notificationService';
 
 const useStyles = makeStyles({
   container: {
@@ -119,6 +121,10 @@ export const TenantsPage = () => {
   const [isSuspendDialogOpen, setIsSuspendDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isUsersDialogOpen, setIsUsersDialogOpen] = useState(false);
+  const [isNotifyUsersDialogOpen, setIsNotifyUsersDialogOpen] = useState(false);
+  const [notificationTitle, setNotificationTitle] = useState('');
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [isSendingNotification, setIsSendingNotification] = useState(false);
   
   // Estados para formularios y datos adicionales
   const [editFormData, setEditFormData] = useState<UpdateTenantRequest>({ name: '' });
@@ -241,6 +247,37 @@ export const TenantsPage = () => {
       setError(err.message || 'Error al cargar usuarios del tenant');
     } finally {
       setIsLoadingUsers(false);
+    }
+  };
+
+  const handleNotifyUsers = (tenant: TenantDto) => {
+    setSelectedTenant(tenant);
+    setNotificationTitle('');
+    setNotificationMessage('');
+    setIsNotifyUsersDialogOpen(true);
+  };
+
+  const handleSendNotification = async () => {
+    if (!selectedTenant || !notificationTitle.trim() || !notificationMessage.trim()) {
+      setError('El título y el mensaje son requeridos');
+      return;
+    }
+
+    try {
+      setError(null);
+      setIsSendingNotification(true);
+      const response = await notificationService.notifyTenantUsers(selectedTenant.id, {
+        title: notificationTitle,
+        message: notificationMessage,
+      });
+      setIsNotifyUsersDialogOpen(false);
+      setNotificationTitle('');
+      setNotificationMessage('');
+      alert(response.message);
+    } catch (err: any) {
+      setError(err.message || 'Error al enviar notificaciones');
+    } finally {
+      setIsSendingNotification(false);
     }
   };
 
@@ -370,6 +407,12 @@ export const TenantsPage = () => {
                               onClick={() => handleViewUsers(tenant)}
                             >
                               Ver Usuarios
+                            </MenuItem>
+                            <MenuItem
+                              icon={<PeopleRegular />}
+                              onClick={() => handleNotifyUsers(tenant)}
+                            >
+                              Enviar notificación
                             </MenuItem>
                             <MenuItem
                               icon={<EditRegular />}
@@ -605,8 +648,61 @@ export const TenantsPage = () => {
               <Button appearance="primary" onClick={() => setIsUsersDialogOpen(false)}>
                 Cerrar
               </Button>
-            </DialogActions>
+          </DialogActions>
+        </DialogBody>
+      </DialogSurface>
+    </Dialog>
+
+      {/* Dialog de enviar notificación */}
+      <Dialog open={isNotifyUsersDialogOpen} onOpenChange={(_, data) => setIsNotifyUsersDialogOpen(data.open)}>
+        <DialogSurface>
+          <DialogTitle>Enviar Notificación a Usuarios</DialogTitle>
+          <DialogBody>
+            <DialogContent>
+              <div className={styles.detailsContent}>
+                <MessageBar intent="info">
+                  <MessageBarBody>
+                    Se enviará una notificación por email a todos los usuarios del tenant "{selectedTenant?.name}".
+                  </MessageBarBody>
+                </MessageBar>
+                <Field label="Título" required>
+                  <Input
+                    value={notificationTitle}
+                    onChange={(e) => setNotificationTitle(e.target.value)}
+                    placeholder="Título de la notificación"
+                  />
+                </Field>
+                <Field label="Mensaje" required>
+                  <Textarea
+                    value={notificationMessage}
+                    onChange={(e) => setNotificationMessage(e.target.value)}
+                    placeholder="Mensaje de la notificación"
+                    rows={5}
+                  />
+                </Field>
+              </div>
+            </DialogContent>
           </DialogBody>
+          <DialogActions>
+            <Button 
+              appearance="secondary" 
+              onClick={() => {
+                setIsNotifyUsersDialogOpen(false);
+                setNotificationTitle('');
+                setNotificationMessage('');
+              }}
+              disabled={isSendingNotification}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              appearance="primary" 
+              onClick={handleSendNotification}
+              disabled={isSendingNotification || !notificationTitle.trim() || !notificationMessage.trim()}
+            >
+              {isSendingNotification ? 'Enviando...' : 'Enviar Notificación'}
+            </Button>
+          </DialogActions>
         </DialogSurface>
       </Dialog>
     </div>

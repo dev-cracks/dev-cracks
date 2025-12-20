@@ -32,6 +32,7 @@ import {
   MenuItem,
   Combobox,
   Option,
+  Textarea,
 } from '@fluentui/react-components';
 import {
   HomeRegular,
@@ -55,6 +56,7 @@ import {
   customerService,
   CustomerDto,
 } from '../services/customerService';
+import { notificationService } from '../services/notificationService';
 
 const useStyles = makeStyles({
   container: {
@@ -124,6 +126,10 @@ export const OfficesPage = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  const [isNotifyUsersDialogOpen, setIsNotifyUsersDialogOpen] = useState(false);
+  const [notificationTitle, setNotificationTitle] = useState('');
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [isSendingNotification, setIsSendingNotification] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState<CreateOfficeRequest>({
@@ -275,6 +281,37 @@ export const OfficesPage = () => {
     setIsDetailsDialogOpen(true);
   };
 
+  const handleNotifyUsers = (office: OfficeDto) => {
+    setSelectedOffice(office);
+    setNotificationTitle('');
+    setNotificationMessage('');
+    setIsNotifyUsersDialogOpen(true);
+  };
+
+  const handleSendNotification = async () => {
+    if (!selectedOffice || !notificationTitle.trim() || !notificationMessage.trim()) {
+      setError('El título y el mensaje son requeridos');
+      return;
+    }
+
+    try {
+      setError(null);
+      setIsSendingNotification(true);
+      const response = await notificationService.notifyOfficeUsers(selectedOffice.id, {
+        title: notificationTitle,
+        message: notificationMessage,
+      });
+      setIsNotifyUsersDialogOpen(false);
+      setNotificationTitle('');
+      setNotificationMessage('');
+      alert(response.message);
+    } catch (err: any) {
+      setError(err.message || 'Error al enviar notificaciones');
+    } finally {
+      setIsSendingNotification(false);
+    }
+  };
+
   const handleActivate = async (office: OfficeDto) => {
     try {
       await officeService.activateOffice(office.id);
@@ -403,6 +440,9 @@ export const OfficesPage = () => {
                         <MenuList>
                           <MenuItem icon={<EyeRegular />} onClick={() => handleViewDetails(office)}>
                             Ver detalles
+                          </MenuItem>
+                          <MenuItem icon={<BuildingRegular />} onClick={() => handleNotifyUsers(office)}>
+                            Enviar notificación
                           </MenuItem>
                           <MenuItem icon={<EditRegular />} onClick={() => handleEdit(office)}>
                             Editar
@@ -687,6 +727,59 @@ export const OfficesPage = () => {
               </Button>
             </DialogActions>
           </DialogBody>
+        </DialogSurface>
+      </Dialog>
+
+      {/* Dialog de enviar notificación */}
+      <Dialog open={isNotifyUsersDialogOpen} onOpenChange={(_, data) => setIsNotifyUsersDialogOpen(data.open)}>
+        <DialogSurface>
+          <DialogTitle>Enviar Notificación a Usuarios</DialogTitle>
+          <DialogBody>
+            <DialogContent>
+              <div className={styles.detailsContent}>
+                <MessageBar intent="info">
+                  <MessageBarBody>
+                    Se enviará una notificación por email a todos los usuarios del cliente de la sede "{selectedOffice?.name}".
+                  </MessageBarBody>
+                </MessageBar>
+                <Field label="Título" required>
+                  <Input
+                    value={notificationTitle}
+                    onChange={(e) => setNotificationTitle(e.target.value)}
+                    placeholder="Título de la notificación"
+                  />
+                </Field>
+                <Field label="Mensaje" required>
+                  <Textarea
+                    value={notificationMessage}
+                    onChange={(e) => setNotificationMessage(e.target.value)}
+                    placeholder="Mensaje de la notificación"
+                    rows={5}
+                  />
+                </Field>
+              </div>
+            </DialogContent>
+          </DialogBody>
+          <DialogActions>
+            <Button 
+              appearance="secondary" 
+              onClick={() => {
+                setIsNotifyUsersDialogOpen(false);
+                setNotificationTitle('');
+                setNotificationMessage('');
+              }}
+              disabled={isSendingNotification}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              appearance="primary" 
+              onClick={handleSendNotification}
+              disabled={isSendingNotification || !notificationTitle.trim() || !notificationMessage.trim()}
+            >
+              {isSendingNotification ? 'Enviando...' : 'Enviar Notificación'}
+            </Button>
+          </DialogActions>
         </DialogSurface>
       </Dialog>
     </div>
