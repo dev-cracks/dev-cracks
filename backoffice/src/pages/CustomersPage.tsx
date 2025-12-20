@@ -15,6 +15,7 @@ import {
   TableHeaderCell,
   Button,
   Input,
+  SearchBox,
   Dialog,
   DialogSurface,
   DialogTitle,
@@ -232,7 +233,7 @@ const useStyles = makeStyles({
   },
   treeHeaderContent: {
     display: 'grid',
-    gridTemplateColumns: '60px 60px 180px 160px 120px 120px 130px 180px 110px 70px 70px 80px 100px',
+    gridTemplateColumns: '32px 60px 180px 160px 120px 120px 130px 180px 110px 70px 70px 80px 100px',
     alignItems: 'center',
     width: '100%',
     ...shorthands.gap(tokens.spacingHorizontalS),
@@ -486,38 +487,6 @@ export const CustomersPage = () => {
               email: '',
             });
             setIsCreateDialogOpen(true);
-          },
-        },
-        {
-          id: 'search',
-          label: 'Buscar',
-          icon: <SearchRegular />,
-          action: () => {
-            // Focus en el campo de búsqueda
-            setTimeout(() => {
-              const searchInput = document.querySelector('input[placeholder*="Buscar"]') as HTMLInputElement;
-              if (searchInput) {
-                searchInput.focus();
-              }
-            }, 100);
-          },
-        },
-        {
-          id: 'view-table',
-          label: 'Vista de Tabla',
-          icon: <TableRegular />,
-          action: () => {
-            setSelectedView('table');
-            setSelectedTabValue('table');
-          },
-        },
-        {
-          id: 'view-flow',
-          label: 'Vista Interactiva',
-          icon: <FlowchartRegular />,
-          action: () => {
-            setSelectedView('flow');
-            setSelectedTabValue('flow');
           },
         },
       ],
@@ -1354,15 +1323,12 @@ export const CustomersPage = () => {
         </div>
         <Card>
           <div className={styles.toolbar}>
-            <Input
+            <SearchBox
               placeholder="Buscar por nombre, identificación o país..."
               disabled
-              contentBefore={<SearchRegular />}
-              style={{ flex: 1 }}
+              size="large"
+              style={{ width: '100%' }}
             />
-            <Button appearance="primary" icon={<AddRegular />} disabled>
-              Crear Cliente
-            </Button>
           </div>
           <TreeSkeleton rows={8} />
         </Card>
@@ -1409,31 +1375,13 @@ export const CustomersPage = () => {
             {selectedView === 'table' && (
               <>
             <div className={styles.toolbar}>
-          <Input
+          <SearchBox
             placeholder="Buscar por nombre, identificación o país..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            contentBefore={<SearchRegular />}
-            style={{ flex: 1 }}
+            onChange={(e, data) => setSearchTerm(data.value)}
+            size="large"
+            style={{ width: '100%' }}
           />
-          <Button
-            appearance="primary"
-            icon={<AddRegular />}
-            onClick={() => {
-      setFormData({
-        name: '',
-        identification: '',
-        countryId: '',
-        stateProvince: '',
-        city: '',
-        phone: '',
-        email: '',
-      });
-      setIsCreateDialogOpen(true);
-            }}
-          >
-            Crear Cliente
-          </Button>
         </div>
 
         {/* Vista jerárquica con drag and drop */}
@@ -1461,19 +1409,19 @@ export const CustomersPage = () => {
             <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '0px' }}>
               <div className={styles.expandColumn} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', minWidth: '32px', maxWidth: '32px' }}></div>
               <div className={styles.treeHeaderContent}>
-              <div style={{ textAlign: 'center' }}></div>
-              <div style={{ textAlign: 'center' }}>Nivel</div>
-                <div>Nombre</div>
-                <div>Identificación</div>
-                <div>País</div>
-                <div>Ciudad</div>
-                <div>Teléfono</div>
-                <div>Email</div>
-                <div style={{ textAlign: 'center' }}>Estado</div>
-                <div style={{ textAlign: 'center' }}>Sedes</div>
-                <div style={{ textAlign: 'center' }}>Tenants</div>
-                <div style={{ textAlign: 'center' }}>Usuarios</div>
-                <div style={{ textAlign: 'center' }}>Acciones</div>
+              <div></div>
+              <div>Nivel</div>
+              <div>Nombre</div>
+              <div>Identificación</div>
+              <div>País</div>
+              <div>Ciudad</div>
+              <div>Teléfono</div>
+              <div>Email</div>
+              <div>Estado</div>
+              <div>Sedes</div>
+              <div>Tenants</div>
+              <div>Usuarios</div>
+              <div>Acciones</div>
               </div>
             </div>
           </div>

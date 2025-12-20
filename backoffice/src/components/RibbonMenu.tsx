@@ -16,6 +16,7 @@ import {
 } from '@fluentui/react-icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSettings } from '../contexts/SettingsContext';
+import { useRibbonMenu } from '../contexts/RibbonMenuContext';
 
 const useStyles = makeStyles({
   ribbonMenu: {
@@ -30,6 +31,23 @@ const useStyles = makeStyles({
     margin: 0,
     width: '100%',
     boxSizing: 'border-box',
+  },
+  ribbonContent: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalM,
+    flex: 1,
+  },
+  groupContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalXS,
+    paddingLeft: tokens.spacingHorizontalM,
+    paddingRight: tokens.spacingHorizontalM,
+    borderRight: `1px solid ${tokens.colorNeutralStroke2}`,
+    '&:last-child': {
+      borderRight: 'none',
+    },
   },
   menuButton: {
     height: '44px',
@@ -67,6 +85,7 @@ export const RibbonMenu = ({ onMenuToggle }: RibbonMenuProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { openSettings } = useSettings();
+  const { groups } = useRibbonMenu();
 
   // Menú base siempre disponible
   const menuItems = [
@@ -108,8 +127,40 @@ export const RibbonMenu = ({ onMenuToggle }: RibbonMenuProps) => {
     return false;
   };
 
+  // Buscar el botón de crear cliente en los grupos
+  const createCustomerButton = groups
+    .find((group) => group.id === 'customers')
+    ?.items.find((item) => item.id === 'create');
+
+  // Filtrar los items del grupo de clientes excluyendo el botón de crear
+  const filteredGroups = groups.map((group) => {
+    if (group.id === 'customers') {
+      return {
+        ...group,
+        items: group.items.filter((item) => item.id !== 'create'),
+      };
+    }
+    return group;
+  });
+
   return (
     <div className={styles.ribbonMenu}>
+      {/* Botón de crear cliente al principio del ribbon */}
+      {createCustomerButton && (
+        <div style={{ marginRight: tokens.spacingHorizontalM }}>
+          <Button
+            appearance="primary"
+            shape="square"
+            size="large"
+            icon={createCustomerButton.icon}
+            onClick={createCustomerButton.action}
+            disabled={createCustomerButton.disabled}
+          >
+            {createCustomerButton.label}
+          </Button>
+        </div>
+      )}
+      
       {/* Pestañas de menú */}
       {menuItems.map((item) => (
         <Menu key={item.id}>
@@ -135,6 +186,29 @@ export const RibbonMenu = ({ onMenuToggle }: RibbonMenuProps) => {
           </MenuPopover>
         </Menu>
       ))}
+      
+      {/* Grupos dinámicos del contexto */}
+      {filteredGroups.length > 0 && filteredGroups.some((group) => group.items.length > 0) && (
+        <div className={styles.ribbonContent}>
+          {filteredGroups
+            .filter((group) => group.items.length > 0)
+            .map((group) => (
+              <div key={group.id} className={styles.groupContainer}>
+                {group.items.map((item) => (
+                  <Button
+                    key={item.id}
+                    appearance="subtle"
+                    icon={item.icon}
+                    onClick={item.action}
+                    disabled={item.disabled}
+                  >
+                    {item.label}
+                  </Button>
+                ))}
+              </div>
+            ))}
+        </div>
+      )}
     </div>
   );
 };
