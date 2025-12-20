@@ -45,7 +45,7 @@ export const auth0Config = {
   authorizationParams: {
     redirect_uri: getRedirectUri(),
     audience: apiAudience,
-    scope: 'openid profile email'
+    scope: 'openid profile email offline_access'
   }
 };
 
