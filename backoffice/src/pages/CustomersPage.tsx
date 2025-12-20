@@ -50,6 +50,7 @@ import {
   applyEdgeChanges,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import dagre from 'dagre';
 import {
   BuildingRegular,
   SearchRegular,
@@ -752,6 +753,45 @@ export const CustomersPage = () => {
     }
   };
 
+  // Función para aplicar layout automático con Dagre
+  const getLayoutedElements = (nodes: Node[], edges: Edge[], direction: 'TB' | 'LR' = 'TB') => {
+    const dagreGraph = new dagre.graphlib.Graph();
+    dagreGraph.setDefaultEdgeLabel(() => ({}));
+    dagreGraph.setGraph({ 
+      rankdir: direction,
+      nodesep: 100, // Separación horizontal entre nodos
+      ranksep: 150, // Separación vertical entre niveles
+      marginx: 50,
+      marginy: 50,
+    });
+
+    const nodeWidth = 220;
+    const nodeHeight = 120;
+
+    nodes.forEach((node) => {
+      dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+    });
+
+    edges.forEach((edge) => {
+      dagreGraph.setEdge(edge.source, edge.target);
+    });
+
+    dagre.layout(dagreGraph);
+
+    const layoutedNodes = nodes.map((node) => {
+      const nodeWithPosition = dagreGraph.node(node.id);
+      return {
+        ...node,
+        position: {
+          x: nodeWithPosition.x - nodeWidth / 2,
+          y: nodeWithPosition.y - nodeHeight / 2,
+        },
+      };
+    });
+
+    return { nodes: layoutedNodes, edges };
+  };
+
   // Función para cargar datos del flow
   const loadFlowData = useCallback(async () => {
     if (filteredCustomers.length === 0) {
@@ -797,23 +837,18 @@ export const CustomersPage = () => {
       setCustomerTenantsMap(newCustomerTenantsMap);
       setTenantUsersMap(newTenantUsersMap);
 
-      // Crear nodos y edges
+      // Crear nodos y edges (sin posiciones, Dagre las calculará)
       const nodes: Node[] = [];
       const edges: Edge[] = [];
-      let customerY = 0;
-      const customerSpacing = 300;
-      const tenantSpacing = 150;
-      const userSpacing = 100;
-
+      
       // Crear nodos de clientes
-      filteredCustomers.forEach((customer, customerIndex) => {
-        const customerX = customerIndex * customerSpacing;
+      filteredCustomers.forEach((customer) => {
         const customerNodeId = `customer-${customer.id}`;
         
         nodes.push({
           id: customerNodeId,
           type: 'default',
-          position: { x: customerX, y: customerY },
+          position: { x: 0, y: 0 }, // Posición temporal, Dagre la calculará
           data: {
             label: (
               <div className={`${styles.flowNode} ${styles.flowNodeCustomer}`}>
@@ -830,15 +865,13 @@ export const CustomersPage = () => {
 
         // Crear nodos de tenants para este cliente
         const tenants = newCustomerTenantsMap.get(customer.id) || [];
-        tenants.forEach((tenant, tenantIndex) => {
-          const tenantX = customerX + (tenantIndex - tenants.length / 2 + 0.5) * tenantSpacing;
-          const tenantY = customerY + 200;
+        tenants.forEach((tenant) => {
           const tenantNodeId = `tenant-${tenant.id}`;
           
           nodes.push({
             id: tenantNodeId,
             type: 'default',
-            position: { x: tenantX, y: tenantY },
+            position: { x: 0, y: 0 }, // Posición temporal, Dagre la calculará
             data: {
               label: (
                 <div className={`${styles.flowNode} ${styles.flowNodeTenant}`}>
@@ -861,15 +894,13 @@ export const CustomersPage = () => {
 
           // Crear nodos de usuarios para este tenant
           const users = newTenantUsersMap.get(tenant.id) || [];
-          users.forEach((user, userIndex) => {
-            const userX = tenantX + (userIndex - users.length / 2 + 0.5) * userSpacing;
-            const userY = tenantY + 150;
+          users.forEach((user) => {
             const userNodeId = `user-${user.id}`;
             
             nodes.push({
               id: userNodeId,
               type: 'default',
-              position: { x: userX, y: userY },
+              position: { x: 0, y: 0 }, // Posición temporal, Dagre la calculará
               data: {
                 label: (
                   <div className={`${styles.flowNode} ${styles.flowNodeUser}`}>
@@ -892,8 +923,11 @@ export const CustomersPage = () => {
         });
       });
 
-      setFlowNodes(nodes);
-      setFlowEdges(edges);
+      // Aplicar layout automático con Dagre
+      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(nodes, edges, 'TB');
+
+      setFlowNodes(layoutedNodes);
+      setFlowEdges(layoutedEdges);
     } catch (err: any) {
       console.error('Error cargando datos del flow:', err);
       setError(err.message || 'Error al cargar datos para la vista interactiva');
