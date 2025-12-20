@@ -1,15 +1,26 @@
 import { apiService } from './apiService';
+import { UserDto } from './authService';
 
 export interface TenantDto {
   id: string;
   name: string;
   createdAt: string;
   updatedAt: string;
+  isActive?: boolean;
+  isSuspended?: boolean;
 }
 
 export interface InitializeTenantResponse {
   tenant: TenantDto;
   message: string;
+}
+
+export interface UpdateTenantRequest {
+  name: string;
+}
+
+export interface TenantDetailsDto extends TenantDto {
+  userCount?: number;
 }
 
 export const tenantService = {
@@ -34,6 +45,39 @@ export const tenantService = {
 
   async getAllTenants(): Promise<TenantDto[]> {
     return apiService.request<TenantDto[]>('/tenants');
+  },
+
+  async getTenantById(id: string): Promise<TenantDetailsDto> {
+    return apiService.request<TenantDetailsDto>(`/tenants/${id}`);
+  },
+
+  async updateTenant(id: string, data: UpdateTenantRequest): Promise<TenantDto> {
+    return apiService.request<TenantDto>(`/tenants/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deleteTenant(id: string): Promise<void> {
+    return apiService.request<void>(`/tenants/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  async suspendTenant(id: string): Promise<TenantDto> {
+    return apiService.request<TenantDto>(`/tenants/${id}/suspend`, {
+      method: 'POST',
+    });
+  },
+
+  async activateTenant(id: string): Promise<TenantDto> {
+    return apiService.request<TenantDto>(`/tenants/${id}/activate`, {
+      method: 'POST',
+    });
+  },
+
+  async getTenantUsers(id: string): Promise<UserDto[]> {
+    return apiService.request<UserDto[]>(`/tenants/${id}/users`);
   },
 };
 

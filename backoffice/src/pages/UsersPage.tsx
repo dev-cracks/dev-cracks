@@ -154,20 +154,6 @@ export const UsersPage = () => {
       (user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
   );
 
-  const isAdmin = userDetails?.role === 'Admin';
-
-  if (!isAdmin) {
-    return (
-      <div className={styles.container}>
-        <MessageBar intent="warning">
-          <MessageBarBody>
-            No tienes permisos para acceder a esta página. Se requiere rol de Administrador.
-          </MessageBarBody>
-        </MessageBar>
-      </div>
-    );
-  }
-
   return (
     <div className={styles.container}>
       {error && (

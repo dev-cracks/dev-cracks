@@ -12,6 +12,7 @@ import {
   PeopleRegular,
   SettingsRegular,
   PanelLeftRegular,
+  BuildingRegular,
 } from '@fluentui/react-icons';
 import { useState, ReactNode, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -249,15 +250,16 @@ export const Layout = ({ children }: LayoutProps) => {
       icon: <HomeRegular />,
       path: '/dashboard',
     },
-    ...(isAdmin
-      ? [
-          {
-            name: 'Usuarios',
-            icon: <PeopleRegular />,
-            path: '/users',
-          },
-        ]
-      : []),
+    {
+      name: 'Usuarios',
+      icon: <PeopleRegular />,
+      path: '/users',
+    },
+    {
+      name: 'Tenants',
+      icon: <BuildingRegular />,
+      path: '/tenants',
+    },
     {
       name: 'Configuración',
       icon: <SettingsRegular />,

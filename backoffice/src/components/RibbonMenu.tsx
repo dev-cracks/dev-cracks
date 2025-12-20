@@ -14,6 +14,7 @@ import {
   DocumentRegular,
   EyeRegular,
   QuestionCircleRegular,
+  BuildingRegular,
 } from '@fluentui/react-icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSettings } from '../contexts/SettingsContext';
@@ -86,6 +87,7 @@ export const RibbonMenu = ({ onMenuToggle }: RibbonMenuProps) => {
       items: [
         { label: 'Dashboard', action: () => navigate('/dashboard') },
         { label: 'Users', action: () => navigate('/users') },
+        { label: 'Tenants', action: () => navigate('/tenants') },
       ],
     },
     {

@@ -16,6 +16,14 @@ export class ApiService {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
+    // Logging para depuración - mostrar stack trace para identificar origen
+    const stackTrace = new Error().stack;
+    const callerInfo = stackTrace?.split('\n')[2]?.trim() || 'unknown';
+    console.log(`[apiService] Request: ${options.method || 'GET'} ${endpoint}`, {
+      caller: callerInfo,
+      timestamp: new Date().toISOString()
+    });
+    
     try {
       const token = await this.getAccessToken();
       
@@ -29,10 +37,13 @@ export class ApiService {
       }
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // Timeout de 10 segundos
+      // Timeout más largo en desarrollo para depuración (10 minutos), 10 segundos en producción
+      const timeoutMs = import.meta.env.DEV ? 600000 : 10000; // 10 minutos en dev, 10 segundos en prod
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
       let response: Response;
       try {
+        const startTime = Date.now();
         response = await fetch(`${this.baseUrl}${endpoint}`, {
           ...options,
           headers,
@@ -40,6 +51,8 @@ export class ApiService {
           signal: controller.signal,
         });
         clearTimeout(timeoutId);
+        const duration = Date.now() - startTime;
+        console.log(`[apiService] Response: ${response.status} ${endpoint} (${duration}ms)`);
       } catch (fetchError: any) {
         clearTimeout(timeoutId);
         
