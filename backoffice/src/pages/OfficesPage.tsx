@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   Card,
   CardHeader,
@@ -69,7 +69,6 @@ import {
   AddRegular,
   BuildingRegular,
   DismissRegular,
-  ArrowSwapRegular,
   ArrowClockwiseRegular,
   TableRegular,
   FlowchartRegular,
@@ -89,6 +88,7 @@ import {
   TenantDto,
 } from '../services/tenantService';
 import { notificationService } from '../services/notificationService';
+import { userService, UserDto } from '../services/userService';
 import {
   ReactFlow,
   Node,
@@ -276,6 +276,18 @@ export const OfficesPage = () => {
   const [allTenants, setAllTenants] = useState<TenantDto[]>([]);
   const [isChangingTenant, setIsChangingTenant] = useState(false);
   const [officeUsers, setOfficeUsers] = useState<Record<string, any[]>>({});
+  
+  // Estados para tabs
+  const [detailsActiveTab, setDetailsActiveTab] = useState<'details' | 'users'>('details');
+  const [editActiveTab, setEditActiveTab] = useState<'details' | 'users'>('details');
+  
+  // Estados para usuarios
+  const [officeUsersList, setOfficeUsersList] = useState<UserDto[]>([]);
+  const [allUsersForAssign, setAllUsersForAssign] = useState<UserDto[]>([]);
+  const [selectedUserToAdd, setSelectedUserToAdd] = useState<string>('');
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [isAssigningUser, setIsAssigningUser] = useState(false);
+  const [userSearchText, setUserSearchText] = useState('');
   
   // Estados para la vista de React Flow
   const [selectedView, setSelectedView] = useState<'table' | 'flow'>('table');
@@ -717,6 +729,79 @@ export const OfficesPage = () => {
     setIsDetailsDialogOpen(true);
   };
 
+  // Funciones para manejar usuarios de la sede
+  const loadOfficeUsersList = useCallback(async (officeId: string) => {
+    try {
+      setIsLoadingUsers(true);
+      const users = await officeService.getOfficeUsers(officeId);
+      setOfficeUsersList(users);
+    } catch (err: any) {
+      console.error('[OfficesPage] Error cargando usuarios de la sede:', err);
+      setError(err.message || 'Error al cargar usuarios de la sede');
+      setOfficeUsersList([]);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  }, []);
+
+  const loadAllUsersForAssign = useCallback(async () => {
+    try {
+      const users = await userService.getAllUsers();
+      setAllUsersForAssign(users);
+    } catch (err: any) {
+      console.error('[OfficesPage] Error cargando usuarios disponibles:', err);
+      setAllUsersForAssign([]);
+    }
+  }, []);
+
+  const handleAssignUserToOffice = async () => {
+    if (!selectedOffice || !selectedUserToAdd) {
+      setError('Debe seleccionar un usuario');
+      return;
+    }
+
+    try {
+      setIsAssigningUser(true);
+      setError(null);
+      await userService.assignOfficeToUser(selectedUserToAdd, selectedOffice.id);
+      await loadOfficeUsersList(selectedOffice.id);
+      setSelectedUserToAdd('');
+      setUserSearchText('');
+    } catch (err: any) {
+      console.error('[OfficesPage] Error asignando usuario a la sede:', err);
+      setError(err.message || 'Error al asignar usuario a la sede');
+    } finally {
+      setIsAssigningUser(false);
+    }
+  };
+
+  const handleRemoveUserFromOffice = async (userId: string) => {
+    if (!selectedOffice) return;
+
+    try {
+      setIsAssigningUser(true);
+      setError(null);
+      await userService.removeOfficeFromUser(userId, selectedOffice.id);
+      await loadOfficeUsersList(selectedOffice.id);
+    } catch (err: any) {
+      console.error('[OfficesPage] Error desasignando usuario de la sede:', err);
+      setError(err.message || 'Error al desasignar usuario de la sede');
+    } finally {
+      setIsAssigningUser(false);
+    }
+  };
+
+  // Filtrar usuarios para el combobox
+  const filteredUsersForAssign = useMemo(() => {
+    if (!userSearchText.trim()) return allUsersForAssign;
+    const searchLower = userSearchText.toLowerCase();
+    return allUsersForAssign.filter((user) =>
+      user.name?.toLowerCase().includes(searchLower) ||
+      user.email?.toLowerCase().includes(searchLower) ||
+      user.contactEmail?.toLowerCase().includes(searchLower)
+    );
+  }, [allUsersForAssign, userSearchText]);
+
   // Manejar loading del drawer de detalles
   useEffect(() => {
     if (isDetailsDialogOpen) {
@@ -729,6 +814,24 @@ export const OfficesPage = () => {
       setIsDetailsLoading(false);
     }
   }, [isDetailsDialogOpen]);
+
+  // Cargar usuarios cuando se abre el drawer de detalles
+  useEffect(() => {
+    if (isDetailsDialogOpen && selectedOffice) {
+      loadOfficeUsersList(selectedOffice.id);
+      loadAllUsersForAssign();
+      setDetailsActiveTab('details');
+    }
+  }, [isDetailsDialogOpen, selectedOffice, loadOfficeUsersList, loadAllUsersForAssign]);
+
+  // Cargar usuarios cuando se abre el drawer de edición
+  useEffect(() => {
+    if (isEditDialogOpen && selectedOffice) {
+      loadOfficeUsersList(selectedOffice.id);
+      loadAllUsersForAssign();
+      setEditActiveTab('details');
+    }
+  }, [isEditDialogOpen, selectedOffice, loadOfficeUsersList, loadAllUsersForAssign]);
 
   // Manejar loading del drawer de creación
   useEffect(() => {
@@ -999,10 +1102,10 @@ export const OfficesPage = () => {
           <TableHeader>
             <TableRow>
               <TableHeaderCell>Nombre</TableHeaderCell>
-              <TableHeaderCell>Cliente</TableHeaderCell>
-              <TableHeaderCell>Tenants</TableHeaderCell>
               <TableHeaderCell>Ciudad</TableHeaderCell>
               <TableHeaderCell>Datos Contacto</TableHeaderCell>
+              <TableHeaderCell>Cliente</TableHeaderCell>
+              <TableHeaderCell>Tenants</TableHeaderCell>
               <TableHeaderCell>Usuarios</TableHeaderCell>
               <TableHeaderCell>Estado</TableHeaderCell>
               <TableHeaderCell>Acciones</TableHeaderCell>
@@ -1023,6 +1126,63 @@ export const OfficesPage = () => {
                   <TableRow key={office.id}>
                   <TableCell>
                     <Text weight="semibold">{office.name}</Text>
+                  </TableCell>
+                  <TableCell>{office.city || 'N/A'}</TableCell>
+                  <TableCell>
+                    {hasContactData ? (
+                      <TeachingPopover>
+                        <TeachingPopoverTrigger>
+                          <Button
+                            appearance="subtle"
+                            style={{
+                              padding: 0,
+                              minWidth: 'auto',
+                              height: 'auto',
+                              color: tokens.colorBrandForegroundLink,
+                              fontWeight: tokens.fontWeightSemibold,
+                            }}
+                          >
+                            Ver datos de contacto
+                          </Button>
+                        </TeachingPopoverTrigger>
+                        <TeachingPopoverSurface>
+                          <TeachingPopoverHeader>Datos de Contacto</TeachingPopoverHeader>
+                          <TeachingPopoverBody>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM }}>
+                              {office.address && (
+                                <div>
+                                  <Text weight="semibold" style={{ display: 'block', marginBottom: tokens.spacingVerticalXS }}>
+                                    Dirección:
+                                  </Text>
+                                  <Text>{office.address}</Text>
+                                </div>
+                              )}
+                              {office.phone && (
+                                <div>
+                                  <Text weight="semibold" style={{ display: 'block', marginBottom: tokens.spacingVerticalXS }}>
+                                    Teléfono:
+                                  </Text>
+                                  <Text>{office.phone}</Text>
+                                </div>
+                              )}
+                              {office.email && (
+                                <div>
+                                  <Text weight="semibold" style={{ display: 'block', marginBottom: tokens.spacingVerticalXS }}>
+                                    Email:
+                                  </Text>
+                                  <Text>{office.email}</Text>
+                                </div>
+                              )}
+                              {!office.address && !office.phone && !office.email && (
+                                <Text>No hay datos de contacto disponibles</Text>
+                              )}
+                            </div>
+                          </TeachingPopoverBody>
+                        </TeachingPopoverSurface>
+                      </TeachingPopover>
+                    ) : (
+                      <Text>N/A</Text>
+                    )}
                   </TableCell>
                   <TableCell>
                     {office.customers && office.customers.length > 0 ? (
@@ -1077,84 +1237,6 @@ export const OfficesPage = () => {
                   </TableCell>
                   <TableCell>
                     {office.tenants && office.tenants.length > 0 ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS }}>
-                        <TeachingPopover>
-                          <TeachingPopoverTrigger>
-                            <Button
-                              appearance="subtle"
-                              style={{
-                                padding: 0,
-                                minWidth: 'auto',
-                                height: 'auto'
-                              }}
-                            >
-                              <CounterBadge 
-                                count={office.tenants.length} 
-                                size="medium" 
-                                appearance="filled" 
-                                color="brand" 
-                              />
-                            </Button>
-                          </TeachingPopoverTrigger>
-                          <TeachingPopoverSurface>
-                            <TeachingPopoverHeader>Tenants Asociados</TeachingPopoverHeader>
-                            <TeachingPopoverBody>
-                              <div style={{ maxWidth: '400px', maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS }}>
-                                {office.tenants.map((tenant) => (
-                                  <Button
-                                    key={tenant.id}
-                                    appearance="subtle"
-                                    onClick={() => handleViewTenantDetails({ id: tenant.id, name: tenant.name } as TenantDto)}
-                                    style={{ 
-                                      color: tokens.colorBrandForegroundLink, 
-                                      textDecoration: 'none',
-                                      fontWeight: tokens.fontWeightSemibold,
-                                      padding: tokens.spacingVerticalXS,
-                                      justifyContent: 'flex-start',
-                                      textAlign: 'left'
-                                    }}
-                                  >
-                                    {tenant.name}
-                                  </Button>
-                                ))}
-                              </div>
-                            </TeachingPopoverBody>
-                          </TeachingPopoverSurface>
-                        </TeachingPopover>
-                        <Button
-                          appearance="subtle"
-                          icon={<ArrowSwapRegular />}
-                          onClick={() => handleChangeTenant(office)}
-                          aria-label="Cambiar tenant"
-                          title="Cambiar tenant"
-                          size="small"
-                          style={{
-                            minWidth: 'auto',
-                            padding: tokens.spacingVerticalXS,
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS }}>
-                        <Text>N/A</Text>
-                        <Button
-                          appearance="subtle"
-                          icon={<ArrowSwapRegular />}
-                          onClick={() => handleChangeTenant(office)}
-                          aria-label="Asignar tenant"
-                          title="Asignar tenant"
-                          size="small"
-                          style={{
-                            minWidth: 'auto',
-                            padding: tokens.spacingVerticalXS,
-                          }}
-                        />
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell>{office.city || 'N/A'}</TableCell>
-                  <TableCell>
-                    {hasContactData ? (
                       <TeachingPopover>
                         <TeachingPopoverTrigger>
                           <Button
@@ -1162,45 +1244,38 @@ export const OfficesPage = () => {
                             style={{
                               padding: 0,
                               minWidth: 'auto',
-                              height: 'auto',
-                              color: tokens.colorBrandForegroundLink,
-                              fontWeight: tokens.fontWeightSemibold,
+                              height: 'auto'
                             }}
                           >
-                            Ver datos de contacto
+                            <CounterBadge 
+                              count={office.tenants.length} 
+                              size="medium" 
+                              appearance="filled" 
+                              color="brand" 
+                            />
                           </Button>
                         </TeachingPopoverTrigger>
                         <TeachingPopoverSurface>
-                          <TeachingPopoverHeader>Datos de Contacto</TeachingPopoverHeader>
+                          <TeachingPopoverHeader>Tenants Asociados</TeachingPopoverHeader>
                           <TeachingPopoverBody>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM }}>
-                              {office.address && (
-                                <div>
-                                  <Text weight="semibold" style={{ display: 'block', marginBottom: tokens.spacingVerticalXS }}>
-                                    Dirección:
-                                  </Text>
-                                  <Text>{office.address}</Text>
-                                </div>
-                              )}
-                              {office.phone && (
-                                <div>
-                                  <Text weight="semibold" style={{ display: 'block', marginBottom: tokens.spacingVerticalXS }}>
-                                    Teléfono:
-                                  </Text>
-                                  <Text>{office.phone}</Text>
-                                </div>
-                              )}
-                              {office.email && (
-                                <div>
-                                  <Text weight="semibold" style={{ display: 'block', marginBottom: tokens.spacingVerticalXS }}>
-                                    Email:
-                                  </Text>
-                                  <Text>{office.email}</Text>
-                                </div>
-                              )}
-                              {!office.address && !office.phone && !office.email && (
-                                <Text>No hay datos de contacto disponibles</Text>
-                              )}
+                            <div style={{ maxWidth: '400px', maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS }}>
+                              {office.tenants.map((tenant) => (
+                                <Button
+                                  key={tenant.id}
+                                  appearance="subtle"
+                                  onClick={() => handleViewTenantDetails({ id: tenant.id, name: tenant.name } as TenantDto)}
+                                  style={{ 
+                                    color: tokens.colorBrandForegroundLink, 
+                                    textDecoration: 'none',
+                                    fontWeight: tokens.fontWeightSemibold,
+                                    padding: tokens.spacingVerticalXS,
+                                    justifyContent: 'flex-start',
+                                    textAlign: 'left'
+                                  }}
+                                >
+                                  {tenant.name}
+                                </Button>
+                              ))}
                             </div>
                           </TeachingPopoverBody>
                         </TeachingPopoverSurface>
@@ -1726,135 +1801,252 @@ export const OfficesPage = () => {
               <DetailsSkeleton rows={8} />
             ) : (
               <>
-              <Field label="Tenant" required className={styles.formField}>
-                <Combobox
-                  value={allTenants.find(t => t.id === formData.tenantId)?.name || ''}
-                  disabled
+                <TabList
+                  selectedValue={editActiveTab}
+                  onTabSelect={(_, data) => setEditActiveTab(data.value as any)}
                 >
-                  {allTenants.map((tenant) => (
-                    <Option key={tenant.id} value={tenant.id}>
-                      {tenant.name}
-                    </Option>
-                  ))}
-                </Combobox>
-              </Field>
-              <Field label="Nombre" required className={styles.formField}>
-                <Input
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Nombre de la sede"
-                />
-              </Field>
-              <Field label="Dirección" className={styles.formField}>
-                <Input
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  placeholder="Dirección"
-                />
-              </Field>
-              <Field label="Ciudad" className={styles.formField}>
-                <Input
-                  value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  placeholder="Ciudad"
-                />
-              </Field>
-              <Field label="Estado/Provincia" className={styles.formField}>
-                <Input
-                  value={formData.stateProvince}
-                  onChange={(e) => setFormData({ ...formData, stateProvince: e.target.value })}
-                  placeholder="Estado/Provincia"
-                />
-              </Field>
-              <Field label="Código Postal" className={styles.formField}>
-                <Input
-                  value={formData.postalCode}
-                  onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-                  placeholder="Código Postal"
-                />
-              </Field>
-              <Field label="Teléfono" className={styles.formField}>
-                <Input
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="Teléfono"
-                />
-              </Field>
-              <Field label="Email" className={styles.formField}>
-                <Input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="Email"
-                />
-              </Field>
-              <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
-                <Button 
-                  appearance="secondary" 
-                  onClick={() => {
-                    if (!selectedOffice) {
-                      setIsEditDialogOpen(false);
-                      setSelectedOffice(null);
-                      setFormData({
-                        customerId: '',
-                        name: '',
-                        address: '',
-                        city: '',
-                        stateProvince: '',
-                        postalCode: '',
-                        phone: '',
-                        email: '',
-                      });
-                      return;
-                    }
-                    const hasChanges = 
-                      formData.name !== selectedOffice.name ||
-                      formData.address !== (selectedOffice.address || '') ||
-                      formData.city !== (selectedOffice.city || '') ||
-                      formData.stateProvince !== (selectedOffice.stateProvince || '') ||
-                      formData.postalCode !== (selectedOffice.postalCode || '') ||
-                      formData.phone !== (selectedOffice.phone || '') ||
-                      formData.email !== (selectedOffice.email || '');
-                    if (hasChanges) {
-                      if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los cambios no guardados.')) {
-                        setIsEditDialogOpen(false);
-                        setSelectedOffice(null);
-                        setFormData({
-                          customerId: '',
-                          name: '',
-                          address: '',
-                          city: '',
-                          stateProvince: '',
-                          postalCode: '',
-                          phone: '',
-                          email: '',
-                        });
-                        setError(null);
-                      }
-                    } else {
-                      setIsEditDialogOpen(false);
-                      setSelectedOffice(null);
-                      setFormData({
-                        customerId: '',
-                        name: '',
-                        address: '',
-                        city: '',
-                        stateProvince: '',
-                        postalCode: '',
-                        phone: '',
-                        email: '',
-                      });
-                      setError(null);
-                    }
-                  }}
-                  disabled={isSaving}
-                >
-                  Cancelar
-                </Button>
-                <Button appearance="primary" onClick={handleUpdate} disabled={isSaving}>
-                  {isSaving ? 'Guardando...' : 'Guardar'}
-                </Button>
-              </div>
+                  <Tab value="details">Detalles</Tab>
+                  <Tab value="users">Usuarios</Tab>
+                </TabList>
+
+                {/* Tab de Detalles */}
+                {editActiveTab === 'details' && (
+                  <div style={{ marginTop: tokens.spacingVerticalL }}>
+                    <Field label="Tenant" required className={styles.formField}>
+                      <Combobox
+                        value={allTenants.find(t => t.id === formData.tenantId)?.name || ''}
+                        disabled
+                      >
+                        {allTenants.map((tenant) => (
+                          <Option key={tenant.id} value={tenant.id}>
+                            {tenant.name}
+                          </Option>
+                        ))}
+                      </Combobox>
+                    </Field>
+                    <Field label="Nombre" required className={styles.formField}>
+                      <Input
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="Nombre de la sede"
+                      />
+                    </Field>
+                    <Field label="Dirección" className={styles.formField}>
+                      <Input
+                        value={formData.address}
+                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                        placeholder="Dirección"
+                      />
+                    </Field>
+                    <Field label="Ciudad" className={styles.formField}>
+                      <Input
+                        value={formData.city}
+                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                        placeholder="Ciudad"
+                      />
+                    </Field>
+                    <Field label="Estado/Provincia" className={styles.formField}>
+                      <Input
+                        value={formData.stateProvince}
+                        onChange={(e) => setFormData({ ...formData, stateProvince: e.target.value })}
+                        placeholder="Estado/Provincia"
+                      />
+                    </Field>
+                    <Field label="Código Postal" className={styles.formField}>
+                      <Input
+                        value={formData.postalCode}
+                        onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+                        placeholder="Código Postal"
+                      />
+                    </Field>
+                    <Field label="Teléfono" className={styles.formField}>
+                      <Input
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        placeholder="Teléfono"
+                      />
+                    </Field>
+                    <Field label="Email" className={styles.formField}>
+                      <Input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        placeholder="Email"
+                      />
+                    </Field>
+                    {error && (
+                      <MessageBar intent="error" style={{ marginTop: tokens.spacingVerticalXL, marginBottom: tokens.spacingVerticalM }}>
+                        <MessageBarBody>{error}</MessageBarBody>
+                      </MessageBar>
+                    )}
+                    <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
+                      <Button 
+                        appearance="secondary" 
+                        onClick={() => {
+                          if (!selectedOffice) {
+                            setIsEditDialogOpen(false);
+                            setSelectedOffice(null);
+                            setFormData({
+                              customerId: '',
+                              name: '',
+                              address: '',
+                              city: '',
+                              stateProvince: '',
+                              postalCode: '',
+                              phone: '',
+                              email: '',
+                            });
+                            return;
+                          }
+                          const hasChanges = 
+                            formData.name !== selectedOffice.name ||
+                            formData.address !== (selectedOffice.address || '') ||
+                            formData.city !== (selectedOffice.city || '') ||
+                            formData.stateProvince !== (selectedOffice.stateProvince || '') ||
+                            formData.postalCode !== (selectedOffice.postalCode || '') ||
+                            formData.phone !== (selectedOffice.phone || '') ||
+                            formData.email !== (selectedOffice.email || '');
+                          if (hasChanges) {
+                            if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los cambios no guardados.')) {
+                              setIsEditDialogOpen(false);
+                              setSelectedOffice(null);
+                              setFormData({
+                                customerId: '',
+                                name: '',
+                                address: '',
+                                city: '',
+                                stateProvince: '',
+                                postalCode: '',
+                                phone: '',
+                                email: '',
+                              });
+                              setError(null);
+                            }
+                          } else {
+                            setIsEditDialogOpen(false);
+                            setSelectedOffice(null);
+                            setFormData({
+                              customerId: '',
+                              name: '',
+                              address: '',
+                              city: '',
+                              stateProvince: '',
+                              postalCode: '',
+                              phone: '',
+                              email: '',
+                            });
+                            setError(null);
+                          }
+                        }}
+                        disabled={isSaving}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button appearance="primary" onClick={handleUpdate} disabled={isSaving}>
+                        {isSaving ? 'Guardando...' : 'Guardar'}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab de Usuarios */}
+                {editActiveTab === 'users' && (
+                  <div style={{ marginTop: tokens.spacingVerticalL }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: tokens.spacingVerticalM }}>
+                      <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <Combobox
+                          placeholder="Seleccionar usuario para asignar"
+                          value={
+                            selectedUserToAdd
+                              ? allUsersForAssign.find((u) => u.id === selectedUserToAdd)?.email || ''
+                              : userSearchText
+                          }
+                          onOptionSelect={(_, data) => {
+                            const user = allUsersForAssign.find((u) => u.email === data.optionValue);
+                            if (user) {
+                              setSelectedUserToAdd(user.id);
+                              setUserSearchText('');
+                            }
+                          }}
+                          onInput={(e) => {
+                            const target = e.target as HTMLInputElement;
+                            setUserSearchText(target.value);
+                            if (!target.value) {
+                              setSelectedUserToAdd('');
+                            }
+                          }}
+                          style={{ width: '300px' }}
+                        >
+                          {filteredUsersForAssign.map((user) => (
+                            <Option key={user.id} value={user.email}>
+                              {user.name || user.email} {user.email !== user.name ? `(${user.email})` : ''}
+                            </Option>
+                          ))}
+                        </Combobox>
+                        <Button
+                          appearance="primary"
+                          icon={<AddRegular />}
+                          onClick={handleAssignUserToOffice}
+                          disabled={!selectedUserToAdd || isAssigningUser}
+                        >
+                          Agregar
+                        </Button>
+                      </div>
+                    </div>
+
+                    {isLoadingUsers ? (
+                      <Spinner label="Cargando usuarios..." />
+                    ) : (
+                      <div>
+                        {officeUsersList.length === 0 ? (
+                          <div style={{ padding: tokens.spacingVerticalXXL, textAlign: 'center' }}>
+                            <Text>No hay usuarios asignados</Text>
+                          </div>
+                        ) : (
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHeaderCell>Nombre</TableHeaderCell>
+                                <TableHeaderCell>Email</TableHeaderCell>
+                                <TableHeaderCell>Rol</TableHeaderCell>
+                                <TableHeaderCell>Estado</TableHeaderCell>
+                                <TableHeaderCell>Acciones</TableHeaderCell>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {officeUsersList.map((user: any) => (
+                                <TableRow key={user.id}>
+                                  <TableCell>{user.name || 'N/A'}</TableCell>
+                                  <TableCell>{user.email}</TableCell>
+                                  <TableCell>{user.role || 'N/A'}</TableCell>
+                                  <TableCell>
+                                    {user.isSuspended ? (
+                                      <Badge appearance="filled" color="danger">Suspendido</Badge>
+                                    ) : user.isActive ? (
+                                      <Badge appearance="filled" color="success">Activo</Badge>
+                                    ) : (
+                                      <Badge appearance="outline">Inactivo</Badge>
+                                    )}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      appearance="subtle"
+                                      icon={<DeleteRegular />}
+                                      onClick={() => handleRemoveUserFromOffice(user.id)}
+                                      disabled={isAssigningUser}
+                                    >
+                                      Desasignar
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -1922,71 +2114,189 @@ export const OfficesPage = () => {
               <DetailsSkeleton rows={12} />
             ) : selectedOffice ? (
               <>
-                <Field label="Nombre" className={styles.formField}>
-                  <Input value={selectedOffice.name} readOnly />
-                </Field>
-                <Field label="Tenants" className={styles.formField}>
-                  {selectedOffice.tenants && selectedOffice.tenants.length > 0 ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalXS }}>
-                      {selectedOffice.tenants.map((tenant) => (
-                        <Text key={tenant.id} weight="semibold">{tenant.name}</Text>
-                      ))}
+                {error && (
+                  <MessageBar intent="error" style={{ marginBottom: tokens.spacingVerticalM }}>
+                    <MessageBarBody>{error}</MessageBarBody>
+                  </MessageBar>
+                )}
+
+                <TabList
+                  selectedValue={detailsActiveTab}
+                  onTabSelect={(_, data) => setDetailsActiveTab(data.value as any)}
+                >
+                  <Tab value="details">Detalles</Tab>
+                  <Tab value="users">Usuarios</Tab>
+                </TabList>
+
+                {/* Tab de Detalles */}
+                {detailsActiveTab === 'details' && (
+                  <div style={{ marginTop: tokens.spacingVerticalL }}>
+                    <Field label="Nombre" className={styles.formField}>
+                      <Input value={selectedOffice.name} readOnly />
+                    </Field>
+                    <Field label="Tenants" className={styles.formField}>
+                      {selectedOffice.tenants && selectedOffice.tenants.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalXS }}>
+                          {selectedOffice.tenants.map((tenant) => (
+                            <Text key={tenant.id} weight="semibold">{tenant.name}</Text>
+                          ))}
+                        </div>
+                      ) : (
+                        <Input value="N/A" readOnly />
+                      )}
+                    </Field>
+                    <Field label="Clientes" className={styles.formField}>
+                      {selectedOffice.customers && selectedOffice.customers.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalXS }}>
+                          {selectedOffice.customers.map((customer) => (
+                            <Text key={customer.id} weight="semibold">{customer.name}</Text>
+                          ))}
+                        </div>
+                      ) : (
+                        <Input value="N/A" readOnly />
+                      )}
+                    </Field>
+                    <Field label="Dirección" className={styles.formField}>
+                      <Input value={selectedOffice.address || 'N/A'} readOnly />
+                    </Field>
+                    <Field label="Ciudad" className={styles.formField}>
+                      <Input value={selectedOffice.city || 'N/A'} readOnly />
+                    </Field>
+                    <Field label="Estado/Provincia" className={styles.formField}>
+                      <Input value={selectedOffice.stateProvince || 'N/A'} readOnly />
+                    </Field>
+                    <Field label="Código Postal" className={styles.formField}>
+                      <Input value={selectedOffice.postalCode || 'N/A'} readOnly />
+                    </Field>
+                    <Field label="Teléfono" className={styles.formField}>
+                      <Input value={selectedOffice.phone || 'N/A'} readOnly />
+                    </Field>
+                    <Field label="Correo electrónico" className={styles.formField}>
+                      <Input value={selectedOffice.email || 'N/A'} readOnly />
+                    </Field>
+                    <Field label="Estado" className={styles.formField}>
+                      <div>
+                        {selectedOffice.isSuspended ? (
+                          <Badge appearance="filled" color="danger">Suspendido</Badge>
+                        ) : selectedOffice.isActive ? (
+                          <Badge appearance="filled" color="success">Activo</Badge>
+                        ) : (
+                          <Badge appearance="outline">Inactivo</Badge>
+                        )}
+                      </div>
+                    </Field>
+                    <Field label="Creado" className={styles.formField}>
+                      <Input value={new Date(selectedOffice.createdAt).toLocaleString()} readOnly />
+                    </Field>
+                    <Field label="Actualizado" className={styles.formField}>
+                      <Input value={new Date(selectedOffice.updatedAt).toLocaleString()} readOnly />
+                    </Field>
+                    <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
+                      <Button appearance="primary" onClick={() => setIsDetailsDialogOpen(false)}>
+                        Cerrar
+                      </Button>
                     </div>
-                  ) : (
-                    <Input value="N/A" readOnly />
-                  )}
-                </Field>
-                <Field label="Clientes" className={styles.formField}>
-                  {selectedOffice.customers && selectedOffice.customers.length > 0 ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalXS }}>
-                      {selectedOffice.customers.map((customer) => (
-                        <Text key={customer.id} weight="semibold">{customer.name}</Text>
-                      ))}
+                  </div>
+                )}
+
+                {/* Tab de Usuarios */}
+                {detailsActiveTab === 'users' && (
+                  <div style={{ marginTop: tokens.spacingVerticalL }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: tokens.spacingVerticalM }}>
+                      <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <Combobox
+                          placeholder="Seleccionar usuario para asignar"
+                          value={
+                            selectedUserToAdd
+                              ? allUsersForAssign.find((u) => u.id === selectedUserToAdd)?.email || ''
+                              : userSearchText
+                          }
+                          onOptionSelect={(_, data) => {
+                            const user = allUsersForAssign.find((u) => u.email === data.optionValue);
+                            if (user) {
+                              setSelectedUserToAdd(user.id);
+                              setUserSearchText('');
+                            }
+                          }}
+                          onInput={(e) => {
+                            const target = e.target as HTMLInputElement;
+                            setUserSearchText(target.value);
+                            if (!target.value) {
+                              setSelectedUserToAdd('');
+                            }
+                          }}
+                          style={{ width: '300px' }}
+                        >
+                          {filteredUsersForAssign.map((user) => (
+                            <Option key={user.id} value={user.email}>
+                              {user.name || user.email} {user.email !== user.name ? `(${user.email})` : ''}
+                            </Option>
+                          ))}
+                        </Combobox>
+                        <Button
+                          appearance="primary"
+                          icon={<AddRegular />}
+                          onClick={handleAssignUserToOffice}
+                          disabled={!selectedUserToAdd || isAssigningUser}
+                        >
+                          Agregar
+                        </Button>
+                      </div>
                     </div>
-                  ) : (
-                    <Input value="N/A" readOnly />
-                  )}
-                </Field>
-                <Field label="Dirección" className={styles.formField}>
-                  <Input value={selectedOffice.address || 'N/A'} readOnly />
-                </Field>
-                <Field label="Ciudad" className={styles.formField}>
-                  <Input value={selectedOffice.city || 'N/A'} readOnly />
-                </Field>
-                <Field label="Estado/Provincia" className={styles.formField}>
-                  <Input value={selectedOffice.stateProvince || 'N/A'} readOnly />
-                </Field>
-                <Field label="Código Postal" className={styles.formField}>
-                  <Input value={selectedOffice.postalCode || 'N/A'} readOnly />
-                </Field>
-                <Field label="Teléfono" className={styles.formField}>
-                  <Input value={selectedOffice.phone || 'N/A'} readOnly />
-                </Field>
-                <Field label="Correo electrónico" className={styles.formField}>
-                  <Input value={selectedOffice.email || 'N/A'} readOnly />
-                </Field>
-                <Field label="Estado" className={styles.formField}>
-                  <div>
-                    {selectedOffice.isSuspended ? (
-                      <Badge appearance="filled" color="danger">Suspendido</Badge>
-                    ) : selectedOffice.isActive ? (
-                      <Badge appearance="filled" color="success">Activo</Badge>
+
+                    {isLoadingUsers ? (
+                      <Spinner label="Cargando usuarios..." />
                     ) : (
-                      <Badge appearance="outline">Inactivo</Badge>
+                      <div>
+                        {officeUsersList.length === 0 ? (
+                          <div style={{ padding: tokens.spacingVerticalXXL, textAlign: 'center' }}>
+                            <Text>No hay usuarios asignados</Text>
+                          </div>
+                        ) : (
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHeaderCell>Nombre</TableHeaderCell>
+                                <TableHeaderCell>Email</TableHeaderCell>
+                                <TableHeaderCell>Rol</TableHeaderCell>
+                                <TableHeaderCell>Estado</TableHeaderCell>
+                                <TableHeaderCell>Acciones</TableHeaderCell>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {officeUsersList.map((user: any) => (
+                                <TableRow key={user.id}>
+                                  <TableCell>{user.name || 'N/A'}</TableCell>
+                                  <TableCell>{user.email}</TableCell>
+                                  <TableCell>{user.role || 'N/A'}</TableCell>
+                                  <TableCell>
+                                    {user.isSuspended ? (
+                                      <Badge appearance="filled" color="danger">Suspendido</Badge>
+                                    ) : user.isActive ? (
+                                      <Badge appearance="filled" color="success">Activo</Badge>
+                                    ) : (
+                                      <Badge appearance="outline">Inactivo</Badge>
+                                    )}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      appearance="subtle"
+                                      icon={<DeleteRegular />}
+                                      onClick={() => handleRemoveUserFromOffice(user.id)}
+                                      disabled={isAssigningUser}
+                                    >
+                                      Desasignar
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        )}
+                      </div>
                     )}
                   </div>
-                </Field>
-                <Field label="Creado" className={styles.formField}>
-                  <Input value={new Date(selectedOffice.createdAt).toLocaleString()} readOnly />
-                </Field>
-                <Field label="Actualizado" className={styles.formField}>
-                  <Input value={new Date(selectedOffice.updatedAt).toLocaleString()} readOnly />
-                </Field>
-                <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
-                  <Button appearance="primary" onClick={() => setIsDetailsDialogOpen(false)}>
-                    Cerrar
-                  </Button>
-                </div>
+                )}
               </>
             ) : null}
           </div>
