@@ -164,6 +164,7 @@ export const UsersPage = () => {
   const [availableOffices, setAvailableOffices] = useState<OfficeDto[]>([]);
   const [isAssigning, setIsAssigning] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
+  const [editAvailableOffices, setEditAvailableOffices] = useState<OfficeDto[]>([]);
 
   const isLoadingRef = useRef(false);
   const hasLoadedRef = useRef(false);
@@ -211,21 +212,53 @@ export const UsersPage = () => {
 
   const loadUserAssociations = useCallback(async (userId: string) => {
     try {
-      // Cargar sedes asociadas al usuario a través del cliente
-      const user = users.find((u) => u.id === userId);
-      if (!user || !user.customerId) return;
+      // Cargar sedes y tenants asociados directamente al usuario a través de las tablas user_offices y user_tenants
+      const [offices, tenants] = await Promise.all([
+        userService.getUserOffices(userId),
+        userService.getUserTenants(userId),
+      ]);
 
-      // Obtener sedes del cliente
-      const offices = await officeService.getOfficesByCustomer(user.customerId);
-      setUserOffices((prev) => ({ ...prev, [userId]: offices }));
+      // Transformar las oficinas al formato OfficeDto
+      const officesDto: OfficeDto[] = offices.map((office: any) => ({
+        id: office.id,
+        name: office.name,
+        tenantId: office.tenantId,
+        tenantName: office.tenantName,
+        customerId: office.customerId,
+        customerName: office.customerName,
+        address: office.address,
+        city: office.city,
+        stateProvince: office.stateProvince,
+        postalCode: office.postalCode,
+        phone: office.phone,
+        email: office.email,
+        createdAt: office.createdAt,
+        updatedAt: office.updatedAt,
+        isActive: office.isActive,
+        isSuspended: office.isSuspended,
+      }));
 
-      // Obtener tenants del cliente
-      const customerTenants = await customerService.getCustomerTenants(user.customerId);
-      setUserTenants((prev) => ({ ...prev, [userId]: customerTenants }));
+      // Transformar los tenants al formato TenantDto
+      const tenantsDto: TenantDto[] = tenants.map((tenant: any) => ({
+        id: tenant.id,
+        name: tenant.name,
+        customerId: tenant.customerId,
+        customerName: tenant.customerName,
+        createdAt: tenant.createdAt,
+        updatedAt: tenant.updatedAt,
+        isActive: tenant.isActive,
+        isSuspended: tenant.isSuspended,
+      }));
+
+      setUserOffices((prev) => ({ ...prev, [userId]: officesDto }));
+      setUserTenants((prev) => ({ ...prev, [userId]: tenantsDto }));
     } catch (err: any) {
       console.error('[UsersPage] Error cargando asociaciones del usuario:', err);
+      // Si hay error, establecer arrays vacíos para evitar errores en la UI
+      setUserOffices((prev) => ({ ...prev, [userId]: [] }));
+      setUserTenants((prev) => ({ ...prev, [userId]: [] }));
     }
-  }, [users]);
+  }, []);
 
   useEffect(() => {
     if (!isLoadingRef.current && !hasLoadedRef.current) {
@@ -238,14 +271,12 @@ export const UsersPage = () => {
 
   // Cargar asociaciones cuando se cargan los usuarios
   useEffect(() => {
-    if (users.length > 0 && customers.length > 0) {
+    if (users.length > 0) {
       users.forEach((user) => {
-        if (user.customerId) {
-          loadUserAssociations(user.id);
-        }
+        loadUserAssociations(user.id);
       });
     }
-  }, [users, customers, loadUserAssociations]);
+  }, [users, loadUserAssociations]);
 
   // Registrar acciones en el RibbonMenu
   useEffect(() => {
@@ -265,6 +296,7 @@ export const UsersPage = () => {
               role: 'User',
               tenantId: '',
               customerId: '',
+              officeId: '',
               contactEmail: '',
               phone: '',
               auth0Id: '',
@@ -286,6 +318,7 @@ export const UsersPage = () => {
     role: 'User',
     tenantId: '',
     customerId: '',
+    officeId: '',
     contactEmail: '',
     phone: '',
     auth0Id: '',
@@ -300,18 +333,41 @@ export const UsersPage = () => {
         user.role.toLowerCase().includes(searchTerm.toLowerCase())
       );
 
-  const handleEdit = (user: UserDto) => {
+  const handleEdit = async (user: UserDto) => {
     setSelectedUser(user);
+    
+    // Obtener la primera sede del usuario si tiene sedes asociadas
+    let initialOfficeId = '';
+    const userOfficesList = userOffices[user.id] || [];
+    if (userOfficesList.length > 0) {
+      initialOfficeId = userOfficesList[0].id;
+    }
+    
     setFormData({
       email: user.email,
       name: user.name || '',
       role: user.role,
       tenantId: user.tenantId || '',
       customerId: user.customerId || '',
+      officeId: initialOfficeId,
       contactEmail: user.contactEmail || '',
       phone: user.phone || '',
       auth0Id: user.auth0Id || '',
     });
+    
+    // Cargar sedes del tenant actual si existe
+    if (user.tenantId) {
+      try {
+        const offices = await officeService.getOfficesByTenant(user.tenantId);
+        setEditAvailableOffices(offices);
+      } catch (err: any) {
+        console.error('[UsersPage] Error cargando sedes:', err);
+        setEditAvailableOffices([]);
+      }
+    } else {
+      setEditAvailableOffices([]);
+    }
+    
     setIsEditDialogOpen(true);
   };
 
@@ -338,6 +394,7 @@ export const UsersPage = () => {
         role: 'User',
         tenantId: '',
         customerId: '',
+        officeId: '',
         contactEmail: '',
         phone: '',
         auth0Id: '',
@@ -358,16 +415,21 @@ export const UsersPage = () => {
     try {
       setError(null);
       setIsSaving(true);
-      await userService.updateUser(selectedUser.id, formData);
+      await userService.updateUser(selectedUser.id, {
+        ...formData,
+        officeId: formData.officeId || undefined,
+      });
       setIsEditDialogOpen(false);
       setSelectedUser(null);
       setIsSaving(false);
+      setEditAvailableOffices([]);
       setFormData({
         email: '',
         name: '',
         role: 'User',
         tenantId: '',
         customerId: '',
+        officeId: '',
         contactEmail: '',
         phone: '',
         auth0Id: '',
@@ -525,6 +587,7 @@ export const UsersPage = () => {
         role: selectedUserForAssign.role,
         tenantId: selectedTenantId,
         customerId: selectedTenant.customerId || selectedUserForAssign.customerId || '',
+        officeId: selectedOfficeId || undefined,
         contactEmail: selectedUserForAssign.contactEmail || '',
         phone: selectedUserForAssign.phone || '',
       });
@@ -622,20 +685,43 @@ export const UsersPage = () => {
         return;
       }
 
+      // Obtener la oficina por defecto creada
+      let defaultOffice: OfficeDto | null = null;
+      
+      // Intentar obtener la oficina de la respuesta
+      if ((response as any)?.office?.id) {
+        defaultOffice = (response as any).office;
+      } else {
+        // Si no está en la respuesta, obtener las oficinas del tenant
+        const tenantOffices = await officeService.getOfficesByTenant(defaultTenant.id);
+        if (tenantOffices.length > 0) {
+          defaultOffice = tenantOffices[0];
+        }
+      }
+
       await userService.updateUser(selectedUserForAssign.id, {
         email: selectedUserForAssign.email,
         name: selectedUserForAssign.name || '',
         role: selectedUserForAssign.role,
         tenantId: defaultTenant.id,
         customerId: newCustomer.id,
+        officeId: defaultOffice?.id || undefined,
         contactEmail: selectedUserForAssign.contactEmail || '',
         phone: selectedUserForAssign.phone || '',
       });
+
+      // Guardar el ID del usuario antes de recargar para poder recargar sus asociaciones después
+      const userIdToReload = selectedUserForAssign.id;
 
       // Recargar datos
       await loadUsers();
       await loadTenants();
       await loadCustomers();
+
+      // Recargar asociaciones del usuario actualizado después de que se hayan cargado los usuarios
+      // El useEffect se encargará de cargar las asociaciones automáticamente, pero forzamos la recarga
+      // para asegurarnos de que se actualicen inmediatamente
+      await loadUserAssociations(userIdToReload);
 
       setIsAssignDrawerOpen(false);
       setSelectedUserForAssign(null);
@@ -831,25 +917,15 @@ export const UsersPage = () => {
                                 <TeachingPopoverSurface>
                                   <TeachingPopoverHeader>Sedes Asociadas</TeachingPopoverHeader>
                                   <TeachingPopoverBody>
-                                    <div style={{ maxWidth: '600px', maxHeight: '400px', overflowY: 'auto' }}>
-                                      <Table size="small">
-                                        <TableHeader>
-                                          <TableRow>
-                                            <TableHeaderCell>Nombre</TableHeaderCell>
-                                            <TableHeaderCell>Ciudad</TableHeaderCell>
-                                            <TableHeaderCell>Tenant</TableHeaderCell>
-                                          </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                          {offices.map((office) => (
-                                            <TableRow key={office.id}>
-                                              <TableCell>{office.name}</TableCell>
-                                              <TableCell>{office.city || 'N/A'}</TableCell>
-                                              <TableCell>{office.tenantName || 'N/A'}</TableCell>
-                                            </TableRow>
-                                          ))}
-                                        </TableBody>
-                                      </Table>
+                                    <div style={{ maxWidth: '600px', maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM }}>
+                                      {offices.map((office) => (
+                                        <div key={office.id} style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalXS }}>
+                                          <Text weight="semibold">{office.name}</Text>
+                                          <Text size={200} style={{ color: tokens.colorNeutralForeground2 }}>
+                                            {office.city || 'N/A'} • {office.tenantName || 'N/A'}
+                                          </Text>
+                                        </div>
+                                      ))}
                                     </div>
                                   </TeachingPopoverBody>
                                   <TeachingPopoverFooter primaryButton={{ text: 'Cerrar' }} />
@@ -1116,7 +1192,12 @@ export const UsersPage = () => {
         size="large"
         open={isEditDialogOpen}
         modalType="alert"
-        onOpenChange={(_, data) => setIsEditDialogOpen(data.open)}
+        onOpenChange={(_, data) => {
+          setIsEditDialogOpen(data.open);
+          if (!data.open) {
+            setEditAvailableOffices([]);
+          }
+        }}
       >
         <DrawerHeader>
           <DrawerHeaderTitle 
@@ -1163,10 +1244,22 @@ export const UsersPage = () => {
                 <Field label="Tenant" className={styles.formField}>
                   <Combobox
                     value={formData.tenantId ? tenants.find((t) => t.id === formData.tenantId)?.name || '' : ''}
-                    onOptionSelect={(_, data) => {
+                    onOptionSelect={async (_, data) => {
                       const tenant = tenants.find((t) => t.name === data.optionValue);
                       if (tenant) {
-                        setFormData({ ...formData, tenantId: tenant.id });
+                        setFormData({ ...formData, tenantId: tenant.id, officeId: '' });
+                        // Cargar sedes del tenant seleccionado
+                        try {
+                          const offices = await officeService.getOfficesByTenant(tenant.id);
+                          setEditAvailableOffices(offices);
+                          // Establecer la primera sede por defecto si existe
+                          if (offices.length > 0) {
+                            setFormData(prev => ({ ...prev, tenantId: tenant.id, officeId: offices[0].id }));
+                          }
+                        } catch (err: any) {
+                          console.error('[UsersPage] Error cargando sedes:', err);
+                          setEditAvailableOffices([]);
+                        }
                       }
                     }}
                   >
@@ -1177,6 +1270,31 @@ export const UsersPage = () => {
                     ))}
                   </Combobox>
                 </Field>
+                {formData.tenantId && (
+                  <Field label="Sede" className={styles.formField}>
+                    <Combobox
+                      value={formData.officeId ? editAvailableOffices.find((o) => o.id === formData.officeId)?.name || '' : ''}
+                      onOptionSelect={(_, data) => {
+                        const office = editAvailableOffices.find((o) => o.name === data.optionValue);
+                        if (office) {
+                          setFormData({ ...formData, officeId: office.id });
+                        }
+                      }}
+                    >
+                      {editAvailableOffices.length > 0 ? (
+                        editAvailableOffices.map((office) => (
+                          <Option key={office.id} value={office.name}>
+                            {office.name} {office.city ? `- ${office.city}` : ''}
+                          </Option>
+                        ))
+                      ) : (
+                        <Option value="" disabled>
+                          No hay sedes disponibles para este tenant
+                        </Option>
+                      )}
+                    </Combobox>
+                  </Field>
+                )}
                 <Field label="Email de Contacto" className={styles.formField}>
                   <Input
                     type="email"

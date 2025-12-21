@@ -34,6 +34,7 @@ export interface UpdateUserRequest {
   name?: string;
   tenantId?: string;
   customerId?: string;
+  officeId?: string;
   role?: 'Admin' | 'User';
   contactEmail?: string;
   phone?: string;
@@ -66,8 +67,19 @@ function transformUserDto(user: any): UserDto {
 
 export const userService = {
   async getAllUsers(): Promise<UserDto[]> {
-    const users = await apiService.request<any[]>('/backoffice/users');
-    return users.map(transformUserDto);
+    // Usar el endpoint /users que requiere rol root y devuelve todos los usuarios
+    // en lugar de /backoffice/users que solo devuelve usuarios del tenant actual
+    try {
+      const users = await apiService.request<any[]>('/users');
+      return users.map(transformUserDto);
+    } catch (error: any) {
+      // Si falla por permisos, intentar con el endpoint de backoffice como fallback
+      if (error?.statusCode === 403 || error?.statusCode === 401) {
+        const users = await apiService.request<any[]>('/backoffice/users');
+        return users.map(transformUserDto);
+      }
+      throw error;
+    }
   },
 
   async getUserById(id: string): Promise<UserDto> {
@@ -136,6 +148,14 @@ export const userService = {
   async getUsersByCustomerId(customerId: string): Promise<UserDto[]> {
     const users = await apiService.request<any[]>(`/customers/${customerId}/users`);
     return users.map(transformUserDto);
+  },
+
+  async getUserOffices(userId: string): Promise<any[]> {
+    return apiService.request<any[]>(`/users/${userId}/offices`);
+  },
+
+  async getUserTenants(userId: string): Promise<any[]> {
+    return apiService.request<any[]>(`/users/${userId}/tenants`);
   },
 };
 

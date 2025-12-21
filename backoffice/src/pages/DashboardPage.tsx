@@ -9,14 +9,21 @@ import {
   shorthands,
   tokens,
   Button,
+  Tree,
+  TreeItem,
+  TreeItemLayout,
+  Persona,
+  Spinner,
 } from '@fluentui/react-components';
-import { HomeRegular, ArrowClockwiseRegular } from '@fluentui/react-icons';
-import { useEffect, useState } from 'react';
+import { HomeRegular, ArrowClockwiseRegular, BuildingRegular, PeopleRegular, PersonRegular } from '@fluentui/react-icons';
+import { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { backofficeService } from '../services/backofficeService';
 import { tenantService } from '../services/tenantService';
-import { customerService } from '../services/customerService';
-import { officeService } from '../services/officeService';
+import { customerService, CustomerDto } from '../services/customerService';
+import { officeService, OfficeDto } from '../services/officeService';
+import { userService, UserDto } from '../services/userService';
+import { TenantDto } from '../services/tenantService';
 import { StatsCardSkeleton } from '../components/StatsCardSkeleton';
 import { DetailsSkeleton } from '../components/DetailsSkeleton';
 
@@ -59,7 +66,44 @@ const useStyles = makeStyles({
     alignItems: 'center',
     minHeight: '60px',
   },
+  treeCard: {
+    minHeight: '400px',
+  },
+  treeContainer: {
+    padding: tokens.spacingVerticalL,
+    maxHeight: '600px',
+    overflowY: 'auto',
+  },
+  personaContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap(tokens.spacingHorizontalS),
+  },
 });
+
+interface TreeData {
+  customers: CustomerDto[];
+  tenants: TenantDto[];
+  offices: OfficeDto[];
+  users: UserDto[];
+  officeUsersMap: Map<string, UserDto[]>;
+}
+
+interface OfficeNode {
+  office: OfficeDto;
+  users: UserDto[];
+}
+
+interface TenantNode {
+  tenant: TenantDto;
+  offices: OfficeNode[];
+}
+
+interface CustomerNode {
+  customer: CustomerDto;
+  children: CustomerNode[];
+  tenants: TenantNode[];
+}
 
 export const DashboardPage = () => {
   const styles = useStyles();
@@ -69,11 +113,14 @@ export const DashboardPage = () => {
   const [customerCount, setCustomerCount] = useState<number | null>(null);
   const [officeCount, setOfficeCount] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [treeData, setTreeData] = useState<TreeData | null>(null);
+  const [isLoadingTree, setIsLoadingTree] = useState(false);
 
   useEffect(() => {
     // Solo cargar stats si userDetails está disponible
     if (userDetails) {
       loadStats();
+      loadTreeData();
     } else {
       setIsLoading(false);
     }
@@ -147,6 +194,222 @@ export const DashboardPage = () => {
     }
   };
 
+  // Cargar datos para el árbol jerárquico
+  const loadTreeData = async () => {
+    try {
+      setIsLoadingTree(true);
+      const [customers, tenants, offices, users] = await Promise.allSettled([
+        customerService.getAllCustomers(),
+        tenantService.getAllTenants(),
+        officeService.getAllOffices(),
+        userService.getAllUsers(),
+      ]);
+
+      const customersData = customers.status === 'fulfilled' ? customers.value : [];
+      const tenantsData = tenants.status === 'fulfilled' ? tenants.value : [];
+      const officesData = offices.status === 'fulfilled' ? offices.value : [];
+      const usersData = users.status === 'fulfilled' ? users.value : [];
+
+      // Cargar usuarios por sede de forma paralela
+      const officeUsersMap = new Map<string, UserDto[]>();
+      const officeUsersPromises = officesData.map(async (office) => {
+        try {
+          const officeUsers = await officeService.getOfficeUsers(office.id);
+          // Transformar los usuarios al formato UserDto si es necesario
+          const transformedUsers = officeUsers.map((u: any) => ({
+            id: u.id,
+            email: u.email,
+            name: u.name || null,
+            tenantId: u.tenantId || null,
+            customerId: u.customerId || null,
+            role: (u.role === 1 || u.role === 'Admin') ? 'Admin' : 'User',
+            contactEmail: u.contactEmail || null,
+            phone: u.phone || null,
+            auth0Id: u.auth0Id || null,
+            createdAt: u.createdAt,
+            updatedAt: u.updatedAt,
+            isActive: u.isActive ?? true,
+            isSuspended: u.isSuspended ?? false,
+          }));
+          officeUsersMap.set(office.id, transformedUsers);
+        } catch (error) {
+          console.warn(`Error loading users for office ${office.id}:`, error);
+          officeUsersMap.set(office.id, []);
+        }
+      });
+
+      await Promise.allSettled(officeUsersPromises);
+
+      const treeDataResult: TreeData = {
+        customers: customersData,
+        tenants: tenantsData,
+        offices: officesData,
+        users: usersData,
+        officeUsersMap,
+      };
+
+      setTreeData(treeDataResult);
+    } catch (error: any) {
+      console.error('Error loading tree data:', error);
+      setTreeData({
+        customers: [],
+        tenants: [],
+        offices: [],
+        users: [],
+        officeUsersMap: new Map(),
+      });
+    } finally {
+      setIsLoadingTree(false);
+    }
+  };
+
+  // Construir árbol jerárquico de clientes con todos sus niveles
+  const buildCustomerTree = useMemo(() => {
+    if (!treeData) return [];
+
+    const { customers, tenants, offices, officeUsersMap } = treeData;
+
+    // Función recursiva para construir el árbol de clientes
+    const buildCustomerNode = (customer: CustomerDto) => {
+      // Obtener clientes hijos directos
+      const childCustomers = customers.filter(c => c.parentId === customer.id);
+
+      // Obtener tenants de este cliente específico
+      const customerTenants = tenants.filter(t => t.customerId === customer.id);
+
+      // Construir estructura de tenants con sus sedes y usuarios
+      const tenantNodes = customerTenants.map(tenant => {
+        // Obtener sedes del tenant
+        const tenantOffices = offices.filter(o => o.tenantId === tenant.id);
+
+        // Construir estructura de sedes con sus usuarios
+        const officeNodes = tenantOffices.map(office => {
+          // Obtener usuarios de la sede desde el mapa
+          const officeUsers = officeUsersMap.get(office.id) || [];
+
+          return {
+            office,
+            users: officeUsers,
+          };
+        });
+
+        return {
+          tenant,
+          offices: officeNodes,
+        };
+      });
+
+      return {
+        customer,
+        children: childCustomers.map(buildCustomerNode),
+        tenants: tenantNodes,
+      };
+    };
+
+    // Obtener clientes raíz (sin padre)
+    const rootCustomers = customers.filter(c => !c.parentId || c.parentId === null);
+
+    return rootCustomers.map(buildCustomerNode);
+  }, [treeData]);
+
+  // Renderizar el árbol
+  const renderTree = () => {
+    if (isLoadingTree) {
+      return (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: tokens.spacingVerticalXL }}>
+          <Spinner size="large" label="Cargando estructura jerárquica..." />
+        </div>
+      );
+    }
+
+    if (!treeData || buildCustomerTree.length === 0) {
+      return (
+        <div style={{ padding: tokens.spacingVerticalXL, textAlign: 'center' }}>
+          <Text>No hay datos disponibles para mostrar</Text>
+        </div>
+      );
+    }
+
+    // Función recursiva para renderizar un nodo de cliente
+    const renderCustomerNode = (customerNode: CustomerNode, depth: number = 0): JSX.Element => {
+      return (
+        <TreeItem
+          key={`customer-${customerNode.customer.id}-${depth}`}
+          itemType="branch"
+        >
+          <TreeItemLayout
+            iconBefore={<BuildingRegular />}
+            aside={<Text size={300}>{customerNode.customer.name}</Text>}
+          >
+            <Text weight={depth === 0 ? "semibold" : "regular"}>{customerNode.customer.name}</Text>
+          </TreeItemLayout>
+          {/* Renderizar clientes hijos recursivamente */}
+          {customerNode.children.map((childNode) => renderCustomerNode(childNode, depth + 1))}
+          {/* Renderizar tenants del cliente */}
+          {customerNode.tenants.map((tenantNode, tenantIdx) => (
+            <TreeItem
+              key={`tenant-${tenantNode.tenant.id}-${tenantIdx}`}
+              itemType="branch"
+            >
+              <TreeItemLayout
+                iconBefore={<PeopleRegular />}
+                aside={<Text size={300}>{tenantNode.tenant.name}</Text>}
+              >
+                <Text>{tenantNode.tenant.name}</Text>
+              </TreeItemLayout>
+              {/* Sedes del tenant */}
+              {tenantNode.offices.map((officeNode, officeIdx) => (
+                <TreeItem
+                  key={`office-${officeNode.office.id}-${officeIdx}`}
+                  itemType="branch"
+                >
+                  <TreeItemLayout
+                    iconBefore={<BuildingRegular />}
+                    aside={<Text size={300}>{officeNode.office.name}</Text>}
+                  >
+                    <Text>{officeNode.office.name}</Text>
+                  </TreeItemLayout>
+                  {/* Usuarios de la sede */}
+                  {officeNode.users.map((user, userIdx) => (
+                    <TreeItem
+                      key={`user-${user.id}-${userIdx}`}
+                      itemType="leaf"
+                    >
+                      <TreeItemLayout
+                        iconBefore={<PersonRegular />}
+                      >
+                        <div className={styles.personaContainer}>
+                          <Persona
+                            name={user.name || user.email}
+                            secondaryText={user.email}
+                            size="extra-small"
+                          />
+                          {user.role && (
+                            <Text size={200} style={{ marginLeft: tokens.spacingHorizontalS }}>
+                              ({user.role})
+                            </Text>
+                          )}
+                        </div>
+                      </TreeItemLayout>
+                    </TreeItem>
+                  ))}
+                </TreeItem>
+              ))}
+            </TreeItem>
+          ))}
+        </TreeItem>
+      );
+    };
+
+    return (
+      <Tree aria-label="Estructura jerárquica de clientes, tenants, sedes y usuarios">
+        {buildCustomerTree.map((customerNode, customerIdx) => 
+          renderCustomerNode(customerNode, 0)
+        )}
+      </Tree>
+    );
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -160,6 +423,15 @@ export const DashboardPage = () => {
           title="Actualizar estadísticas del dashboard"
         >
           Actualizar
+        </Button>
+        <Button
+          appearance="secondary"
+          icon={<ArrowClockwiseRegular />}
+          onClick={loadTreeData}
+          disabled={isLoadingTree}
+          title="Actualizar estructura jerárquica"
+        >
+          Actualizar Árbol
         </Button>
       </div>
 
@@ -236,6 +508,18 @@ export const DashboardPage = () => {
           </CardPreview>
         </Card>
       </div>
+
+      <Card className={styles.treeCard}>
+        <CardHeader
+          header={<Text weight="semibold">Estructura Jerárquica</Text>}
+          description="Clientes, tenants, sedes y usuarios organizados jerárquicamente"
+        />
+        <CardPreview>
+          <div className={styles.treeContainer}>
+            {renderTree()}
+          </div>
+        </CardPreview>
+      </Card>
 
       <Card>
         <CardHeader

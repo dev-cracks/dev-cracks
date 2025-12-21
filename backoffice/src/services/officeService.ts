@@ -112,5 +112,9 @@ export const officeService = {
     });
     return response;
   },
+
+  async getOfficeUsers(officeId: string): Promise<any[]> {
+    return apiService.request<any[]>(`/offices/${officeId}/users`);
+  },
 };
 

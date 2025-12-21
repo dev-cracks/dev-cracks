@@ -595,6 +595,10 @@ export const CustomersPage = () => {
   const [parentCustomerSearchText, setParentCustomerSearchText] = useState('');
   const [editCountrySearchText, setEditCountrySearchText] = useState('');
   const [assignParentSearchText, setAssignParentSearchText] = useState('');
+  const [tenantSearchText, setTenantSearchText] = useState('');
+  const [userTenantSearchText, setUserTenantSearchText] = useState('');
+  const [officeSearchText, setOfficeSearchText] = useState('');
+  const [roleSearchText, setRoleSearchText] = useState('');
 
   // Form state
   const [formData, setFormData] = useState<CreateCustomerRequest>({
@@ -769,6 +773,47 @@ export const CustomersPage = () => {
         customer.identification.toLowerCase().includes(searchLower)
       );
   }, [customers, assignParentSearchText, selectedCustomer]);
+
+  // Filtrar tenants para el Combobox de crear sede
+  const filteredTenants = useMemo(() => {
+    if (!tenantSearchText.trim()) return customerTenants;
+    const searchLower = tenantSearchText.toLowerCase();
+    return customerTenants.filter((tenant) =>
+      tenant.name.toLowerCase().includes(searchLower)
+    );
+  }, [customerTenants, tenantSearchText]);
+
+  // Filtrar tenants para el Combobox de crear usuario
+  const filteredUserTenants = useMemo(() => {
+    if (!userTenantSearchText.trim()) return customerTenants;
+    const searchLower = userTenantSearchText.toLowerCase();
+    return customerTenants.filter((tenant) =>
+      tenant.name.toLowerCase().includes(searchLower)
+    );
+  }, [customerTenants, userTenantSearchText]);
+
+  // Filtrar sedes para el Combobox de crear usuario
+  const filteredOffices = useMemo(() => {
+    const officesForTenant = availableOffices.filter(o => o.tenantId === userFormData.tenantId);
+    if (!officeSearchText.trim()) return officesForTenant;
+    const searchLower = officeSearchText.toLowerCase();
+    return officesForTenant.filter((office) =>
+      office.name.toLowerCase().includes(searchLower)
+    );
+  }, [availableOffices, userFormData.tenantId, officeSearchText]);
+
+  // Filtrar roles para el Combobox de crear usuario
+  const filteredRoles = useMemo(() => {
+    const roles = [
+      { value: 'User', label: 'Usuario' },
+      { value: 'Admin', label: 'Administrador' }
+    ];
+    if (!roleSearchText.trim()) return roles;
+    const searchLower = roleSearchText.toLowerCase();
+    return roles.filter((role) =>
+      role.label.toLowerCase().includes(searchLower)
+    );
+  }, [roleSearchText]);
 
   // Estado para controlar qué nodos están expandidos y drag and drop
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
@@ -1503,6 +1548,7 @@ export const CustomersPage = () => {
         phone: '',
         email: '',
       });
+      setTenantSearchText('');
     } catch (err: any) {
       console.error('Error cargando tenants:', err);
       setCustomerTenants([]);
@@ -1516,6 +1562,7 @@ export const CustomersPage = () => {
         phone: '',
         email: '',
       });
+      setTenantSearchText('');
     }
   };
 
@@ -1569,6 +1616,9 @@ export const CustomersPage = () => {
         auth0Id: '',
       });
       setSelectedOfficeId(defaultOfficeId);
+      setUserTenantSearchText('');
+      setOfficeSearchText('');
+      setRoleSearchText('');
       
       setIsCreateUserDrawerOpen(true);
     } catch (err: any) {
@@ -1639,6 +1689,7 @@ export const CustomersPage = () => {
         phone: '',
         email: '',
       });
+      setTenantSearchText('');
       await loadCustomers();
       if (selectedView === 'flow') {
         await loadFlowData();
@@ -1713,6 +1764,9 @@ export const CustomersPage = () => {
         auth0Id: '',
       });
       setSelectedOfficeId('');
+      setUserTenantSearchText('');
+      setOfficeSearchText('');
+      setRoleSearchText('');
       await loadCustomers();
       if (selectedView === 'flow') {
         await loadFlowData();
@@ -3396,6 +3450,7 @@ export const CustomersPage = () => {
                   phone: '',
                   email: '',
                 });
+                setTenantSearchText('');
                 setError(null);
               }
               return;
@@ -3438,6 +3493,7 @@ export const CustomersPage = () => {
                         phone: '',
                         email: '',
                       });
+                      setTenantSearchText('');
                       setError(null);
                     }
                   } else {
@@ -3477,14 +3533,19 @@ export const CustomersPage = () => {
                     />
                   ) : (
                     <Combobox
-                      value={customerTenants.find(t => t.id === officeFormData.tenantId)?.name || ''}
+                      value={tenantSearchText || customerTenants.find(t => t.id === officeFormData.tenantId)?.name || ''}
                       onOptionSelect={(_, data) => {
                         if (data.optionValue) {
                           setOfficeFormData({ ...officeFormData, tenantId: data.optionValue });
+                          setTenantSearchText('');
                         }
                       }}
+                      onInput={(e) => {
+                        const target = e.target as HTMLInputElement;
+                        setTenantSearchText(target.value);
+                      }}
                     >
-                      {customerTenants.map((tenant) => (
+                      {filteredTenants.map((tenant) => (
                         <Option key={tenant.id} value={tenant.id}>
                           {tenant.name}
                         </Option>
@@ -3566,6 +3627,7 @@ export const CustomersPage = () => {
                             phone: '',
                             email: '',
                           });
+                          setTenantSearchText('');
                           setError(null);
                         }
                       } else {
@@ -3736,6 +3798,9 @@ export const CustomersPage = () => {
                   auth0Id: '',
                 });
                 setSelectedOfficeId('');
+                setUserTenantSearchText('');
+                setOfficeSearchText('');
+                setRoleSearchText('');
                 setError(null);
               }
               return;
@@ -3816,7 +3881,7 @@ export const CustomersPage = () => {
                     />
                   ) : (
                     <Combobox
-                      value={customerTenants.find(t => t.id === userFormData.tenantId)?.name || ''}
+                      value={userTenantSearchText || customerTenants.find(t => t.id === userFormData.tenantId)?.name || ''}
                       onOptionSelect={(_, data) => {
                         if (data.optionValue) {
                       setUserFormData({ ...userFormData, tenantId: data.optionValue });
@@ -3827,10 +3892,16 @@ export const CustomersPage = () => {
                       } else {
                         setSelectedOfficeId('');
                       }
+                      setUserTenantSearchText('');
+                      setOfficeSearchText(''); // Limpiar búsqueda de sede cuando cambia el tenant
                         }
                       }}
+                      onInput={(e) => {
+                        const target = e.target as HTMLInputElement;
+                        setUserTenantSearchText(target.value);
+                      }}
                     >
-                      {customerTenants.map((tenant) => (
+                      {filteredUserTenants.map((tenant) => (
                         <Option key={tenant.id} value={tenant.id}>
                           {tenant.name}
                         </Option>
@@ -3848,22 +3919,25 @@ export const CustomersPage = () => {
                     />
                   ) : (
                     <Combobox
-                      value={availableOffices
+                      value={officeSearchText || availableOffices
                         .filter(o => o.tenantId === userFormData.tenantId)
                         .find(o => o.id === selectedOfficeId)?.name || ''}
                       onOptionSelect={(_, data) => {
                         if (data.optionValue) {
                           setSelectedOfficeId(data.optionValue);
+                          setOfficeSearchText('');
                         }
                       }}
+                      onInput={(e) => {
+                        const target = e.target as HTMLInputElement;
+                        setOfficeSearchText(target.value);
+                      }}
                     >
-                      {availableOffices
-                        .filter(o => o.tenantId === userFormData.tenantId)
-                        .map((office) => (
-                          <Option key={office.id} value={office.id}>
-                            {office.name}
-                          </Option>
-                        ))}
+                      {filteredOffices.map((office) => (
+                        <Option key={office.id} value={office.id}>
+                          {office.name}
+                        </Option>
+                      ))}
                     </Combobox>
                   )}
                 </Field>
@@ -3891,15 +3965,23 @@ export const CustomersPage = () => {
                 </Field>
                 <Field label="Rol" className={styles.formField}>
                   <Combobox
-                    value={userFormData.role === 'Admin' ? 'Administrador' : 'Usuario'}
+                    value={roleSearchText || (userFormData.role === 'Admin' ? 'Administrador' : 'Usuario')}
                     onOptionSelect={(_, data) => {
                       if (data.optionValue) {
                         setUserFormData({ ...userFormData, role: data.optionValue as 'Admin' | 'User' });
+                        setRoleSearchText('');
                       }
                     }}
+                    onInput={(e) => {
+                      const target = e.target as HTMLInputElement;
+                      setRoleSearchText(target.value);
+                    }}
                   >
-                    <Option value="User">Usuario</Option>
-                    <Option value="Admin">Administrador</Option>
+                    {filteredRoles.map((role) => (
+                      <Option key={role.value} value={role.value}>
+                        {role.label}
+                      </Option>
+                    ))}
                   </Combobox>
                 </Field>
                 <Field label="Email de Contacto" className={styles.formField}>
@@ -3947,6 +4029,10 @@ export const CustomersPage = () => {
                             phone: '',
                             auth0Id: '',
                           });
+                          setSelectedOfficeId('');
+                          setUserTenantSearchText('');
+                          setOfficeSearchText('');
+                          setRoleSearchText('');
                           setError(null);
                         }
                       } else {

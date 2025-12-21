@@ -27,6 +27,8 @@ import {
   MessageBar,
   MessageBarBody,
   Badge,
+  CounterBadge,
+  Persona,
   Menu,
   MenuTrigger,
   MenuPopover,
@@ -84,6 +86,14 @@ import {
   BriefcaseRegular,
   ArrowClockwiseRegular,
 } from '@fluentui/react-icons';
+import {
+  TeachingPopover,
+  TeachingPopoverTrigger,
+  TeachingPopoverSurface,
+  TeachingPopoverHeader,
+  TeachingPopoverBody,
+  TeachingPopoverFooter,
+} from '@fluentui/react-teaching-popover';
 import { tenantService, TenantDto, UpdateTenantRequest, CreateTenantRequest } from '../services/tenantService';
 import { UserDto } from '../services/authService';
 import { customerService, CustomerDto } from '../services/customerService';
@@ -272,6 +282,7 @@ export const TenantsPage = () => {
   const [isChangeCustomerDialogOpen, setIsChangeCustomerDialogOpen] = useState(false);
   const [selectedNewCustomerId, setSelectedNewCustomerId] = useState<string>('');
   const [isChangingCustomer, setIsChangingCustomer] = useState(false);
+  const [tenantUsersMap, setTenantUsersMap] = useState<Record<string, UserDto[]>>({});
   
   // Form state
   const [formData, setFormData] = useState<CreateTenantRequest>({
@@ -290,7 +301,7 @@ export const TenantsPage = () => {
   const [flowEdges, setFlowEdges] = useState<Edge[]>([]);
   const [flowLoading, setFlowLoading] = useState(false);
   const flowLoadingRef = useRef(false);
-  const [tenantUsersMap, setTenantUsersMap] = useState<Map<string, UserDto[]>>(new Map());
+  const [flowTenantUsersMap, setFlowTenantUsersMap] = useState<Map<string, UserDto[]>>(new Map());
   const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
   
   // Detectar cambios en el tamaño de ventana
@@ -334,6 +345,16 @@ export const TenantsPage = () => {
     }
   }, []);
 
+  const loadTenantUsers = useCallback(async (tenantId: string) => {
+    try {
+      const users = await tenantService.getTenantUsers(tenantId);
+      setTenantUsersMap((prev) => ({ ...prev, [tenantId]: users }));
+    } catch (err: any) {
+      console.error('[TenantsPage] Error cargando usuarios del tenant:', err);
+      setTenantUsersMap((prev) => ({ ...prev, [tenantId]: [] }));
+    }
+  }, []);
+
   useEffect(() => {
     if (!isLoadingRef.current && !hasLoadedRef.current) {
       hasLoadedRef.current = true;
@@ -342,6 +363,15 @@ export const TenantsPage = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Cargar usuarios de cada tenant cuando se cargan los tenants
+  useEffect(() => {
+    if (tenants.length > 0) {
+      tenants.forEach((tenant) => {
+        loadTenantUsers(tenant.id);
+      });
+    }
+  }, [tenants, loadTenantUsers]);
 
   // Registrar acciones en el RibbonMenu
   useEffect(() => {
@@ -710,7 +740,7 @@ export const TenantsPage = () => {
         }
       }
 
-      setTenantUsersMap(newTenantUsersMap);
+      setFlowTenantUsersMap(newTenantUsersMap);
 
       // Crear nodos y edges
       const nodes: Node[] = [];
@@ -1005,20 +1035,53 @@ export const TenantsPage = () => {
                             )}
                           </TableCell>
                           <TableCell>
-                            <Button
-                              appearance="subtle"
-                              onClick={() => handleViewUsers(tenant)}
-                              style={{ 
-                                color: tokens.colorBrandForegroundLink, 
-                                textDecoration: 'none',
-                                fontWeight: tokens.fontWeightSemibold,
-                                padding: 0,
-                                minWidth: 'auto',
-                                height: 'auto'
-                              }}
-                            >
-                              {tenant.userCount || 0}
-                            </Button>
+                            {(() => {
+                              const users = tenantUsersMap[tenant.id] || [];
+                              return users.length > 0 ? (
+                                <TeachingPopover>
+                                  <TeachingPopoverTrigger>
+                                    <Button
+                                      appearance="subtle"
+                                      style={{
+                                        padding: 0,
+                                        minWidth: 'auto',
+                                        height: 'auto'
+                                      }}
+                                    >
+                                      <CounterBadge 
+                                        count={users.length} 
+                                        size="medium" 
+                                        appearance="filled" 
+                                        color={users.length === 0 ? 'informative' : 'brand'} 
+                                      />
+                                    </Button>
+                                  </TeachingPopoverTrigger>
+                                  <TeachingPopoverSurface>
+                                    <TeachingPopoverHeader>Usuarios Asociados</TeachingPopoverHeader>
+                                    <TeachingPopoverBody>
+                                      <div style={{ maxWidth: '600px', maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM }}>
+                                        {users.map((user: UserDto) => (
+                                          <Persona
+                                            key={user.id}
+                                            name={user.name || user.email}
+                                            secondaryText={user.email}
+                                            presence={{ status: user.isActive && !user.isSuspended ? 'available' : 'offline' }}
+                                          />
+                                        ))}
+                                      </div>
+                                    </TeachingPopoverBody>
+                                    <TeachingPopoverFooter primaryButton={{ text: 'Cerrar' }} />
+                                  </TeachingPopoverSurface>
+                                </TeachingPopover>
+                              ) : (
+                                <CounterBadge 
+                                  count={0} 
+                                  size="medium" 
+                                  appearance="filled" 
+                                  color="informative" 
+                                />
+                              );
+                            })()}
                           </TableCell>
                           <TableCell>
                             <Button

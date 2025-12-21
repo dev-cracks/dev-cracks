@@ -26,6 +26,8 @@ import {
   MessageBar,
   MessageBarBody,
   Badge,
+  CounterBadge,
+  Persona,
   Menu,
   MenuTrigger,
   MenuPopover,
@@ -37,6 +39,14 @@ import {
   Input,
 } from '@fluentui/react-components';
 import {
+  TeachingPopover,
+  TeachingPopoverTrigger,
+  TeachingPopoverSurface,
+  TeachingPopoverHeader,
+  TeachingPopoverBody,
+  TeachingPopoverFooter,
+} from '@fluentui/react-teaching-popover';
+import {
   OverlayDrawer,
   DrawerBody,
   DrawerHeader,
@@ -47,7 +57,7 @@ import {
   useRestoreFocusTarget,
 } from '@fluentui/react-components';
 import {
-  HomeRegular,
+  LocationRegular,
   SearchRegular,
   MoreHorizontalRegular,
   EditRegular,
@@ -181,6 +191,7 @@ export const OfficesPage = () => {
   const [selectedNewTenantId, setSelectedNewTenantId] = useState<string>('');
   const [allTenants, setAllTenants] = useState<TenantDto[]>([]);
   const [isChangingTenant, setIsChangingTenant] = useState(false);
+  const [officeUsers, setOfficeUsers] = useState<Record<string, any[]>>({});
 
   // Form state
   const [formData, setFormData] = useState<CreateOfficeRequest>({
@@ -225,6 +236,16 @@ export const OfficesPage = () => {
     }
   }, []);
 
+  const loadOfficeUsers = useCallback(async (officeId: string) => {
+    try {
+      const users = await officeService.getOfficeUsers(officeId);
+      setOfficeUsers((prev) => ({ ...prev, [officeId]: users }));
+    } catch (err: any) {
+      console.error('[OfficesPage] Error cargando usuarios de la oficina:', err);
+      setOfficeUsers((prev) => ({ ...prev, [officeId]: [] }));
+    }
+  }, []);
+
   useEffect(() => {
     if (!isLoadingRef.current && !hasLoadedRef.current) {
       hasLoadedRef.current = true;
@@ -247,12 +268,21 @@ export const OfficesPage = () => {
     loadTenants();
   }, []);
 
+  // Cargar usuarios de cada oficina cuando se cargan las oficinas
+  useEffect(() => {
+    if (offices.length > 0) {
+      offices.forEach((office) => {
+        loadOfficeUsers(office.id);
+      });
+    }
+  }, [offices, loadOfficeUsers]);
+
   // Registrar acciones en el RibbonMenu
   useEffect(() => {
     addGroup({
       id: 'offices',
       label: 'Sedes',
-      icon: <HomeRegular />,
+      icon: <LocationRegular />,
       items: [
         {
           id: 'create',
@@ -549,7 +579,7 @@ export const OfficesPage = () => {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <HomeRegular fontSize={32} />
+          <LocationRegular fontSize={32} />
           <h1 className={styles.title}>Sedes</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalM }}>
@@ -575,7 +605,7 @@ export const OfficesPage = () => {
         <RibbonMenu />
       </div>
       <div className={styles.header}>
-        <HomeRegular fontSize={32} />
+        <LocationRegular fontSize={32} />
         <h1 className={styles.title}>Sedes</h1>
       </div>
       
@@ -612,12 +642,11 @@ export const OfficesPage = () => {
           <TableHeader>
             <TableRow>
               <TableHeaderCell>Nombre</TableHeaderCell>
-              <TableHeaderCell>Tenants</TableHeaderCell>
               <TableHeaderCell>Cliente</TableHeaderCell>
-              <TableHeaderCell>Dirección</TableHeaderCell>
+              <TableHeaderCell>Tenants</TableHeaderCell>
               <TableHeaderCell>Ciudad</TableHeaderCell>
-              <TableHeaderCell>Teléfono</TableHeaderCell>
-              <TableHeaderCell>Email</TableHeaderCell>
+              <TableHeaderCell>Datos Contacto</TableHeaderCell>
+              <TableHeaderCell>Usuarios</TableHeaderCell>
               <TableHeaderCell>Estado</TableHeaderCell>
               <TableHeaderCell>Acciones</TableHeaderCell>
             </TableRow>
@@ -625,15 +654,38 @@ export const OfficesPage = () => {
           <TableBody>
             {filteredOffices.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} style={{ textAlign: 'center', padding: tokens.spacingVerticalXXL }}>
+                <TableCell colSpan={8} style={{ textAlign: 'center', padding: tokens.spacingVerticalXXL }}>
                   <Text>No se encontraron sedes</Text>
                 </TableCell>
               </TableRow>
             ) : (
-              filteredOffices.map((office) => (
-                <TableRow key={office.id}>
+              filteredOffices.map((office) => {
+                const users = officeUsers[office.id] || [];
+                const hasContactData = office.address || office.phone || office.email;
+                return (
+                  <TableRow key={office.id}>
                   <TableCell>
                     <Text weight="semibold">{office.name}</Text>
+                  </TableCell>
+                  <TableCell>
+                    {office.customerId && office.customerName ? (
+                      <Button
+                        appearance="subtle"
+                        onClick={() => handleViewCustomerDetails(office.customerId)}
+                        style={{ 
+                          color: tokens.colorBrandForegroundLink, 
+                          textDecoration: 'none',
+                          fontWeight: tokens.fontWeightSemibold,
+                          padding: 0,
+                          minWidth: 'auto',
+                          height: 'auto'
+                        }}
+                      >
+                        {office.customerName}
+                      </Button>
+                    ) : (
+                      <Text>N/A</Text>
+                    )}
                   </TableCell>
                   <TableCell>
                     {office.tenantId && office.tenantName ? (
@@ -683,30 +735,110 @@ export const OfficesPage = () => {
                       </div>
                     )}
                   </TableCell>
+                  <TableCell>{office.city || 'N/A'}</TableCell>
                   <TableCell>
-                    {office.customerId && office.customerName ? (
-                      <Button
-                        appearance="subtle"
-                        onClick={() => handleViewCustomerDetails(office.customerId)}
-                        style={{ 
-                          color: tokens.colorBrandForegroundLink, 
-                          textDecoration: 'none',
-                          fontWeight: tokens.fontWeightSemibold,
-                          padding: 0,
-                          minWidth: 'auto',
-                          height: 'auto'
-                        }}
-                      >
-                        {office.customerName}
-                      </Button>
+                    {hasContactData ? (
+                      <TeachingPopover>
+                        <TeachingPopoverTrigger>
+                          <Button
+                            appearance="subtle"
+                            style={{
+                              padding: 0,
+                              minWidth: 'auto',
+                              height: 'auto',
+                              color: tokens.colorBrandForegroundLink,
+                              fontWeight: tokens.fontWeightSemibold,
+                            }}
+                          >
+                            Ver datos de contacto
+                          </Button>
+                        </TeachingPopoverTrigger>
+                        <TeachingPopoverSurface>
+                          <TeachingPopoverHeader>Datos de Contacto</TeachingPopoverHeader>
+                          <TeachingPopoverBody>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM }}>
+                              {office.address && (
+                                <div>
+                                  <Text weight="semibold" style={{ display: 'block', marginBottom: tokens.spacingVerticalXS }}>
+                                    Dirección:
+                                  </Text>
+                                  <Text>{office.address}</Text>
+                                </div>
+                              )}
+                              {office.phone && (
+                                <div>
+                                  <Text weight="semibold" style={{ display: 'block', marginBottom: tokens.spacingVerticalXS }}>
+                                    Teléfono:
+                                  </Text>
+                                  <Text>{office.phone}</Text>
+                                </div>
+                              )}
+                              {office.email && (
+                                <div>
+                                  <Text weight="semibold" style={{ display: 'block', marginBottom: tokens.spacingVerticalXS }}>
+                                    Email:
+                                  </Text>
+                                  <Text>{office.email}</Text>
+                                </div>
+                              )}
+                              {!office.address && !office.phone && !office.email && (
+                                <Text>No hay datos de contacto disponibles</Text>
+                              )}
+                            </div>
+                          </TeachingPopoverBody>
+                          <TeachingPopoverFooter primaryButton={{ text: 'Cerrar' }} />
+                        </TeachingPopoverSurface>
+                      </TeachingPopover>
                     ) : (
                       <Text>N/A</Text>
                     )}
                   </TableCell>
-                  <TableCell>{office.address || 'N/A'}</TableCell>
-                  <TableCell>{office.city || 'N/A'}</TableCell>
-                  <TableCell>{office.phone || 'N/A'}</TableCell>
-                  <TableCell>{office.email || 'N/A'}</TableCell>
+                  <TableCell>
+                    {users.length > 0 ? (
+                      <TeachingPopover>
+                        <TeachingPopoverTrigger>
+                          <Button
+                            appearance="subtle"
+                            style={{
+                              padding: 0,
+                              minWidth: 'auto',
+                              height: 'auto'
+                            }}
+                          >
+                            <CounterBadge 
+                              count={users.length} 
+                              size="medium" 
+                              appearance="filled" 
+                              color={users.length === 0 ? 'informative' : 'brand'} 
+                            />
+                          </Button>
+                        </TeachingPopoverTrigger>
+                        <TeachingPopoverSurface>
+                          <TeachingPopoverHeader>Usuarios Asociados</TeachingPopoverHeader>
+                          <TeachingPopoverBody>
+                            <div style={{ maxWidth: '600px', maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM }}>
+                              {users.map((user: any) => (
+                                <Persona
+                                  key={user.id}
+                                  name={user.name || user.email}
+                                  secondaryText={user.contactEmail || user.email}
+                                  presence={{ status: user.isActive && !user.isSuspended ? 'available' : 'offline' }}
+                                />
+                              ))}
+                            </div>
+                          </TeachingPopoverBody>
+                          <TeachingPopoverFooter primaryButton={{ text: 'Cerrar' }} />
+                        </TeachingPopoverSurface>
+                      </TeachingPopover>
+                    ) : (
+                      <CounterBadge 
+                        count={0} 
+                        size="medium" 
+                        appearance="filled" 
+                        color="informative" 
+                      />
+                    )}
+                  </TableCell>
                   <TableCell>
                     {office.isSuspended ? (
                       <Badge appearance="filled" color="danger">Suspendido</Badge>
@@ -753,7 +885,8 @@ export const OfficesPage = () => {
                     </Menu>
                   </TableCell>
                 </TableRow>
-              ))
+                );
+              })
             )}
           </TableBody>
         </Table>
