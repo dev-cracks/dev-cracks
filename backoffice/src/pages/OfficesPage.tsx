@@ -91,6 +91,7 @@ import {
 } from '../services/tenantService';
 import { notificationService } from '../services/notificationService';
 import { userService, UserDto } from '../services/userService';
+import { OfficeLocationMap } from '../components/OfficeLocationMap';
 import {
   ReactFlow,
   Node,
@@ -281,6 +282,8 @@ export const OfficesPage = () => {
   const [allTenants, setAllTenants] = useState<TenantDto[]>([]);
   const [isChangingTenant, setIsChangingTenant] = useState(false);
   const [officeUsers, setOfficeUsers] = useState<Record<string, any[]>>({});
+  const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
+  const [officeForLocation, setOfficeForLocation] = useState<OfficeDto | null>(null);
   
   // Estados para tabs
   const [detailsActiveTab, setDetailsActiveTab] = useState<'details' | 'users'>('details');
@@ -944,6 +947,49 @@ export const OfficesPage = () => {
     }
   };
 
+  const handleOpenLocationDialog = (office: OfficeDto) => {
+    setOfficeForLocation(office);
+    setIsLocationDialogOpen(true);
+  };
+
+  const handleSaveLocation = async (
+    latitude: number | null,
+    longitude: number | null,
+    fullAddress: string | null
+  ) => {
+    if (!officeForLocation) {
+      return;
+    }
+
+    try {
+      setError(null);
+      setIsSaving(true);
+      const updateData: UpdateOfficeRequest = {
+        name: officeForLocation.name,
+        address: officeForLocation.address || undefined,
+        city: officeForLocation.city || undefined,
+        stateProvince: officeForLocation.stateProvince || undefined,
+        postalCode: officeForLocation.postalCode || undefined,
+        phone: officeForLocation.phone || undefined,
+        email: officeForLocation.email || undefined,
+        countryId: officeForLocation.countryId || undefined,
+        latitude: latitude || undefined,
+        longitude: longitude || undefined,
+        fullAddress: fullAddress || undefined,
+      };
+      await officeService.updateOffice(officeForLocation.id, updateData);
+      await loadOffices();
+      setIsLocationDialogOpen(false);
+      setOfficeForLocation(null);
+    } catch (err: any) {
+      console.error('[OfficesPage] Error guardando ubicación:', err);
+      setError(err.message || 'Error al guardar la ubicación');
+      throw err;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleDeactivate = async (office: OfficeDto) => {
     try {
       await officeService.deactivateOffice(office.id);
@@ -1150,6 +1196,7 @@ export const OfficesPage = () => {
               <TableHeaderCell>País</TableHeaderCell>
               <TableHeaderCell>Ciudad</TableHeaderCell>
               <TableHeaderCell>Datos Contacto</TableHeaderCell>
+              <TableHeaderCell>Ubicación</TableHeaderCell>
               <TableHeaderCell>Cliente</TableHeaderCell>
               <TableHeaderCell>Tenants</TableHeaderCell>
               <TableHeaderCell>Usuarios</TableHeaderCell>
@@ -1160,7 +1207,7 @@ export const OfficesPage = () => {
           <TableBody>
             {filteredOffices.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} style={{ textAlign: 'center', padding: tokens.spacingVerticalXXL }}>
+                <TableCell colSpan={10} style={{ textAlign: 'center', padding: tokens.spacingVerticalXXL }}>
                   <Text>No se encontraron sedes</Text>
                 </TableCell>
               </TableRow>
@@ -1238,6 +1285,68 @@ export const OfficesPage = () => {
                       </TeachingPopover>
                     ) : (
                       <Text>N/A</Text>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {office.latitude && office.longitude ? (
+                      <TeachingPopover>
+                        <TeachingPopoverTrigger>
+                          <Button
+                            appearance="subtle"
+                            icon={<LocationRegular />}
+                            title="Ver/Editar ubicación"
+                            style={{
+                              padding: 0,
+                              minWidth: 'auto',
+                              height: 'auto',
+                              color: tokens.colorBrandForeground1,
+                            }}
+                          />
+                        </TeachingPopoverTrigger>
+                        <TeachingPopoverSurface>
+                          <TeachingPopoverHeader>Ubicación de la Sede</TeachingPopoverHeader>
+                          <TeachingPopoverBody>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM }}>
+                              {office.fullAddress && (
+                                <div>
+                                  <Text weight="semibold" style={{ display: 'block', marginBottom: tokens.spacingVerticalXS }}>
+                                    Dirección:
+                                  </Text>
+                                  <Text>{office.fullAddress}</Text>
+                                </div>
+                              )}
+                              <div>
+                                <Text weight="semibold" style={{ display: 'block', marginBottom: tokens.spacingVerticalXS }}>
+                                  Coordenadas:
+                                </Text>
+                                <Text>
+                                  Lat: {office.latitude.toFixed(6)}, Lng: {office.longitude.toFixed(6)}
+                                </Text>
+                              </div>
+                              <Button
+                                appearance="primary"
+                                onClick={() => handleOpenLocationDialog(office)}
+                                style={{ marginTop: tokens.spacingVerticalS }}
+                              >
+                                Ver/Editar en Mapa
+                              </Button>
+                            </div>
+                          </TeachingPopoverBody>
+                        </TeachingPopoverSurface>
+                      </TeachingPopover>
+                    ) : (
+                      <Button
+                        appearance="subtle"
+                        icon={<LocationRegular />}
+                        onClick={() => handleOpenLocationDialog(office)}
+                        title="Agregar ubicación"
+                        style={{
+                          padding: 0,
+                          minWidth: 'auto',
+                          height: 'auto',
+                          color: tokens.colorNeutralForeground3,
+                        }}
+                      />
                     )}
                   </TableCell>
                   <TableCell>
@@ -2696,6 +2805,22 @@ export const OfficesPage = () => {
           </DialogBody>
         </DialogSurface>
       </Dialog>
+
+      {/* Dialog de ubicación en mapa */}
+      {officeForLocation && (
+        <OfficeLocationMap
+          isOpen={isLocationDialogOpen}
+          onClose={() => {
+            setIsLocationDialogOpen(false);
+            setOfficeForLocation(null);
+          }}
+          onSave={handleSaveLocation}
+          initialLatitude={officeForLocation.latitude ?? null}
+          initialLongitude={officeForLocation.longitude ?? null}
+          initialFullAddress={officeForLocation.fullAddress ?? null}
+          officeName={officeForLocation.name}
+        />
+      )}
     </div>
   );
 };

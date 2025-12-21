@@ -1,5 +1,6 @@
 import { apiService } from './apiService';
 import { UserDto } from './authService';
+import { CustomerDto } from './customerService';
 
 export interface TenantDto {
   id: string;
@@ -100,6 +101,10 @@ export const tenantService = {
 
   async getTenantsByOffice(officeId: string): Promise<TenantDto[]> {
     return apiService.request<TenantDto[]>(`/tenants/office/${officeId}`);
+  },
+
+  async getTenantCustomers(id: string): Promise<CustomerDto[]> {
+    return apiService.request<CustomerDto[]>(`/tenants/${id}/customers`);
   },
 };
 

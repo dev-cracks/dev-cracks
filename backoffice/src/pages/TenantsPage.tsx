@@ -288,6 +288,9 @@ export const TenantsPage = () => {
   const [isLoadingCustomerUsers, setIsLoadingCustomerUsers] = useState(false);
   const [popoverOpenForTenant, setPopoverOpenForTenant] = useState<string | null>(null);
   const [isAssigningUser, setIsAssigningUser] = useState<string | null>(null);
+  const [tenantCustomersMap, setTenantCustomersMap] = useState<Record<string, CustomerDto[]>>({});
+  const [isLoadingTenantCustomers, setIsLoadingTenantCustomers] = useState<string | null>(null);
+  const [popoverOpenForTenantCustomers, setPopoverOpenForTenantCustomers] = useState<string | null>(null);
   
   // Form state
   const [formData, setFormData] = useState<CreateTenantRequest>({
@@ -359,6 +362,25 @@ export const TenantsPage = () => {
       setTenantUsersMap((prev) => ({ ...prev, [tenantId]: [] }));
     }
   }, []);
+
+  const loadTenantCustomers = useCallback(async (tenantId: string) => {
+    try {
+      const tenantCustomers = await tenantService.getTenantCustomers(tenantId);
+      setTenantCustomersMap((prev) => ({ ...prev, [tenantId]: tenantCustomers }));
+    } catch (err: any) {
+      console.error('[TenantsPage] Error cargando clientes del tenant:', err);
+      setTenantCustomersMap((prev) => ({ ...prev, [tenantId]: [] }));
+    }
+  }, []);
+
+  // Cargar clientes de cada tenant cuando se cargan los tenants
+  useEffect(() => {
+    if (tenants.length > 0) {
+      tenants.forEach((tenant) => {
+        loadTenantCustomers(tenant.id);
+      });
+    }
+  }, [tenants, loadTenantCustomers]);
 
   useEffect(() => {
     if (!isLoadingRef.current && !hasLoadedRef.current) {
@@ -595,6 +617,8 @@ export const TenantsPage = () => {
       setSelectedTenant(null);
       setSelectedNewCustomerId('');
       await loadTenants();
+      // Recargar clientes del tenant después de cambiar
+      await loadTenantCustomers(selectedTenant.id);
       if (selectedView === 'flow') {
         await loadFlowData();
       }
@@ -1018,11 +1042,11 @@ export const TenantsPage = () => {
                       <TableRow>
                         <TableHeaderCell style={{ width: 'auto', minWidth: '200px' }}>Nombre</TableHeaderCell>
                         <TableHeaderCell style={{ width: 'auto', minWidth: '180px' }}>Cliente</TableHeaderCell>
-                        <TableHeaderCell style={{ width: 'auto', minWidth: '110px' }}>Estado</TableHeaderCell>
-                        <TableHeaderCell style={{ width: 'auto', minWidth: '80px' }}>Usuarios</TableHeaderCell>
                         <TableHeaderCell style={{ width: 'auto', minWidth: '80px' }}>Sedes</TableHeaderCell>
+                        <TableHeaderCell style={{ width: 'auto', minWidth: '80px' }}>Usuarios</TableHeaderCell>
                         <TableHeaderCell style={{ width: 'auto', minWidth: '150px' }}>Fecha de Creación</TableHeaderCell>
                         <TableHeaderCell style={{ width: 'auto', minWidth: '150px' }}>Última Actualización</TableHeaderCell>
+                        <TableHeaderCell style={{ width: 'auto', minWidth: '110px' }}>Estado</TableHeaderCell>
                         <TableHeaderCell style={{ width: '120px', minWidth: '120px' }}>Acciones</TableHeaderCell>
                       </TableRow>
                     </TableHeader>
@@ -1034,62 +1058,142 @@ export const TenantsPage = () => {
                           </TableCell>
                           <TableCell>
                             <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS }}>
-                              {tenant.customerId && tenant.customerName ? (
-                                <>
-                                  <Button
-                                    appearance="subtle"
-                                    onClick={() => handleViewCustomerDetails(tenant.customerId)}
-                                    style={{ 
-                                      color: tokens.colorBrandForegroundLink, 
-                                      textDecoration: 'none',
-                                      fontWeight: tokens.fontWeightSemibold,
-                                      padding: 0,
-                                      minWidth: 'auto',
-                                      height: 'auto'
+                              {(() => {
+                                const tenantCustomers = tenantCustomersMap[tenant.id] || [];
+                                const customersCount = tenantCustomers.length;
+                                
+                                return customersCount > 0 ? (
+                                  <TeachingPopover
+                                    open={popoverOpenForTenantCustomers === tenant.id}
+                                    onOpenChange={(_, data) => {
+                                      setPopoverOpenForTenantCustomers(data.open ? tenant.id : null);
+                                      if (data.open && !tenantCustomersMap[tenant.id]) {
+                                        setIsLoadingTenantCustomers(tenant.id);
+                                        loadTenantCustomers(tenant.id).finally(() => {
+                                          setIsLoadingTenantCustomers(null);
+                                        });
+                                      }
                                     }}
                                   >
-                                    {tenant.customerName}
-                                  </Button>
-                                  <Button
-                                    appearance="subtle"
-                                    icon={<ArrowSwapRegular />}
-                                    onClick={() => handleChangeCustomer(tenant)}
-                                    aria-label="Cambiar cliente"
-                                    title="Cambiar cliente"
-                                    size="small"
-                                    style={{
-                                      minWidth: 'auto',
-                                      padding: tokens.spacingVerticalXS,
-                                    }}
+                                    <TeachingPopoverTrigger disableButtonEnhancement>
+                                      <Button
+                                        appearance="subtle"
+                                        style={{
+                                          padding: 0,
+                                          minWidth: 'auto',
+                                          height: 'auto'
+                                        }}
+                                      >
+                                        <CounterBadge 
+                                          count={customersCount} 
+                                          size="medium" 
+                                          appearance="filled" 
+                                          color="brand"
+                                        />
+                                      </Button>
+                                    </TeachingPopoverTrigger>
+                                    <TeachingPopoverSurface>
+                                      <TeachingPopoverHeader>
+                                        Clientes Asociados
+                                      </TeachingPopoverHeader>
+                                      <TeachingPopoverBody>
+                                        {isLoadingTenantCustomers === tenant.id ? (
+                                          <div style={{ display: 'flex', justifyContent: 'center', padding: tokens.spacingVerticalL }}>
+                                            <Spinner size="small" label="Cargando clientes..." />
+                                          </div>
+                                        ) : tenantCustomers.length === 0 ? (
+                                          <Text>No hay clientes asociados</Text>
+                                        ) : (
+                                          <div style={{ maxWidth: '600px', maxHeight: '400px', overflowY: 'auto' }}>
+                                            <Table>
+                                              <TableHeader>
+                                                <TableRow>
+                                                  <TableHeaderCell>Nombre</TableHeaderCell>
+                                                  <TableHeaderCell>Identificación</TableHeaderCell>
+                                                  <TableHeaderCell>País</TableHeaderCell>
+                                                  <TableHeaderCell>Estado</TableHeaderCell>
+                                                </TableRow>
+                                              </TableHeader>
+                                              <TableBody>
+                                                {tenantCustomers.map((customer) => (
+                                                  <TableRow key={customer.id}>
+                                                    <TableCell>
+                                                      <Button
+                                                        appearance="subtle"
+                                                        onClick={() => {
+                                                          handleViewCustomerDetails(customer.id);
+                                                          setPopoverOpenForTenantCustomers(null);
+                                                        }}
+                                                        style={{ 
+                                                          color: tokens.colorBrandForegroundLink, 
+                                                          textDecoration: 'none',
+                                                          fontWeight: tokens.fontWeightSemibold,
+                                                          padding: 0,
+                                                          minWidth: 'auto',
+                                                          height: 'auto'
+                                                        }}
+                                                      >
+                                                        {customer.name}
+                                                      </Button>
+                                                    </TableCell>
+                                                    <TableCell>{customer.identification}</TableCell>
+                                                    <TableCell>{customer.countryName || 'N/A'}</TableCell>
+                                                    <TableCell>
+                                                      {customer.isSuspended ? (
+                                                        <Badge appearance="filled" color="danger">Suspendido</Badge>
+                                                      ) : customer.isActive ? (
+                                                        <Badge appearance="filled" color="success">Activo</Badge>
+                                                      ) : (
+                                                        <Badge appearance="outline">Inactivo</Badge>
+                                                      )}
+                                                    </TableCell>
+                                                  </TableRow>
+                                                ))}
+                                              </TableBody>
+                                            </Table>
+                                          </div>
+                                        )}
+                                      </TeachingPopoverBody>
+                                    </TeachingPopoverSurface>
+                                  </TeachingPopover>
+                                ) : (
+                                  <CounterBadge 
+                                    count={0} 
+                                    size="medium" 
+                                    appearance="filled" 
+                                    color="informative"
                                   />
-                                </>
-                              ) : (
-                                <>
-                                  <Text>N/A</Text>
-                                  <Button
-                                    appearance="subtle"
-                                    icon={<ArrowSwapRegular />}
-                                    onClick={() => handleChangeCustomer(tenant)}
-                                    aria-label="Asignar cliente"
-                                    title="Asignar cliente"
-                                    size="small"
-                                    style={{
-                                      minWidth: 'auto',
-                                      padding: tokens.spacingVerticalXS,
-                                    }}
-                                  />
-                                </>
-                              )}
+                                );
+                              })()}
+                              <Button
+                                appearance="subtle"
+                                icon={<ArrowSwapRegular />}
+                                onClick={() => handleChangeCustomer(tenant)}
+                                aria-label="Cambiar cliente"
+                                title="Cambiar cliente"
+                                size="small"
+                                style={{
+                                  minWidth: 'auto',
+                                  padding: tokens.spacingVerticalXS,
+                                }}
+                              />
                             </div>
                           </TableCell>
                           <TableCell>
-                            {tenant.isSuspended ? (
-                              <Badge appearance="filled" color="danger">Suspendido</Badge>
-                            ) : tenant.isActive ? (
-                              <Badge appearance="filled" color="success">Activo</Badge>
-                            ) : (
-                              <Badge appearance="outline">Inactivo</Badge>
-                            )}
+                            <Button
+                              appearance="subtle"
+                              onClick={() => handleViewOffices(tenant)}
+                              style={{ 
+                                color: tokens.colorBrandForegroundLink, 
+                                textDecoration: 'none',
+                                fontWeight: tokens.fontWeightSemibold,
+                                padding: 0,
+                                minWidth: 'auto',
+                                height: 'auto'
+                              }}
+                            >
+                              Ver sedes
+                            </Button>
                           </TableCell>
                           <TableCell>
                             {(() => {
@@ -1231,22 +1335,6 @@ export const TenantsPage = () => {
                             })()}
                           </TableCell>
                           <TableCell>
-                            <Button
-                              appearance="subtle"
-                              onClick={() => handleViewOffices(tenant)}
-                              style={{ 
-                                color: tokens.colorBrandForegroundLink, 
-                                textDecoration: 'none',
-                                fontWeight: tokens.fontWeightSemibold,
-                                padding: 0,
-                                minWidth: 'auto',
-                                height: 'auto'
-                              }}
-                            >
-                              Ver sedes
-                            </Button>
-                          </TableCell>
-                          <TableCell>
                             {new Date(tenant.createdAt).toLocaleDateString('es-ES', {
                               year: 'numeric',
                               month: 'short',
@@ -1259,6 +1347,15 @@ export const TenantsPage = () => {
                               month: 'short',
                               day: 'numeric',
                             })}
+                          </TableCell>
+                          <TableCell>
+                            {tenant.isSuspended ? (
+                              <Badge appearance="filled" color="danger">Suspendido</Badge>
+                            ) : tenant.isActive ? (
+                              <Badge appearance="filled" color="success">Activo</Badge>
+                            ) : (
+                              <Badge appearance="outline">Inactivo</Badge>
+                            )}
                           </TableCell>
                           <TableCell>
                             <Menu>
