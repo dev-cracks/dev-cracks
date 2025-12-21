@@ -14,6 +14,7 @@ import {
   PanelLeftRegular,
   BuildingRegular,
   LocationRegular,
+  BriefcaseRegular,
 } from '@fluentui/react-icons';
 import { useState, ReactNode, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -257,7 +258,7 @@ export const Layout = ({ children }: LayoutProps) => {
     },
     {
       name: 'Tenants',
-      icon: <BuildingRegular />,
+      icon: <BriefcaseRegular />,
       path: '/tenants',
     },
     {

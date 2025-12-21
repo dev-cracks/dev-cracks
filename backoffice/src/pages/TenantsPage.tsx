@@ -81,6 +81,7 @@ import {
   FlowchartRegular,
   DismissRegular,
   ArrowSwapRegular,
+  BriefcaseRegular,
 } from '@fluentui/react-icons';
 import { tenantService, TenantDto, UpdateTenantRequest, CreateTenantRequest } from '../services/tenantService';
 import { UserDto } from '../services/authService';
@@ -335,7 +336,7 @@ export const TenantsPage = () => {
     addGroup({
       id: 'tenants',
       label: 'Tenants',
-      icon: <BuildingRegular />,
+      icon: <BriefcaseRegular />,
       items: [
         {
           id: 'create',
@@ -782,7 +783,7 @@ export const TenantsPage = () => {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <BuildingRegular fontSize={32} />
+          <BriefcaseRegular fontSize={32} />
           <h1 className={styles.title}>Tenants</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalM }}>
@@ -816,7 +817,7 @@ export const TenantsPage = () => {
         <RibbonMenu />
       </div>
       <div className={styles.header}>
-        <BuildingRegular fontSize={32} />
+        <BriefcaseRegular fontSize={32} />
         <h1 className={styles.title}>Tenants</h1>
       </div>
       

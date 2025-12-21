@@ -88,6 +88,8 @@ import {
   TableRegular,
   FlowchartRegular,
   DismissRegular,
+  BriefcaseRegular,
+  LocationRegular,
 } from '@fluentui/react-icons';
 import {
   customerService,
@@ -98,8 +100,8 @@ import {
   countryService,
 } from '../services/customerService';
 import { UserDto } from '../services/authService';
-import { tenantService, TenantDto } from '../services/tenantService';
-import { officeService, OfficeDto } from '../services/officeService';
+import { tenantService, TenantDto, CreateTenantRequest } from '../services/tenantService';
+import { officeService, OfficeDto, CreateOfficeRequest } from '../services/officeService';
 import { notificationService } from '../services/notificationService';
 import { TableSkeleton } from '../components/TableSkeleton';
 import { TreeSkeleton } from '../components/TreeSkeleton';
@@ -402,16 +404,23 @@ export const CustomersPage = () => {
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isUsersDialogOpen, setIsUsersDialogOpen] = useState(false);
   const [isTenantsDialogOpen, setIsTenantsDialogOpen] = useState(false);
+  const [isOfficesDialogOpen, setIsOfficesDialogOpen] = useState(false);
   const [isAssignTenantDialogOpen, setIsAssignTenantDialogOpen] = useState(false);
   const [isAssignParentDialogOpen, setIsAssignParentDialogOpen] = useState(false);
   const [isNotifyUsersDialogOpen, setIsNotifyUsersDialogOpen] = useState(false);
+  const [isCreateOfficeDialogOpen, setIsCreateOfficeDialogOpen] = useState(false);
+  const [isCreateTenantDialogOpen, setIsCreateTenantDialogOpen] = useState(false);
+  const [isCreatingOffice, setIsCreatingOffice] = useState(false);
+  const [isCreatingTenant, setIsCreatingTenant] = useState(false);
   const [notificationTitle, setNotificationTitle] = useState('');
   const [notificationMessage, setNotificationMessage] = useState('');
   const [isSendingNotification, setIsSendingNotification] = useState(false);
   const [customerUsers, setCustomerUsers] = useState<UserDto[]>([]);
   const [customerTenants, setCustomerTenants] = useState<TenantDto[]>([]);
+  const [customerOffices, setCustomerOffices] = useState<OfficeDto[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [isLoadingTenants, setIsLoadingTenants] = useState(false);
+  const [isLoadingOffices, setIsLoadingOffices] = useState(false);
   const [isReordering, setIsReordering] = useState(false);
   const [isDetailsLoading, setIsDetailsLoading] = useState(false);
   const [isCreateDrawerLoading, setIsCreateDrawerLoading] = useState(false);
@@ -430,6 +439,24 @@ export const CustomersPage = () => {
     city: '',
     phone: '',
     email: '',
+  });
+
+  // Form state for office
+  const [officeFormData, setOfficeFormData] = useState<CreateOfficeRequest>({
+    customerId: '',
+    name: '',
+    address: '',
+    city: '',
+    stateProvince: '',
+    postalCode: '',
+    phone: '',
+    email: '',
+  });
+
+  // Form state for tenant
+  const [tenantFormData, setTenantFormData] = useState<CreateTenantRequest>({
+    name: '',
+    customerId: '',
   });
 
   const isLoadingRef = useRef(false);
@@ -781,8 +808,24 @@ export const CustomersPage = () => {
                 <Badge appearance="outline">Inactivo</Badge>
               )}
             </div>
-            <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '70px' }}>{node.officeCount || 0}</div>
-            <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '70px' }}>{node.tenantCount || 0}</div>
+            <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '70px' }}>
+              <Button
+                appearance="subtle"
+                onClick={() => handleViewOffices(node)}
+                style={{ cursor: 'pointer', padding: 0, minWidth: 'auto' }}
+              >
+                {node.officeCount || 0}
+              </Button>
+            </div>
+            <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '70px' }}>
+              <Button
+                appearance="subtle"
+                onClick={() => handleViewTenants(node)}
+                style={{ cursor: 'pointer', padding: 0, minWidth: 'auto' }}
+              >
+                {node.tenantCount || 0}
+              </Button>
+            </div>
             <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '80px' }}>{node.userCount || 0}</div>
             <div className={styles.treeCell}>
               <Menu>
@@ -801,8 +844,11 @@ export const CustomersPage = () => {
                     <MenuItem icon={<EditRegular />} onClick={() => handleEdit(node)}>
                       Editar
                     </MenuItem>
-                    <MenuItem icon={<BuildingRegular />} onClick={() => handleViewTenants(node)}>
-                      Ver Tenants
+                    <MenuItem icon={<LocationRegular />} onClick={() => handleOpenCreateOffice(node)}>
+                      Agregar Sede
+                    </MenuItem>
+                    <MenuItem icon={<BriefcaseRegular />} onClick={() => handleOpenCreateTenant(node)}>
+                      Agregar Tenant
                     </MenuItem>
                     <MenuItem icon={<PeopleRegular />} onClick={() => handleViewUsers(node)}>
                       Ver usuarios
@@ -1153,6 +1199,102 @@ export const CustomersPage = () => {
       setError(err.message || 'Error al cargar tenants');
     } finally {
       setIsLoadingTenants(false);
+    }
+  };
+
+  const handleViewOffices = async (customer: CustomerDto) => {
+    setSelectedCustomer(customer);
+    setIsLoadingOffices(true);
+    setIsOfficesDialogOpen(true);
+    try {
+      const offices = await officeService.getOfficesByCustomer(customer.id);
+      setCustomerOffices(offices);
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar sedes');
+    } finally {
+      setIsLoadingOffices(false);
+    }
+  };
+
+  const handleOpenCreateOffice = (customer: CustomerDto) => {
+    setSelectedCustomer(customer);
+    setOfficeFormData({
+      customerId: customer.id,
+      name: '',
+      address: '',
+      city: '',
+      stateProvince: '',
+      postalCode: '',
+      phone: '',
+      email: '',
+    });
+    setIsCreateOfficeDialogOpen(true);
+  };
+
+  const handleOpenCreateTenant = (customer: CustomerDto) => {
+    setSelectedCustomer(customer);
+    setTenantFormData({
+      name: '',
+      customerId: customer.id,
+    });
+    setIsCreateTenantDialogOpen(true);
+  };
+
+  const handleCreateOffice = async () => {
+    if (!selectedCustomer || !officeFormData.name.trim()) {
+      setError('El nombre de la sede es requerido');
+      return;
+    }
+
+    try {
+      setError(null);
+      setIsCreatingOffice(true);
+      await officeService.createOffice(officeFormData);
+      setIsCreateOfficeDialogOpen(false);
+      setOfficeFormData({
+        customerId: '',
+        name: '',
+        address: '',
+        city: '',
+        stateProvince: '',
+        postalCode: '',
+        phone: '',
+        email: '',
+      });
+      await loadCustomers();
+      if (selectedView === 'flow') {
+        await loadFlowData();
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error al crear sede');
+    } finally {
+      setIsCreatingOffice(false);
+    }
+  };
+
+  const handleCreateTenant = async () => {
+    if (!selectedCustomer || !tenantFormData.name.trim()) {
+      setError('El nombre del tenant es requerido');
+      return;
+    }
+
+    try {
+      setError(null);
+      setIsCreatingTenant(true);
+      await tenantService.createTenant(tenantFormData);
+      setIsCreateTenantDialogOpen(false);
+      setTenantFormData({
+        name: '',
+        customerId: '',
+      });
+      await loadCustomers();
+      if (selectedView === 'flow') {
+        await loadFlowData();
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error al crear tenant');
+    } finally {
+      setIsCreatingTenant(false);
     }
   };
 
@@ -1696,8 +1838,24 @@ export const CustomersPage = () => {
                           <Badge appearance="outline">Inactivo</Badge>
                         )}
                       </TableCell>
-                      <TableCell>{customer.officeCount || 0}</TableCell>
-                      <TableCell>{customer.tenantCount || 0}</TableCell>
+                      <TableCell>
+                        <Button
+                          appearance="subtle"
+                          onClick={() => handleViewOffices(customer)}
+                          style={{ cursor: 'pointer', padding: 0, minWidth: 'auto' }}
+                        >
+                          {customer.officeCount || 0}
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          appearance="subtle"
+                          onClick={() => handleViewTenants(customer)}
+                          style={{ cursor: 'pointer', padding: 0, minWidth: 'auto' }}
+                        >
+                          {customer.tenantCount || 0}
+                        </Button>
+                      </TableCell>
                       <TableCell>{customer.userCount || 0}</TableCell>
                       <TableCell>
                         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS }}>
@@ -1717,8 +1875,11 @@ export const CustomersPage = () => {
                                 <MenuItem icon={<EditRegular />} onClick={() => handleEdit(customer)}>
                                   Editar
                                 </MenuItem>
-                                <MenuItem icon={<BuildingRegular />} onClick={() => handleViewTenants(customer)}>
-                                  Ver Tenants
+                                <MenuItem icon={<LocationRegular />} onClick={() => handleOpenCreateOffice(customer)}>
+                                  Agregar Sede
+                                </MenuItem>
+                                <MenuItem icon={<BriefcaseRegular />} onClick={() => handleOpenCreateTenant(customer)}>
+                                  Agregar Tenant
                                 </MenuItem>
                                 <MenuItem icon={<PeopleRegular />} onClick={() => handleViewUsers(customer)}>
                                   Ver usuarios
@@ -2484,6 +2645,56 @@ export const CustomersPage = () => {
         </DialogSurface>
       </Dialog>
 
+      {/* Dialog de sedes */}
+      <Dialog open={isOfficesDialogOpen} onOpenChange={(_, data) => setIsOfficesDialogOpen(data.open)}>
+        <DialogSurface style={{ minWidth: '600px' }}>
+          <DialogTitle>Sedes del Cliente</DialogTitle>
+          <DialogBody>
+            <DialogContent>
+              {isLoadingOffices ? (
+                <TableSkeleton rows={5} columns={4} />
+              ) : customerOffices.length === 0 ? (
+                <Text>No hay sedes asociadas a este cliente.</Text>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHeaderCell>Nombre</TableHeaderCell>
+                      <TableHeaderCell>Dirección</TableHeaderCell>
+                      <TableHeaderCell>Ciudad</TableHeaderCell>
+                      <TableHeaderCell>Estado</TableHeaderCell>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {customerOffices.map((office) => (
+                      <TableRow key={office.id}>
+                        <TableCell>{office.name}</TableCell>
+                        <TableCell>{office.address || 'N/A'}</TableCell>
+                        <TableCell>{office.city || 'N/A'}</TableCell>
+                        <TableCell>
+                          {office.isSuspended ? (
+                            <Badge appearance="filled" color="danger">Suspendido</Badge>
+                          ) : office.isActive ? (
+                            <Badge appearance="filled" color="success">Activo</Badge>
+                          ) : (
+                            <Badge appearance="outline">Inactivo</Badge>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </DialogContent>
+          </DialogBody>
+          <DialogActions>
+            <Button appearance="primary" onClick={() => setIsOfficesDialogOpen(false)}>
+              Cerrar
+            </Button>
+          </DialogActions>
+        </DialogSurface>
+      </Dialog>
+
       {/* Dialog de enviar notificación */}
       <Dialog open={isNotifyUsersDialogOpen} onOpenChange={(_, data) => setIsNotifyUsersDialogOpen(data.open)}>
         <DialogSurface>
@@ -2536,6 +2747,321 @@ export const CustomersPage = () => {
           </DialogActions>
         </DialogSurface>
       </Dialog>
+
+      {/* Drawer de crear sede */}
+      <OverlayDrawer
+        {...restoreFocusSourceAttributes}
+        position="end"
+        size="large"
+        open={isCreateOfficeDialogOpen}
+        modalType="alert"
+        onOpenChange={(event: any, data: { open: boolean }) => {
+          if (data.open === false) {
+            if (isCreatingOffice) {
+              return;
+            }
+            const hasData = officeFormData.name.trim() || 
+                            officeFormData.address.trim() || 
+                            officeFormData.city.trim() || 
+                            officeFormData.stateProvince.trim() || 
+                            officeFormData.postalCode.trim() || 
+                            officeFormData.phone.trim() || 
+                            officeFormData.email.trim();
+            if (hasData) {
+              if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
+                setIsCreateOfficeDialogOpen(false);
+                setOfficeFormData({
+                  customerId: '',
+                  name: '',
+                  address: '',
+                  city: '',
+                  stateProvince: '',
+                  postalCode: '',
+                  phone: '',
+                  email: '',
+                });
+                setError(null);
+              }
+              return;
+            } else {
+              setIsCreateOfficeDialogOpen(false);
+            }
+          } else {
+            setIsCreateOfficeDialogOpen(data.open);
+          }
+        }}
+      >
+        <DrawerHeader>
+          <DrawerHeaderTitle 
+            action={
+              <Button
+                appearance="subtle"
+                aria-label="Cerrar"
+                icon={<DismissRegular />}
+                onClick={() => {
+                  if (isCreatingOffice) {
+                    return;
+                  }
+                  const hasData = officeFormData.name.trim() || 
+                                  officeFormData.address.trim() || 
+                                  officeFormData.city.trim() || 
+                                  officeFormData.stateProvince.trim() || 
+                                  officeFormData.postalCode.trim() || 
+                                  officeFormData.phone.trim() || 
+                                  officeFormData.email.trim();
+                  if (hasData) {
+                    if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
+                      setIsCreateOfficeDialogOpen(false);
+                      setOfficeFormData({
+                        customerId: '',
+                        name: '',
+                        address: '',
+                        city: '',
+                        stateProvince: '',
+                        postalCode: '',
+                        phone: '',
+                        email: '',
+                      });
+                      setError(null);
+                    }
+                  } else {
+                    setIsCreateOfficeDialogOpen(false);
+                  }
+                }}
+              />
+            }
+          >
+            Nueva Sede
+          </DrawerHeaderTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
+            {isCreatingOffice ? (
+              <DetailsSkeleton rows={8} />
+            ) : (
+              <>
+                {error && (
+                  <MessageBar intent="error" style={{ marginBottom: tokens.spacingVerticalM }}>
+                    <MessageBarBody>{error}</MessageBarBody>
+                  </MessageBar>
+                )}
+                <Field label="Cliente" className={styles.formField}>
+                  <Input
+                    value={selectedCustomer?.name || ''}
+                    readOnly
+                  />
+                </Field>
+                <Field label="Nombre" required className={styles.formField}>
+                  <Input
+                    value={officeFormData.name}
+                    onChange={(e) => setOfficeFormData({ ...officeFormData, name: e.target.value })}
+                    placeholder="Nombre de la sede"
+                  />
+                </Field>
+                <Field label="Dirección" className={styles.formField}>
+                  <Input
+                    value={officeFormData.address}
+                    onChange={(e) => setOfficeFormData({ ...officeFormData, address: e.target.value })}
+                    placeholder="Dirección"
+                  />
+                </Field>
+                <Field label="Ciudad" className={styles.formField}>
+                  <Input
+                    value={officeFormData.city}
+                    onChange={(e) => setOfficeFormData({ ...officeFormData, city: e.target.value })}
+                    placeholder="Ciudad"
+                  />
+                </Field>
+                <Field label="Estado/Provincia" className={styles.formField}>
+                  <Input
+                    value={officeFormData.stateProvince}
+                    onChange={(e) => setOfficeFormData({ ...officeFormData, stateProvince: e.target.value })}
+                    placeholder="Estado/Provincia"
+                  />
+                </Field>
+                <Field label="Código Postal" className={styles.formField}>
+                  <Input
+                    value={officeFormData.postalCode}
+                    onChange={(e) => setOfficeFormData({ ...officeFormData, postalCode: e.target.value })}
+                    placeholder="Código Postal"
+                  />
+                </Field>
+                <Field label="Teléfono" className={styles.formField}>
+                  <Input
+                    value={officeFormData.phone}
+                    onChange={(e) => setOfficeFormData({ ...officeFormData, phone: e.target.value })}
+                    placeholder="Teléfono"
+                  />
+                </Field>
+                <Field label="Email" className={styles.formField}>
+                  <Input
+                    type="email"
+                    value={officeFormData.email}
+                    onChange={(e) => setOfficeFormData({ ...officeFormData, email: e.target.value })}
+                    placeholder="Email"
+                  />
+                </Field>
+                <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
+                  <Button 
+                    appearance="secondary" 
+                    onClick={() => {
+                      const hasData = officeFormData.name.trim() || 
+                                      officeFormData.address.trim() || 
+                                      officeFormData.city.trim() || 
+                                      officeFormData.stateProvince.trim() || 
+                                      officeFormData.postalCode.trim() || 
+                                      officeFormData.phone.trim() || 
+                                      officeFormData.email.trim();
+                      if (hasData) {
+                        if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los datos no guardados.')) {
+                          setIsCreateOfficeDialogOpen(false);
+                          setOfficeFormData({
+                            customerId: '',
+                            name: '',
+                            address: '',
+                            city: '',
+                            stateProvince: '',
+                            postalCode: '',
+                            phone: '',
+                            email: '',
+                          });
+                          setError(null);
+                        }
+                      } else {
+                        setIsCreateOfficeDialogOpen(false);
+                      }
+                    }}
+                    disabled={isCreatingOffice}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button appearance="primary" onClick={handleCreateOffice} disabled={isCreatingOffice}>
+                    {isCreatingOffice ? 'Creando...' : 'Crear'}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </DrawerBody>
+      </OverlayDrawer>
+
+      {/* Drawer de crear tenant */}
+      <OverlayDrawer
+        {...restoreFocusSourceAttributes}
+        position="end"
+        size="medium"
+        open={isCreateTenantDialogOpen}
+        modalType="alert"
+        onOpenChange={(event: any, data: { open: boolean }) => {
+          if (data.open === false) {
+            if (isCreatingTenant) {
+              return;
+            }
+            const hasData = tenantFormData.name.trim();
+            if (hasData) {
+              if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
+                setIsCreateTenantDialogOpen(false);
+                setTenantFormData({
+                  name: '',
+                  customerId: '',
+                });
+                setError(null);
+              }
+              return;
+            } else {
+              setIsCreateTenantDialogOpen(false);
+            }
+          } else {
+            setIsCreateTenantDialogOpen(data.open);
+          }
+        }}
+      >
+        <DrawerHeader>
+          <DrawerHeaderTitle 
+            action={
+              <Button
+                appearance="subtle"
+                aria-label="Cerrar"
+                icon={<DismissRegular />}
+                onClick={() => {
+                  if (isCreatingTenant) {
+                    return;
+                  }
+                  const hasData = tenantFormData.name.trim();
+                  if (hasData) {
+                    if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
+                      setIsCreateTenantDialogOpen(false);
+                      setTenantFormData({
+                        name: '',
+                        customerId: '',
+                      });
+                      setError(null);
+                    }
+                  } else {
+                    setIsCreateTenantDialogOpen(false);
+                  }
+                }}
+              />
+            }
+          >
+            Nuevo Tenant
+          </DrawerHeaderTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
+            {isCreatingTenant ? (
+              <DetailsSkeleton rows={3} />
+            ) : (
+              <>
+                {error && (
+                  <MessageBar intent="error" style={{ marginBottom: tokens.spacingVerticalM }}>
+                    <MessageBarBody>{error}</MessageBarBody>
+                  </MessageBar>
+                )}
+                <Field label="Cliente" className={styles.formField}>
+                  <Input
+                    value={selectedCustomer?.name || ''}
+                    readOnly
+                  />
+                </Field>
+                <Field label="Nombre" required className={styles.formField}>
+                  <Input
+                    value={tenantFormData.name}
+                    onChange={(e) => setTenantFormData({ ...tenantFormData, name: e.target.value })}
+                    placeholder="Nombre del tenant"
+                  />
+                </Field>
+                <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
+                  <Button 
+                    appearance="secondary" 
+                    onClick={() => {
+                      const hasData = tenantFormData.name.trim();
+                      if (hasData) {
+                        if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los datos no guardados.')) {
+                          setIsCreateTenantDialogOpen(false);
+                          setTenantFormData({
+                            name: '',
+                            customerId: '',
+                          });
+                          setError(null);
+                        }
+                      } else {
+                        setIsCreateTenantDialogOpen(false);
+                      }
+                    }}
+                    disabled={isCreatingTenant}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button appearance="primary" onClick={handleCreateTenant} disabled={isCreatingTenant}>
+                    {isCreatingTenant ? 'Creando...' : 'Crear'}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </DrawerBody>
+      </OverlayDrawer>
     </div>
   );
 };

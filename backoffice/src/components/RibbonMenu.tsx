@@ -127,14 +127,26 @@ export const RibbonMenu = ({ onMenuToggle }: RibbonMenuProps) => {
     return false;
   };
 
-  // Buscar el botón de crear cliente en los grupos
+  // Buscar los botones de crear en los grupos (clientes, sedes, tenants, usuarios)
   const createCustomerButton = groups
     .find((group) => group.id === 'customers')
     ?.items.find((item) => item.id === 'create');
+  
+  const createOfficeButton = groups
+    .find((group) => group.id === 'offices')
+    ?.items.find((item) => item.id === 'create');
+  
+  const createTenantButton = groups
+    .find((group) => group.id === 'tenants')
+    ?.items.find((item) => item.id === 'create');
+  
+  const createUserButton = groups
+    .find((group) => group.id === 'users')
+    ?.items.find((item) => item.id === 'create');
 
-  // Filtrar los items del grupo de clientes excluyendo el botón de crear
+  // Filtrar los items de los grupos excluyendo los botones de crear
   const filteredGroups = groups.map((group) => {
-    if (group.id === 'customers') {
+    if (group.id === 'customers' || group.id === 'offices' || group.id === 'tenants' || group.id === 'users') {
       return {
         ...group,
         items: group.items.filter((item) => item.id !== 'create'),
@@ -145,7 +157,7 @@ export const RibbonMenu = ({ onMenuToggle }: RibbonMenuProps) => {
 
   return (
     <div className={styles.ribbonMenu}>
-      {/* Botón de crear cliente al principio del ribbon */}
+      {/* Botones de crear al principio del ribbon (clientes, sedes, tenants, usuarios) */}
       {createCustomerButton && (
         <div style={{ marginRight: tokens.spacingHorizontalM }}>
           <Button
@@ -157,6 +169,48 @@ export const RibbonMenu = ({ onMenuToggle }: RibbonMenuProps) => {
             disabled={createCustomerButton.disabled}
           >
             {createCustomerButton.label}
+          </Button>
+        </div>
+      )}
+      {createOfficeButton && (
+        <div style={{ marginRight: tokens.spacingHorizontalM }}>
+          <Button
+            appearance="primary"
+            shape="square"
+            size="large"
+            icon={createOfficeButton.icon}
+            onClick={createOfficeButton.action}
+            disabled={createOfficeButton.disabled}
+          >
+            {createOfficeButton.label}
+          </Button>
+        </div>
+      )}
+      {createTenantButton && (
+        <div style={{ marginRight: tokens.spacingHorizontalM }}>
+          <Button
+            appearance="primary"
+            shape="square"
+            size="large"
+            icon={createTenantButton.icon}
+            onClick={createTenantButton.action}
+            disabled={createTenantButton.disabled}
+          >
+            {createTenantButton.label}
+          </Button>
+        </div>
+      )}
+      {createUserButton && (
+        <div style={{ marginRight: tokens.spacingHorizontalM }}>
+          <Button
+            appearance="primary"
+            shape="square"
+            size="large"
+            icon={createUserButton.icon}
+            onClick={createUserButton.action}
+            disabled={createUserButton.disabled}
+          >
+            {createUserButton.label}
           </Button>
         </div>
       )}
