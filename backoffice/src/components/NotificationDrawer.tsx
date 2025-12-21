@@ -19,8 +19,10 @@ import {
   InfoRegular,
 } from '@fluentui/react-icons';
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { Notification } from '../hooks/useNotifications';
 import { useNotificationContext } from '../contexts/NotificationContext';
+import { NotificationSkeleton } from './NotificationSkeleton';
 
 interface NotificationDrawerProps {
   open: boolean;
@@ -162,11 +164,26 @@ const formatTimeAgo = (date: Date): string => {
 export const NotificationDrawer = ({ open, onOpenChange }: NotificationDrawerProps) => {
   const styles = useStyles();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
   const {
     notifications,
     markAsRead,
     removeNotification,
   } = useNotificationContext();
+
+  // Simular carga cuando se abre el drawer
+  useEffect(() => {
+    if (open) {
+      setIsLoading(true);
+      // Simular una carga rápida para mejorar la experiencia
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    } else {
+      setIsLoading(false);
+    }
+  }, [open]);
 
   const handleNotificationClick = (notification: Notification) => {
     // Marcar como leída si no lo está
@@ -213,7 +230,9 @@ export const NotificationDrawer = ({ open, onOpenChange }: NotificationDrawerPro
 
       <DrawerBody className={styles.drawerBody}>
         <div className={styles.notificationsList}>
-          {notifications.length === 0 ? (
+          {isLoading ? (
+            <NotificationSkeleton count={5} />
+          ) : notifications.length === 0 ? (
             <div className={styles.emptyState}>
               <Text className={styles.emptyStateText}>
                 No hay notificaciones

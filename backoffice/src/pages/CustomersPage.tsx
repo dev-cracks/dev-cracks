@@ -87,6 +87,7 @@ import {
   HomeRegular,
   TableRegular,
   FlowchartRegular,
+  DismissRegular,
 } from '@fluentui/react-icons';
 import {
   customerService,
@@ -412,6 +413,9 @@ export const CustomersPage = () => {
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [isLoadingTenants, setIsLoadingTenants] = useState(false);
   const [isReordering, setIsReordering] = useState(false);
+  const [isDetailsLoading, setIsDetailsLoading] = useState(false);
+  const [isCreateDrawerLoading, setIsCreateDrawerLoading] = useState(false);
+  const [isEditDrawerLoading, setIsEditDrawerLoading] = useState(false);
   const [tenantName, setTenantName] = useState('');
   const [selectedParentId, setSelectedParentId] = useState<string>('');
   const [hasParent, setHasParent] = useState(false);
@@ -1084,6 +1088,45 @@ export const CustomersPage = () => {
     setSelectedCustomer(customer);
     setIsDetailsDialogOpen(true);
   };
+
+  // Manejar loading del drawer de detalles
+  useEffect(() => {
+    if (isDetailsDialogOpen) {
+      setIsDetailsLoading(true);
+      const timer = setTimeout(() => {
+        setIsDetailsLoading(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    } else {
+      setIsDetailsLoading(false);
+    }
+  }, [isDetailsDialogOpen]);
+
+  // Manejar loading del drawer de creación
+  useEffect(() => {
+    if (isCreateDialogOpen) {
+      setIsCreateDrawerLoading(true);
+      const timer = setTimeout(() => {
+        setIsCreateDrawerLoading(false);
+      }, 200);
+      return () => clearTimeout(timer);
+    } else {
+      setIsCreateDrawerLoading(false);
+    }
+  }, [isCreateDialogOpen]);
+
+  // Manejar loading del drawer de edición
+  useEffect(() => {
+    if (isEditDialogOpen) {
+      setIsEditDrawerLoading(true);
+      const timer = setTimeout(() => {
+        setIsEditDrawerLoading(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    } else {
+      setIsEditDrawerLoading(false);
+    }
+  }, [isEditDialogOpen]);
 
   const handleViewUsers = async (customer: CustomerDto) => {
     setSelectedCustomer(customer);
@@ -1800,11 +1843,24 @@ export const CustomersPage = () => {
         onOpenChange={handleDrawerOpenChange}
       >
         <DrawerHeader>
-          <DrawerHeaderTitle>Nuevo</DrawerHeaderTitle>
+          <DrawerHeaderTitle 
+            action={
+              <Button
+                appearance="subtle"
+                aria-label="Cerrar"
+                icon={<DismissRegular />}
+                onClick={() => {
+                  handleDrawerOpenChange({} as any, { open: false });
+                }}
+              />
+            }
+          >
+            Nuevo
+          </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
           <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
-            {isCreating ? (
+            {isCreateDrawerLoading || isCreating ? (
               <DetailsSkeleton rows={8} />
             ) : (
               <>
@@ -1963,11 +2019,24 @@ export const CustomersPage = () => {
         onOpenChange={handleEditDrawerOpenChange}
       >
         <DrawerHeader>
-          <DrawerHeaderTitle>Editar Cliente</DrawerHeaderTitle>
+          <DrawerHeaderTitle 
+            action={
+              <Button
+                appearance="subtle"
+                aria-label="Cerrar"
+                icon={<DismissRegular />}
+                onClick={() => {
+                  handleEditDrawerOpenChange({} as any, { open: false });
+                }}
+              />
+            }
+          >
+            Editar Cliente
+          </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
           <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
-            {isSaving ? (
+            {isEditDrawerLoading || isSaving ? (
               <DetailsSkeleton rows={8} />
             ) : isLoadingTenants ? (
               <DetailsSkeleton rows={3} />
@@ -2187,11 +2256,26 @@ export const CustomersPage = () => {
         onOpenChange={handleDetailsDrawerOpenChange}
       >
         <DrawerHeader>
-          <DrawerHeaderTitle>Detalles del Cliente</DrawerHeaderTitle>
+          <DrawerHeaderTitle 
+            action={
+              <Button
+                appearance="subtle"
+                aria-label="Cerrar"
+                icon={<DismissRegular />}
+                onClick={() => {
+                  handleDetailsDrawerOpenChange({} as any, { open: false });
+                }}
+              />
+            }
+          >
+            Detalles del Cliente
+          </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
           <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
-            {selectedCustomer && (
+            {isDetailsLoading ? (
+              <DetailsSkeleton rows={12} />
+            ) : selectedCustomer ? (
               <>
                 <Field label="Nombre" className={styles.formField}>
                   <Input value={selectedCustomer.name} readOnly />
@@ -2243,7 +2327,7 @@ export const CustomersPage = () => {
                   </Button>
                 </div>
               </>
-            )}
+            ) : null}
           </div>
         </DrawerBody>
       </OverlayDrawer>

@@ -27,6 +27,7 @@ export interface CreateTenantRequest {
 
 export interface UpdateTenantRequest {
   name: string;
+  customerId?: string;
 }
 
 export interface TenantDetailsDto extends TenantDto {

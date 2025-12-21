@@ -57,6 +57,7 @@ import {
   EyeRegular,
   AddRegular,
   BuildingRegular,
+  DismissRegular,
 } from '@fluentui/react-icons';
 import {
   officeService,
@@ -163,6 +164,9 @@ export const OfficesPage = () => {
   const [notificationTitle, setNotificationTitle] = useState('');
   const [notificationMessage, setNotificationMessage] = useState('');
   const [isSendingNotification, setIsSendingNotification] = useState(false);
+  const [isDetailsLoading, setIsDetailsLoading] = useState(false);
+  const [isCreateDrawerLoading, setIsCreateDrawerLoading] = useState(false);
+  const [isEditDrawerLoading, setIsEditDrawerLoading] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState<CreateOfficeRequest>({
@@ -362,6 +366,45 @@ export const OfficesPage = () => {
     setSelectedOffice(office);
     setIsDetailsDialogOpen(true);
   };
+
+  // Manejar loading del drawer de detalles
+  useEffect(() => {
+    if (isDetailsDialogOpen) {
+      setIsDetailsLoading(true);
+      const timer = setTimeout(() => {
+        setIsDetailsLoading(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    } else {
+      setIsDetailsLoading(false);
+    }
+  }, [isDetailsDialogOpen]);
+
+  // Manejar loading del drawer de creación
+  useEffect(() => {
+    if (isCreateDialogOpen) {
+      setIsCreateDrawerLoading(true);
+      const timer = setTimeout(() => {
+        setIsCreateDrawerLoading(false);
+      }, 200);
+      return () => clearTimeout(timer);
+    } else {
+      setIsCreateDrawerLoading(false);
+    }
+  }, [isCreateDialogOpen]);
+
+  // Manejar loading del drawer de edición
+  useEffect(() => {
+    if (isEditDialogOpen) {
+      setIsEditDrawerLoading(true);
+      const timer = setTimeout(() => {
+        setIsEditDrawerLoading(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    } else {
+      setIsEditDrawerLoading(false);
+    }
+  }, [isEditDialogOpen]);
 
   const handleNotifyUsers = (office: OfficeDto) => {
     setSelectedOffice(office);
@@ -601,11 +644,52 @@ export const OfficesPage = () => {
         }}
       >
         <DrawerHeader>
-          <DrawerHeaderTitle>Nueva Sede</DrawerHeaderTitle>
+          <DrawerHeaderTitle 
+            action={
+              <Button
+                appearance="subtle"
+                aria-label="Cerrar"
+                icon={<DismissRegular />}
+                onClick={() => {
+                  if (isCreating) {
+                    return;
+                  }
+                  const hasData = formData.name.trim() || 
+                                  formData.customerId || 
+                                  formData.address.trim() || 
+                                  formData.city.trim() || 
+                                  formData.stateProvince.trim() || 
+                                  formData.postalCode.trim() || 
+                                  formData.phone.trim() || 
+                                  formData.email.trim();
+                  if (hasData) {
+                    if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
+                      setIsCreateDialogOpen(false);
+                      setFormData({
+                        customerId: '',
+                        name: '',
+                        address: '',
+                        city: '',
+                        stateProvince: '',
+                        postalCode: '',
+                        phone: '',
+                        email: '',
+                      });
+                      setError(null);
+                    }
+                  } else {
+                    setIsCreateDialogOpen(false);
+                  }
+                }}
+              />
+            }
+          >
+            Nueva Sede
+          </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
           <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
-            {isCreating ? (
+            {isCreateDrawerLoading || isCreating ? (
               <DetailsSkeleton rows={8} />
             ) : (
               <>
@@ -794,11 +878,80 @@ export const OfficesPage = () => {
         }}
       >
         <DrawerHeader>
-          <DrawerHeaderTitle>Editar Sede</DrawerHeaderTitle>
+          <DrawerHeaderTitle 
+            action={
+              <Button
+                appearance="subtle"
+                aria-label="Cerrar"
+                icon={<DismissRegular />}
+                onClick={() => {
+                  if (isSaving) {
+                    return;
+                  }
+                  if (!selectedOffice) {
+                    setIsEditDialogOpen(false);
+                    setSelectedOffice(null);
+                    setFormData({
+                      customerId: '',
+                      name: '',
+                      address: '',
+                      city: '',
+                      stateProvince: '',
+                      postalCode: '',
+                      phone: '',
+                      email: '',
+                    });
+                    return;
+                  }
+                  const hasChanges = 
+                    formData.name !== selectedOffice.name ||
+                    formData.address !== (selectedOffice.address || '') ||
+                    formData.city !== (selectedOffice.city || '') ||
+                    formData.stateProvince !== (selectedOffice.stateProvince || '') ||
+                    formData.postalCode !== (selectedOffice.postalCode || '') ||
+                    formData.phone !== (selectedOffice.phone || '') ||
+                    formData.email !== (selectedOffice.email || '');
+                  if (hasChanges) {
+                    if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los cambios no guardados.')) {
+                      setIsEditDialogOpen(false);
+                      setSelectedOffice(null);
+                      setFormData({
+                        customerId: '',
+                        name: '',
+                        address: '',
+                        city: '',
+                        stateProvince: '',
+                        postalCode: '',
+                        phone: '',
+                        email: '',
+                      });
+                      setError(null);
+                    }
+                  } else {
+                    setIsEditDialogOpen(false);
+                    setSelectedOffice(null);
+                    setFormData({
+                      customerId: '',
+                      name: '',
+                      address: '',
+                      city: '',
+                      stateProvince: '',
+                      postalCode: '',
+                      phone: '',
+                      email: '',
+                    });
+                    setError(null);
+                  }
+                }}
+              />
+            }
+          >
+            Editar Sede
+          </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
           <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
-            {isSaving ? (
+            {isEditDrawerLoading || isSaving ? (
               <DetailsSkeleton rows={8} />
             ) : (
               <>
@@ -976,11 +1129,27 @@ export const OfficesPage = () => {
         }}
       >
         <DrawerHeader>
-          <DrawerHeaderTitle>Detalles de la Sede</DrawerHeaderTitle>
+          <DrawerHeaderTitle 
+            action={
+              <Button
+                appearance="subtle"
+                aria-label="Cerrar"
+                icon={<DismissRegular />}
+                onClick={() => {
+                  setIsDetailsDialogOpen(false);
+                  setSelectedOffice(null);
+                }}
+              />
+            }
+          >
+            Detalles de la Sede
+          </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
           <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
-            {selectedOffice && (
+            {isDetailsLoading ? (
+              <DetailsSkeleton rows={12} />
+            ) : selectedOffice ? (
               <>
                 <Field label="Nombre" className={styles.formField}>
                   <Input value={selectedOffice.name} readOnly />
@@ -1032,7 +1201,7 @@ export const OfficesPage = () => {
                   </Button>
                 </div>
               </>
-            )}
+            ) : null}
           </div>
         </DrawerBody>
       </OverlayDrawer>

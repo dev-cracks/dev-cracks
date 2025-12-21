@@ -54,6 +54,7 @@ import {
   PlayRegular,
   EyeRegular,
   AddRegular,
+  DismissRegular,
 } from '@fluentui/react-icons';
 import { userService, UserDto, CreateUserRequest, UpdateUserRequest } from '../services/userService';
 import { tenantService, TenantDto } from '../services/tenantService';
@@ -123,6 +124,9 @@ export const UsersPage = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  const [isDetailsLoading, setIsDetailsLoading] = useState(false);
+  const [isCreateDrawerLoading, setIsCreateDrawerLoading] = useState(false);
+  const [isEditDrawerLoading, setIsEditDrawerLoading] = useState(false);
 
   const isLoadingRef = useRef(false);
   const hasLoadedRef = useRef(false);
@@ -321,6 +325,45 @@ export const UsersPage = () => {
     setIsDetailsDialogOpen(true);
   };
 
+  // Manejar loading del drawer de detalles
+  useEffect(() => {
+    if (isDetailsDialogOpen) {
+      setIsDetailsLoading(true);
+      const timer = setTimeout(() => {
+        setIsDetailsLoading(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    } else {
+      setIsDetailsLoading(false);
+    }
+  }, [isDetailsDialogOpen]);
+
+  // Manejar loading del drawer de creación
+  useEffect(() => {
+    if (isCreateDialogOpen) {
+      setIsCreateDrawerLoading(true);
+      const timer = setTimeout(() => {
+        setIsCreateDrawerLoading(false);
+      }, 200);
+      return () => clearTimeout(timer);
+    } else {
+      setIsCreateDrawerLoading(false);
+    }
+  }, [isCreateDialogOpen]);
+
+  // Manejar loading del drawer de edición
+  useEffect(() => {
+    if (isEditDialogOpen) {
+      setIsEditDrawerLoading(true);
+      const timer = setTimeout(() => {
+        setIsEditDrawerLoading(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    } else {
+      setIsEditDrawerLoading(false);
+    }
+  }, [isEditDialogOpen]);
+
   if (isLoading && users.length === 0) {
     return (
       <div className={styles.container}>
@@ -492,11 +535,22 @@ export const UsersPage = () => {
         onOpenChange={(_, data) => setIsCreateDialogOpen(data.open)}
       >
         <DrawerHeader>
-          <DrawerHeaderTitle>Nuevo Usuario</DrawerHeaderTitle>
+          <DrawerHeaderTitle 
+            action={
+              <Button
+                appearance="subtle"
+                aria-label="Cerrar"
+                icon={<DismissRegular />}
+                onClick={() => setIsCreateDialogOpen(false)}
+              />
+            }
+          >
+            Nuevo Usuario
+          </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
           <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
-            {isCreating ? (
+            {isCreateDrawerLoading || isCreating ? (
               <DetailsSkeleton rows={8} />
             ) : (
               <>
@@ -580,11 +634,22 @@ export const UsersPage = () => {
         onOpenChange={(_, data) => setIsEditDialogOpen(data.open)}
       >
         <DrawerHeader>
-          <DrawerHeaderTitle>Editar Usuario</DrawerHeaderTitle>
+          <DrawerHeaderTitle 
+            action={
+              <Button
+                appearance="subtle"
+                aria-label="Cerrar"
+                icon={<DismissRegular />}
+                onClick={() => setIsEditDialogOpen(false)}
+              />
+            }
+          >
+            Editar Usuario
+          </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
           <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
-            {isSaving ? (
+            {isEditDrawerLoading || isSaving ? (
               <DetailsSkeleton rows={8} />
             ) : (
               <>
@@ -690,11 +755,27 @@ export const UsersPage = () => {
         onOpenChange={(_, data) => setIsDetailsDialogOpen(data.open)}
       >
         <DrawerHeader>
-          <DrawerHeaderTitle>Detalles del Usuario</DrawerHeaderTitle>
+          <DrawerHeaderTitle 
+            action={
+              <Button
+                appearance="subtle"
+                aria-label="Cerrar"
+                icon={<DismissRegular />}
+                onClick={() => {
+                  setIsDetailsDialogOpen(false);
+                  setSelectedUser(null);
+                }}
+              />
+            }
+          >
+            Detalles del Usuario
+          </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
           <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
-            {selectedUser && (
+            {isDetailsLoading ? (
+              <DetailsSkeleton rows={8} />
+            ) : selectedUser ? (
               <>
                 <Field label="Email" className={styles.formField}>
                   <Input value={selectedUser.email} readOnly />
@@ -734,7 +815,7 @@ export const UsersPage = () => {
                   </Button>
                 </div>
               </>
-            )}
+            ) : null}
           </div>
         </DrawerBody>
       </OverlayDrawer>
