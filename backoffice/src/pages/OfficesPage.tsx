@@ -59,6 +59,7 @@ import {
   BuildingRegular,
   DismissRegular,
   ArrowSwapRegular,
+  ArrowClockwiseRegular,
 } from '@fluentui/react-icons';
 import {
   officeService,
@@ -588,6 +589,15 @@ export const OfficesPage = () => {
             style={{ width: '100%' }}
           />
         </div>
+        <Button
+          appearance="primary"
+          icon={<ArrowClockwiseRegular />}
+          onClick={loadOffices}
+          disabled={isLoading}
+          title="Actualizar lista de sedes"
+        >
+          Actualizar
+        </Button>
       </div>
 
       <Card>

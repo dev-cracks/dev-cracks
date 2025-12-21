@@ -8,8 +8,9 @@ import {
   makeStyles,
   shorthands,
   tokens,
+  Button,
 } from '@fluentui/react-components';
-import { HomeRegular } from '@fluentui/react-icons';
+import { HomeRegular, ArrowClockwiseRegular } from '@fluentui/react-icons';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { backofficeService } from '../services/backofficeService';
@@ -151,6 +152,15 @@ export const DashboardPage = () => {
       <div className={styles.header}>
         <HomeRegular fontSize={32} />
         <h1 className={styles.title}>Dashboard</h1>
+        <Button
+          appearance="primary"
+          icon={<ArrowClockwiseRegular />}
+          onClick={loadStats}
+          disabled={isLoading}
+          title="Actualizar estadísticas del dashboard"
+        >
+          Actualizar
+        </Button>
       </div>
 
       <div className={styles.statsGrid}>

@@ -82,6 +82,7 @@ import {
   DismissRegular,
   ArrowSwapRegular,
   BriefcaseRegular,
+  ArrowClockwiseRegular,
 } from '@fluentui/react-icons';
 import { tenantService, TenantDto, UpdateTenantRequest, CreateTenantRequest } from '../services/tenantService';
 import { UserDto } from '../services/authService';
@@ -858,6 +859,20 @@ export const TenantsPage = () => {
             style={{ width: '100%' }}
           />
         </div>
+        <Button
+          appearance="primary"
+          icon={<ArrowClockwiseRegular />}
+          onClick={async () => {
+            await loadTenants();
+            if (selectedView === 'flow') {
+              await loadFlowData();
+            }
+          }}
+          disabled={isLoading || flowLoading}
+          title="Actualizar lista de tenants"
+        >
+          Actualizar
+        </Button>
         <TabList
           selectedValue={selectedTabValue}
           onTabSelect={(_, data) => {

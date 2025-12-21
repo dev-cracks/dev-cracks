@@ -90,6 +90,7 @@ import {
   DismissRegular,
   BriefcaseRegular,
   LocationRegular,
+  ArrowClockwiseRegular,
 } from '@fluentui/react-icons';
 import {
   customerService,
@@ -1815,6 +1816,20 @@ export const CustomersPage = () => {
             style={{ width: '100%' }}
           />
         </div>
+        <Button
+          appearance="primary"
+          icon={<ArrowClockwiseRegular />}
+          onClick={async () => {
+            await loadCustomers();
+            if (selectedView === 'flow') {
+              await loadFlowData();
+            }
+          }}
+          disabled={isLoading || flowLoading}
+          title="Actualizar lista de clientes"
+        >
+          Actualizar
+        </Button>
         <TabList
           selectedValue={selectedTabValue}
           onTabSelect={(_, data) => {

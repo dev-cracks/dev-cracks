@@ -25,6 +25,7 @@ import {
   MessageBar,
   MessageBarBody,
   Badge,
+  CounterBadge,
   Menu,
   MenuTrigger,
   MenuPopover,
@@ -34,7 +35,16 @@ import {
   Option,
   Input,
   Select,
+  Persona,
 } from '@fluentui/react-components';
+import {
+  TeachingPopover,
+  TeachingPopoverTrigger,
+  TeachingPopoverSurface,
+  TeachingPopoverHeader,
+  TeachingPopoverBody,
+  TeachingPopoverFooter,
+} from '@fluentui/react-teaching-popover';
 import {
   OverlayDrawer,
   DrawerBody,
@@ -55,9 +65,13 @@ import {
   EyeRegular,
   AddRegular,
   DismissRegular,
+  ArrowClockwiseRegular,
+  ArrowSwapRegular,
 } from '@fluentui/react-icons';
 import { userService, UserDto, CreateUserRequest, UpdateUserRequest } from '../services/userService';
 import { tenantService, TenantDto } from '../services/tenantService';
+import { customerService, CustomerDto } from '../services/customerService';
+import { officeService, OfficeDto } from '../services/officeService';
 import { TableSkeleton } from '../components/TableSkeleton';
 import { DetailsSkeleton } from '../components/DetailsSkeleton';
 import { useRibbonMenu } from '../contexts/RibbonMenuContext';
@@ -119,6 +133,10 @@ export const UsersPage = () => {
   
   const [users, setUsers] = useState<UserDto[]>([]);
   const [tenants, setTenants] = useState<TenantDto[]>([]);
+  const [customers, setCustomers] = useState<CustomerDto[]>([]);
+  const [customerNames, setCustomerNames] = useState<Record<string, string>>({});
+  const [userOffices, setUserOffices] = useState<Record<string, OfficeDto[]>>({});
+  const [userTenants, setUserTenants] = useState<Record<string, TenantDto[]>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -132,6 +150,11 @@ export const UsersPage = () => {
   const [isDetailsLoading, setIsDetailsLoading] = useState(false);
   const [isCreateDrawerLoading, setIsCreateDrawerLoading] = useState(false);
   const [isEditDrawerLoading, setIsEditDrawerLoading] = useState(false);
+  const [isCustomerDetailsDialogOpen, setIsCustomerDetailsDialogOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerDto | null>(null);
+  const [isChangeCustomerDialogOpen, setIsChangeCustomerDialogOpen] = useState(false);
+  const [selectedNewCustomerId, setSelectedNewCustomerId] = useState<string>('');
+  const [isChangingCustomer, setIsChangingCustomer] = useState(false);
 
   const isLoadingRef = useRef(false);
   const hasLoadedRef = useRef(false);
@@ -162,13 +185,58 @@ export const UsersPage = () => {
     }
   }, []);
 
+  const loadCustomers = useCallback(async () => {
+    try {
+      const data = await customerService.getAllCustomers();
+      setCustomers(data);
+      // Crear un mapa de customerId a customerName
+      const namesMap: Record<string, string> = {};
+      data.forEach((customer) => {
+        namesMap[customer.id] = customer.name;
+      });
+      setCustomerNames(namesMap);
+    } catch (err: any) {
+      console.error('[UsersPage] Error cargando clientes:', err);
+    }
+  }, []);
+
+  const loadUserAssociations = useCallback(async (userId: string) => {
+    try {
+      // Cargar sedes asociadas al usuario a través del cliente
+      const user = users.find((u) => u.id === userId);
+      if (!user || !user.customerId) return;
+
+      // Obtener sedes del cliente
+      const offices = await officeService.getOfficesByCustomer(user.customerId);
+      setUserOffices((prev) => ({ ...prev, [userId]: offices }));
+
+      // Obtener tenants del cliente
+      const customerTenants = await customerService.getCustomerTenants(user.customerId);
+      setUserTenants((prev) => ({ ...prev, [userId]: customerTenants }));
+    } catch (err: any) {
+      console.error('[UsersPage] Error cargando asociaciones del usuario:', err);
+    }
+  }, [users]);
+
   useEffect(() => {
     if (!isLoadingRef.current && !hasLoadedRef.current) {
       hasLoadedRef.current = true;
       loadUsers();
       loadTenants();
+      loadCustomers();
     }
-  }, [loadUsers, loadTenants]);
+  }, [loadUsers, loadTenants, loadCustomers]);
+
+  // Cargar asociaciones cuando se cargan los usuarios
+  useEffect(() => {
+    if (users.length > 0 && customers.length > 0) {
+      users.forEach((user) => {
+        if (user.customerId) {
+          loadUserAssociations(user.id);
+        }
+      });
+    }
+  }, [users, customers, loadUserAssociations]);
 
   // Registrar acciones en el RibbonMenu
   useEffect(() => {
@@ -343,6 +411,73 @@ export const UsersPage = () => {
     setIsDetailsDialogOpen(true);
   };
 
+  const handleViewCustomerDetails = async (customerId: string) => {
+    try {
+      const customer = await customerService.getCustomerById(customerId);
+      setSelectedCustomer(customer);
+      setIsCustomerDetailsDialogOpen(true);
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar detalles del cliente');
+    }
+  };
+
+  const handleChangeCustomer = async (user: UserDto) => {
+    setSelectedUser(user);
+    setSelectedNewCustomerId(user.customerId || '');
+    try {
+      setIsChangeCustomerDialogOpen(true);
+    } catch (err: any) {
+      setError(err.message || 'Error al abrir diálogo de cambio de cliente');
+    }
+  };
+
+  const handleConfirmChangeCustomer = async () => {
+    if (!selectedUser || !selectedNewCustomerId) {
+      setError('Debe seleccionar un cliente');
+      return;
+    }
+
+    if (selectedNewCustomerId === selectedUser.customerId) {
+      setError('El cliente seleccionado es el mismo que el actual');
+      return;
+    }
+
+    try {
+      setError(null);
+      setIsChangingCustomer(true);
+      
+      // Obtener el primer tenant del nuevo cliente
+      const customerTenants = await customerService.getCustomerTenants(selectedNewCustomerId);
+      const newTenantId = customerTenants.length > 0 ? customerTenants[0].id : '';
+
+      // Obtener la primera sede del nuevo cliente si existe
+      const customerOffices = await officeService.getOfficesByCustomer(selectedNewCustomerId);
+      // Si hay sedes, usar el tenant de la primera sede
+      const finalTenantId = customerOffices.length > 0 && customerOffices[0].tenantId 
+        ? customerOffices[0].tenantId 
+        : newTenantId;
+
+      await userService.updateUser(selectedUser.id, {
+        email: selectedUser.email,
+        name: selectedUser.name || '',
+        role: selectedUser.role,
+        customerId: selectedNewCustomerId,
+        tenantId: finalTenantId,
+        contactEmail: selectedUser.contactEmail || '',
+        phone: selectedUser.phone || '',
+      });
+      
+      setIsChangeCustomerDialogOpen(false);
+      setSelectedUser(null);
+      setSelectedNewCustomerId('');
+      await loadUsers();
+      setIsChangingCustomer(false);
+    } catch (err: any) {
+      setError(err.message || 'Error al cambiar cliente del usuario');
+      setIsChangingCustomer(false);
+    }
+  };
+
   // Manejar loading del drawer de detalles
   useEffect(() => {
     if (isDetailsDialogOpen) {
@@ -426,6 +561,15 @@ export const UsersPage = () => {
             style={{ width: '100%' }}
           />
         </div>
+        <Button
+          appearance="primary"
+          icon={<ArrowClockwiseRegular />}
+          onClick={loadUsers}
+          disabled={isLoading}
+          title="Actualizar lista de usuarios"
+        >
+          Actualizar
+        </Button>
       </div>
 
       <Card>
@@ -465,80 +609,187 @@ export const UsersPage = () => {
                 <Table style={{ tableLayout: 'auto', width: '100%' }}>
                   <TableHeader>
                     <TableRow>
-                      <TableHeaderCell>Email</TableHeaderCell>
                       <TableHeaderCell>Nombre</TableHeaderCell>
+                      <TableHeaderCell>Teléfono</TableHeaderCell>
+                      <TableHeaderCell>Sedes</TableHeaderCell>
+                      <TableHeaderCell>Tenants</TableHeaderCell>
                       <TableHeaderCell>Rol</TableHeaderCell>
                       <TableHeaderCell>Estado</TableHeaderCell>
-                      <TableHeaderCell>Email de Contacto</TableHeaderCell>
                       <TableHeaderCell>Auth0 ID</TableHeaderCell>
-                      <TableHeaderCell>Teléfono</TableHeaderCell>
                       <TableHeaderCell>Fecha de Creación</TableHeaderCell>
                       <TableHeaderCell>Acciones</TableHeaderCell>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredUsers.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>{user.name || 'Sin nombre'}</TableCell>
-                        <TableCell>
-                          <Badge
-                            appearance={user.role === 'Admin' ? 'filled' : 'outline'}
-                            color={user.role === 'Admin' ? 'brand' : 'neutral'}
-                          >
-                            {getRoleLabel(user.role)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {user.isSuspended ? (
-                            <Badge appearance="filled" color="danger">Suspendido</Badge>
-                          ) : user.isActive ? (
-                            <Badge appearance="filled" color="success">Activo</Badge>
-                          ) : (
-                            <Badge appearance="outline">Inactivo</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>{user.contactEmail || 'N/A'}</TableCell>
-                        <TableCell>{user.auth0Id || 'N/A'}</TableCell>
-                        <TableCell>{user.phone || 'N/A'}</TableCell>
-                        <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
-                        <TableCell>
-                          <Menu>
-                            <MenuTrigger disableButtonEnhancement>
-                              <Button
-                                appearance="subtle"
-                                icon={<MoreHorizontalRegular />}
-                                aria-label="Más acciones"
-                              />
-                            </MenuTrigger>
-                            <MenuPopover>
-                              <MenuList>
-                                <MenuItem icon={<EyeRegular />} onClick={() => handleViewDetails(user)}>
-                                  Ver detalles
-                                </MenuItem>
-                                <MenuItem icon={<EditRegular />} onClick={() => handleEdit(user)}>
-                                  Editar
-                                </MenuItem>
-                                {user.isSuspended ? (
-                                  <MenuItem icon={<PlayRegular />} onClick={() => handleActivate(user)}>
-                                    Activar
+                    {filteredUsers.map((user) => {
+                      const offices = userOffices[user.id] || [];
+                      const associatedTenants = userTenants[user.id] || [];
+
+                      return (
+                        <TableRow key={user.id}>
+                          {/* Nombre */}
+                          <TableCell>
+                            <Persona
+                              name={user.name || user.email}
+                              secondaryText={user.contactEmail || undefined}
+                            />
+                          </TableCell>
+                          {/* Teléfono */}
+                          <TableCell>{user.phone || 'N/A'}</TableCell>
+                          {/* Sedes */}
+                          <TableCell>
+                            {offices.length > 0 ? (
+                              <TeachingPopover>
+                                <TeachingPopoverTrigger>
+                                  <Button
+                                    appearance="subtle"
+                                    style={{
+                                      padding: 0,
+                                      minWidth: 'auto',
+                                      height: 'auto'
+                                    }}
+                                  >
+                                    <CounterBadge count={offices.length} />
+                                  </Button>
+                                </TeachingPopoverTrigger>
+                                <TeachingPopoverSurface>
+                                  <TeachingPopoverHeader>Sedes Asociadas</TeachingPopoverHeader>
+                                  <TeachingPopoverBody>
+                                    <div style={{ maxWidth: '600px', maxHeight: '400px', overflowY: 'auto' }}>
+                                      <Table size="small">
+                                        <TableHeader>
+                                          <TableRow>
+                                            <TableHeaderCell>Nombre</TableHeaderCell>
+                                            <TableHeaderCell>Ciudad</TableHeaderCell>
+                                            <TableHeaderCell>Tenant</TableHeaderCell>
+                                          </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                          {offices.map((office) => (
+                                            <TableRow key={office.id}>
+                                              <TableCell>{office.name}</TableCell>
+                                              <TableCell>{office.city || 'N/A'}</TableCell>
+                                              <TableCell>{office.tenantName || 'N/A'}</TableCell>
+                                            </TableRow>
+                                          ))}
+                                        </TableBody>
+                                      </Table>
+                                    </div>
+                                  </TeachingPopoverBody>
+                                  <TeachingPopoverFooter primaryButton={{ text: 'Cerrar' }} />
+                                </TeachingPopoverSurface>
+                              </TeachingPopover>
+                            ) : (
+                              <CounterBadge count={0} />
+                            )}
+                          </TableCell>
+                          {/* Tenants */}
+                          <TableCell>
+                            {associatedTenants.length > 0 ? (
+                              <TeachingPopover>
+                                <TeachingPopoverTrigger>
+                                  <Button
+                                    appearance="subtle"
+                                    style={{
+                                      padding: 0,
+                                      minWidth: 'auto',
+                                      height: 'auto'
+                                    }}
+                                  >
+                                    <CounterBadge count={associatedTenants.length} />
+                                  </Button>
+                                </TeachingPopoverTrigger>
+                                <TeachingPopoverSurface>
+                                  <TeachingPopoverHeader>Tenants Asociados</TeachingPopoverHeader>
+                                  <TeachingPopoverBody>
+                                    <div style={{ maxWidth: '600px', maxHeight: '400px', overflowY: 'auto' }}>
+                                      <Table size="small">
+                                        <TableHeader>
+                                          <TableRow>
+                                            <TableHeaderCell>Nombre</TableHeaderCell>
+                                            <TableHeaderCell>Cliente</TableHeaderCell>
+                                          </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                          {associatedTenants.map((tenant) => (
+                                            <TableRow key={tenant.id}>
+                                              <TableCell>{tenant.name}</TableCell>
+                                              <TableCell>{tenant.customerName || 'N/A'}</TableCell>
+                                            </TableRow>
+                                          ))}
+                                        </TableBody>
+                                      </Table>
+                                    </div>
+                                  </TeachingPopoverBody>
+                                  <TeachingPopoverFooter primaryButton={{ text: 'Cerrar' }} />
+                                </TeachingPopoverSurface>
+                              </TeachingPopover>
+                            ) : (
+                              <CounterBadge count={0} />
+                            )}
+                          </TableCell>
+                          {/* Rol */}
+                          <TableCell>
+                            <Badge
+                              appearance={user.role === 'Admin' ? 'filled' : 'outline'}
+                              color={user.role === 'Admin' ? 'brand' : 'neutral'}
+                            >
+                              {getRoleLabel(user.role)}
+                            </Badge>
+                          </TableCell>
+                          {/* Estado */}
+                          <TableCell>
+                            {user.isSuspended ? (
+                              <Badge appearance="filled" color="danger">Suspendido</Badge>
+                            ) : user.isActive ? (
+                              <Badge appearance="filled" color="success">Activo</Badge>
+                            ) : (
+                              <Badge appearance="outline">Inactivo</Badge>
+                            )}
+                          </TableCell>
+                          {/* Auth0 ID */}
+                          <TableCell>{user.auth0Id || 'N/A'}</TableCell>
+                          {/* Fecha de Creación */}
+                          <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                          {/* Acciones */}
+                          <TableCell>
+                            <Menu>
+                              <MenuTrigger disableButtonEnhancement>
+                                <Button
+                                  appearance="subtle"
+                                  icon={<MoreHorizontalRegular />}
+                                  aria-label="Más acciones"
+                                />
+                              </MenuTrigger>
+                              <MenuPopover>
+                                <MenuList>
+                                  <MenuItem icon={<EyeRegular />} onClick={() => handleViewDetails(user)}>
+                                    Ver detalles
                                   </MenuItem>
-                                ) : (
-                                  <MenuItem icon={<PauseRegular />} onClick={() => handleSuspend(user)}>
-                                    Suspender
+                                  <MenuItem icon={<EditRegular />} onClick={() => handleEdit(user)}>
+                                    Editar
                                   </MenuItem>
-                                )}
-                                {user.id !== userDetails?.id && (
-                                  <MenuItem icon={<DeleteRegular />} onClick={() => handleDelete(user)}>
-                                    Eliminar
-                                  </MenuItem>
-                                )}
-                              </MenuList>
-                            </MenuPopover>
-                          </Menu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                                  {user.isSuspended ? (
+                                    <MenuItem icon={<PlayRegular />} onClick={() => handleActivate(user)}>
+                                      Activar
+                                    </MenuItem>
+                                  ) : (
+                                    <MenuItem icon={<PauseRegular />} onClick={() => handleSuspend(user)}>
+                                      Suspender
+                                    </MenuItem>
+                                  )}
+                                  {user.id !== userDetails?.id && (
+                                    <MenuItem icon={<DeleteRegular />} onClick={() => handleDelete(user)}>
+                                      Eliminar
+                                    </MenuItem>
+                                  )}
+                                </MenuList>
+                              </MenuPopover>
+                            </Menu>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               )}
@@ -858,6 +1109,154 @@ export const UsersPage = () => {
           </div>
         </DrawerBody>
       </OverlayDrawer>
+
+      {/* Drawer de detalles del cliente */}
+      <OverlayDrawer
+        {...restoreFocusSourceAttributes}
+        position="end"
+        size="large"
+        open={isCustomerDetailsDialogOpen}
+        modalType="alert"
+        onOpenChange={(event: any, data: { open: boolean }) => {
+          if (data.open === false) {
+            setIsCustomerDetailsDialogOpen(false);
+            setSelectedCustomer(null);
+          } else {
+            setIsCustomerDetailsDialogOpen(true);
+          }
+        }}
+      >
+        <DrawerHeader>
+          <DrawerHeaderTitle 
+            action={
+              <Button
+                appearance="subtle"
+                aria-label="Cerrar"
+                icon={<DismissRegular />}
+                onClick={() => {
+                  setIsCustomerDetailsDialogOpen(false);
+                  setSelectedCustomer(null);
+                }}
+              />
+            }
+          >
+            Detalles del Cliente
+          </DrawerHeaderTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
+            {selectedCustomer && (
+              <>
+                <Field label="Nombre" className={styles.formField}>
+                  <Input value={selectedCustomer.name} readOnly />
+                </Field>
+                <Field label="Identificación" className={styles.formField}>
+                  <Input value={selectedCustomer.identification} readOnly />
+                </Field>
+                <Field label="País" className={styles.formField}>
+                  <Input value={selectedCustomer.countryName || 'N/A'} readOnly />
+                </Field>
+                <Field label="Estado/Provincia" className={styles.formField}>
+                  <Input value={selectedCustomer.stateProvince || 'N/A'} readOnly />
+                </Field>
+                <Field label="Ciudad" className={styles.formField}>
+                  <Input value={selectedCustomer.city || 'N/A'} readOnly />
+                </Field>
+                <Field label="Teléfono" className={styles.formField}>
+                  <Input value={selectedCustomer.phone || 'N/A'} readOnly />
+                </Field>
+                <Field label="Correo electrónico" className={styles.formField}>
+                  <Input value={selectedCustomer.email || 'N/A'} readOnly />
+                </Field>
+                <Field label="Estado" className={styles.formField}>
+                  <div>
+                    {selectedCustomer.isSuspended ? (
+                      <Badge appearance="filled" color="danger">Suspendido</Badge>
+                    ) : selectedCustomer.isActive ? (
+                      <Badge appearance="filled" color="success">Activo</Badge>
+                    ) : (
+                      <Badge appearance="outline">Inactivo</Badge>
+                    )}
+                  </div>
+                </Field>
+                <Field label="Tenants" className={styles.formField}>
+                  <Input value={String(selectedCustomer.tenantCount || 0)} readOnly />
+                </Field>
+                <Field label="Usuarios" className={styles.formField}>
+                  <Input value={String(selectedCustomer.userCount || 0)} readOnly />
+                </Field>
+                <Field label="Creado" className={styles.formField}>
+                  <Input value={new Date(selectedCustomer.createdAt).toLocaleString()} readOnly />
+                </Field>
+                <Field label="Actualizado" className={styles.formField}>
+                  <Input value={new Date(selectedCustomer.updatedAt).toLocaleString()} readOnly />
+                </Field>
+                <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
+                  <Button appearance="primary" onClick={() => setIsCustomerDetailsDialogOpen(false)}>
+                    Cerrar
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </DrawerBody>
+      </OverlayDrawer>
+
+      {/* Dialog de cambiar cliente */}
+      <Dialog open={isChangeCustomerDialogOpen} onOpenChange={(_, data) => setIsChangeCustomerDialogOpen(data.open)}>
+        <DialogSurface>
+          <DialogTitle>Cambiar Cliente del Usuario</DialogTitle>
+          <DialogBody>
+            <DialogContent>
+              <Text>
+                Seleccione un nuevo cliente para el usuario "{selectedUser?.name || selectedUser?.email}".
+                Al cambiar el cliente, también se actualizarán la sede y el tenant asociados.
+              </Text>
+              <Field label="Cliente" required className={styles.formField} style={{ marginTop: tokens.spacingVerticalM }}>
+                <Combobox
+                  value={customers.find(c => c.id === selectedNewCustomerId)?.name || ''}
+                  onOptionSelect={(_, data) => {
+                    const customer = customers.find((c) => c.name === data.optionValue);
+                    if (customer) {
+                      setSelectedNewCustomerId(customer.id);
+                    }
+                  }}
+                >
+                  {customers.map((customer) => (
+                    <Option key={customer.id} value={customer.name}>
+                      {customer.name}
+                    </Option>
+                  ))}
+                </Combobox>
+              </Field>
+              {selectedUser?.customerId && customerNames[selectedUser.customerId] && (
+                <Text size={300} style={{ marginTop: tokens.spacingVerticalS, color: tokens.colorNeutralForeground3 }}>
+                  Cliente actual: {customerNames[selectedUser.customerId]}
+                </Text>
+              )}
+            </DialogContent>
+          </DialogBody>
+          <DialogActions>
+            <Button 
+              appearance="secondary" 
+              onClick={() => {
+                setIsChangeCustomerDialogOpen(false);
+                setSelectedNewCustomerId('');
+              }}
+              disabled={isChangingCustomer}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              appearance="primary" 
+              onClick={handleConfirmChangeCustomer}
+              disabled={isChangingCustomer || !selectedNewCustomerId}
+            >
+              {isChangingCustomer ? 'Cambiando...' : 'Cambiar Cliente'}
+            </Button>
+          </DialogActions>
+        </DialogSurface>
+      </Dialog>
     </div>
   );
 };
