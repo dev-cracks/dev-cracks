@@ -4,17 +4,25 @@ import { UserDto } from './authService';
 export interface TenantDto {
   id: string;
   name: string;
+  customerId: string;
+  customerName?: string;
   officeId?: string;
   officeName?: string;
   createdAt: string;
   updatedAt: string;
   isActive?: boolean;
   isSuspended?: boolean;
+  userCount?: number;
 }
 
 export interface InitializeTenantResponse {
   tenant: TenantDto;
   message: string;
+}
+
+export interface CreateTenantRequest {
+  name: string;
+  customerId: string;
 }
 
 export interface UpdateTenantRequest {
@@ -47,6 +55,13 @@ export const tenantService = {
 
   async getAllTenants(): Promise<TenantDto[]> {
     return apiService.request<TenantDto[]>('/tenants');
+  },
+
+  async createTenant(data: CreateTenantRequest): Promise<TenantDto> {
+    return apiService.request<TenantDto>('/tenants', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   },
 
   async getTenantById(id: string): Promise<TenantDetailsDto> {

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Card,
   CardHeader,
+  CardPreview,
   Text,
   makeStyles,
   shorthands,
@@ -13,7 +14,7 @@ import {
   TableHeader,
   TableHeaderCell,
   Button,
-  Input,
+  SearchBox,
   Dialog,
   DialogSurface,
   DialogTitle,
@@ -33,6 +34,17 @@ import {
   Combobox,
   Option,
   Textarea,
+  Input,
+} from '@fluentui/react-components';
+import {
+  OverlayDrawer,
+  DrawerBody,
+  DrawerHeader,
+  DrawerHeaderTitle,
+} from '@fluentui/react-drawer';
+import {
+  useRestoreFocusSource,
+  useRestoreFocusTarget,
 } from '@fluentui/react-components';
 import {
   HomeRegular,
@@ -58,17 +70,29 @@ import {
 } from '../services/customerService';
 import { notificationService } from '../services/notificationService';
 import { TableSkeleton } from '../components/TableSkeleton';
+import { DetailsSkeleton } from '../components/DetailsSkeleton';
+import { useRibbonMenu } from '../contexts/RibbonMenuContext';
+import { RibbonMenu } from '../components/RibbonMenu';
 
 const useStyles = makeStyles({
   container: {
     display: 'flex',
     flexDirection: 'column',
-    ...shorthands.gap(tokens.spacingVerticalXL),
+    ...shorthands.gap(0),
+    margin: 0,
+    padding: 0,
+  },
+  ribbonMenuContainer: {
+    marginLeft: `calc(-1 * ${tokens.spacingVerticalXL})`,
+    marginRight: `calc(-1 * ${tokens.spacingVerticalXL})`,
+    marginTop: `calc(-1 * ${tokens.spacingVerticalXL})`,
+    marginBottom: tokens.spacingVerticalL,
+    width: `calc(100% + ${tokens.spacingVerticalXL} * 2)`,
   },
   header: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    ...shorthands.gap(tokens.spacingHorizontalM),
     marginBottom: tokens.spacingVerticalM,
   },
   headerLeft: {
@@ -83,6 +107,7 @@ const useStyles = makeStyles({
   },
   toolbar: {
     display: 'flex',
+    width: '100%',
     ...shorthands.gap(tokens.spacingHorizontalM),
     marginBottom: tokens.spacingVerticalL,
   },
@@ -117,6 +142,11 @@ const useStyles = makeStyles({
 
 export const OfficesPage = () => {
   const styles = useStyles();
+  const { addGroup, removeGroup } = useRibbonMenu();
+  
+  // Hooks para restauración de foco en el Drawer
+  const restoreFocusTargetAttributes = useRestoreFocusTarget();
+  const restoreFocusSourceAttributes = useRestoreFocusSource();
   const [offices, setOffices] = useState<OfficeDto[]>([]);
   const [customers, setCustomers] = useState<CustomerDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -124,7 +154,9 @@ export const OfficesPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOffice, setSelectedOffice] = useState<OfficeDto | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isNotifyUsersDialogOpen, setIsNotifyUsersDialogOpen] = useState(false);
@@ -184,6 +216,40 @@ export const OfficesPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Registrar acciones en el RibbonMenu
+  useEffect(() => {
+    addGroup({
+      id: 'offices',
+      label: 'Sedes',
+      icon: <HomeRegular />,
+      items: [
+        {
+          id: 'create',
+          label: 'Nuevo',
+          icon: <AddRegular />,
+          action: () => {
+            setFormData({
+              customerId: '',
+              name: '',
+              address: '',
+              city: '',
+              stateProvince: '',
+              postalCode: '',
+              phone: '',
+              email: '',
+            });
+            setIsCreateDialogOpen(true);
+          },
+        },
+      ],
+    });
+
+    // Limpiar al desmontar
+    return () => {
+      removeGroup('offices');
+    };
+  }, [addGroup, removeGroup]);
+
   const filteredOffices = offices.filter((office) =>
     office.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     office.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -199,8 +265,10 @@ export const OfficesPage = () => {
 
     try {
       setError(null);
+      setIsCreating(true);
       await officeService.createOffice(formData);
       setIsCreateDialogOpen(false);
+      setIsCreating(false);
       setFormData({
         customerId: '',
         name: '',
@@ -214,6 +282,7 @@ export const OfficesPage = () => {
       await loadOffices();
     } catch (err: any) {
       setError(err.message || 'Error al crear sede');
+      setIsCreating(false);
     }
   };
 
@@ -240,6 +309,7 @@ export const OfficesPage = () => {
 
     try {
       setError(null);
+      setIsSaving(true);
       const updateData: UpdateOfficeRequest = {
         name: formData.name,
         address: formData.address || undefined,
@@ -252,9 +322,20 @@ export const OfficesPage = () => {
       await officeService.updateOffice(selectedOffice.id, updateData);
       setIsEditDialogOpen(false);
       setSelectedOffice(null);
+      setIsSaving(false);
       await loadOffices();
     } catch (err: any) {
       setError(err.message || 'Error al actualizar sede');
+      setIsSaving(false);
+    }
+  };
+
+  const handleSuspend = async (office: OfficeDto) => {
+    try {
+      await officeService.suspendOffice(office.id);
+      await loadOffices();
+    } catch (err: any) {
+      setError(err.message || 'Error al suspender sede');
     }
   };
 
@@ -334,28 +415,21 @@ export const OfficesPage = () => {
   if (isLoading && offices.length === 0) {
     return (
       <div className={styles.container}>
-        <Card>
-          <CardHeader
-            header={
-              <div className={styles.header}>
-                <div className={styles.headerLeft}>
-                  <HomeRegular fontSize={24} />
-                  <Text className={styles.title}>Gestión de Sedes</Text>
-                </div>
-                <Button appearance="primary" icon={<AddRegular />} disabled>
-                  Nueva Sede
-                </Button>
-              </div>
-            }
-          />
-          <div className={styles.toolbar}>
-            <Input
+        <div className={styles.header}>
+          <HomeRegular fontSize={32} />
+          <h1 className={styles.title}>Sedes</h1>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalM }}>
+          <div style={{ flex: 1 }}>
+            <SearchBox
               placeholder="Buscar por nombre, cliente, dirección o ciudad..."
               disabled
-              contentBefore={<SearchRegular />}
-              style={{ width: '400px' }}
+              size="large"
+              style={{ width: '100%' }}
             />
           </div>
+        </div>
+        <Card>
           <TableSkeleton rows={8} columns={9} />
         </Card>
       </div>
@@ -364,49 +438,44 @@ export const OfficesPage = () => {
 
   return (
     <div className={styles.container}>
-      <Card>
-        <CardHeader
-          header={
-            <div className={styles.header}>
-              <div className={styles.headerLeft}>
-                <HomeRegular fontSize={24} />
-                <Text className={styles.title}>Gestión de Sedes</Text>
-              </div>
-              <Button
-                appearance="primary"
-                icon={<AddRegular />}
-                onClick={() => {
-                  setFormData({
-                    customerId: '',
-                    name: '',
-                    address: '',
-                    city: '',
-                    stateProvince: '',
-                    postalCode: '',
-                    phone: '',
-                    email: '',
-                  });
-                  setIsCreateDialogOpen(true);
-                }}
-              >
-                Nueva Sede
-              </Button>
-            </div>
-          }
-        />
-        {error && (
-          <MessageBar intent="error">
-            <MessageBarBody>{error}</MessageBarBody>
-          </MessageBar>
-        )}
-        <div className={styles.toolbar}>
-          <Input
+      <div className={styles.ribbonMenuContainer}>
+        <RibbonMenu />
+      </div>
+      <div className={styles.header}>
+        <HomeRegular fontSize={32} />
+        <h1 className={styles.title}>Sedes</h1>
+      </div>
+      
+      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalM }}>
+        <div style={{ flex: 1 }}>
+          <SearchBox
             placeholder="Buscar por nombre, cliente, dirección o ciudad..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            contentBefore={<SearchRegular />}
-            style={{ width: '400px' }}
+            onChange={(e, data) => setSearchTerm(data.value)}
+            size="large"
+            style={{ width: '100%' }}
           />
+        </div>
+      </div>
+
+      <Card>
+        <CardPreview>
+          <div style={{ padding: tokens.spacingVerticalXL }}>
+            {error && (
+              <MessageBar intent="error" style={{ marginBottom: tokens.spacingVerticalM }}>
+                <MessageBarBody>{error}</MessageBarBody>
+              </MessageBar>
+            )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalM }}>
+          <div style={{ flex: 1 }}>
+            <SearchBox
+              placeholder="Buscar por nombre, cliente, dirección o ciudad..."
+              value={searchTerm}
+              onChange={(e, data) => setSearchTerm(data.value)}
+              size="large"
+              style={{ width: '100%' }}
+            />
+          </div>
         </div>
         <Table>
           <TableHeader>
@@ -444,7 +513,9 @@ export const OfficesPage = () => {
                   <TableCell>{office.phone || 'N/A'}</TableCell>
                   <TableCell>{office.email || 'N/A'}</TableCell>
                   <TableCell>
-                    {office.isActive ? (
+                    {office.isSuspended ? (
+                      <Badge appearance="filled" color="danger">Suspendido</Badge>
+                    ) : office.isActive ? (
                       <Badge appearance="filled" color="success">Activo</Badge>
                     ) : (
                       <Badge appearance="outline">Inactivo</Badge>
@@ -471,13 +542,13 @@ export const OfficesPage = () => {
                           <MenuItem icon={<EditRegular />} onClick={() => handleEdit(office)}>
                             Editar
                           </MenuItem>
-                          {office.isActive ? (
-                            <MenuItem icon={<PauseRegular />} onClick={() => handleDeactivate(office)}>
-                              Desactivar
-                            </MenuItem>
-                          ) : (
+                          {office.isSuspended ? (
                             <MenuItem icon={<PlayRegular />} onClick={() => handleActivate(office)}>
                               Activar
+                            </MenuItem>
+                          ) : (
+                            <MenuItem icon={<PauseRegular />} onClick={() => handleSuspend(office)}>
+                              Suspender
                             </MenuItem>
                           )}
                           <MenuItem icon={<DeleteRegular />} onClick={() => handleDelete(office)}>
@@ -492,14 +563,63 @@ export const OfficesPage = () => {
             )}
           </TableBody>
         </Table>
+          </div>
+        </CardPreview>
       </Card>
 
-      {/* Dialog de Crear */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={(_, data) => setIsCreateDialogOpen(data.open)}>
-        <DialogSurface>
-          <DialogTitle>Nueva Sede</DialogTitle>
-          <DialogBody>
-            <DialogContent>
+      {/* Drawer de creación */}
+      <OverlayDrawer
+        {...restoreFocusSourceAttributes}
+        position="end"
+        size="large"
+        open={isCreateDialogOpen}
+        modalType="alert"
+        onOpenChange={(event: any, data: { open: boolean }) => {
+          if (data.open === false) {
+            if (isCreating) {
+              return;
+            }
+            const hasData = formData.name.trim() || 
+                            formData.customerId || 
+                            formData.address.trim() || 
+                            formData.city.trim() || 
+                            formData.stateProvince.trim() || 
+                            formData.postalCode.trim() || 
+                            formData.phone.trim() || 
+                            formData.email.trim();
+            if (hasData) {
+              if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
+                setIsCreateDialogOpen(false);
+                setFormData({
+                  customerId: '',
+                  name: '',
+                  address: '',
+                  city: '',
+                  stateProvince: '',
+                  postalCode: '',
+                  phone: '',
+                  email: '',
+                });
+                setError(null);
+              }
+              return;
+            } else {
+              setIsCreateDialogOpen(false);
+            }
+          } else {
+            setIsCreateDialogOpen(data.open);
+          }
+        }}
+      >
+        <DrawerHeader>
+          <DrawerHeaderTitle>Nueva Sede</DrawerHeaderTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
+            {isCreating ? (
+              <DetailsSkeleton rows={8} />
+            ) : (
+              <>
               <Field label="Cliente" required className={styles.formField}>
                 <Combobox
                   value={customers.find(c => c.id === formData.customerId)?.name || ''}
@@ -566,25 +686,133 @@ export const OfficesPage = () => {
                   placeholder="Email"
                 />
               </Field>
-            </DialogContent>
-            <DialogActions>
-              <Button appearance="secondary" onClick={() => setIsCreateDialogOpen(false)}>
-                Cancelar
-              </Button>
-              <Button appearance="primary" onClick={handleCreate}>
-                Crear
-              </Button>
-            </DialogActions>
-          </DialogBody>
-        </DialogSurface>
-      </Dialog>
+              <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
+                <Button 
+                  appearance="secondary" 
+                  onClick={() => {
+                    const hasData = formData.name.trim() || 
+                                    formData.customerId || 
+                                    formData.address.trim() || 
+                                    formData.city.trim() || 
+                                    formData.stateProvince.trim() || 
+                                    formData.postalCode.trim() || 
+                                    formData.phone.trim() || 
+                                    formData.email.trim();
+                    if (hasData) {
+                      if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los datos no guardados.')) {
+                        setIsCreateDialogOpen(false);
+                        setFormData({
+                          customerId: '',
+                          name: '',
+                          address: '',
+                          city: '',
+                          stateProvince: '',
+                          postalCode: '',
+                          phone: '',
+                          email: '',
+                        });
+                        setError(null);
+                      }
+                    } else {
+                      setIsCreateDialogOpen(false);
+                    }
+                  }}
+                  disabled={isCreating}
+                >
+                  Cancelar
+                </Button>
+                <Button appearance="primary" onClick={handleCreate} disabled={isCreating}>
+                  {isCreating ? 'Creando...' : 'Crear'}
+                </Button>
+              </div>
+              </>
+            )}
+          </div>
+        </DrawerBody>
+      </OverlayDrawer>
 
-      {/* Dialog de Editar */}
-      <Dialog open={isEditDialogOpen} onOpenChange={(_, data) => setIsEditDialogOpen(data.open)}>
-        <DialogSurface>
-          <DialogTitle>Editar Sede</DialogTitle>
-          <DialogBody>
-            <DialogContent>
+      {/* Drawer de edición */}
+      <OverlayDrawer
+        {...restoreFocusSourceAttributes}
+        position="end"
+        size="large"
+        open={isEditDialogOpen}
+        modalType="alert"
+        onOpenChange={(event: any, data: { open: boolean }) => {
+          if (data.open === false) {
+            if (isSaving) {
+              return;
+            }
+            if (!selectedOffice) {
+              setIsEditDialogOpen(false);
+              setSelectedOffice(null);
+              setFormData({
+                customerId: '',
+                name: '',
+                address: '',
+                city: '',
+                stateProvince: '',
+                postalCode: '',
+                phone: '',
+                email: '',
+              });
+              return;
+            }
+            const hasChanges = 
+              formData.name !== selectedOffice.name ||
+              formData.address !== (selectedOffice.address || '') ||
+              formData.city !== (selectedOffice.city || '') ||
+              formData.stateProvince !== (selectedOffice.stateProvince || '') ||
+              formData.postalCode !== (selectedOffice.postalCode || '') ||
+              formData.phone !== (selectedOffice.phone || '') ||
+              formData.email !== (selectedOffice.email || '');
+            if (hasChanges) {
+              if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los cambios no guardados.')) {
+                setIsEditDialogOpen(false);
+                setSelectedOffice(null);
+                setFormData({
+                  customerId: '',
+                  name: '',
+                  address: '',
+                  city: '',
+                  stateProvince: '',
+                  postalCode: '',
+                  phone: '',
+                  email: '',
+                });
+                setError(null);
+              }
+              return;
+            } else {
+              setIsEditDialogOpen(false);
+              setSelectedOffice(null);
+              setFormData({
+                customerId: '',
+                name: '',
+                address: '',
+                city: '',
+                stateProvince: '',
+                postalCode: '',
+                phone: '',
+                email: '',
+              });
+              setError(null);
+            }
+          }
+          if (data.open === true) {
+            setIsEditDialogOpen(true);
+          }
+        }}
+      >
+        <DrawerHeader>
+          <DrawerHeaderTitle>Editar Sede</DrawerHeaderTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
+            {isSaving ? (
+              <DetailsSkeleton rows={8} />
+            ) : (
+              <>
               <Field label="Cliente" required className={styles.formField}>
                 <Combobox
                   value={customers.find(c => c.id === formData.customerId)?.name || ''}
@@ -647,18 +875,78 @@ export const OfficesPage = () => {
                   placeholder="Email"
                 />
               </Field>
-            </DialogContent>
-            <DialogActions>
-              <Button appearance="secondary" onClick={() => setIsEditDialogOpen(false)}>
-                Cancelar
-              </Button>
-              <Button appearance="primary" onClick={handleUpdate}>
-                Actualizar
-              </Button>
-            </DialogActions>
-          </DialogBody>
-        </DialogSurface>
-      </Dialog>
+              <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
+                <Button 
+                  appearance="secondary" 
+                  onClick={() => {
+                    if (!selectedOffice) {
+                      setIsEditDialogOpen(false);
+                      setSelectedOffice(null);
+                      setFormData({
+                        customerId: '',
+                        name: '',
+                        address: '',
+                        city: '',
+                        stateProvince: '',
+                        postalCode: '',
+                        phone: '',
+                        email: '',
+                      });
+                      return;
+                    }
+                    const hasChanges = 
+                      formData.name !== selectedOffice.name ||
+                      formData.address !== (selectedOffice.address || '') ||
+                      formData.city !== (selectedOffice.city || '') ||
+                      formData.stateProvince !== (selectedOffice.stateProvince || '') ||
+                      formData.postalCode !== (selectedOffice.postalCode || '') ||
+                      formData.phone !== (selectedOffice.phone || '') ||
+                      formData.email !== (selectedOffice.email || '');
+                    if (hasChanges) {
+                      if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los cambios no guardados.')) {
+                        setIsEditDialogOpen(false);
+                        setSelectedOffice(null);
+                        setFormData({
+                          customerId: '',
+                          name: '',
+                          address: '',
+                          city: '',
+                          stateProvince: '',
+                          postalCode: '',
+                          phone: '',
+                          email: '',
+                        });
+                        setError(null);
+                      }
+                    } else {
+                      setIsEditDialogOpen(false);
+                      setSelectedOffice(null);
+                      setFormData({
+                        customerId: '',
+                        name: '',
+                        address: '',
+                        city: '',
+                        stateProvince: '',
+                        postalCode: '',
+                        phone: '',
+                        email: '',
+                      });
+                      setError(null);
+                    }
+                  }}
+                  disabled={isSaving}
+                >
+                  Cancelar
+                </Button>
+                <Button appearance="primary" onClick={handleUpdate} disabled={isSaving}>
+                  {isSaving ? 'Guardando...' : 'Guardar'}
+                </Button>
+              </div>
+              </>
+            )}
+          </div>
+        </DrawerBody>
+      </OverlayDrawer>
 
       {/* Dialog de Eliminar */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={(_, data) => setIsDeleteDialogOpen(data.open)}>
@@ -682,77 +970,83 @@ export const OfficesPage = () => {
         </DialogSurface>
       </Dialog>
 
-      {/* Dialog de Detalles */}
-      <Dialog open={isDetailsDialogOpen} onOpenChange={(_, data) => setIsDetailsDialogOpen(data.open)}>
-        <DialogSurface>
-          <DialogTitle>Detalles de la Sede</DialogTitle>
-          <DialogBody>
-            <DialogContent>
-              {selectedOffice && (
-                <div className={styles.detailsContent}>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Nombre:</Text>
-                    <Text>{selectedOffice.name}</Text>
-                  </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Cliente:</Text>
-                    <Text>{selectedOffice.customerName || 'N/A'}</Text>
-                  </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Dirección:</Text>
-                    <Text>{selectedOffice.address || 'N/A'}</Text>
-                  </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Ciudad:</Text>
-                    <Text>{selectedOffice.city || 'N/A'}</Text>
-                  </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Estado/Provincia:</Text>
-                    <Text>{selectedOffice.stateProvince || 'N/A'}</Text>
-                  </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Código Postal:</Text>
-                    <Text>{selectedOffice.postalCode || 'N/A'}</Text>
-                  </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Teléfono:</Text>
-                    <Text>{selectedOffice.phone || 'N/A'}</Text>
-                  </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Email:</Text>
-                    <Text>{selectedOffice.email || 'N/A'}</Text>
-                  </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Estado:</Text>
-                    {selectedOffice.isActive ? (
+      {/* Drawer de detalles */}
+      <OverlayDrawer
+        {...restoreFocusSourceAttributes}
+        position="end"
+        size="large"
+        open={isDetailsDialogOpen}
+        modalType="alert"
+        onOpenChange={(event: any, data: { open: boolean }) => {
+          if (data.open === false) {
+            setIsDetailsDialogOpen(false);
+            setSelectedOffice(null);
+          } else {
+            setIsDetailsDialogOpen(true);
+          }
+        }}
+      >
+        <DrawerHeader>
+          <DrawerHeaderTitle>Detalles de la Sede</DrawerHeaderTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
+            {selectedOffice && (
+              <>
+                <Field label="Nombre" className={styles.formField}>
+                  <Input value={selectedOffice.name} readOnly />
+                </Field>
+                <Field label="Cliente" className={styles.formField}>
+                  <Input value={selectedOffice.customerName || 'N/A'} readOnly />
+                </Field>
+                <Field label="Dirección" className={styles.formField}>
+                  <Input value={selectedOffice.address || 'N/A'} readOnly />
+                </Field>
+                <Field label="Ciudad" className={styles.formField}>
+                  <Input value={selectedOffice.city || 'N/A'} readOnly />
+                </Field>
+                <Field label="Estado/Provincia" className={styles.formField}>
+                  <Input value={selectedOffice.stateProvince || 'N/A'} readOnly />
+                </Field>
+                <Field label="Código Postal" className={styles.formField}>
+                  <Input value={selectedOffice.postalCode || 'N/A'} readOnly />
+                </Field>
+                <Field label="Teléfono" className={styles.formField}>
+                  <Input value={selectedOffice.phone || 'N/A'} readOnly />
+                </Field>
+                <Field label="Correo electrónico" className={styles.formField}>
+                  <Input value={selectedOffice.email || 'N/A'} readOnly />
+                </Field>
+                <Field label="Estado" className={styles.formField}>
+                  <div>
+                    {selectedOffice.isSuspended ? (
+                      <Badge appearance="filled" color="danger">Suspendido</Badge>
+                    ) : selectedOffice.isActive ? (
                       <Badge appearance="filled" color="success">Activo</Badge>
                     ) : (
                       <Badge appearance="outline">Inactivo</Badge>
                     )}
                   </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Tenants:</Text>
-                    <Text>{selectedOffice.tenantCount || 0}</Text>
-                  </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Creado:</Text>
-                    <Text>{new Date(selectedOffice.createdAt).toLocaleString()}</Text>
-                  </div>
-                  <div className={styles.detailsRow}>
-                    <Text className={styles.detailsLabel}>Actualizado:</Text>
-                    <Text>{new Date(selectedOffice.updatedAt).toLocaleString()}</Text>
-                  </div>
+                </Field>
+                <Field label="Tenants" className={styles.formField}>
+                  <Input value={String(selectedOffice.tenantCount || 0)} readOnly />
+                </Field>
+                <Field label="Creado" className={styles.formField}>
+                  <Input value={new Date(selectedOffice.createdAt).toLocaleString()} readOnly />
+                </Field>
+                <Field label="Actualizado" className={styles.formField}>
+                  <Input value={new Date(selectedOffice.updatedAt).toLocaleString()} readOnly />
+                </Field>
+                <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
+                  <Button appearance="primary" onClick={() => setIsDetailsDialogOpen(false)}>
+                    Cerrar
+                  </Button>
                 </div>
-              )}
-            </DialogContent>
-            <DialogActions>
-              <Button appearance="primary" onClick={() => setIsDetailsDialogOpen(false)}>
-                Cerrar
-              </Button>
-            </DialogActions>
-          </DialogBody>
-        </DialogSurface>
-      </Dialog>
+              </>
+            )}
+          </div>
+        </DrawerBody>
+      </OverlayDrawer>
 
       {/* Dialog de enviar notificación */}
       <Dialog open={isNotifyUsersDialogOpen} onOpenChange={(_, data) => setIsNotifyUsersDialogOpen(data.open)}>

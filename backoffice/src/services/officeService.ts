@@ -14,6 +14,7 @@ export interface OfficeDto {
   createdAt: string;
   updatedAt: string;
   isActive: boolean;
+  isSuspended?: boolean;
   tenantCount: number;
 }
 
@@ -91,6 +92,13 @@ export const officeService = {
 
   async deactivateOffice(id: string): Promise<OfficeDto> {
     const response = await apiService.request<OfficeDto>(`/offices/${id}/deactivate`, {
+      method: 'POST',
+    });
+    return response;
+  },
+
+  async suspendOffice(id: string): Promise<OfficeDto> {
+    const response = await apiService.request<OfficeDto>(`/offices/${id}/suspend`, {
       method: 'POST',
     });
     return response;

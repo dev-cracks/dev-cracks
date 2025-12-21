@@ -14,12 +14,15 @@ export interface UserDto {
   id: string;
   email: string;
   name: string | null;
-  tenantId: string;
+  tenantId: string | null;
+  customerId?: string | null;
   role: 'Admin' | 'User';
   contactEmail?: string | null;
   phone?: string | null;
   createdAt: string;
   updatedAt: string;
+  isActive?: boolean;
+  isSuspended?: boolean;
 }
 
 export const mapAuth0User = (auth0User: Auth0User | undefined): User | null => {
