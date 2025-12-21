@@ -86,12 +86,18 @@ import {
 import { tenantService, TenantDto, UpdateTenantRequest, CreateTenantRequest } from '../services/tenantService';
 import { UserDto } from '../services/authService';
 import { customerService, CustomerDto } from '../services/customerService';
+import { officeService, OfficeDto } from '../services/officeService';
 import { notificationService } from '../services/notificationService';
 import { TableSkeleton } from '../components/TableSkeleton';
 import { DetailsSkeleton } from '../components/DetailsSkeleton';
 import { FlowSkeleton } from '../components/FlowSkeleton';
 import { useRibbonMenu } from '../contexts/RibbonMenuContext';
 import { RibbonMenu } from '../components/RibbonMenu';
+
+// Helper para convertir rol a texto en español
+function getRoleLabel(role: 'Admin' | 'User'): string {
+  return role === 'Admin' ? 'Administrador' : 'Usuario';
+}
 
 const useStyles = makeStyles({
   container: {
@@ -255,6 +261,11 @@ export const TenantsPage = () => {
   const [isSendingNotification, setIsSendingNotification] = useState(false);
   const [tenantUsers, setTenantUsers] = useState<UserDto[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [tenantOffices, setTenantOffices] = useState<OfficeDto[]>([]);
+  const [isLoadingOffices, setIsLoadingOffices] = useState(false);
+  const [isOfficesDialogOpen, setIsOfficesDialogOpen] = useState(false);
+  const [selectedOffice, setSelectedOffice] = useState<OfficeDto | null>(null);
+  const [isOfficeDetailsDialogOpen, setIsOfficeDetailsDialogOpen] = useState(false);
   const [isCustomerDetailsDialogOpen, setIsCustomerDetailsDialogOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerDto | null>(null);
   const [isChangeCustomerDialogOpen, setIsChangeCustomerDialogOpen] = useState(false);
@@ -574,6 +585,22 @@ export const TenantsPage = () => {
     }
   };
 
+  const handleViewOffices = async (tenant: TenantDto) => {
+    setSelectedTenant(tenant);
+    setIsLoadingOffices(true);
+    setIsOfficesDialogOpen(true);
+    
+    try {
+      setError(null);
+      const offices = await officeService.getOfficesByTenant(tenant.id);
+      setTenantOffices(offices);
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar sedes del tenant');
+    } finally {
+      setIsLoadingOffices(false);
+    }
+  };
+
   const handleNotifyUsers = (tenant: TenantDto) => {
     setSelectedTenant(tenant);
     setNotificationTitle('');
@@ -723,7 +750,7 @@ export const TenantsPage = () => {
                 <div className={`${styles.flowNode} ${styles.flowNodeUser}`}>
                   <div className={styles.flowNodeHeader}>{user.name || user.email}</div>
                   <div className={styles.flowNodeContent}>{user.email}</div>
-                  <div className={styles.flowNodeContent}>Rol: {user.role}</div>
+                  <div className={styles.flowNodeContent}>Rol: {getRoleLabel(user.role)}</div>
                 </div>
               ),
             },
@@ -891,6 +918,7 @@ export const TenantsPage = () => {
                         <TableHeaderCell style={{ width: 'auto', minWidth: '180px' }}>Cliente</TableHeaderCell>
                         <TableHeaderCell style={{ width: 'auto', minWidth: '110px' }}>Estado</TableHeaderCell>
                         <TableHeaderCell style={{ width: 'auto', minWidth: '80px' }}>Usuarios</TableHeaderCell>
+                        <TableHeaderCell style={{ width: 'auto', minWidth: '80px' }}>Sedes</TableHeaderCell>
                         <TableHeaderCell style={{ width: 'auto', minWidth: '150px' }}>Fecha de Creación</TableHeaderCell>
                         <TableHeaderCell style={{ width: 'auto', minWidth: '150px' }}>Última Actualización</TableHeaderCell>
                         <TableHeaderCell style={{ width: '120px', minWidth: '120px' }}>Acciones</TableHeaderCell>
@@ -961,7 +989,38 @@ export const TenantsPage = () => {
                               <Badge appearance="outline">Inactivo</Badge>
                             )}
                           </TableCell>
-                          <TableCell>{tenant.userCount || 0}</TableCell>
+                          <TableCell>
+                            <Button
+                              appearance="subtle"
+                              onClick={() => handleViewUsers(tenant)}
+                              style={{ 
+                                color: tokens.colorBrandForegroundLink, 
+                                textDecoration: 'none',
+                                fontWeight: tokens.fontWeightSemibold,
+                                padding: 0,
+                                minWidth: 'auto',
+                                height: 'auto'
+                              }}
+                            >
+                              {tenant.userCount || 0}
+                            </Button>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              appearance="subtle"
+                              onClick={() => handleViewOffices(tenant)}
+                              style={{ 
+                                color: tokens.colorBrandForegroundLink, 
+                                textDecoration: 'none',
+                                fontWeight: tokens.fontWeightSemibold,
+                                padding: 0,
+                                minWidth: 'auto',
+                                height: 'auto'
+                              }}
+                            >
+                              Ver sedes
+                            </Button>
+                          </TableCell>
                           <TableCell>
                             {new Date(tenant.createdAt).toLocaleDateString('es-ES', {
                               year: 'numeric',
@@ -995,6 +1054,9 @@ export const TenantsPage = () => {
                                   </MenuItem>
                                   <MenuItem icon={<PeopleRegular />} onClick={() => handleViewUsers(tenant)}>
                                     Ver usuarios
+                                  </MenuItem>
+                                  <MenuItem icon={<BuildingRegular />} onClick={() => handleViewOffices(tenant)}>
+                                    Ver sedes
                                   </MenuItem>
                                   <MenuItem icon={<PeopleRegular />} onClick={() => handleNotifyUsers(tenant)}>
                                     Enviar notificación
@@ -1465,7 +1527,7 @@ export const TenantsPage = () => {
                               appearance={user.role === 'Admin' ? 'filled' : 'outline'}
                               color={user.role === 'Admin' ? 'brand' : undefined}
                             >
-                              {user.role}
+                              {getRoleLabel(user.role)}
                             </Badge>
                           </TableCell>
                         </TableRow>
@@ -1483,6 +1545,168 @@ export const TenantsPage = () => {
         </DialogBody>
       </DialogSurface>
     </Dialog>
+
+      {/* Dialog para ver sedes */}
+      <Dialog open={isOfficesDialogOpen} onOpenChange={(_, data) => setIsOfficesDialogOpen(data.open)}>
+        <DialogSurface style={{ maxWidth: '700px' }}>
+          <DialogTitle>Sedes del Tenant: {selectedTenant?.name}</DialogTitle>
+          <DialogBody>
+            <DialogContent>
+              {isLoadingOffices ? (
+                <TableSkeleton rows={5} columns={4} />
+              ) : tenantOffices.length === 0 ? (
+                <Text>No hay sedes asociadas a este tenant</Text>
+              ) : (
+                <div className={styles.usersList}>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHeaderCell>Nombre</TableHeaderCell>
+                        <TableHeaderCell>Dirección</TableHeaderCell>
+                        <TableHeaderCell>Ciudad</TableHeaderCell>
+                        <TableHeaderCell>Estado</TableHeaderCell>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {tenantOffices.map((office) => (
+                        <TableRow key={office.id}>
+                          <TableCell>
+                            <Button
+                              appearance="subtle"
+                              onClick={() => {
+                                setSelectedOffice(office);
+                                setIsOfficeDetailsDialogOpen(true);
+                              }}
+                              style={{ 
+                                color: tokens.colorBrandForegroundLink, 
+                                textDecoration: 'none',
+                                fontWeight: tokens.fontWeightSemibold,
+                                padding: 0,
+                                minWidth: 'auto',
+                                height: 'auto'
+                              }}
+                            >
+                              {office.name}
+                            </Button>
+                          </TableCell>
+                          <TableCell>{office.address || 'N/A'}</TableCell>
+                          <TableCell>{office.city || 'N/A'}</TableCell>
+                          <TableCell>
+                            {office.isSuspended ? (
+                              <Badge appearance="filled" color="danger">Suspendido</Badge>
+                            ) : office.isActive ? (
+                              <Badge appearance="filled" color="success">Activo</Badge>
+                            ) : (
+                              <Badge appearance="outline">Inactivo</Badge>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </DialogContent>
+            <DialogActions>
+              <Button appearance="primary" onClick={() => setIsOfficesDialogOpen(false)}>
+                Cerrar
+              </Button>
+          </DialogActions>
+        </DialogBody>
+      </DialogSurface>
+    </Dialog>
+
+      {/* Drawer de detalles de la sede */}
+      <OverlayDrawer
+        {...restoreFocusSourceAttributes}
+        position="end"
+        size="large"
+        open={isOfficeDetailsDialogOpen}
+        modalType="alert"
+        onOpenChange={(event: any, data: { open: boolean }) => {
+          if (data.open === false) {
+            setIsOfficeDetailsDialogOpen(false);
+            setSelectedOffice(null);
+          } else {
+            setIsOfficeDetailsDialogOpen(true);
+          }
+        }}
+      >
+        <DrawerHeader>
+          <DrawerHeaderTitle 
+            action={
+              <Button
+                appearance="subtle"
+                aria-label="Cerrar"
+                icon={<DismissRegular />}
+                onClick={() => {
+                  setIsOfficeDetailsDialogOpen(false);
+                  setSelectedOffice(null);
+                }}
+              />
+            }
+          >
+            Detalles de la Sede
+          </DrawerHeaderTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
+            {selectedOffice && (
+              <>
+                <Field label="Nombre" className={styles.formField}>
+                  <Input value={selectedOffice.name} readOnly />
+                </Field>
+                <Field label="Dirección" className={styles.formField}>
+                  <Input value={selectedOffice.address || 'N/A'} readOnly />
+                </Field>
+                <Field label="Ciudad" className={styles.formField}>
+                  <Input value={selectedOffice.city || 'N/A'} readOnly />
+                </Field>
+                <Field label="Estado/Provincia" className={styles.formField}>
+                  <Input value={selectedOffice.stateProvince || 'N/A'} readOnly />
+                </Field>
+                <Field label="Código Postal" className={styles.formField}>
+                  <Input value={selectedOffice.postalCode || 'N/A'} readOnly />
+                </Field>
+                <Field label="Teléfono" className={styles.formField}>
+                  <Input value={selectedOffice.phone || 'N/A'} readOnly />
+                </Field>
+                <Field label="Correo electrónico" className={styles.formField}>
+                  <Input value={selectedOffice.email || 'N/A'} readOnly />
+                </Field>
+                <Field label="Estado" className={styles.formField}>
+                  <div>
+                    {selectedOffice.isSuspended ? (
+                      <Badge appearance="filled" color="danger">Suspendido</Badge>
+                    ) : selectedOffice.isActive ? (
+                      <Badge appearance="filled" color="success">Activo</Badge>
+                    ) : (
+                      <Badge appearance="outline">Inactivo</Badge>
+                    )}
+                  </div>
+                </Field>
+                <Field label="Tenant" className={styles.formField}>
+                  <Input value={selectedOffice.tenantName || 'N/A'} readOnly />
+                </Field>
+                <Field label="Cliente" className={styles.formField}>
+                  <Input value={selectedOffice.customerName || 'N/A'} readOnly />
+                </Field>
+                <Field label="Creado" className={styles.formField}>
+                  <Input value={new Date(selectedOffice.createdAt).toLocaleString()} readOnly />
+                </Field>
+                <Field label="Actualizado" className={styles.formField}>
+                  <Input value={new Date(selectedOffice.updatedAt).toLocaleString()} readOnly />
+                </Field>
+                <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
+                  <Button appearance="primary" onClick={() => setIsOfficeDetailsDialogOpen(false)}>
+                    Cerrar
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </DrawerBody>
+      </OverlayDrawer>
 
       {/* Dialog de enviar notificación */}
       <Dialog open={isNotifyUsersDialogOpen} onOpenChange={(_, data) => setIsNotifyUsersDialogOpen(data.open)}>

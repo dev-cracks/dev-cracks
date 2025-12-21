@@ -110,6 +110,11 @@ import { FlowSkeleton } from '../components/FlowSkeleton';
 import { useRibbonMenu } from '../contexts/RibbonMenuContext';
 import { RibbonMenu } from '../components/RibbonMenu';
 
+// Helper para convertir rol a texto en español
+function getRoleLabel(role: 'Admin' | 'User'): string {
+  return role === 'Admin' ? 'Administrador' : 'Usuario';
+}
+
 const useStyles = makeStyles({
   container: {
     display: 'flex',
@@ -429,6 +434,15 @@ export const CustomersPage = () => {
   const [selectedParentId, setSelectedParentId] = useState<string>('');
   const [hasParent, setHasParent] = useState(false);
   const [createParentId, setCreateParentId] = useState<string>('');
+  const [isTenantInfoDialogOpen, setIsTenantInfoDialogOpen] = useState(false);
+  const [selectedTenant, setSelectedTenant] = useState<TenantDto | null>(null);
+  const [isLoadingTenant, setIsLoadingTenant] = useState(false);
+
+  // Search states for Combobox
+  const [countrySearchText, setCountrySearchText] = useState('');
+  const [parentCustomerSearchText, setParentCustomerSearchText] = useState('');
+  const [editCountrySearchText, setEditCountrySearchText] = useState('');
+  const [assignParentSearchText, setAssignParentSearchText] = useState('');
 
   // Form state
   const [formData, setFormData] = useState<CreateCustomerRequest>({
@@ -443,7 +457,7 @@ export const CustomersPage = () => {
 
   // Form state for office
   const [officeFormData, setOfficeFormData] = useState<CreateOfficeRequest>({
-    customerId: '',
+    tenantId: '',
     name: '',
     address: '',
     city: '',
@@ -525,6 +539,8 @@ export const CustomersPage = () => {
             });
             setHasParent(false);
             setCreateParentId('');
+            setCountrySearchText('');
+            setParentCustomerSearchText('');
             setIsCreateDialogOpen(true);
           },
         },
@@ -542,6 +558,48 @@ export const CustomersPage = () => {
     customer.identification.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.countryName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Filtrar países para el Combobox de crear cliente
+  const filteredCountries = useMemo(() => {
+    if (!countrySearchText.trim()) return countries;
+    const searchLower = countrySearchText.toLowerCase();
+    return countries.filter((country) =>
+      country.name.toLowerCase().includes(searchLower) ||
+      country.isoCode.toLowerCase().includes(searchLower)
+    );
+  }, [countries, countrySearchText]);
+
+  // Filtrar clientes para el Combobox de cliente padre (crear)
+  const filteredParentCustomers = useMemo(() => {
+    if (!parentCustomerSearchText.trim()) return customers;
+    const searchLower = parentCustomerSearchText.toLowerCase();
+    return customers.filter((customer) =>
+      customer.name.toLowerCase().includes(searchLower) ||
+      customer.identification.toLowerCase().includes(searchLower)
+    );
+  }, [customers, parentCustomerSearchText]);
+
+  // Filtrar países para el Combobox de editar cliente
+  const filteredEditCountries = useMemo(() => {
+    if (!editCountrySearchText.trim()) return countries;
+    const searchLower = editCountrySearchText.toLowerCase();
+    return countries.filter((country) =>
+      country.name.toLowerCase().includes(searchLower) ||
+      country.isoCode.toLowerCase().includes(searchLower)
+    );
+  }, [countries, editCountrySearchText]);
+
+  // Filtrar clientes para el Combobox de asignar padre
+  const filteredAssignParentCustomers = useMemo(() => {
+    if (!assignParentSearchText.trim()) return customers.filter((c) => c.id !== selectedCustomer?.id);
+    const searchLower = assignParentSearchText.toLowerCase();
+    return customers
+      .filter((c) => c.id !== selectedCustomer?.id)
+      .filter((customer) =>
+        customer.name.toLowerCase().includes(searchLower) ||
+        customer.identification.toLowerCase().includes(searchLower)
+      );
+  }, [customers, assignParentSearchText, selectedCustomer]);
 
   // Estado para controlar qué nodos están expandidos y drag and drop
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
@@ -898,6 +956,7 @@ export const CustomersPage = () => {
       phone: customer.phone || '',
       email: customer.email || '',
     });
+    setEditCountrySearchText('');
     
     // Cargar tenants del cliente para verificar si tiene
     setIsLoadingTenants(true);
@@ -946,6 +1005,8 @@ export const CustomersPage = () => {
       });
       setHasParent(false);
       setCreateParentId('');
+      setCountrySearchText('');
+      setParentCustomerSearchText('');
       await loadCustomers();
     } catch (err: any) {
       setError(err.message || 'Error al crear cliente');
@@ -986,6 +1047,8 @@ export const CustomersPage = () => {
           });
           setHasParent(false);
           setCreateParentId('');
+          setCountrySearchText('');
+          setParentCustomerSearchText('');
           setError(null);
         }
         // Si el usuario cancela, no actualizamos el estado (mantiene el Drawer abierto)
@@ -1020,6 +1083,7 @@ export const CustomersPage = () => {
           phone: '',
           email: '',
         });
+        setEditCountrySearchText('');
         return;
       }
 
@@ -1047,6 +1111,7 @@ export const CustomersPage = () => {
             phone: '',
             email: '',
           });
+          setEditCountrySearchText('');
           setError(null);
         }
         // Si el usuario cancela, no actualizamos el estado (mantiene el Drawer abierto)
@@ -1065,6 +1130,7 @@ export const CustomersPage = () => {
           phone: '',
           email: '',
         });
+        setEditCountrySearchText('');
         setError(null);
       }
     }
@@ -1216,19 +1282,55 @@ export const CustomersPage = () => {
     }
   };
 
-  const handleOpenCreateOffice = (customer: CustomerDto) => {
+  const handleViewTenantInfo = async (tenantId: string) => {
+    setIsLoadingTenant(true);
+    setIsTenantInfoDialogOpen(true);
+    try {
+      const tenant = await tenantService.getTenantById(tenantId);
+      setSelectedTenant(tenant);
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar información del tenant');
+      setSelectedTenant(null);
+    } finally {
+      setIsLoadingTenant(false);
+    }
+  };
+
+  const handleOpenCreateOffice = async (customer: CustomerDto) => {
     setSelectedCustomer(customer);
-    setOfficeFormData({
-      customerId: customer.id,
-      name: '',
-      address: '',
-      city: '',
-      stateProvince: '',
-      postalCode: '',
-      phone: '',
-      email: '',
-    });
     setIsCreateOfficeDialogOpen(true);
+    
+    // Cargar tenants del cliente
+    try {
+      const tenants = await customerService.getCustomerTenants(customer.id);
+      setCustomerTenants(tenants);
+      
+      // Establecer el primer tenant por defecto si existe
+      const defaultTenantId = tenants.length > 0 ? tenants[0].id : '';
+      setOfficeFormData({
+        tenantId: defaultTenantId,
+        name: '',
+        address: '',
+        city: '',
+        stateProvince: '',
+        postalCode: '',
+        phone: '',
+        email: '',
+      });
+    } catch (err: any) {
+      console.error('Error cargando tenants:', err);
+      setCustomerTenants([]);
+      setOfficeFormData({
+        tenantId: '',
+        name: '',
+        address: '',
+        city: '',
+        stateProvince: '',
+        postalCode: '',
+        phone: '',
+        email: '',
+      });
+    }
   };
 
   const handleOpenCreateTenant = (customer: CustomerDto) => {
@@ -1245,6 +1347,11 @@ export const CustomersPage = () => {
       setError('El nombre de la sede es requerido');
       return;
     }
+    
+    if (!officeFormData.tenantId) {
+      setError('El tenant es requerido');
+      return;
+    }
 
     try {
       setError(null);
@@ -1252,7 +1359,7 @@ export const CustomersPage = () => {
       await officeService.createOffice(officeFormData);
       setIsCreateOfficeDialogOpen(false);
       setOfficeFormData({
-        customerId: '',
+        tenantId: '',
         name: '',
         address: '',
         city: '',
@@ -1335,6 +1442,7 @@ export const CustomersPage = () => {
   const handleAssignParent = (customer: CustomerDto) => {
     setSelectedCustomer(customer);
     setSelectedParentId(customer.parentId || '');
+    setAssignParentSearchText('');
     setIsAssignParentDialogOpen(true);
   };
 
@@ -1349,6 +1457,7 @@ export const CustomersPage = () => {
       );
       setIsAssignParentDialogOpen(false);
       setSelectedParentId('');
+      setAssignParentSearchText('');
       await loadCustomers();
       if (selectedView === 'flow') {
         await loadFlowData();
@@ -1545,7 +1654,7 @@ export const CustomersPage = () => {
                   <div className={`${styles.flowNode} ${styles.flowNodeUser}`}>
                     <div className={styles.flowNodeHeader}>{user.name || user.email}</div>
                     <div className={styles.flowNodeContent}>{user.email}</div>
-                    <div className={styles.flowNodeContent}>Rol: {user.role}</div>
+                    <div className={styles.flowNodeContent}>Rol: {getRoleLabel(user.role)}</div>
                   </div>
                 ),
               },
@@ -1632,6 +1741,7 @@ export const CustomersPage = () => {
         phone: '',
         email: '',
       });
+      setEditCountrySearchText('');
       await loadCustomers();
       setIsSaving(false);
     } catch (err: any) {
@@ -2039,15 +2149,20 @@ export const CustomersPage = () => {
             </Field>
             <Field label="País" required className={styles.formField}>
               <Combobox
-                value={countries.find((c) => c.id === formData.countryId)?.name || ''}
+                value={countrySearchText || countries.find((c) => c.id === formData.countryId)?.name || ''}
                 onOptionSelect={(_, data) => {
                   const country = countries.find((c) => c.name === data.optionValue);
                   if (country) {
                     setFormData({ ...formData, countryId: country.id });
+                    setCountrySearchText('');
                   }
                 }}
+                onInput={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  setCountrySearchText(target.value);
+                }}
               >
-                {countries.map((country) => (
+                {filteredCountries.map((country) => (
                   <Option key={country.id} value={country.name}>
                     {country.name} ({country.isoCode})
                   </Option>
@@ -2095,23 +2210,26 @@ export const CustomersPage = () => {
             {hasParent && (
               <Field label="Cliente Padre" required className={styles.formField}>
                 <Combobox
-                  value={createParentId ? customers.find((c) => c.id === createParentId)?.name || '' : ''}
+                  value={parentCustomerSearchText || (createParentId ? customers.find((c) => c.id === createParentId)?.name || '' : '')}
                   onOptionSelect={(_, data) => {
                     const customer = customers.find((c) => c.name === data.optionValue);
                     if (customer) {
                       setCreateParentId(customer.id);
+                      setParentCustomerSearchText('');
                     } else {
                       setCreateParentId('');
+                      setParentCustomerSearchText('');
                     }
                   }}
                   onInput={(e) => {
                     const target = e.target as HTMLInputElement;
+                    setParentCustomerSearchText(target.value);
                     if (!target.value) {
                       setCreateParentId('');
                     }
                   }}
                 >
-                  {customers.map((customer) => (
+                  {filteredParentCustomers.map((customer) => (
                     <Option key={customer.id} value={customer.name}>
                       {customer.name} ({customer.identification})
                     </Option>
@@ -2150,6 +2268,8 @@ export const CustomersPage = () => {
                       });
                       setHasParent(false);
                       setCreateParentId('');
+                      setCountrySearchText('');
+                      setParentCustomerSearchText('');
                       setError(null);
                     }
                   } else {
@@ -2234,15 +2354,20 @@ export const CustomersPage = () => {
                 </Field>
                 <Field label="País" required className={styles.formField}>
                   <Combobox
-                    value={countries.find((c) => c.id === formData.countryId)?.name || ''}
+                    value={editCountrySearchText || countries.find((c) => c.id === formData.countryId)?.name || ''}
                     onOptionSelect={(_, data) => {
                       const country = countries.find((c) => c.name === data.optionValue);
                       if (country) {
                         setFormData({ ...formData, countryId: country.id });
+                        setEditCountrySearchText('');
                       }
                     }}
+                    onInput={(e) => {
+                      const target = e.target as HTMLInputElement;
+                      setEditCountrySearchText(target.value);
+                    }}
                   >
-                    {countries.map((country) => (
+                    {filteredEditCountries.map((country) => (
                       <Option key={country.id} value={country.name}>
                         {country.name} ({country.isoCode})
                       </Option>
@@ -2291,6 +2416,7 @@ export const CustomersPage = () => {
                           phone: '',
                           email: '',
                         });
+                        setEditCountrySearchText('');
                         return;
                       }
 
@@ -2317,6 +2443,7 @@ export const CustomersPage = () => {
                             phone: '',
                             email: '',
                           });
+                          setEditCountrySearchText('');
                           setError(null);
                         }
                       } else {
@@ -2332,6 +2459,7 @@ export const CustomersPage = () => {
                           phone: '',
                           email: '',
                         });
+                        setEditCountrySearchText('');
                         setError(null);
                       }
                     }}
@@ -2500,24 +2628,39 @@ export const CustomersPage = () => {
           <DialogBody>
             <DialogContent>
               {isLoadingUsers ? (
-                <TableSkeleton rows={5} columns={3} />
+                <TableSkeleton rows={5} columns={4} />
               ) : customerUsers.length === 0 ? (
                 <Text>No hay usuarios asociados a este cliente.</Text>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHeaderCell>Email</TableHeaderCell>
                       <TableHeaderCell>Nombre</TableHeaderCell>
+                      <TableHeaderCell>Contact Email</TableHeaderCell>
+                      <TableHeaderCell>Tenant</TableHeaderCell>
                       <TableHeaderCell>Rol</TableHeaderCell>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {customerUsers.map((user) => (
                       <TableRow key={user.id}>
-                        <TableCell>{user.email}</TableCell>
                         <TableCell>{user.name || 'N/A'}</TableCell>
-                        <TableCell>{user.role}</TableCell>
+                        <TableCell>{user.contactEmail || user.email || 'N/A'}</TableCell>
+                        <TableCell>
+                          {user.tenantId ? (
+                            <Button
+                              appearance="subtle"
+                              icon={<LinkRegular />}
+                              onClick={() => handleViewTenantInfo(user.tenantId!)}
+                              style={{ textDecoration: 'underline', cursor: 'pointer' }}
+                            >
+                              Ver Tenant
+                            </Button>
+                          ) : (
+                            'N/A'
+                          )}
+                        </TableCell>
+                        <TableCell>{getRoleLabel(user.role)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -2581,6 +2724,63 @@ export const CustomersPage = () => {
         </DialogSurface>
       </Dialog>
 
+      {/* Dialog de información del tenant */}
+      <Dialog open={isTenantInfoDialogOpen} onOpenChange={(_, data) => setIsTenantInfoDialogOpen(data.open)}>
+        <DialogSurface style={{ minWidth: '500px' }}>
+          <DialogTitle>Información del Tenant</DialogTitle>
+          <DialogBody>
+            <DialogContent>
+              {isLoadingTenant ? (
+                <DetailsSkeleton rows={8} />
+              ) : selectedTenant ? (
+                <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
+                  <Field label="Nombre" className={styles.formField}>
+                    <Input value={selectedTenant.name} readOnly />
+                  </Field>
+                  <Field label="Cliente" className={styles.formField}>
+                    <Input value={selectedTenant.customerName || 'N/A'} readOnly />
+                  </Field>
+                  {selectedTenant.officeName && (
+                    <Field label="Sede" className={styles.formField}>
+                      <Input value={selectedTenant.officeName} readOnly />
+                    </Field>
+                  )}
+                  <Field label="Estado" className={styles.formField}>
+                    <div>
+                      {selectedTenant.isSuspended ? (
+                        <Badge appearance="filled" color="danger">Suspendido</Badge>
+                      ) : selectedTenant.isActive ? (
+                        <Badge appearance="filled" color="success">Activo</Badge>
+                      ) : (
+                        <Badge appearance="outline">Inactivo</Badge>
+                      )}
+                    </div>
+                  </Field>
+                  {selectedTenant.userCount !== undefined && (
+                    <Field label="Usuarios" className={styles.formField}>
+                      <Input value={selectedTenant.userCount.toString()} readOnly />
+                    </Field>
+                  )}
+                  <Field label="Creado" className={styles.formField}>
+                    <Input value={new Date(selectedTenant.createdAt).toLocaleString()} readOnly />
+                  </Field>
+                  <Field label="Actualizado" className={styles.formField}>
+                    <Input value={new Date(selectedTenant.updatedAt).toLocaleString()} readOnly />
+                  </Field>
+                </div>
+              ) : (
+                <Text>No se pudo cargar la información del tenant.</Text>
+              )}
+            </DialogContent>
+          </DialogBody>
+          <DialogActions>
+            <Button appearance="primary" onClick={() => setIsTenantInfoDialogOpen(false)}>
+              Cerrar
+            </Button>
+          </DialogActions>
+        </DialogSurface>
+      </Dialog>
+
       {/* Dialog de asignar cliente padre */}
       <Dialog open={isAssignParentDialogOpen} onOpenChange={(_, data) => setIsAssignParentDialogOpen(data.open)}>
         <DialogSurface>
@@ -2596,29 +2796,36 @@ export const CustomersPage = () => {
                 </MessageBar>
                 <Field label="Cliente Padre" className={styles.formField}>
                   <Combobox
-                    value={selectedParentId ? customers.find((c) => c.id === selectedParentId)?.name || '' : ''}
+                    value={assignParentSearchText || (selectedParentId ? customers.find((c) => c.id === selectedParentId)?.name || '' : '')}
                     onOptionSelect={(_, data) => {
-                      const customer = customers.find((c) => c.name === data.optionValue);
-                      if (customer) {
-                        setSelectedParentId(customer.id);
-                      } else {
+                      if (data.optionValue === '') {
                         setSelectedParentId('');
+                        setAssignParentSearchText('');
+                      } else {
+                        const customer = customers.find((c) => c.name === data.optionValue);
+                        if (customer) {
+                          setSelectedParentId(customer.id);
+                          setAssignParentSearchText('');
+                        } else {
+                          setSelectedParentId('');
+                          setAssignParentSearchText('');
+                        }
                       }
                     }}
                     onInput={(e) => {
-                      if (!e.target.value) {
+                      const target = e.target as HTMLInputElement;
+                      setAssignParentSearchText(target.value);
+                      if (!target.value) {
                         setSelectedParentId('');
                       }
                     }}
                   >
                     <Option value="">(Cliente raíz - sin padre)</Option>
-                    {customers
-                      .filter((c) => c.id !== selectedCustomer?.id) // Excluir el cliente actual
-                      .map((customer) => (
-                        <Option key={customer.id} value={customer.name}>
-                          {customer.name} ({customer.identification})
-                        </Option>
-                      ))}
+                    {filteredAssignParentCustomers.map((customer) => (
+                      <Option key={customer.id} value={customer.name}>
+                        {customer.name} ({customer.identification})
+                      </Option>
+                    ))}
                   </Combobox>
                 </Field>
                 {selectedCustomer?.parentName && (
@@ -2635,6 +2842,7 @@ export const CustomersPage = () => {
             <Button appearance="secondary" onClick={() => {
               setIsAssignParentDialogOpen(false);
               setSelectedParentId('');
+              setAssignParentSearchText('');
             }}>
               Cancelar
             </Button>
@@ -2761,6 +2969,7 @@ export const CustomersPage = () => {
               return;
             }
             const hasData = officeFormData.name.trim() || 
+                            officeFormData.tenantId ||
                             officeFormData.address.trim() || 
                             officeFormData.city.trim() || 
                             officeFormData.stateProvince.trim() || 
@@ -2771,7 +2980,7 @@ export const CustomersPage = () => {
               if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
                 setIsCreateOfficeDialogOpen(false);
                 setOfficeFormData({
-                  customerId: '',
+                  tenantId: '',
                   name: '',
                   address: '',
                   city: '',
@@ -2813,7 +3022,7 @@ export const CustomersPage = () => {
                     if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
                       setIsCreateOfficeDialogOpen(false);
                       setOfficeFormData({
-                        customerId: '',
+                        tenantId: '',
                         name: '',
                         address: '',
                         city: '',
@@ -2850,6 +3059,31 @@ export const CustomersPage = () => {
                     value={selectedCustomer?.name || ''}
                     readOnly
                   />
+                </Field>
+                <Field label="Tenant" required className={styles.formField}>
+                  {customerTenants.length === 0 ? (
+                    <Input
+                      value=""
+                      placeholder="No hay tenants disponibles"
+                      readOnly
+                      disabled
+                    />
+                  ) : (
+                    <Combobox
+                      value={customerTenants.find(t => t.id === officeFormData.tenantId)?.name || ''}
+                      onOptionSelect={(_, data) => {
+                        if (data.optionValue) {
+                          setOfficeFormData({ ...officeFormData, tenantId: data.optionValue });
+                        }
+                      }}
+                    >
+                      {customerTenants.map((tenant) => (
+                        <Option key={tenant.id} value={tenant.id}>
+                          {tenant.name}
+                        </Option>
+                      ))}
+                    </Combobox>
+                  )}
                 </Field>
                 <Field label="Nombre" required className={styles.formField}>
                   <Input
@@ -2916,7 +3150,7 @@ export const CustomersPage = () => {
                         if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los datos no guardados.')) {
                           setIsCreateOfficeDialogOpen(false);
                           setOfficeFormData({
-                            customerId: '',
+                            tenantId: '',
                             name: '',
                             address: '',
                             city: '',

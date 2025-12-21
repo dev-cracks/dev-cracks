@@ -63,6 +63,13 @@ export const officeService = {
     return response;
   },
 
+  async getOfficesByTenant(tenantId: string): Promise<OfficeDto[]> {
+    const response = await apiService.request<OfficeDto[]>(`/offices/tenant/${tenantId}`, {
+      method: 'GET',
+    });
+    return response;
+  },
+
   async createOffice(request: CreateOfficeRequest): Promise<OfficeDto> {
     const response = await apiService.request<{ office: OfficeDto; message: string }>('/offices', {
       method: 'POST',

@@ -64,6 +64,11 @@ import { useRibbonMenu } from '../contexts/RibbonMenuContext';
 import { RibbonMenu } from '../components/RibbonMenu';
 import { useAuth } from '../hooks/useAuth';
 
+// Helper para convertir rol a texto en español
+function getRoleLabel(role: 'Admin' | 'User'): string {
+  return role === 'Admin' ? 'Administrador' : 'Usuario';
+}
+
 const useStyles = makeStyles({
   container: {
     display: 'flex',
@@ -185,6 +190,7 @@ export const UsersPage = () => {
               customerId: '',
               contactEmail: '',
               phone: '',
+              auth0Id: '',
             });
             setIsCreateDialogOpen(true);
           },
@@ -205,6 +211,7 @@ export const UsersPage = () => {
     customerId: '',
     contactEmail: '',
     phone: '',
+    auth0Id: '',
   });
 
   // Filtrar usuarios solo si hay un término de búsqueda
@@ -226,6 +233,7 @@ export const UsersPage = () => {
       customerId: user.customerId || '',
       contactEmail: user.contactEmail || '',
       phone: user.phone || '',
+      auth0Id: user.auth0Id || '',
     });
     setIsEditDialogOpen(true);
   };
@@ -233,6 +241,11 @@ export const UsersPage = () => {
   const handleCreate = async () => {
     if (!formData.email.trim()) {
       setError('El email es requerido');
+      return;
+    }
+
+    if (!formData.auth0Id.trim()) {
+      setError('El Auth0 ID es requerido');
       return;
     }
 
@@ -250,6 +263,7 @@ export const UsersPage = () => {
         customerId: '',
         contactEmail: '',
         phone: '',
+        auth0Id: '',
       });
       await loadUsers();
     } catch (err: any) {
@@ -279,6 +293,7 @@ export const UsersPage = () => {
         customerId: '',
         contactEmail: '',
         phone: '',
+        auth0Id: '',
       });
       await loadUsers();
     } catch (err: any) {
@@ -454,6 +469,8 @@ export const UsersPage = () => {
                       <TableHeaderCell>Nombre</TableHeaderCell>
                       <TableHeaderCell>Rol</TableHeaderCell>
                       <TableHeaderCell>Estado</TableHeaderCell>
+                      <TableHeaderCell>Email de Contacto</TableHeaderCell>
+                      <TableHeaderCell>Auth0 ID</TableHeaderCell>
                       <TableHeaderCell>Teléfono</TableHeaderCell>
                       <TableHeaderCell>Fecha de Creación</TableHeaderCell>
                       <TableHeaderCell>Acciones</TableHeaderCell>
@@ -469,7 +486,7 @@ export const UsersPage = () => {
                             appearance={user.role === 'Admin' ? 'filled' : 'outline'}
                             color={user.role === 'Admin' ? 'brand' : 'neutral'}
                           >
-                            {user.role}
+                            {getRoleLabel(user.role)}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -481,6 +498,8 @@ export const UsersPage = () => {
                             <Badge appearance="outline">Inactivo</Badge>
                           )}
                         </TableCell>
+                        <TableCell>{user.contactEmail || 'N/A'}</TableCell>
+                        <TableCell>{user.auth0Id || 'N/A'}</TableCell>
                         <TableCell>{user.phone || 'N/A'}</TableCell>
                         <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
                         <TableCell>
@@ -603,6 +622,13 @@ export const UsersPage = () => {
                     onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
                   />
                 </Field>
+                <Field label="Auth0 ID" required className={styles.formField}>
+                  <Input
+                    value={formData.auth0Id}
+                    onChange={(e) => setFormData({ ...formData, auth0Id: e.target.value })}
+                    placeholder="auth0|..."
+                  />
+                </Field>
                 <Field label="Teléfono" className={styles.formField}>
                   <Input
                     value={formData.phone}
@@ -702,6 +728,13 @@ export const UsersPage = () => {
                     onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
                   />
                 </Field>
+                <Field label="Auth0 ID" className={styles.formField}>
+                  <Input
+                    value={formData.auth0Id}
+                    readOnly
+                    placeholder="auth0|..."
+                  />
+                </Field>
                 <Field label="Teléfono" className={styles.formField}>
                   <Input
                     value={formData.phone}
@@ -787,7 +820,7 @@ export const UsersPage = () => {
                   <Input value={selectedUser.name || 'N/A'} readOnly />
                 </Field>
                 <Field label="Rol" className={styles.formField}>
-                  <Input value={selectedUser.role} readOnly />
+                  <Input value={getRoleLabel(selectedUser.role)} readOnly />
                 </Field>
                 <Field label="Estado" className={styles.formField}>
                   <div>
@@ -802,6 +835,9 @@ export const UsersPage = () => {
                 </Field>
                 <Field label="Email de Contacto" className={styles.formField}>
                   <Input value={selectedUser.contactEmail || 'N/A'} readOnly />
+                </Field>
+                <Field label="Auth0 ID" className={styles.formField}>
+                  <Input value={selectedUser.auth0Id || 'N/A'} readOnly />
                 </Field>
                 <Field label="Teléfono" className={styles.formField}>
                   <Input value={selectedUser.phone || 'N/A'} readOnly />

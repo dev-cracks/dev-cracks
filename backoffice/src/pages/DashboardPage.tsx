@@ -15,6 +15,7 @@ import { useAuth } from '../hooks/useAuth';
 import { backofficeService } from '../services/backofficeService';
 import { tenantService } from '../services/tenantService';
 import { customerService } from '../services/customerService';
+import { officeService } from '../services/officeService';
 import { StatsCardSkeleton } from '../components/StatsCardSkeleton';
 import { DetailsSkeleton } from '../components/DetailsSkeleton';
 
@@ -65,6 +66,7 @@ export const DashboardPage = () => {
   const [userCount, setUserCount] = useState<number | null>(null);
   const [tenantCount, setTenantCount] = useState<number | null>(null);
   const [customerCount, setCustomerCount] = useState<number | null>(null);
+  const [officeCount, setOfficeCount] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -79,10 +81,11 @@ export const DashboardPage = () => {
   const loadStats = async () => {
     try {
       // Cargar todas las estadísticas en paralelo
-      const [users, tenants, customers] = await Promise.allSettled([
+      const [users, tenants, customers, offices] = await Promise.allSettled([
         backofficeService.getUsers(),
         tenantService.getAllTenants(),
         customerService.getAllCustomers(),
+        officeService.getAllOffices(),
       ]);
 
       // Procesar usuarios
@@ -108,6 +111,14 @@ export const DashboardPage = () => {
         handleError(customers.reason, 'clientes');
         setCustomerCount(0);
       }
+
+      // Procesar sedes
+      if (offices.status === 'fulfilled') {
+        setOfficeCount(offices.value.length);
+      } else {
+        handleError(offices.reason, 'sedes');
+        setOfficeCount(0);
+      }
     } catch (error: any) {
       // Si es un error de red (API no disponible), solo mostrar warning en desarrollo
       if (error?.statusCode === undefined && import.meta.env.DEV) {
@@ -119,6 +130,7 @@ export const DashboardPage = () => {
       setUserCount(0);
       setTenantCount(0);
       setCustomerCount(0);
+      setOfficeCount(0);
     } finally {
       setIsLoading(false);
     }
@@ -191,6 +203,24 @@ export const DashboardPage = () => {
                 </Skeleton>
               ) : (
                 userCount
+              )}
+            </div>
+          </CardPreview>
+        </Card>
+
+        <Card className={styles.card}>
+          <CardHeader
+            header={<Text weight="semibold">Sedes</Text>}
+            description="Total de sedes en el sistema"
+          />
+          <CardPreview>
+            <div className={styles.previewContent}>
+              {isLoading || officeCount === null ? (
+                <Skeleton className={styles.numberSkeleton}>
+                  <SkeletonItem size={48} />
+                </Skeleton>
+              ) : (
+                officeCount
               )}
             </div>
           </CardPreview>

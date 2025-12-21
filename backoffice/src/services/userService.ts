@@ -10,6 +10,7 @@ export interface UserDto {
   role: 'Admin' | 'User';
   contactEmail?: string | null;
   phone?: string | null;
+  auth0Id?: string | null;
   createdAt: string;
   updatedAt: string;
   isActive?: boolean;
@@ -24,6 +25,7 @@ export interface CreateUserRequest {
   role?: 'Admin' | 'User';
   contactEmail?: string;
   phone?: string;
+  auth0Id: string;
 }
 
 export interface UpdateUserRequest {
@@ -36,53 +38,86 @@ export interface UpdateUserRequest {
   phone?: string;
 }
 
+// Helper para convertir rol numérico a texto
+function transformRole(role: number | string | 'Admin' | 'User'): 'Admin' | 'User' {
+  if (typeof role === 'string') {
+    // Si ya es string, verificar que sea válido
+    if (role === 'Admin' || role === 'User') {
+      return role;
+    }
+    // Si es string pero no válido, intentar convertir
+    return role.toLowerCase() === 'admin' ? 'Admin' : 'User';
+  }
+  // Si es número, convertir: 0 = User, 1 = Admin
+  return role === 1 ? 'Admin' : 'User';
+}
+
+// Helper para transformar un UserDto
+function transformUserDto(user: any): UserDto {
+  return {
+    ...user,
+    role: transformRole(user.role),
+    // Asegurar que isActive se mapee correctamente (puede venir como IsActive o isActive)
+    isActive: user.isActive ?? user.IsActive ?? true,
+    isSuspended: user.isSuspended ?? user.IsSuspended ?? false,
+  };
+}
+
 export const userService = {
   async getAllUsers(): Promise<UserDto[]> {
-    return apiService.request<UserDto[]>('/users');
+    const users = await apiService.request<any[]>('/backoffice/users');
+    return users.map(transformUserDto);
   },
 
   async getUserById(id: string): Promise<UserDto> {
-    return apiService.request<UserDto>(`/users/${id}`);
+    const user = await apiService.request<any>(`/backoffice/users/${id}`);
+    return transformUserDto(user);
   },
 
   async createUser(data: CreateUserRequest): Promise<UserDto> {
-    return apiService.request<UserDto>('/users', {
+    const user = await apiService.request<any>('/backoffice/users', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+    return transformUserDto(user);
   },
 
   async updateUser(id: string, data: UpdateUserRequest): Promise<UserDto> {
-    return apiService.request<UserDto>(`/users/${id}`, {
+    const user = await apiService.request<any>(`/backoffice/users/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
+    return transformUserDto(user);
   },
 
   async deleteUser(id: string): Promise<void> {
-    return apiService.request<void>(`/users/${id}`, {
+    return apiService.request<void>(`/backoffice/users/${id}`, {
       method: 'DELETE',
     });
   },
 
   async suspendUser(id: string): Promise<UserDto> {
-    return apiService.request<UserDto>(`/users/${id}/suspend`, {
+    const user = await apiService.request<any>(`/backoffice/users/${id}/suspend`, {
       method: 'POST',
     });
+    return transformUserDto(user);
   },
 
   async activateUser(id: string): Promise<UserDto> {
-    return apiService.request<UserDto>(`/users/${id}/activate`, {
+    const user = await apiService.request<any>(`/backoffice/users/${id}/activate`, {
       method: 'POST',
     });
+    return transformUserDto(user);
   },
 
   async getUsersByTenantId(tenantId: string): Promise<UserDto[]> {
-    return apiService.request<UserDto[]>(`/tenants/${tenantId}/users`);
+    const users = await apiService.request<any[]>(`/tenants/${tenantId}/users`);
+    return users.map(transformUserDto);
   },
 
   async getUsersByCustomerId(customerId: string): Promise<UserDto[]> {
-    return apiService.request<UserDto[]>(`/customers/${customerId}/users`);
+    const users = await apiService.request<any[]>(`/customers/${customerId}/users`);
+    return users.map(transformUserDto);
   },
 };
 
