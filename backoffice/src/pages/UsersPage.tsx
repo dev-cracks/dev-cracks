@@ -792,7 +792,7 @@ export const UsersPage = () => {
           />
         </div>
         <Button
-          appearance="primary"
+          appearance="default"
           icon={<ArrowClockwiseRegular />}
           onClick={loadUsers}
           disabled={isLoading}
@@ -841,8 +841,8 @@ export const UsersPage = () => {
                     <TableRow>
                       <TableHeaderCell>Nombre</TableHeaderCell>
                       <TableHeaderCell>Teléfono</TableHeaderCell>
-                      <TableHeaderCell>Sedes</TableHeaderCell>
                       <TableHeaderCell>Tenants</TableHeaderCell>
+                      <TableHeaderCell>Sedes</TableHeaderCell>
                       <TableHeaderCell>Rol</TableHeaderCell>
                       <TableHeaderCell>Estado</TableHeaderCell>
                       <TableHeaderCell>Auth0 ID</TableHeaderCell>
@@ -866,59 +866,6 @@ export const UsersPage = () => {
                           </TableCell>
                           {/* Teléfono */}
                           <TableCell>{user.phone || 'N/A'}</TableCell>
-                          {/* Sedes */}
-                          <TableCell>
-                            {offices.length > 0 ? (
-                              <TeachingPopover>
-                                <TeachingPopoverTrigger>
-                                  <Button
-                                    appearance="subtle"
-                                    style={{
-                                      padding: 0,
-                                      minWidth: 'auto',
-                                      height: 'auto'
-                                    }}
-                                  >
-                                    <CounterBadge 
-                                      count={offices.length} 
-                                      size="medium" 
-                                      appearance="filled" 
-                                      color={offices.length === 0 ? 'informative' : 'brand'} 
-                                    />
-                                  </Button>
-                                </TeachingPopoverTrigger>
-                                <TeachingPopoverSurface>
-                                  <TeachingPopoverHeader>Sedes Asociadas</TeachingPopoverHeader>
-                                  <TeachingPopoverBody>
-                                    <div style={{ maxWidth: '600px', maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM }}>
-                                      {offices.map((office) => (
-                                        <div key={office.id} style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalXS }}>
-                                          <Text weight="semibold">{office.name}</Text>
-                                          <Text size={200} style={{ color: tokens.colorNeutralForeground2 }}>
-                                            {office.city || 'N/A'} • {office.tenantName || 'N/A'}
-                                          </Text>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </TeachingPopoverBody>
-                                </TeachingPopoverSurface>
-                              </TeachingPopover>
-                            ) : (
-                              <Button
-                                appearance="subtle"
-                                icon={<LinkRegular />}
-                                onClick={() => {
-                                  setError(null);
-                                  setSelectedUserForAssign(user);
-                                  setSelectedTenantId('');
-                                  setSelectedOfficeId('');
-                                  setAvailableOffices([]);
-                                  setIsAssignDrawerOpen(true);
-                                }}
-                                title="Asignar sede y tenant"
-                              />
-                            )}
-                          </TableCell>
                           {/* Tenants */}
                           <TableCell>
                             {associatedTenants.length > 0 ? (
@@ -960,6 +907,59 @@ export const UsersPage = () => {
                                           ))}
                                         </TableBody>
                                       </Table>
+                                    </div>
+                                  </TeachingPopoverBody>
+                                </TeachingPopoverSurface>
+                              </TeachingPopover>
+                            ) : (
+                              <Button
+                                appearance="subtle"
+                                icon={<LinkRegular />}
+                                onClick={() => {
+                                  setError(null);
+                                  setSelectedUserForAssign(user);
+                                  setSelectedTenantId('');
+                                  setSelectedOfficeId('');
+                                  setAvailableOffices([]);
+                                  setIsAssignDrawerOpen(true);
+                                }}
+                                title="Asignar sede y tenant"
+                              />
+                            )}
+                          </TableCell>
+                          {/* Sedes */}
+                          <TableCell>
+                            {offices.length > 0 ? (
+                              <TeachingPopover>
+                                <TeachingPopoverTrigger>
+                                  <Button
+                                    appearance="subtle"
+                                    style={{
+                                      padding: 0,
+                                      minWidth: 'auto',
+                                      height: 'auto'
+                                    }}
+                                  >
+                                    <CounterBadge 
+                                      count={offices.length} 
+                                      size="medium" 
+                                      appearance="filled" 
+                                      color={offices.length === 0 ? 'informative' : 'brand'} 
+                                    />
+                                  </Button>
+                                </TeachingPopoverTrigger>
+                                <TeachingPopoverSurface>
+                                  <TeachingPopoverHeader>Sedes Asociadas</TeachingPopoverHeader>
+                                  <TeachingPopoverBody>
+                                    <div style={{ maxWidth: '600px', maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM }}>
+                                      {offices.map((office) => (
+                                        <div key={office.id} style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalXS }}>
+                                          <Text weight="semibold">{office.name}</Text>
+                                          <Text size={200} style={{ color: tokens.colorNeutralForeground2 }}>
+                                            {office.city || 'N/A'} • {office.tenantName || 'N/A'}
+                                          </Text>
+                                        </div>
+                                      ))}
                                     </div>
                                   </TeachingPopoverBody>
                                 </TeachingPopoverSurface>

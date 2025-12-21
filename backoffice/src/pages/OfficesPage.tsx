@@ -37,6 +37,8 @@ import {
   Option,
   Textarea,
   Input,
+  TabList,
+  Tab,
 } from '@fluentui/react-components';
 import {
   TeachingPopover,
@@ -69,6 +71,8 @@ import {
   DismissRegular,
   ArrowSwapRegular,
   ArrowClockwiseRegular,
+  TableRegular,
+  FlowchartRegular,
 } from '@fluentui/react-icons';
 import {
   officeService,
@@ -85,6 +89,24 @@ import {
   TenantDto,
 } from '../services/tenantService';
 import { notificationService } from '../services/notificationService';
+import {
+  ReactFlow,
+  Node,
+  Edge,
+  Background,
+  Controls,
+  MiniMap,
+  addEdge,
+  Connection,
+  ReactFlowProvider,
+  Panel,
+  NodeChange,
+  EdgeChange,
+  applyNodeChanges,
+  applyEdgeChanges,
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+import dagre from 'dagre';
 import { TableSkeleton } from '../components/TableSkeleton';
 import { DetailsSkeleton } from '../components/DetailsSkeleton';
 import { useRibbonMenu } from '../contexts/RibbonMenuContext';
@@ -154,6 +176,68 @@ const useStyles = makeStyles({
   formField: {
     marginBottom: tokens.spacingVerticalM,
   },
+  flowContainer: {
+    width: '100%',
+    height: 'calc(100vh - 300px)',
+    minHeight: '500px',
+    maxHeight: '800px',
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    overflow: 'hidden',
+    '@media (max-width: 768px)': {
+      height: 'calc(100vh - 250px)',
+      minHeight: '400px',
+    },
+    '@media (max-width: 480px)': {
+      height: 'calc(100vh - 200px)',
+      minHeight: '350px',
+    },
+  },
+  flowNode: {
+    padding: tokens.spacingVerticalM,
+    backgroundColor: tokens.colorNeutralBackground1,
+    border: `2px solid ${tokens.colorNeutralStroke1}`,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    minWidth: '180px',
+    maxWidth: '250px',
+    width: 'auto',
+    boxShadow: tokens.shadow4,
+    '@media (max-width: 768px)': {
+      minWidth: '150px',
+      maxWidth: '200px',
+      padding: tokens.spacingVerticalS,
+    },
+    '@media (max-width: 480px)': {
+      minWidth: '120px',
+      maxWidth: '160px',
+      padding: tokens.spacingVerticalXS,
+    },
+  },
+  flowNodeHeader: {
+    fontWeight: tokens.fontWeightSemibold,
+    fontSize: tokens.fontSizeBase400,
+    marginBottom: tokens.spacingVerticalXS,
+    color: tokens.colorNeutralForeground1,
+  },
+  flowNodeContent: {
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground2,
+    ...shorthands.margin(0),
+  },
+  flowNodeOffice: {
+    backgroundColor: tokens.colorBrandBackground2,
+    borderTop: `2px solid ${tokens.colorBrandForeground1}`,
+    borderRight: `2px solid ${tokens.colorBrandForeground1}`,
+    borderBottom: `2px solid ${tokens.colorBrandForeground1}`,
+    borderLeft: `2px solid ${tokens.colorBrandForeground1}`,
+  },
+  flowNodeUser: {
+    backgroundColor: tokens.colorPaletteGreenBackground2,
+    borderTop: `2px solid ${tokens.colorPaletteGreenForeground1}`,
+    borderRight: `2px solid ${tokens.colorPaletteGreenForeground1}`,
+    borderBottom: `2px solid ${tokens.colorPaletteGreenForeground1}`,
+    borderLeft: `2px solid ${tokens.colorPaletteGreenForeground1}`,
+  },
 });
 
 export const OfficesPage = () => {
@@ -191,6 +275,15 @@ export const OfficesPage = () => {
   const [allTenants, setAllTenants] = useState<TenantDto[]>([]);
   const [isChangingTenant, setIsChangingTenant] = useState(false);
   const [officeUsers, setOfficeUsers] = useState<Record<string, any[]>>({});
+  
+  // Estados para la vista de React Flow
+  const [selectedView, setSelectedView] = useState<'table' | 'flow'>('table');
+  const [selectedTabValue, setSelectedTabValue] = useState<'table' | 'flow'>('table');
+  const [flowNodes, setFlowNodes] = useState<Node[]>([]);
+  const [flowEdges, setFlowEdges] = useState<Edge[]>([]);
+  const [flowLoading, setFlowLoading] = useState(false);
+  const flowLoadingRef = useRef(false);
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
 
   // Form state
   const [formData, setFormData] = useState<CreateOfficeRequest>({
@@ -276,6 +369,194 @@ export const OfficesPage = () => {
     }
   }, [offices, loadOfficeUsers]);
 
+  // Filtrar oficinas según el término de búsqueda
+  const filteredOffices = offices.filter((office) =>
+    office.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    office.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    office.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    office.city?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Detectar cambios en el tamaño de ventana
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Función para aplicar layout automático con Dagre (responsive)
+  const getLayoutedElements = useCallback((nodes: Node[], edges: Edge[], direction: 'TB' | 'LR' = 'TB') => {
+    const dagreGraph = new dagre.graphlib.Graph();
+    dagreGraph.setDefaultEdgeLabel(() => ({}));
+    
+    // Detectar tamaño de pantalla para ajustar espaciado
+    const isMobile = window.innerWidth < 768;
+    const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+    
+    const nodesep = isMobile ? 50 : isTablet ? 75 : 100; // Separación horizontal
+    const ranksep = isMobile ? 100 : isTablet ? 120 : 150; // Separación vertical
+    const marginx = isMobile ? 20 : 50;
+    const marginy = isMobile ? 20 : 50;
+    
+    dagreGraph.setGraph({ 
+      rankdir: direction,
+      nodesep,
+      ranksep,
+      marginx,
+      marginy,
+    });
+
+    const nodeWidth = isMobile ? 150 : isTablet ? 180 : 220;
+    const nodeHeight = isMobile ? 100 : isTablet ? 110 : 120;
+
+    nodes.forEach((node) => {
+      dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+    });
+
+    edges.forEach((edge) => {
+      dagreGraph.setEdge(edge.source, edge.target);
+    });
+
+    dagre.layout(dagreGraph);
+
+    const layoutedNodes = nodes.map((node) => {
+      const nodeWithPosition = dagreGraph.node(node.id);
+      return {
+        ...node,
+        position: {
+          x: nodeWithPosition.x - nodeWidth / 2,
+          y: nodeWithPosition.y - nodeHeight / 2,
+        },
+      };
+    });
+
+    return { nodes: layoutedNodes, edges };
+  }, []);
+
+  // Función para cargar datos del flow
+  const loadFlowData = useCallback(async () => {
+    if (filteredOffices.length === 0) {
+      setFlowNodes([]);
+      setFlowEdges([]);
+      return;
+    }
+
+    // Prevenir múltiples cargas simultáneas
+    if (flowLoadingRef.current) {
+      console.log('[OfficesPage] loadFlowData ya está en ejecución, ignorando llamada duplicada');
+      return;
+    }
+
+    flowLoadingRef.current = true;
+    setFlowLoading(true);
+    try {
+      // Crear nodos y edges (sin posiciones, Dagre las calculará)
+      const nodes: Node[] = [];
+      const edges: Edge[] = [];
+      
+      // Crear nodos de oficinas
+      filteredOffices.forEach((office) => {
+        const officeNodeId = `office-${office.id}`;
+        
+        nodes.push({
+          id: officeNodeId,
+          type: 'default',
+          position: { x: 0, y: 0 }, // Posición temporal, Dagre la calculará
+          data: {
+            label: (
+              <div className={`${styles.flowNode} ${styles.flowNodeOffice}`}>
+                <div className={styles.flowNodeHeader}>{office.name}</div>
+                <div className={styles.flowNodeContent}>Cliente: {office.customerName || 'N/A'}</div>
+                <div className={styles.flowNodeContent}>Tenant: {office.tenantName || 'N/A'}</div>
+                {office.city && (
+                  <div className={styles.flowNodeContent}>Ciudad: {office.city}</div>
+                )}
+                {office.email && (
+                  <div className={styles.flowNodeContent}>Email: {office.email}</div>
+                )}
+                <div className={styles.flowNodeContent}>
+                  {office.isSuspended ? 'Suspendido' : office.isActive ? 'Activo' : 'Inactivo'}
+                </div>
+              </div>
+            ),
+          },
+        });
+
+        // Crear nodos de usuarios para esta oficina
+        const users = officeUsers[office.id] || [];
+        users.forEach((user: any) => {
+          const userNodeId = `user-${user.id}`;
+          
+          nodes.push({
+            id: userNodeId,
+            type: 'default',
+            position: { x: 0, y: 0 }, // Posición temporal, Dagre la calculará
+            data: {
+              label: (
+                <div className={`${styles.flowNode} ${styles.flowNodeUser}`}>
+                  <div className={styles.flowNodeHeader}>{user.name || user.email}</div>
+                  <div className={styles.flowNodeContent}>{user.contactEmail || user.email}</div>
+                  {user.role && (
+                    <div className={styles.flowNodeContent}>Rol: {user.role === 'Admin' ? 'Administrador' : 'Usuario'}</div>
+                  )}
+                </div>
+              ),
+            },
+          });
+
+          // Edge de oficina a usuario
+          edges.push({
+            id: `edge-${officeNodeId}-${userNodeId}`,
+            source: officeNodeId,
+            target: userNodeId,
+            type: 'smoothstep',
+          });
+        });
+      });
+
+      // Aplicar layout automático con Dagre
+      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(nodes, edges, 'TB');
+
+      setFlowNodes(layoutedNodes);
+      setFlowEdges(layoutedEdges);
+    } catch (err: any) {
+      console.error('Error cargando datos del flow:', err);
+      setError(err.message || 'Error al cargar datos para la vista interactiva');
+    } finally {
+      setFlowLoading(false);
+      flowLoadingRef.current = false;
+    }
+  }, [filteredOffices, officeUsers, getLayoutedElements, styles]);
+
+  // Cargar datos del flow cuando cambia la vista, las oficinas o los usuarios
+  useEffect(() => {
+    if (selectedView === 'flow' && filteredOffices.length > 0) {
+      // Esperar un poco para que se carguen los usuarios si aún no están cargados
+      const timer = setTimeout(() => {
+        loadFlowData().catch((err) => {
+          console.error('[OfficesPage] Error en loadFlowData:', err);
+        });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedView, filteredOffices.length, officeUsers, loadFlowData]);
+
+  const onNodesChange = useCallback((changes: NodeChange[]) => {
+    setFlowNodes((nds) => applyNodeChanges(changes, nds));
+  }, []);
+
+  const onEdgesChange = useCallback((changes: EdgeChange[]) => {
+    setFlowEdges((eds) => applyEdgeChanges(changes, eds));
+  }, []);
+
+  const onConnect = useCallback(
+    (params: Connection) => setFlowEdges((eds) => addEdge(params, eds)),
+    []
+  );
+
   // Registrar acciones en el RibbonMenu
   useEffect(() => {
     addGroup({
@@ -309,13 +590,6 @@ export const OfficesPage = () => {
       removeGroup('offices');
     };
   }, [addGroup, removeGroup]);
-
-  const filteredOffices = offices.filter((office) =>
-    office.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    office.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    office.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    office.city?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const handleCreate = async () => {
     if (!formData.name || !formData.tenantId) {
@@ -590,6 +864,14 @@ export const OfficesPage = () => {
               style={{ width: '100%' }}
             />
           </div>
+          <TabList selectedValue="table" disabled>
+            <Tab value="table" icon={<TableRegular />}>
+              Vista de Tabla
+            </Tab>
+            <Tab value="flow" icon={<FlowchartRegular />}>
+              Vista Interactiva
+            </Tab>
+          </TabList>
         </div>
         <Card>
           <TableSkeleton rows={8} columns={9} />
@@ -619,14 +901,29 @@ export const OfficesPage = () => {
           />
         </div>
         <Button
-          appearance="primary"
+          appearance="default"
           icon={<ArrowClockwiseRegular />}
           onClick={loadOffices}
-          disabled={isLoading}
+          disabled={isLoading || flowLoading}
           title="Actualizar lista de sedes"
         >
           Actualizar
         </Button>
+        <TabList
+          selectedValue={selectedTabValue}
+          onTabSelect={(_, data) => {
+            const value = data.value as 'table' | 'flow';
+            setSelectedTabValue(value);
+            setSelectedView(value);
+          }}
+        >
+          <Tab value="table" icon={<TableRegular />}>
+            Vista de Tabla
+          </Tab>
+          <Tab value="flow" icon={<FlowchartRegular />}>
+            Vista Interactiva
+          </Tab>
+        </TabList>
       </div>
 
       <Card>
@@ -637,6 +934,9 @@ export const OfficesPage = () => {
                 <MessageBarBody>{error}</MessageBarBody>
               </MessageBar>
             )}
+
+            {selectedView === 'table' && (
+              <>
         <Table>
           <TableHeader>
             <TableRow>
@@ -887,6 +1187,67 @@ export const OfficesPage = () => {
             )}
           </TableBody>
         </Table>
+              </>
+            )}
+
+            {selectedView === 'flow' && (
+              <div style={{ position: 'relative' }}>
+                {flowLoading && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      zIndex: 1000,
+                      ...shorthands.borderRadius(tokens.borderRadiusMedium),
+                    }}
+                  >
+                    <Spinner size="large" label="Cargando vista interactiva..." />
+                  </div>
+                )}
+                {flowNodes.length === 0 && !flowLoading ? (
+                  <div style={{ padding: tokens.spacingVerticalXXL, textAlign: 'center' }}>
+                    <Text>No hay datos para mostrar en la vista interactiva</Text>
+                  </div>
+                ) : (
+                  <div className={styles.flowContainer}>
+                    <ReactFlowProvider>
+                      <ReactFlow
+                        nodes={flowNodes}
+                        edges={flowEdges}
+                        onNodesChange={onNodesChange}
+                        onEdgesChange={onEdgesChange}
+                        onConnect={onConnect}
+                        fitView
+                        minZoom={0.2}
+                        maxZoom={2}
+                        defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
+                      >
+                        <Background />
+                        <Controls />
+                        <MiniMap />
+                        <Panel position="top-left">
+                          <div style={{ backgroundColor: tokens.colorNeutralBackground1, padding: tokens.spacingVerticalS, ...shorthands.borderRadius(tokens.borderRadiusMedium) }}>
+                            <Text weight="semibold">Vista Interactiva: Sedes → Usuarios</Text>
+                            <div style={{ marginTop: tokens.spacingVerticalXS }}>
+                              <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
+                                Nivel: Sedes (1) → Usuarios (2)
+                              </Text>
+                            </div>
+                          </div>
+                        </Panel>
+                      </ReactFlow>
+                    </ReactFlowProvider>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </CardPreview>
       </Card>

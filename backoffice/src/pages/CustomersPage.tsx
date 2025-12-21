@@ -41,6 +41,7 @@ import {
   Switch,
   Label,
   Persona,
+  Checkbox,
 } from '@fluentui/react-components';
 import {
   OverlayDrawer,
@@ -681,7 +682,12 @@ export const CustomersPage = () => {
   const [customers, setCustomers] = useState<CustomerDto[]>([]);
   const [countries, setCountries] = useState<CountryDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [createCustomerError, setCreateCustomerError] = useState<string | null>(null);
+  const [createOfficeError, setCreateOfficeError] = useState<string | null>(null);
+  const [createTenantError, setCreateTenantError] = useState<string | null>(null);
+  const [createUserError, setCreateUserError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerDto | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -717,11 +723,26 @@ export const CustomersPage = () => {
   const [isEditDrawerLoading, setIsEditDrawerLoading] = useState(false);
   const [tenantName, setTenantName] = useState('');
   const [selectedParentId, setSelectedParentId] = useState<string>('');
-  const [hasParent, setHasParent] = useState(false);
+  const [hasParent, setHasParent] = useState(true);
   const [createParentId, setCreateParentId] = useState<string>('');
+  const [skipDefaultStructure, setSkipDefaultStructure] = useState(false);
   const [isTenantInfoDialogOpen, setIsTenantInfoDialogOpen] = useState(false);
   const [selectedTenant, setSelectedTenant] = useState<TenantDto | null>(null);
   const [isLoadingTenant, setIsLoadingTenant] = useState(false);
+
+  // Estados para el stepper de eliminación
+  const [deleteStep, setDeleteStep] = useState(1);
+  const [deleteConsentChecked, setDeleteConsentChecked] = useState(false);
+  const [deleteTenants, setDeleteTenants] = useState<Set<string>>(new Set());
+  const [deleteOffices, setDeleteOffices] = useState<Set<string>>(new Set());
+  const [deleteUsers, setDeleteUsers] = useState<Set<string>>(new Set());
+  const [deleteRelatedTenants, setDeleteRelatedTenants] = useState<TenantDto[]>([]);
+  const [deleteRelatedOffices, setDeleteRelatedOffices] = useState<OfficeDto[]>([]);
+  const [deleteRelatedUsers, setDeleteRelatedUsers] = useState<UserDto[]>([]);
+  const [isLoadingDeleteData, setIsLoadingDeleteData] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isAssigningTenant, setIsAssigningTenant] = useState(false);
+  const [isAssigningParent, setIsAssigningParent] = useState(false);
 
   // Search states for Combobox
   const [countrySearchText, setCountrySearchText] = useState('');
@@ -845,10 +866,12 @@ export const CustomersPage = () => {
               phone: '',
               email: '',
             });
-            setHasParent(false);
+            setHasParent(true);
             setCreateParentId('');
+            setSkipDefaultStructure(false);
             setCountrySearchText('');
             setParentCustomerSearchText('');
+            setCreateCustomerError(null);
             setIsCreateDialogOpen(true);
           },
         },
@@ -1341,21 +1364,22 @@ export const CustomersPage = () => {
 
   const handleCreate = async () => {
     if (!formData.name.trim() || !formData.identification.trim() || !formData.countryId) {
-      setError('Nombre, identificación y país son requeridos');
+      setCreateCustomerError('Nombre, identificación y país son requeridos');
       return;
     }
 
     if (hasParent && !createParentId) {
-      setError('Debe seleccionar un cliente padre');
+      setCreateCustomerError('Debe seleccionar un cliente padre');
       return;
     }
 
     try {
-      setError(null);
+      setCreateCustomerError(null);
       setIsCreating(true);
       const createData: CreateCustomerRequest = {
         ...formData,
         parentId: hasParent && createParentId ? createParentId : undefined,
+        skipDefaultStructure: skipDefaultStructure || undefined,
       };
       await customerService.createCustomer(createData);
       setIsCreateDialogOpen(false);
@@ -1371,11 +1395,13 @@ export const CustomersPage = () => {
       });
       setHasParent(false);
       setCreateParentId('');
+      setSkipDefaultStructure(false);
       setCountrySearchText('');
       setParentCustomerSearchText('');
+      setCreateCustomerError(null);
       await loadCustomers();
     } catch (err: any) {
-      setError(err.message || 'Error al crear cliente');
+      setCreateCustomerError(err.message || 'Error al crear cliente');
       setIsCreating(false);
     }
   };
@@ -1413,9 +1439,10 @@ export const CustomersPage = () => {
           });
           setHasParent(false);
           setCreateParentId('');
+          setSkipDefaultStructure(false);
           setCountrySearchText('');
           setParentCustomerSearchText('');
-          setError(null);
+          setCreateCustomerError(null);
         }
         // Si el usuario cancela, no actualizamos el estado (mantiene el Drawer abierto)
         return;
@@ -1522,6 +1549,7 @@ export const CustomersPage = () => {
 
     try {
       setError(null);
+      setIsAssigningTenant(true);
       await customerService.assignTenantToCustomer(selectedCustomer.id, tenantName || undefined);
       setIsAssignTenantDialogOpen(false);
       setTenantName('');
@@ -1536,12 +1564,83 @@ export const CustomersPage = () => {
       await loadCustomers();
     } catch (err: any) {
       setError(err.message || 'Error al asignar tenant');
+    } finally {
+      setIsAssigningTenant(false);
     }
   };
 
-  const handleDelete = (customer: CustomerDto) => {
+  const handleDelete = async (customer: CustomerDto) => {
     setSelectedCustomer(customer);
     setIsDeleteDialogOpen(true);
+    setDeleteStep(1);
+    setDeleteConsentChecked(false);
+    setDeleteTenants(new Set());
+    setDeleteOffices(new Set());
+    setDeleteUsers(new Set());
+    setIsLoadingDeleteData(true);
+    
+    try {
+      // Cargar todos los datos relacionados
+      const [tenants, offices, directUsers] = await Promise.all([
+        customerService.getCustomerTenants(customer.id),
+        officeService.getOfficesByCustomer(customer.id),
+        customerService.getCustomerUsers(customer.id),
+      ]);
+      
+      setDeleteRelatedTenants(tenants);
+      setDeleteRelatedOffices(offices);
+      
+      // Obtener usuarios de todos los tenants relacionados
+      const tenantUsersPromises = tenants.map((tenant: TenantDto) => 
+        userService.getUsersByTenantId(tenant.id).catch(() => [] as UserDto[])
+      );
+      const tenantUsersArrays = await Promise.all(tenantUsersPromises);
+      const tenantUsers = tenantUsersArrays.flat();
+      
+      // Obtener usuarios de todas las sedes relacionadas
+      const officeUsersPromises = offices.map((office: OfficeDto) => 
+        officeService.getOfficeUsers(office.id).catch(() => [] as any[])
+      );
+      const officeUsersArrays = await Promise.all(officeUsersPromises);
+      const officeUsersRaw = officeUsersArrays.flat();
+      // Transformar usuarios de sedes al formato UserDto si es necesario
+      const officeUsers = officeUsersRaw.map((user: any): UserDto | null => {
+        if (user.id && user.email) {
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name || null,
+            tenantId: user.tenantId || null,
+            customerId: user.customerId || null,
+            role: user.role === 1 || user.role === 'Admin' ? 'Admin' : 'User',
+            contactEmail: user.contactEmail || null,
+            phone: user.phone || null,
+            auth0Id: user.auth0Id || null,
+            createdAt: user.createdAt || '',
+            updatedAt: user.updatedAt || '',
+            isActive: user.isActive ?? user.IsActive ?? true,
+            isSuspended: user.isSuspended ?? user.IsSuspended ?? false,
+          } as UserDto;
+        }
+        return null;
+      }).filter((user): user is UserDto => user !== null);
+      
+      // Consolidar todos los usuarios y eliminar duplicados por ID
+      const allUsers = [...directUsers, ...tenantUsers, ...officeUsers];
+      const uniqueUsersMap = new Map<string, UserDto>();
+      allUsers.forEach((user: UserDto) => {
+        if (!uniqueUsersMap.has(user.id)) {
+          uniqueUsersMap.set(user.id, user);
+        }
+      });
+      const uniqueUsers = Array.from(uniqueUsersMap.values());
+      
+      setDeleteRelatedUsers(uniqueUsers);
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar datos relacionados');
+    } finally {
+      setIsLoadingDeleteData(false);
+    }
   };
 
   const handleSuspend = async (customer: CustomerDto) => {
@@ -1664,6 +1763,7 @@ export const CustomersPage = () => {
 
   const handleOpenCreateOffice = async (customer: CustomerDto) => {
     setSelectedCustomer(customer);
+    setCreateOfficeError(null);
     setIsCreateOfficeDialogOpen(true);
     
     // Cargar tenants del cliente
@@ -1703,6 +1803,7 @@ export const CustomersPage = () => {
 
   const handleOpenCreateTenant = (customer: CustomerDto) => {
     setSelectedCustomer(customer);
+    setCreateTenantError(null);
     setTenantFormData({
       name: '',
       customerId: customer.id,
@@ -1754,6 +1855,7 @@ export const CustomersPage = () => {
       setUserTenantSearchText('');
       setOfficeSearchText('');
       setRoleSearchText('');
+      setCreateUserError(null);
       
       setIsCreateUserDrawerOpen(true);
     } catch (err: any) {
@@ -1800,17 +1902,17 @@ export const CustomersPage = () => {
 
   const handleCreateOffice = async () => {
     if (!selectedCustomer || !officeFormData.name.trim()) {
-      setError('El nombre de la sede es requerido');
+      setCreateOfficeError('El nombre de la sede es requerido');
       return;
     }
     
     if (!officeFormData.tenantId) {
-      setError('El tenant es requerido');
+      setCreateOfficeError('El tenant es requerido');
       return;
     }
 
     try {
-      setError(null);
+      setCreateOfficeError(null);
       setIsCreatingOffice(true);
       await officeService.createOffice(officeFormData);
       setIsCreateOfficeDialogOpen(false);
@@ -1825,12 +1927,13 @@ export const CustomersPage = () => {
         email: '',
       });
       setTenantSearchText('');
+      setCreateOfficeError(null);
       await loadCustomers();
       if (selectedView === 'flow') {
         await loadFlowData();
       }
     } catch (err: any) {
-      setError(err.message || 'Error al crear sede');
+      setCreateOfficeError(err.message || 'Error al crear sede');
     } finally {
       setIsCreatingOffice(false);
     }
@@ -1838,12 +1941,12 @@ export const CustomersPage = () => {
 
   const handleCreateTenant = async () => {
     if (!selectedCustomer || !tenantFormData.name.trim()) {
-      setError('El nombre del tenant es requerido');
+      setCreateTenantError('El nombre del tenant es requerido');
       return;
     }
 
     try {
-      setError(null);
+      setCreateTenantError(null);
       setIsCreatingTenant(true);
       await tenantService.createTenant(tenantFormData);
       setIsCreateTenantDialogOpen(false);
@@ -1851,12 +1954,13 @@ export const CustomersPage = () => {
         name: '',
         customerId: '',
       });
+      setCreateTenantError(null);
       await loadCustomers();
       if (selectedView === 'flow') {
         await loadFlowData();
       }
     } catch (err: any) {
-      setError(err.message || 'Error al crear tenant');
+      setCreateTenantError(err.message || 'Error al crear tenant');
     } finally {
       setIsCreatingTenant(false);
     }
@@ -1864,17 +1968,17 @@ export const CustomersPage = () => {
 
   const handleCreateUser = async () => {
     if (!selectedCustomer || !userFormData.email.trim()) {
-      setError('El email es requerido');
+      setCreateUserError('El email es requerido');
       return;
     }
 
     if (!userFormData.tenantId) {
-      setError('El tenant es requerido');
+      setCreateUserError('El tenant es requerido');
       return;
     }
 
     try {
-      setError(null);
+      setCreateUserError(null);
       setIsCreatingUser(true);
       // Incluir el officeId seleccionado en el request
       // Si no se proporciona auth0Id, el backend lo creará automáticamente en Auth0
@@ -1899,12 +2003,13 @@ export const CustomersPage = () => {
       setUserTenantSearchText('');
       setOfficeSearchText('');
       setRoleSearchText('');
+      setCreateUserError(null);
       await loadCustomers();
       if (selectedView === 'flow') {
         await loadFlowData();
       }
     } catch (err: any) {
-      setError(err.message || 'Error al crear usuario');
+      setCreateUserError(err.message || 'Error al crear usuario');
     } finally {
       setIsCreatingUser(false);
     }
@@ -1956,6 +2061,7 @@ export const CustomersPage = () => {
 
     try {
       setError(null);
+      setIsAssigningParent(true);
       await customerService.assignParentToCustomer(
         selectedCustomer.id,
         selectedParentId || undefined
@@ -1969,6 +2075,8 @@ export const CustomersPage = () => {
       }
     } catch (err: any) {
       setError(err.message || 'Error al asignar cliente padre');
+    } finally {
+      setIsAssigningParent(false);
     }
   };
 
@@ -2255,16 +2363,144 @@ export const CustomersPage = () => {
     }
   };
 
+  const handleDeleteNext = () => {
+    if (deleteStep === 1 && !deleteConsentChecked) {
+      setError('Debe confirmar que es consciente de las consecuencias');
+      return;
+    }
+    if (deleteStep < 4) {
+      setDeleteStep(deleteStep + 1);
+      setError(null);
+    }
+  };
+
+  const handleDeleteBack = () => {
+    if (deleteStep > 1) {
+      setDeleteStep(deleteStep - 1);
+      setError(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteDialogOpen(false);
+    setSelectedCustomer(null);
+    setDeleteStep(1);
+    setDeleteConsentChecked(false);
+    setDeleteTenants(new Set());
+    setDeleteOffices(new Set());
+    setDeleteUsers(new Set());
+    setError(null);
+  };
+
+  const handleToggleTenant = (tenantId: string) => {
+    const newSet = new Set(deleteTenants);
+    if (newSet.has(tenantId)) {
+      newSet.delete(tenantId);
+      // Si se deselecciona un tenant, también deseleccionar sus sedes relacionadas
+      const relatedOffices = deleteRelatedOffices.filter(office => office.tenantId === tenantId);
+      const newOfficesSet = new Set(deleteOffices);
+      relatedOffices.forEach(office => {
+        newOfficesSet.delete(office.id);
+      });
+      setDeleteOffices(newOfficesSet);
+    } else {
+      newSet.add(tenantId);
+    }
+    setDeleteTenants(newSet);
+  };
+
+  const handleToggleOffice = (officeId: string) => {
+    const office = deleteRelatedOffices.find(o => o.id === officeId);
+    if (!office) return;
+    
+    // Si la sede pertenece a un tenant seleccionado para eliminar, no permitir deseleccionarla
+    if (deleteTenants.has(office.tenantId)) {
+      return;
+    }
+    
+    const newSet = new Set(deleteOffices);
+    if (newSet.has(officeId)) {
+      newSet.delete(officeId);
+    } else {
+      newSet.add(officeId);
+    }
+    setDeleteOffices(newSet);
+  };
+
+  const handleToggleUser = (userId: string) => {
+    const newSet = new Set(deleteUsers);
+    if (newSet.has(userId)) {
+      newSet.delete(userId);
+    } else {
+      newSet.add(userId);
+    }
+    setDeleteUsers(newSet);
+  };
+
   const handleConfirmDelete = async () => {
     if (!selectedCustomer) return;
 
+    setIsDeleting(true);
     try {
+      // Eliminar usuarios seleccionados
+      const deleteUserPromises = Array.from(deleteUsers).map(userId => 
+        userService.deleteUser(userId)
+      );
+      await Promise.all(deleteUserPromises);
+
+      // Desvincular usuarios no seleccionados
+      const unlinkUserPromises = deleteRelatedUsers
+        .filter(user => !deleteUsers.has(user.id))
+        .map(user => 
+          userService.updateUser(user.id, {
+            email: user.email,
+            customerId: undefined,
+            tenantId: user.tenantId || undefined,
+          })
+        );
+      await Promise.all(unlinkUserPromises);
+
+      // Eliminar sedes seleccionadas
+      const deleteOfficePromises = Array.from(deleteOffices).map(officeId => 
+        officeService.deleteOffice(officeId)
+      );
+      await Promise.all(deleteOfficePromises);
+
+      // Nota: Las sedes no seleccionadas se desvincularán automáticamente 
+      // cuando se elimine el cliente o se desvinculen los tenants relacionados
+
+      // Eliminar tenants seleccionados
+      const deleteTenantPromises = Array.from(deleteTenants).map(tenantId => 
+        tenantService.deleteTenant(tenantId)
+      );
+      await Promise.all(deleteTenantPromises);
+
+      // Desvincular tenants no seleccionados
+      const unlinkTenantPromises = deleteRelatedTenants
+        .filter(tenant => !deleteTenants.has(tenant.id))
+        .map(tenant => 
+          tenantService.updateTenant(tenant.id, {
+            name: tenant.name,
+            customerId: undefined,
+          })
+        );
+      await Promise.all(unlinkTenantPromises);
+
+      // Finalmente, eliminar el cliente
       await customerService.deleteCustomer(selectedCustomer.id);
+      
       setIsDeleteDialogOpen(false);
       setSelectedCustomer(null);
+      setDeleteStep(1);
+      setDeleteConsentChecked(false);
+      setDeleteTenants(new Set());
+      setDeleteOffices(new Set());
+      setDeleteUsers(new Set());
       await loadCustomers();
     } catch (err: any) {
       setError(err.message || 'Error al eliminar cliente');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -2321,15 +2557,21 @@ export const CustomersPage = () => {
           />
         </div>
         <Button
-          appearance="primary"
-          icon={<ArrowClockwiseRegular />}
+          appearance="secondary"
+          icon={!isRefreshing ? <ArrowClockwiseRegular /> : undefined}
           onClick={async () => {
-            await loadCustomers();
-            if (selectedView === 'flow') {
-              await loadFlowData();
+            setIsRefreshing(true);
+            try {
+              await loadCustomers();
+              if (selectedView === 'flow') {
+                await loadFlowData();
+              }
+            } finally {
+              setIsRefreshing(false);
             }
           }}
-          disabled={isLoading || flowLoading}
+          disabled={isRefreshing}
+          loading={isRefreshing}
           title="Actualizar lista de clientes"
         >
           Actualizar
@@ -2815,6 +3057,70 @@ export const CustomersPage = () => {
               <DetailsSkeleton rows={8} />
             ) : (
               <>
+            {skipDefaultStructure ? (
+              <MessageBar intent="warning" style={{ marginTop: 0, marginBottom: tokens.spacingVerticalM }}>
+                <MessageBarBody>
+                  No se creará el tenant sede ni usuario por defecto.
+                </MessageBarBody>
+              </MessageBar>
+            ) : (
+              <MessageBar intent="info" style={{ marginTop: 0, marginBottom: tokens.spacingVerticalM }}>
+                <MessageBarBody>
+                  Se creará automáticamente un tenant para este cliente.
+                </MessageBarBody>
+              </MessageBar>
+            )}
+            <div className={styles.formField} style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS }}>
+              <Switch
+                checked={skipDefaultStructure}
+                onChange={(_, data) => {
+                  setSkipDefaultStructure(data.checked);
+                }}
+                label="Omitir creación de estructura por defecto"
+              />
+            </div>
+            <div className={styles.formField} style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS }}>
+              <Switch
+                checked={hasParent}
+                onChange={(_, data) => {
+                  setHasParent(data.checked);
+                  if (!data.checked) {
+                    setCreateParentId('');
+                  }
+                }}
+                label="El nuevo cliente será hijo de otro cliente"
+              />
+            </div>
+            {hasParent && (
+              <Field label="Cliente Padre" required className={styles.formField}>
+                <Combobox
+                  value={parentCustomerSearchText || (createParentId ? customers.find((c) => c.id === createParentId)?.name || '' : '')}
+                  onOptionSelect={(_, data) => {
+                    const customer = customers.find((c) => c.name === data.optionValue);
+                    if (customer) {
+                      setCreateParentId(customer.id);
+                      setParentCustomerSearchText('');
+                    } else {
+                      setCreateParentId('');
+                      setParentCustomerSearchText('');
+                    }
+                  }}
+                  onInput={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    setParentCustomerSearchText(target.value);
+                    if (!target.value) {
+                      setCreateParentId('');
+                    }
+                  }}
+                >
+                  {filteredParentCustomers.map((customer) => (
+                    <Option key={customer.id} value={customer.name}>
+                      {customer.name} ({customer.identification})
+                    </Option>
+                  ))}
+                </Combobox>
+              </Field>
+            )}
             <Field label="Nombre" required className={styles.formField}>
               <Input
                 value={formData.name}
@@ -2874,54 +3180,9 @@ export const CustomersPage = () => {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
             </Field>
-            <div className={styles.formField} style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS }}>
-              <Label>Asignar cliente padre</Label>
-              <Switch
-                checked={hasParent}
-                onChange={(_, data) => {
-                  setHasParent(data.checked);
-                  if (!data.checked) {
-                    setCreateParentId('');
-                  }
-                }}
-                label="El nuevo cliente será hijo de otro cliente"
-              />
-            </div>
-            {hasParent && (
-              <Field label="Cliente Padre" required className={styles.formField}>
-                <Combobox
-                  value={parentCustomerSearchText || (createParentId ? customers.find((c) => c.id === createParentId)?.name || '' : '')}
-                  onOptionSelect={(_, data) => {
-                    const customer = customers.find((c) => c.name === data.optionValue);
-                    if (customer) {
-                      setCreateParentId(customer.id);
-                      setParentCustomerSearchText('');
-                    } else {
-                      setCreateParentId('');
-                      setParentCustomerSearchText('');
-                    }
-                  }}
-                  onInput={(e) => {
-                    const target = e.target as HTMLInputElement;
-                    setParentCustomerSearchText(target.value);
-                    if (!target.value) {
-                      setCreateParentId('');
-                    }
-                  }}
-                >
-                  {filteredParentCustomers.map((customer) => (
-                    <Option key={customer.id} value={customer.name}>
-                      {customer.name} ({customer.identification})
-                    </Option>
-                  ))}
-                </Combobox>
-              </Field>
-            )}
-            {!hasParent && (
-              <MessageBar intent="info" style={{ marginTop: tokens.spacingVerticalM }}>
-                <MessageBarBody>
-                  Se creará automáticamente un tenant para este cliente.
-                </MessageBarBody>
+            {createCustomerError && (
+              <MessageBar intent="error" style={{ marginTop: tokens.spacingVerticalXL, marginBottom: tokens.spacingVerticalM }}>
+                <MessageBarBody>{createCustomerError}</MessageBarBody>
               </MessageBar>
             )}
             <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
@@ -2950,9 +3211,10 @@ export const CustomersPage = () => {
                       });
                       setHasParent(false);
                       setCreateParentId('');
+                      setSkipDefaultStructure(false);
                       setCountrySearchText('');
                       setParentCustomerSearchText('');
-                      setError(null);
+                      setCreateCustomerError(null);
                     }
                   } else {
                     setIsCreateDialogOpen(false);
@@ -2962,7 +3224,7 @@ export const CustomersPage = () => {
               >
                 Cancelar
               </Button>
-              <Button appearance="primary" onClick={handleCreate} disabled={isCreating}>
+              <Button appearance="primary" onClick={handleCreate} disabled={isCreating} loading={isCreating}>
                 {isCreating ? 'Creando...' : 'Crear'}
               </Button>
             </div>
@@ -3149,7 +3411,7 @@ export const CustomersPage = () => {
                   >
                     Cancelar
                   </Button>
-                  <Button appearance="primary" onClick={handleSave} disabled={isSaving}>
+                  <Button appearance="primary" onClick={handleSave} disabled={isSaving} loading={isSaving}>
                     {isSaving ? 'Guardando...' : 'Guardar'}
                   </Button>
                 </div>
@@ -3188,31 +3450,317 @@ export const CustomersPage = () => {
             }}>
               Cancelar
             </Button>
-            <Button appearance="primary" onClick={handleAssignTenant}>
+            <Button appearance="primary" onClick={handleAssignTenant} disabled={isAssigningTenant} loading={isAssigningTenant}>
               Asignar Tenant
             </Button>
           </DialogActions>
         </DialogSurface>
       </Dialog>
 
-      {/* Dialog de eliminación */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={(_, data) => setIsDeleteDialogOpen(data.open)}>
-        <DialogSurface>
-          <DialogTitle>Confirmar eliminación</DialogTitle>
+      {/* Dialog de eliminación con stepper */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={(_, data) => {
+        if (!data.open) {
+          handleDeleteCancel();
+        }
+      }}>
+        <DialogSurface style={{ minWidth: '600px', maxWidth: '800px' }}>
+          <DialogTitle>Confirmar eliminación de cliente</DialogTitle>
           <DialogBody>
             <DialogContent>
-              <Text>
-                ¿Está seguro de que desea eliminar el cliente "{selectedCustomer?.name}"? Esta acción no se puede deshacer.
-              </Text>
+              {isLoadingDeleteData ? (
+                <div style={{ display: 'flex', justifyContent: 'center', padding: tokens.spacingVerticalXL }}>
+                  <Spinner size="large" />
+                </div>
+              ) : (
+                <>
+                  {/* Indicador de pasos */}
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    marginBottom: tokens.spacingVerticalL,
+                    padding: tokens.spacingVerticalM,
+                    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`
+                  }}>
+                    {[1, 2, 3, 4].map((step) => (
+                      <div key={step} style={{ 
+                        flex: 1, 
+                        textAlign: 'center',
+                        position: 'relative'
+                      }}>
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          backgroundColor: deleteStep >= step ? tokens.colorBrandBackground : tokens.colorNeutralBackground3,
+                          color: deleteStep >= step ? tokens.colorNeutralForegroundOnBrand : tokens.colorNeutralForeground3,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          margin: '0 auto',
+                          fontWeight: 'bold'
+                        }}>
+                          {step}
+                        </div>
+                        <Text size={200} style={{ 
+                          marginTop: tokens.spacingVerticalXS,
+                          color: deleteStep >= step ? tokens.colorNeutralForeground1 : tokens.colorNeutralForeground3
+                        }}>
+                          {step === 1 && 'Confirmación'}
+                          {step === 2 && 'Tenants'}
+                          {step === 3 && 'Sedes'}
+                          {step === 4 && 'Usuarios'}
+                        </Text>
+                        {step < 4 && (
+                          <div style={{
+                            position: 'absolute',
+                            top: '16px',
+                            left: 'calc(50% + 16px)',
+                            width: 'calc(100% - 32px)',
+                            height: '2px',
+                            backgroundColor: deleteStep > step ? tokens.colorBrandBackground : tokens.colorNeutralStroke2,
+                            zIndex: -1
+                          }} />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Paso 1: Confirmación inicial */}
+                  {deleteStep === 1 && (
+                    <div>
+                      <Text size={400} weight="semibold" style={{ marginBottom: tokens.spacingVerticalM }}>
+                        ¿Está seguro de que desea eliminar el cliente "{selectedCustomer?.name}"?
+                      </Text>
+                      <Text style={{ marginBottom: tokens.spacingVerticalL }}>
+                        Esta acción eliminará:
+                      </Text>
+                      <ul style={{ marginLeft: tokens.spacingHorizontalL, marginBottom: tokens.spacingVerticalL }}>
+                        <li><Text>{deleteRelatedTenants.length} tenant(s)</Text></li>
+                        <li><Text>{deleteRelatedOffices.length} sede(s)</Text></li>
+                        <li><Text>{deleteRelatedUsers.length} usuario(s)</Text></li>
+                      </ul>
+                      <div style={{ marginTop: tokens.spacingVerticalL }}>
+                        <Checkbox
+                          checked={deleteConsentChecked}
+                          onChange={(_, data) => setDeleteConsentChecked(data.checked || false)}
+                          label="Soy consciente de las consecuencias de borrar este cliente y entiendo que se eliminarán los elementos seleccionados y se desvincularán los no seleccionados"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Paso 2: Selección de tenants */}
+                  {deleteStep === 2 && (
+                    <div>
+                      <Text size={400} weight="semibold" style={{ marginBottom: tokens.spacingVerticalM }}>
+                        Seleccione los tenants a eliminar
+                      </Text>
+                      <Text style={{ marginBottom: tokens.spacingVerticalM, color: tokens.colorNeutralForeground2 }}>
+                        Los tenants no seleccionados serán desvinculados del cliente y quedarán huérfanos.
+                      </Text>
+                      {deleteRelatedTenants.length === 0 ? (
+                        <Text style={{ color: tokens.colorNeutralForeground3, fontStyle: 'italic' }}>
+                          No hay tenants asociados a este cliente.
+                        </Text>
+                      ) : (
+                        <div style={{ maxHeight: '400px', overflowY: 'auto', border: `1px solid ${tokens.colorNeutralStroke2}`, borderRadius: tokens.borderRadiusMedium }}>
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHeaderCell style={{ width: '50px' }}>Seleccionar</TableHeaderCell>
+                                <TableHeaderCell>Nombre</TableHeaderCell>
+                                <TableHeaderCell>Estado</TableHeaderCell>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {deleteRelatedTenants.map((tenant) => (
+                                <TableRow key={tenant.id}>
+                                  <TableCell>
+                                    <Checkbox
+                                      checked={deleteTenants.has(tenant.id)}
+                                      onChange={() => handleToggleTenant(tenant.id)}
+                                    />
+                                  </TableCell>
+                                  <TableCell>{tenant.name}</TableCell>
+                                  <TableCell>
+                                    <Badge appearance={tenant.isActive ? 'filled' : 'outline'} color={tenant.isActive ? 'success' : 'danger'}>
+                                      {tenant.isActive ? 'Activo' : 'Inactivo'}
+                                    </Badge>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Paso 3: Selección de sedes */}
+                  {deleteStep === 3 && (
+                    <div>
+                      <Text size={400} weight="semibold" style={{ marginBottom: tokens.spacingVerticalM }}>
+                        Seleccione las sedes a eliminar
+                      </Text>
+                      <Text style={{ marginBottom: tokens.spacingVerticalM, color: tokens.colorNeutralForeground2 }}>
+                        Las sedes relacionadas a tenants seleccionados para eliminar aparecerán marcadas y deshabilitadas. Las sedes no seleccionadas serán desvinculadas.
+                      </Text>
+                      {deleteRelatedOffices.length === 0 ? (
+                        <Text style={{ color: tokens.colorNeutralForeground3, fontStyle: 'italic' }}>
+                          No hay sedes asociadas a este cliente.
+                        </Text>
+                      ) : (
+                        <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                          {deleteRelatedTenants.map((tenant) => {
+                            const tenantOffices = deleteRelatedOffices.filter(office => office.tenantId === tenant.id);
+                            if (tenantOffices.length === 0) return null;
+                            
+                            const isTenantSelected = deleteTenants.has(tenant.id);
+                            
+                            return (
+                              <div key={tenant.id} style={{ marginBottom: tokens.spacingVerticalL }}>
+                                <Text size={300} weight="semibold" style={{ 
+                                  marginBottom: tokens.spacingVerticalS,
+                                  padding: tokens.spacingVerticalS,
+                                  backgroundColor: tokens.colorNeutralBackground2,
+                                  borderRadius: tokens.borderRadiusSmall
+                                }}>
+                                  Tenant: {tenant.name}
+                                  {isTenantSelected && (
+                                    <Badge appearance="filled" color="brand" style={{ marginLeft: tokens.spacingHorizontalS }}>
+                                      Se eliminará
+                                    </Badge>
+                                  )}
+                                </Text>
+                                <div style={{ border: `1px solid ${tokens.colorNeutralStroke2}`, borderRadius: tokens.borderRadiusMedium }}>
+                                  <Table>
+                                    <TableHeader>
+                                      <TableRow>
+                                        <TableHeaderCell style={{ width: '50px' }}>Seleccionar</TableHeaderCell>
+                                        <TableHeaderCell>Nombre</TableHeaderCell>
+                                        <TableHeaderCell>Dirección</TableHeaderCell>
+                                        <TableHeaderCell>Estado</TableHeaderCell>
+                                      </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                      {tenantOffices.map((office) => {
+                                        const isDisabled = isTenantSelected;
+                                        const isChecked = isDisabled || deleteOffices.has(office.id);
+                                        
+                                        return (
+                                          <TableRow key={office.id}>
+                                            <TableCell>
+                                              <Checkbox
+                                                checked={isChecked}
+                                                disabled={isDisabled}
+                                                onChange={() => handleToggleOffice(office.id)}
+                                              />
+                                            </TableCell>
+                                            <TableCell>{office.name}</TableCell>
+                                            <TableCell>{office.address || '-'}</TableCell>
+                                            <TableCell>
+                                              <Badge appearance={office.isActive ? 'filled' : 'outline'} color={office.isActive ? 'success' : 'danger'}>
+                                                {office.isActive ? 'Activa' : 'Inactiva'}
+                                              </Badge>
+                                            </TableCell>
+                                          </TableRow>
+                                        );
+                                      })}
+                                    </TableBody>
+                                  </Table>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Paso 4: Selección de usuarios */}
+                  {deleteStep === 4 && (
+                    <div>
+                      <Text size={400} weight="semibold" style={{ marginBottom: tokens.spacingVerticalM }}>
+                        Seleccione los usuarios a eliminar
+                      </Text>
+                      <Text style={{ marginBottom: tokens.spacingVerticalM, color: tokens.colorNeutralForeground2 }}>
+                        Los usuarios no seleccionados serán desvinculados del cliente y quedarán huérfanos.
+                      </Text>
+                      {deleteRelatedUsers.length === 0 ? (
+                        <Text style={{ color: tokens.colorNeutralForeground3, fontStyle: 'italic' }}>
+                          No hay usuarios asociados a este cliente.
+                        </Text>
+                      ) : (
+                        <div style={{ maxHeight: '400px', overflowY: 'auto', border: `1px solid ${tokens.colorNeutralStroke2}`, borderRadius: tokens.borderRadiusMedium }}>
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHeaderCell style={{ width: '50px' }}>Seleccionar</TableHeaderCell>
+                                <TableHeaderCell>Nombre</TableHeaderCell>
+                                <TableHeaderCell>Email</TableHeaderCell>
+                                <TableHeaderCell>Rol</TableHeaderCell>
+                                <TableHeaderCell>Estado</TableHeaderCell>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {deleteRelatedUsers.map((user) => (
+                                <TableRow key={user.id}>
+                                  <TableCell>
+                                    <Checkbox
+                                      checked={deleteUsers.has(user.id)}
+                                      onChange={() => handleToggleUser(user.id)}
+                                    />
+                                  </TableCell>
+                                  <TableCell>{user.name || '-'}</TableCell>
+                                  <TableCell>{user.email}</TableCell>
+                                  <TableCell>
+                                    <Badge appearance="outline">
+                                      {getRoleLabel(user.role)}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Badge appearance={user.isActive ? 'filled' : 'outline'} color={user.isActive ? 'success' : 'danger'}>
+                                      {user.isActive ? 'Activo' : 'Inactivo'}
+                                    </Badge>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
             </DialogContent>
           </DialogBody>
           <DialogActions>
-            <Button appearance="secondary" onClick={() => setIsDeleteDialogOpen(false)}>
-              Cancelar
+            <Button 
+              appearance="secondary" 
+              onClick={deleteStep === 1 ? handleDeleteCancel : handleDeleteBack}
+              disabled={isDeleting || isLoadingDeleteData}
+            >
+              {deleteStep === 1 ? 'Cancelar' : 'Atrás'}
             </Button>
-            <Button appearance="primary" onClick={handleConfirmDelete}>
-              Eliminar
-            </Button>
+            {deleteStep < 4 ? (
+              <Button 
+                appearance="primary" 
+                onClick={handleDeleteNext}
+                disabled={isLoadingDeleteData}
+              >
+                Continuar
+              </Button>
+            ) : (
+              <Button 
+                appearance="primary" 
+                onClick={handleConfirmDelete}
+                disabled={isDeleting || isLoadingDeleteData}
+                loading={isDeleting}
+              >
+                {isDeleting ? 'Eliminando...' : 'Confirmar eliminación'}
+              </Button>
+            )}
           </DialogActions>
         </DialogSurface>
       </Dialog>
@@ -3524,7 +4072,7 @@ export const CustomersPage = () => {
             }}>
               Cancelar
             </Button>
-            <Button appearance="primary" onClick={handleConfirmAssignParent}>
+            <Button appearance="primary" onClick={handleConfirmAssignParent} disabled={isAssigningParent} loading={isAssigningParent}>
               Asignar
             </Button>
           </DialogActions>
@@ -3721,6 +4269,7 @@ export const CustomersPage = () => {
               appearance="primary" 
               onClick={handleSendNotification}
               disabled={isSendingNotification || !notificationTitle.trim() || !notificationMessage.trim()}
+              loading={isSendingNotification}
             >
               {isSendingNotification ? 'Enviando...' : 'Enviar Notificación'}
             </Button>
@@ -3762,11 +4311,12 @@ export const CustomersPage = () => {
                   email: '',
                 });
                 setTenantSearchText('');
-                setError(null);
+                setCreateOfficeError(null);
               }
               return;
             } else {
               setIsCreateOfficeDialogOpen(false);
+              setCreateOfficeError(null);
             }
           } else {
             setIsCreateOfficeDialogOpen(data.open);
@@ -3805,10 +4355,11 @@ export const CustomersPage = () => {
                         email: '',
                       });
                       setTenantSearchText('');
-                      setError(null);
+                      setCreateOfficeError(null);
                     }
                   } else {
                     setIsCreateOfficeDialogOpen(false);
+                    setCreateOfficeError(null);
                   }
                 }}
               />
@@ -3823,11 +4374,6 @@ export const CustomersPage = () => {
               <DetailsSkeleton rows={8} />
             ) : (
               <>
-                {error && (
-                  <MessageBar intent="error" style={{ marginBottom: tokens.spacingVerticalM }}>
-                    <MessageBarBody>{error}</MessageBarBody>
-                  </MessageBar>
-                )}
                 <Field label="Cliente" className={styles.formField}>
                   <Input
                     value={selectedCustomer?.name || ''}
@@ -3914,6 +4460,11 @@ export const CustomersPage = () => {
                     placeholder="Email"
                   />
                 </Field>
+                {createOfficeError && (
+                  <MessageBar intent="error" style={{ marginTop: tokens.spacingVerticalXL, marginBottom: tokens.spacingVerticalM }}>
+                    <MessageBarBody>{createOfficeError}</MessageBarBody>
+                  </MessageBar>
+                )}
                 <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
                   <Button 
                     appearance="secondary" 
@@ -3939,17 +4490,18 @@ export const CustomersPage = () => {
                             email: '',
                           });
                           setTenantSearchText('');
-                          setError(null);
+                          setCreateOfficeError(null);
                         }
                       } else {
                         setIsCreateOfficeDialogOpen(false);
+                        setCreateOfficeError(null);
                       }
                     }}
                     disabled={isCreatingOffice}
                   >
                     Cancelar
                   </Button>
-                  <Button appearance="primary" onClick={handleCreateOffice} disabled={isCreatingOffice}>
+                  <Button appearance="primary" onClick={handleCreateOffice} disabled={isCreatingOffice} loading={isCreatingOffice}>
                     {isCreatingOffice ? 'Creando...' : 'Crear'}
                   </Button>
                 </div>
@@ -3979,11 +4531,12 @@ export const CustomersPage = () => {
                   name: '',
                   customerId: '',
                 });
-                setError(null);
+                setCreateTenantError(null);
               }
               return;
             } else {
               setIsCreateTenantDialogOpen(false);
+              setCreateTenantError(null);
             }
           } else {
             setIsCreateTenantDialogOpen(data.open);
@@ -4009,10 +4562,11 @@ export const CustomersPage = () => {
                         name: '',
                         customerId: '',
                       });
-                      setError(null);
+                      setCreateTenantError(null);
                     }
                   } else {
                     setIsCreateTenantDialogOpen(false);
+                    setCreateTenantError(null);
                   }
                 }}
               />
@@ -4027,11 +4581,6 @@ export const CustomersPage = () => {
               <DetailsSkeleton rows={3} />
             ) : (
               <>
-                {error && (
-                  <MessageBar intent="error" style={{ marginBottom: tokens.spacingVerticalM }}>
-                    <MessageBarBody>{error}</MessageBarBody>
-                  </MessageBar>
-                )}
                 <Field label="Cliente" className={styles.formField}>
                   <Input
                     value={selectedCustomer?.name || ''}
@@ -4045,6 +4594,11 @@ export const CustomersPage = () => {
                     placeholder="Nombre del tenant"
                   />
                 </Field>
+                {createTenantError && (
+                  <MessageBar intent="error" style={{ marginTop: tokens.spacingVerticalXL, marginBottom: tokens.spacingVerticalM }}>
+                    <MessageBarBody>{createTenantError}</MessageBarBody>
+                  </MessageBar>
+                )}
                 <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
                   <Button 
                     appearance="secondary" 
@@ -4057,17 +4611,18 @@ export const CustomersPage = () => {
                             name: '',
                             customerId: '',
                           });
-                          setError(null);
+                          setCreateTenantError(null);
                         }
                       } else {
                         setIsCreateTenantDialogOpen(false);
+                        setCreateTenantError(null);
                       }
                     }}
                     disabled={isCreatingTenant}
                   >
                     Cancelar
                   </Button>
-                  <Button appearance="primary" onClick={handleCreateTenant} disabled={isCreatingTenant}>
+                  <Button appearance="primary" onClick={handleCreateTenant} disabled={isCreatingTenant} loading={isCreatingTenant}>
                     {isCreatingTenant ? 'Creando...' : 'Crear'}
                   </Button>
                 </div>
@@ -4112,11 +4667,12 @@ export const CustomersPage = () => {
                 setUserTenantSearchText('');
                 setOfficeSearchText('');
                 setRoleSearchText('');
-                setError(null);
+                setCreateUserError(null);
               }
               return;
             } else {
               setIsCreateUserDrawerOpen(false);
+              setCreateUserError(null);
             }
           } else {
             setIsCreateUserDrawerOpen(data.open);
@@ -4153,10 +4709,11 @@ export const CustomersPage = () => {
                         phone: '',
                         auth0Id: '',
                       });
-                      setError(null);
+                      setCreateUserError(null);
                     }
                   } else {
                     setIsCreateUserDrawerOpen(false);
+                    setCreateUserError(null);
                   }
                 }}
               />
@@ -4171,11 +4728,6 @@ export const CustomersPage = () => {
               <DetailsSkeleton rows={8} />
             ) : (
               <>
-                {error && (
-                  <MessageBar intent="error" style={{ marginBottom: tokens.spacingVerticalM }}>
-                    <MessageBarBody>{error}</MessageBarBody>
-                  </MessageBar>
-                )}
                 <Field label="Cliente" className={styles.formField}>
                   <Input
                     value={selectedCustomer?.name || ''}
@@ -4317,6 +4869,11 @@ export const CustomersPage = () => {
                     placeholder="Se generará automáticamente si se deja vacío"
                   />
                 </Field>
+                {createUserError && (
+                  <MessageBar intent="error" style={{ marginTop: tokens.spacingVerticalXL, marginBottom: tokens.spacingVerticalM }}>
+                    <MessageBarBody>{createUserError}</MessageBarBody>
+                  </MessageBar>
+                )}
                 <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
                   <Button 
                     appearance="secondary" 
@@ -4344,17 +4901,18 @@ export const CustomersPage = () => {
                           setUserTenantSearchText('');
                           setOfficeSearchText('');
                           setRoleSearchText('');
-                          setError(null);
+                          setCreateUserError(null);
                         }
                       } else {
                         setIsCreateUserDrawerOpen(false);
+                        setCreateUserError(null);
                       }
                     }}
                     disabled={isCreatingUser}
                   >
                     Cancelar
                   </Button>
-                  <Button appearance="primary" onClick={handleCreateUser} disabled={isCreatingUser}>
+                  <Button appearance="primary" onClick={handleCreateUser} disabled={isCreatingUser} loading={isCreatingUser}>
                     {isCreatingUser ? 'Creando...' : 'Crear'}
                   </Button>
                 </div>

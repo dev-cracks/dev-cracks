@@ -41,6 +41,7 @@ export interface CreateCustomerRequest {
   phone?: string;
   email?: string;
   parentId?: string;
+  skipDefaultStructure?: boolean;
 }
 
 export interface UpdateCustomerRequest {

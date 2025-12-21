@@ -947,7 +947,7 @@ export const TenantsPage = () => {
           />
         </div>
         <Button
-          appearance="primary"
+          appearance="default"
           icon={<ArrowClockwiseRegular />}
           onClick={async () => {
             await loadTenants();

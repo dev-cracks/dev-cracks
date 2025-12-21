@@ -416,7 +416,7 @@ export const DashboardPage = () => {
         <HomeRegular fontSize={32} />
         <h1 className={styles.title}>Dashboard</h1>
         <Button
-          appearance="primary"
+          appearance="default"
           icon={<ArrowClockwiseRegular />}
           onClick={loadStats}
           disabled={isLoading}
@@ -425,7 +425,7 @@ export const DashboardPage = () => {
           Actualizar
         </Button>
         <Button
-          appearance="secondary"
+          appearance="default"
           icon={<ArrowClockwiseRegular />}
           onClick={loadTreeData}
           disabled={isLoadingTree}
