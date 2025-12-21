@@ -43,7 +43,6 @@ import {
   TeachingPopoverSurface,
   TeachingPopoverHeader,
   TeachingPopoverBody,
-  TeachingPopoverFooter,
 } from '@fluentui/react-teaching-popover';
 import {
   OverlayDrawer,
@@ -79,6 +78,7 @@ import { DetailsSkeleton } from '../components/DetailsSkeleton';
 import { useRibbonMenu } from '../contexts/RibbonMenuContext';
 import { RibbonMenu } from '../components/RibbonMenu';
 import { useAuth } from '../hooks/useAuth';
+import { UserDetailsView } from '../components/UserDetailsView';
 
 // Helper para convertir rol a texto en español
 function getRoleLabel(role: 'Admin' | 'User'): string {
@@ -150,6 +150,8 @@ export const UsersPage = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isDetailsLoading, setIsDetailsLoading] = useState(false);
+  const [isUserDetailsViewOpen, setIsUserDetailsViewOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [isCreateDrawerLoading, setIsCreateDrawerLoading] = useState(false);
   const [isEditDrawerLoading, setIsEditDrawerLoading] = useState(false);
   const [isCustomerDetailsDialogOpen, setIsCustomerDetailsDialogOpen] = useState(false);
@@ -165,6 +167,7 @@ export const UsersPage = () => {
   const [isAssigning, setIsAssigning] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
   const [editAvailableOffices, setEditAvailableOffices] = useState<OfficeDto[]>([]);
+  const [createAvailableOffices, setCreateAvailableOffices] = useState<OfficeDto[]>([]);
 
   const isLoadingRef = useRef(false);
   const hasLoadedRef = useRef(false);
@@ -335,40 +338,8 @@ export const UsersPage = () => {
 
   const handleEdit = async (user: UserDto) => {
     setSelectedUser(user);
-    
-    // Obtener la primera sede del usuario si tiene sedes asociadas
-    let initialOfficeId = '';
-    const userOfficesList = userOffices[user.id] || [];
-    if (userOfficesList.length > 0) {
-      initialOfficeId = userOfficesList[0].id;
-    }
-    
-    setFormData({
-      email: user.email,
-      name: user.name || '',
-      role: user.role,
-      tenantId: user.tenantId || '',
-      customerId: user.customerId || '',
-      officeId: initialOfficeId,
-      contactEmail: user.contactEmail || '',
-      phone: user.phone || '',
-      auth0Id: user.auth0Id || '',
-    });
-    
-    // Cargar sedes del tenant actual si existe
-    if (user.tenantId) {
-      try {
-        const offices = await officeService.getOfficesByTenant(user.tenantId);
-        setEditAvailableOffices(offices);
-      } catch (err: any) {
-        console.error('[UsersPage] Error cargando sedes:', err);
-        setEditAvailableOffices([]);
-      }
-    } else {
-      setEditAvailableOffices([]);
-    }
-    
-    setIsEditDialogOpen(true);
+    setIsEditMode(true);
+    setIsUserDetailsViewOpen(true);
   };
 
   const handleCreate = async () => {
@@ -377,17 +348,18 @@ export const UsersPage = () => {
       return;
     }
 
-    if (!formData.auth0Id.trim()) {
-      setError('El Auth0 ID es requerido');
-      return;
-    }
-
     try {
       setError(null);
       setIsCreating(true);
-      await userService.createUser(formData);
+      // Si no se proporciona auth0Id, el backend lo creará automáticamente en Auth0
+      const userRequest = {
+        ...formData,
+        auth0Id: formData.auth0Id?.trim() || undefined,
+      };
+      await userService.createUser(userRequest);
       setIsCreateDialogOpen(false);
       setIsCreating(false);
+      setCreateAvailableOffices([]);
       setFormData({
         email: '',
         name: '',
@@ -479,7 +451,8 @@ export const UsersPage = () => {
 
   const handleViewDetails = (user: UserDto) => {
     setSelectedUser(user);
-    setIsDetailsDialogOpen(true);
+    setIsEditMode(false);
+    setIsUserDetailsViewOpen(true);
   };
 
   const handleViewCustomerDetails = async (customerId: string) => {
@@ -928,7 +901,6 @@ export const UsersPage = () => {
                                       ))}
                                     </div>
                                   </TeachingPopoverBody>
-                                  <TeachingPopoverFooter primaryButton={{ text: 'Cerrar' }} />
                                 </TeachingPopoverSurface>
                               </TeachingPopover>
                             ) : (
@@ -990,7 +962,6 @@ export const UsersPage = () => {
                                       </Table>
                                     </div>
                                   </TeachingPopoverBody>
-                                  <TeachingPopoverFooter primaryButton={{ text: 'Cerrar' }} />
                                 </TeachingPopoverSurface>
                               </TeachingPopover>
                             ) : (
@@ -1086,7 +1057,12 @@ export const UsersPage = () => {
         size="large"
         open={isCreateDialogOpen}
         modalType="alert"
-        onOpenChange={(_, data) => setIsCreateDialogOpen(data.open)}
+        onOpenChange={(_, data) => {
+          setIsCreateDialogOpen(data.open);
+          if (!data.open) {
+            setCreateAvailableOffices([]);
+          }
+        }}
       >
         <DrawerHeader>
           <DrawerHeaderTitle 
@@ -1133,10 +1109,18 @@ export const UsersPage = () => {
                 <Field label="Tenant" className={styles.formField}>
                   <Combobox
                     value={formData.tenantId ? tenants.find((t) => t.id === formData.tenantId)?.name || '' : ''}
-                    onOptionSelect={(_, data) => {
+                    onOptionSelect={async (_, data) => {
                       const tenant = tenants.find((t) => t.name === data.optionValue);
                       if (tenant) {
-                        setFormData({ ...formData, tenantId: tenant.id });
+                        setFormData({ ...formData, tenantId: tenant.id, officeId: '' });
+                        // Cargar sedes del tenant seleccionado
+                        try {
+                          const offices = await officeService.getOfficesByTenant(tenant.id);
+                          setCreateAvailableOffices(offices);
+                        } catch (err: any) {
+                          console.error('[UsersPage] Error cargando sedes:', err);
+                          setCreateAvailableOffices([]);
+                        }
                       }
                     }}
                   >
@@ -1147,6 +1131,31 @@ export const UsersPage = () => {
                     ))}
                   </Combobox>
                 </Field>
+                {formData.tenantId && (
+                  <Field label="Sede" className={styles.formField}>
+                    <Combobox
+                      value={formData.officeId ? createAvailableOffices.find((o) => o.id === formData.officeId)?.name || '' : ''}
+                      onOptionSelect={(_, data) => {
+                        const office = createAvailableOffices.find((o) => o.name === data.optionValue);
+                        if (office) {
+                          setFormData({ ...formData, officeId: office.id });
+                        }
+                      }}
+                    >
+                      {createAvailableOffices.length > 0 ? (
+                        createAvailableOffices.map((office) => (
+                          <Option key={office.id} value={office.name}>
+                            {office.name} {office.city ? `- ${office.city}` : ''}
+                          </Option>
+                        ))
+                      ) : (
+                        <Option value="" disabled>
+                          No hay sedes disponibles para este tenant
+                        </Option>
+                      )}
+                    </Combobox>
+                  </Field>
+                )}
                 <Field label="Email de Contacto" className={styles.formField}>
                   <Input
                     type="email"
@@ -1154,11 +1163,11 @@ export const UsersPage = () => {
                     onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
                   />
                 </Field>
-                <Field label="Auth0 ID" required className={styles.formField}>
+                <Field label="Auth0 ID (opcional)" className={styles.formField}>
                   <Input
                     value={formData.auth0Id}
                     onChange={(e) => setFormData({ ...formData, auth0Id: e.target.value })}
-                    placeholder="auth0|..."
+                    placeholder="Se generará automáticamente si se deja vacío"
                   />
                 </Field>
                 <Field label="Teléfono" className={styles.formField}>
@@ -1704,6 +1713,25 @@ export const UsersPage = () => {
           </div>
         </DrawerBody>
       </OverlayDrawer>
+
+      {/* Vista de detalles/edición con tabs */}
+      <UserDetailsView
+        user={selectedUser}
+        isOpen={isUserDetailsViewOpen}
+        onClose={() => {
+          setIsUserDetailsViewOpen(false);
+          setSelectedUser(null);
+          setIsEditMode(false);
+        }}
+        onUserUpdated={async () => {
+          await loadUsers();
+          // Recargar asociaciones del usuario si está seleccionado
+          if (selectedUser) {
+            await loadUserAssociations(selectedUser.id);
+          }
+        }}
+        isEditMode={isEditMode}
+      />
     </div>
   );
 };

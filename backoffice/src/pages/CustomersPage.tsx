@@ -54,7 +54,6 @@ import {
   TeachingPopoverSurface,
   TeachingPopoverHeader,
   TeachingPopoverBody,
-  TeachingPopoverFooter,
 } from '@fluentui/react-teaching-popover';
 import {
   useRestoreFocusSource,
@@ -132,33 +131,67 @@ function getRoleLabel(role: 'Admin' | 'User'): string {
 const UsersListByTenantAndOffice = ({ users }: { users: UserDto[] }) => {
   const [tenantsMap, setTenantsMap] = useState<Map<string, TenantDto>>(new Map());
   const [officesMap, setOfficesMap] = useState<Map<string, OfficeDto[]>>(new Map());
+  const [userTenantsMap, setUserTenantsMap] = useState<Map<string, string[]>>(new Map()); // userId -> tenantIds[]
+  const [userOfficesMap, setUserOfficesMap] = useState<Map<string, string[]>>(new Map()); // userId -> officeIds[]
   const [isLoading, setIsLoading] = useState(true);
+  const [openPopoverOfficeId, setOpenPopoverOfficeId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setIsLoading(true);
-        const tenantIds = [...new Set(users.map(u => u.tenantId).filter(Boolean) as string[])];
         
-        // Cargar información de tenants y sedes
-        const tenantsPromises = tenantIds.map(id => tenantService.getTenantById(id));
+        // Obtener tenants y sedes relacionados mediante las tablas de relación
+        const userTenantsPromises = users.map(user => userService.getUserTenants(user.id));
+        const userTenantsArrays = await Promise.all(userTenantsPromises);
+        
+        // Crear mapa de usuario -> tenantIds
+        const newUserTenantsMap = new Map<string, string[]>();
+        const allTenantIds = new Set<string>();
+        userTenantsArrays.forEach((tenants: any[], index: number) => {
+          const userId = users[index].id;
+          const tenantIds = tenants.map((t: any) => t.id || t.tenantId);
+          newUserTenantsMap.set(userId, tenantIds);
+          tenantIds.forEach((id: string) => allTenantIds.add(id));
+        });
+        setUserTenantsMap(newUserTenantsMap);
+        
+        // Obtener sedes relacionadas mediante las tablas de relación
+        const userOfficesPromises = users.map(user => userService.getUserOffices(user.id));
+        const userOfficesArrays = await Promise.all(userOfficesPromises);
+        
+        // Crear mapa de usuario -> officeIds
+        const newUserOfficesMap = new Map<string, string[]>();
+        const allOfficeIds = new Set<string>();
+        userOfficesArrays.forEach((offices: any[], index: number) => {
+          const userId = users[index].id;
+          const officeIds = offices.map((o: any) => o.id || o.officeId);
+          newUserOfficesMap.set(userId, officeIds);
+          officeIds.forEach((id: string) => allOfficeIds.add(id));
+        });
+        setUserOfficesMap(newUserOfficesMap);
+        
+        // Cargar información de tenants
+        const tenantIdsArray = Array.from(allTenantIds);
+        const tenantsPromises = tenantIdsArray.map(id => tenantService.getTenantById(id));
         const tenants = await Promise.all(tenantsPromises);
         
-        const tenantsMap = new Map<string, TenantDto>();
+        const tenantsMapData = new Map<string, TenantDto>();
         tenants.forEach(tenant => {
-          if (tenant) tenantsMap.set(tenant.id, tenant);
+          if (tenant) tenantsMapData.set(tenant.id, tenant);
         });
 
-        const officesPromises = tenantIds.map(id => officeService.getOfficesByTenant(id));
+        // Cargar información de sedes
+        const officesPromises = tenantIdsArray.map(id => officeService.getOfficesByTenant(id));
         const officesArrays = await Promise.all(officesPromises);
         
-        const officesMap = new Map<string, OfficeDto[]>();
-        tenantIds.forEach((id, index) => {
-          officesMap.set(id, officesArrays[index] || []);
+        const officesMapData = new Map<string, OfficeDto[]>();
+        tenantIdsArray.forEach((id, index) => {
+          officesMapData.set(id, officesArrays[index] || []);
         });
 
-        setTenantsMap(tenantsMap);
-        setOfficesMap(officesMap);
+        setTenantsMap(tenantsMapData);
+        setOfficesMap(officesMapData);
       } catch (err) {
         console.error('Error cargando datos de tenants y sedes:', err);
       } finally {
@@ -181,14 +214,38 @@ const UsersListByTenantAndOffice = ({ users }: { users: UserDto[] }) => {
     return <Text>No hay usuarios asociados a este cliente.</Text>;
   }
 
-  // Agrupar usuarios por tenant
+  // Agrupar usuarios por tenant usando las relaciones
   const usersByTenant = new Map<string, UserDto[]>();
   users.forEach(user => {
-    const tenantId = user.tenantId || 'sin-tenant';
-    if (!usersByTenant.has(tenantId)) {
-      usersByTenant.set(tenantId, []);
+    const tenantIds = userTenantsMap.get(user.id) || [];
+    if (tenantIds.length === 0) {
+      // Si no tiene tenants relacionados, ponerlo en "sin-tenant"
+      const tenantId = 'sin-tenant';
+      if (!usersByTenant.has(tenantId)) {
+        usersByTenant.set(tenantId, []);
+      }
+      usersByTenant.get(tenantId)!.push(user);
+    } else {
+      // Agregar el usuario a cada tenant relacionado
+      tenantIds.forEach(tenantId => {
+        if (!usersByTenant.has(tenantId)) {
+          usersByTenant.set(tenantId, []);
+        }
+        usersByTenant.get(tenantId)!.push(user);
+      });
     }
-    usersByTenant.get(tenantId)!.push(user);
+  });
+
+  // Agrupar usuarios por officeId usando las relaciones
+  const usersByOffice = new Map<string, UserDto[]>();
+  users.forEach(user => {
+    const officeIds = userOfficesMap.get(user.id) || [];
+    officeIds.forEach(officeId => {
+      if (!usersByOffice.has(officeId)) {
+        usersByOffice.set(officeId, []);
+      }
+      usersByOffice.get(officeId)!.push(user);
+    });
   });
 
   return (
@@ -205,14 +262,90 @@ const UsersListByTenantAndOffice = ({ users }: { users: UserDto[] }) => {
             
             {offices.length > 0 && (
               <div style={{ marginLeft: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalS }}>
-                <Text size={200} style={{ marginBottom: tokens.spacingVerticalXS }}>
-                  Sedes:
-                </Text>
-                {offices.map(office => (
-                  <Text key={office.id} size={200} style={{ marginLeft: tokens.spacingHorizontalM }}>
-                    • {office.name} {office.city ? `(${office.city})` : ''}
+                <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS, marginBottom: tokens.spacingVerticalXS }}>
+                  <Text size={200}>
+                    Sedes:
                   </Text>
-                ))}
+                  <CounterBadge count={offices.length} />
+                </div>
+                {offices.map(office => {
+                  const officeUsers = usersByOffice.get(office.id) || [];
+                  const hasUsers = officeUsers.length > 0;
+
+                  return (
+                    <div key={office.id} style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS, marginLeft: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalXXS }}>
+                      <Text size={200}>
+                        • {office.name} {office.city ? `(${office.city})` : ''}
+                      </Text>
+                      {!hasUsers && (
+                        <TeachingPopover
+                          open={openPopoverOfficeId === office.id}
+                          onOpenChange={(_, data) => {
+                            setOpenPopoverOfficeId(data.open ? office.id : null);
+                          }}
+                        >
+                          <TeachingPopoverTrigger disableButtonEnhancement>
+                            <Button
+                              appearance="subtle"
+                              icon={<LinkRegular />}
+                              size="small"
+                              style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
+                            />
+                          </TeachingPopoverTrigger>
+                          <TeachingPopoverSurface>
+                            <TeachingPopoverHeader>
+                              Usuarios disponibles para vincular a: {office.name}
+                            </TeachingPopoverHeader>
+                            <TeachingPopoverBody>
+                              {users.length === 0 ? (
+                                <Text>No hay usuarios disponibles para vincular.</Text>
+                              ) : (
+                                <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                                  <Table size="small">
+                                    <TableHeader>
+                                      <TableRow>
+                                        <TableHeaderCell style={{ width: '60%', minWidth: '200px' }}>Usuario</TableHeaderCell>
+                                        <TableHeaderCell style={{ width: '20%' }}>Rol</TableHeaderCell>
+                                        <TableHeaderCell style={{ width: '20%' }}>Estado</TableHeaderCell>
+                                      </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                      {users.map(user => (
+                                        <TableRow key={user.id}>
+                                          <TableCell style={{ width: '60%', minWidth: '200px' }}>
+                                            <Persona
+                                              name={user.name || user.email || 'N/A'}
+                                              secondaryText={user.contactEmail || user.email || 'Sin email'}
+                                              size="small"
+                                            />
+                                          </TableCell>
+                                          <TableCell style={{ width: '20%' }}>
+                                            <Badge appearance="outline" size="small">
+                                              {user.role === 'Admin' ? 'Admin' : 'User'}
+                                            </Badge>
+                                          </TableCell>
+                                          <TableCell style={{ width: '20%' }}>
+                                            {user.isSuspended ? (
+                                              <Badge appearance="filled" color="danger" size="small">Suspendido</Badge>
+                                            ) : user.isActive ? (
+                                              <Badge appearance="filled" color="success" size="small">Activo</Badge>
+                                            ) : (
+                                              <Badge appearance="outline" size="small">Inactivo</Badge>
+                                            )}
+                                          </TableCell>
+                                        </TableRow>
+                                      ))}
+                                    </TableBody>
+                                  </Table>
+                                </div>
+                              )}
+                            </TeachingPopoverBody>
+                          </TeachingPopoverSurface>
+                        </TeachingPopover>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
 
@@ -393,7 +526,7 @@ const useStyles = makeStyles({
   },
   treeHeaderContent: {
     display: 'grid',
-    gridTemplateColumns: '32px 60px 180px 160px 120px 120px 130px 180px 110px 70px 70px 80px 100px',
+    gridTemplateColumns: '32px 60px 180px 160px 120px 120px 130px 180px 70px 70px 80px 110px 100px',
     alignItems: 'center',
     width: '100%',
     ...shorthands.gap(tokens.spacingHorizontalS),
@@ -404,7 +537,7 @@ const useStyles = makeStyles({
   },
   treeRowContent: {
     display: 'grid',
-    gridTemplateColumns: '32px 60px 180px 160px 120px 120px 130px 180px 110px 70px 70px 80px 100px',
+    gridTemplateColumns: '32px 60px 180px 160px 120px 120px 130px 180px 70px 70px 80px 110px 100px',
     alignItems: 'center',
     width: '100%',
     ...shorthands.gap(tokens.spacingHorizontalS),
@@ -645,6 +778,8 @@ export const CustomersPage = () => {
   const [usersForPopover, setUsersForPopover] = useState<UserDto[]>([]);
   const [isLoadingUsersForPopover, setIsLoadingUsersForPopover] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState<string | null>(null);
+  const [contactPopoverOpen, setContactPopoverOpen] = useState<string | null>(null);
+  const [officeContactPopoverOpen, setOfficeContactPopoverOpen] = useState<string | null>(null);
 
   const isLoadingRef = useRef(false);
   const hasLoadedRef = useRef(false);
@@ -1071,14 +1206,19 @@ export const CustomersPage = () => {
             <div className={styles.treeCell} style={{ minWidth: '120px' }}>{node.city || 'N/A'}</div>
             <div className={styles.treeCell} style={{ minWidth: '130px' }}>{node.phone || 'N/A'}</div>
             <div className={styles.treeCell} style={{ minWidth: '180px' }}>{node.email || 'N/A'}</div>
-            <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '110px' }}>
-              {node.isSuspended ? (
-                <Badge appearance="filled" color="danger">Suspendido</Badge>
-              ) : node.isActive ? (
-                <Badge appearance="filled" color="success">Activo</Badge>
-              ) : (
-                <Badge appearance="outline">Inactivo</Badge>
-              )}
+            <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '70px' }}>
+              <Button
+                appearance="subtle"
+                onClick={() => handleViewTenants(node)}
+                style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
+              >
+                <CounterBadge 
+                  count={node.tenantCount || 0} 
+                  size="medium" 
+                  appearance="filled" 
+                  color={(node.tenantCount || 0) === 0 ? 'informative' : 'brand'} 
+                />
+              </Button>
             </div>
             <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '70px' }}>
               <Button
@@ -1094,20 +1234,6 @@ export const CustomersPage = () => {
                 />
               </Button>
             </div>
-            <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '70px' }}>
-              <Button
-                appearance="subtle"
-                onClick={() => handleViewTenants(node)}
-                style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
-              >
-                <CounterBadge 
-                  count={node.tenantCount || 0} 
-                  size="medium" 
-                  appearance="filled" 
-                  color={(node.tenantCount || 0) === 0 ? 'informative' : 'brand'} 
-                />
-              </Button>
-            </div>
             <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '80px' }}>
               <CounterBadge 
                 count={node.userCount || 0} 
@@ -1115,6 +1241,15 @@ export const CustomersPage = () => {
                 appearance="filled" 
                 color={(node.userCount || 0) === 0 ? 'informative' : 'brand'} 
               />
+            </div>
+            <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '110px' }}>
+              {node.isSuspended ? (
+                <Badge appearance="filled" color="danger">Suspendido</Badge>
+              ) : node.isActive ? (
+                <Badge appearance="filled" color="success">Activo</Badge>
+              ) : (
+                <Badge appearance="outline">Inactivo</Badge>
+              )}
             </div>
             <div className={styles.treeCell}>
               <Menu>
@@ -1738,18 +1873,15 @@ export const CustomersPage = () => {
       return;
     }
 
-    if (!userFormData.auth0Id.trim()) {
-      setError('El Auth0 ID es requerido');
-      return;
-    }
-
     try {
       setError(null);
       setIsCreatingUser(true);
       // Incluir el officeId seleccionado en el request
+      // Si no se proporciona auth0Id, el backend lo creará automáticamente en Auth0
       const userRequest = {
         ...userFormData,
         officeId: selectedOfficeId || undefined,
+        auth0Id: userFormData.auth0Id?.trim() || undefined,
       };
       await userService.createUser(userRequest);
       setIsCreateUserDrawerOpen(false);
@@ -2267,10 +2399,10 @@ export const CustomersPage = () => {
                   <TableHeaderCell style={{ width: 'auto', minWidth: '120px' }}>Ciudad</TableHeaderCell>
                   <TableHeaderCell style={{ width: 'auto', minWidth: '130px' }}>Teléfono</TableHeaderCell>
                   <TableHeaderCell style={{ width: 'auto', minWidth: '180px' }}>Email</TableHeaderCell>
-                  <TableHeaderCell style={{ width: 'auto', minWidth: '110px' }}>Estado</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '80px', minWidth: '80px' }}>Sedes</TableHeaderCell>
                   <TableHeaderCell style={{ width: '80px', minWidth: '80px' }}>Tenants</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '80px', minWidth: '80px' }}>Sedes</TableHeaderCell>
                   <TableHeaderCell style={{ width: '80px', minWidth: '80px' }}>Usuarios</TableHeaderCell>
+                  <TableHeaderCell style={{ width: 'auto', minWidth: '110px' }}>Estado</TableHeaderCell>
                   <TableHeaderCell style={{ width: '120px', minWidth: '120px' }}>Acciones</TableHeaderCell>
                 </TableRow>
               </TableHeader>
@@ -2324,30 +2456,97 @@ export const CustomersPage = () => {
                       <TableCell>{customer.identification}</TableCell>
                       <TableCell>{customer.countryName || 'N/A'}</TableCell>
                       <TableCell>{customer.city || 'N/A'}</TableCell>
-                      <TableCell>{customer.phone || 'N/A'}</TableCell>
-                      <TableCell>{customer.email || 'N/A'}</TableCell>
                       <TableCell>
-                        {customer.isSuspended ? (
-                          <Badge appearance="filled" color="danger">Suspendido</Badge>
-                        ) : customer.isActive ? (
-                          <Badge appearance="filled" color="success">Activo</Badge>
+                        {customer.phone ? (
+                          <TeachingPopover
+                            open={contactPopoverOpen === `${customer.id}-phone`}
+                            onOpenChange={(_, data) => {
+                              setContactPopoverOpen(data.open ? `${customer.id}-phone` : null);
+                            }}
+                          >
+                            <TeachingPopoverTrigger disableButtonEnhancement>
+                              <Button
+                                appearance="subtle"
+                                style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto', textDecoration: 'underline' }}
+                              >
+                                {customer.phone}
+                              </Button>
+                            </TeachingPopoverTrigger>
+                            <TeachingPopoverSurface>
+                              <TeachingPopoverHeader>
+                                Datos de Contacto: {customer.name}
+                              </TeachingPopoverHeader>
+                              <TeachingPopoverBody>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM }}>
+                                  <div>
+                                    <Text weight="semibold">Teléfono:</Text>
+                                    <Text>{customer.phone || 'N/A'}</Text>
+                                  </div>
+                                  <div>
+                                    <Text weight="semibold">Email:</Text>
+                                    <Text>{customer.email || 'N/A'}</Text>
+                                  </div>
+                                  <div>
+                                    <Text weight="semibold">Ciudad:</Text>
+                                    <Text>{customer.city || 'N/A'}</Text>
+                                  </div>
+                                  <div>
+                                    <Text weight="semibold">Dirección:</Text>
+                                    <Text>N/A</Text>
+                                  </div>
+                                </div>
+                              </TeachingPopoverBody>
+                            </TeachingPopoverSurface>
+                          </TeachingPopover>
                         ) : (
-                          <Badge appearance="outline">Inactivo</Badge>
+                          'N/A'
                         )}
                       </TableCell>
                       <TableCell>
-                        <Button
-                          appearance="subtle"
-                          onClick={() => handleViewOffices(customer)}
-                          style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
-                        >
-                          <CounterBadge 
-                            count={customer.officeCount || 0} 
-                            size="medium" 
-                            appearance="filled" 
-                            color={(customer.officeCount || 0) === 0 ? 'informative' : 'brand'} 
-                          />
-                        </Button>
+                        {customer.email ? (
+                          <TeachingPopover
+                            open={contactPopoverOpen === `${customer.id}-email`}
+                            onOpenChange={(_, data) => {
+                              setContactPopoverOpen(data.open ? `${customer.id}-email` : null);
+                            }}
+                          >
+                            <TeachingPopoverTrigger disableButtonEnhancement>
+                              <Button
+                                appearance="subtle"
+                                style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto', textDecoration: 'underline' }}
+                              >
+                                {customer.email}
+                              </Button>
+                            </TeachingPopoverTrigger>
+                            <TeachingPopoverSurface>
+                              <TeachingPopoverHeader>
+                                Datos de Contacto: {customer.name}
+                              </TeachingPopoverHeader>
+                              <TeachingPopoverBody>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM }}>
+                                  <div>
+                                    <Text weight="semibold">Teléfono:</Text>
+                                    <Text>{customer.phone || 'N/A'}</Text>
+                                  </div>
+                                  <div>
+                                    <Text weight="semibold">Email:</Text>
+                                    <Text>{customer.email || 'N/A'}</Text>
+                                  </div>
+                                  <div>
+                                    <Text weight="semibold">Ciudad:</Text>
+                                    <Text>{customer.city || 'N/A'}</Text>
+                                  </div>
+                                  <div>
+                                    <Text weight="semibold">Dirección:</Text>
+                                    <Text>N/A</Text>
+                                  </div>
+                                </div>
+                              </TeachingPopoverBody>
+                            </TeachingPopoverSurface>
+                          </TeachingPopover>
+                        ) : (
+                          'N/A'
+                        )}
                       </TableCell>
                       <TableCell>
                         <Button
@@ -2360,6 +2559,20 @@ export const CustomersPage = () => {
                             size="medium" 
                             appearance="filled" 
                             color={(customer.tenantCount || 0) === 0 ? 'informative' : 'brand'} 
+                          />
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          appearance="subtle"
+                          onClick={() => handleViewOffices(customer)}
+                          style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
+                        >
+                          <CounterBadge 
+                            count={customer.officeCount || 0} 
+                            size="medium" 
+                            appearance="filled" 
+                            color={(customer.officeCount || 0) === 0 ? 'informative' : 'brand'} 
                           />
                         </Button>
                       </TableCell>
@@ -2420,13 +2633,19 @@ export const CustomersPage = () => {
                                     <UsersListByTenantAndOffice users={usersForPopover} />
                                   )}
                                 </TeachingPopoverBody>
-                                <TeachingPopoverFooter>
-                                  <Button onClick={() => setPopoverOpen(null)}>Cerrar</Button>
-                                </TeachingPopoverFooter>
                               </TeachingPopoverSurface>
                             </TeachingPopover>
                           );
                         })()}
+                      </TableCell>
+                      <TableCell>
+                        {customer.isSuspended ? (
+                          <Badge appearance="filled" color="danger">Suspendido</Badge>
+                        ) : customer.isActive ? (
+                          <Badge appearance="filled" color="success">Activo</Badge>
+                        ) : (
+                          <Badge appearance="outline">Inactivo</Badge>
+                        )}
                       </TableCell>
                       <TableCell>
                         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS }}>
@@ -2698,11 +2917,13 @@ export const CustomersPage = () => {
                 </Combobox>
               </Field>
             )}
-            <MessageBar intent="info" style={{ marginTop: tokens.spacingVerticalM }}>
-              <MessageBarBody>
-                Se creará automáticamente un tenant para este cliente.
-              </MessageBarBody>
-            </MessageBar>
+            {!hasParent && (
+              <MessageBar intent="info" style={{ marginTop: tokens.spacingVerticalM }}>
+                <MessageBarBody>
+                  Se creará automáticamente un tenant para este cliente.
+                </MessageBarBody>
+              </MessageBar>
+            )}
             <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
               <Button 
                 appearance="secondary" 
@@ -3089,7 +3310,7 @@ export const CustomersPage = () => {
           <DialogBody>
             <DialogContent>
               {isLoadingUsers ? (
-                <TableSkeleton rows={5} columns={4} />
+                <TableSkeleton rows={5} columns={3} />
               ) : customerUsers.length === 0 ? (
                 <Text>No hay usuarios asociados a este cliente.</Text>
               ) : (
@@ -3098,7 +3319,6 @@ export const CustomersPage = () => {
                     <TableRow>
                       <TableHeaderCell>Nombre</TableHeaderCell>
                       <TableHeaderCell>Contact Email</TableHeaderCell>
-                      <TableHeaderCell>Tenant</TableHeaderCell>
                       <TableHeaderCell>Rol</TableHeaderCell>
                     </TableRow>
                   </TableHeader>
@@ -3107,20 +3327,6 @@ export const CustomersPage = () => {
                       <TableRow key={user.id}>
                         <TableCell>{user.name || 'N/A'}</TableCell>
                         <TableCell>{user.contactEmail || user.email || 'N/A'}</TableCell>
-                        <TableCell>
-                          {user.tenantId ? (
-                            <Button
-                              appearance="subtle"
-                              icon={<LinkRegular />}
-                              onClick={() => handleViewTenantInfo(user.tenantId!)}
-                              style={{ textDecoration: 'underline', cursor: 'pointer' }}
-                            >
-                              Ver Tenant
-                            </Button>
-                          ) : (
-                            'N/A'
-                          )}
-                        </TableCell>
                         <TableCell>{getRoleLabel(user.role)}</TableCell>
                       </TableRow>
                     ))}
@@ -3144,7 +3350,7 @@ export const CustomersPage = () => {
           <DialogBody>
             <DialogContent>
               {isLoadingTenants ? (
-                <TableSkeleton rows={5} columns={3} />
+                <TableSkeleton rows={5} columns={4} />
               ) : customerTenants.length === 0 ? (
                 <Text>No hay tenants asociados a este cliente.</Text>
               ) : (
@@ -3152,14 +3358,16 @@ export const CustomersPage = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHeaderCell>Nombre</TableHeaderCell>
-                      <TableHeaderCell>Estado</TableHeaderCell>
                       <TableHeaderCell>Creado</TableHeaderCell>
+                      <TableHeaderCell>Estado</TableHeaderCell>
+                      <TableHeaderCell>Acciones</TableHeaderCell>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {customerTenants.map((tenant) => (
                       <TableRow key={tenant.id}>
                         <TableCell>{tenant.name}</TableCell>
+                        <TableCell>{new Date(tenant.createdAt).toLocaleDateString()}</TableCell>
                         <TableCell>
                           {tenant.isSuspended ? (
                             <Badge appearance="filled" color="danger">Suspendido</Badge>
@@ -3169,7 +3377,16 @@ export const CustomersPage = () => {
                             <Badge appearance="outline">Inactivo</Badge>
                           )}
                         </TableCell>
-                        <TableCell>{new Date(tenant.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <Button
+                            appearance="subtle"
+                            icon={<EyeRegular />}
+                            onClick={() => handleViewTenantInfo(tenant.id)}
+                            style={{ cursor: 'pointer' }}
+                          >
+                            Ver detalles
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -3321,7 +3538,7 @@ export const CustomersPage = () => {
           <DialogBody>
             <DialogContent>
               {isLoadingOffices ? (
-                <TableSkeleton rows={5} columns={4} />
+                <TableSkeleton rows={5} columns={6} />
               ) : customerOffices.length === 0 ? (
                 <Text>No hay sedes asociadas a este cliente.</Text>
               ) : (
@@ -3331,6 +3548,8 @@ export const CustomersPage = () => {
                       <TableHeaderCell>Nombre</TableHeaderCell>
                       <TableHeaderCell>Dirección</TableHeaderCell>
                       <TableHeaderCell>Ciudad</TableHeaderCell>
+                      <TableHeaderCell>Teléfono</TableHeaderCell>
+                      <TableHeaderCell>Email</TableHeaderCell>
                       <TableHeaderCell>Estado</TableHeaderCell>
                     </TableRow>
                   </TableHeader>
@@ -3340,6 +3559,98 @@ export const CustomersPage = () => {
                         <TableCell>{office.name}</TableCell>
                         <TableCell>{office.address || 'N/A'}</TableCell>
                         <TableCell>{office.city || 'N/A'}</TableCell>
+                        <TableCell>
+                          {office.phone ? (
+                            <TeachingPopover
+                              open={officeContactPopoverOpen === `${office.id}-phone`}
+                              onOpenChange={(_, data) => {
+                                setOfficeContactPopoverOpen(data.open ? `${office.id}-phone` : null);
+                              }}
+                            >
+                              <TeachingPopoverTrigger disableButtonEnhancement>
+                                <Button
+                                  appearance="subtle"
+                                  style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto', textDecoration: 'underline' }}
+                                >
+                                  {office.phone}
+                                </Button>
+                              </TeachingPopoverTrigger>
+                              <TeachingPopoverSurface>
+                                <TeachingPopoverHeader>
+                                  Datos de Contacto: {office.name}
+                                </TeachingPopoverHeader>
+                                <TeachingPopoverBody>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM }}>
+                                    <div>
+                                      <Text weight="semibold">Teléfono:</Text>
+                                      <Text>{office.phone || 'N/A'}</Text>
+                                    </div>
+                                    <div>
+                                      <Text weight="semibold">Email:</Text>
+                                      <Text>{office.email || 'N/A'}</Text>
+                                    </div>
+                                    <div>
+                                      <Text weight="semibold">Ciudad:</Text>
+                                      <Text>{office.city || 'N/A'}</Text>
+                                    </div>
+                                    <div>
+                                      <Text weight="semibold">Dirección:</Text>
+                                      <Text>{office.address || 'N/A'}</Text>
+                                    </div>
+                                  </div>
+                                </TeachingPopoverBody>
+                              </TeachingPopoverSurface>
+                            </TeachingPopover>
+                          ) : (
+                            'N/A'
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {office.email ? (
+                            <TeachingPopover
+                              open={officeContactPopoverOpen === `${office.id}-email`}
+                              onOpenChange={(_, data) => {
+                                setOfficeContactPopoverOpen(data.open ? `${office.id}-email` : null);
+                              }}
+                            >
+                              <TeachingPopoverTrigger disableButtonEnhancement>
+                                <Button
+                                  appearance="subtle"
+                                  style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto', textDecoration: 'underline' }}
+                                >
+                                  {office.email}
+                                </Button>
+                              </TeachingPopoverTrigger>
+                              <TeachingPopoverSurface>
+                                <TeachingPopoverHeader>
+                                  Datos de Contacto: {office.name}
+                                </TeachingPopoverHeader>
+                                <TeachingPopoverBody>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM }}>
+                                    <div>
+                                      <Text weight="semibold">Teléfono:</Text>
+                                      <Text>{office.phone || 'N/A'}</Text>
+                                    </div>
+                                    <div>
+                                      <Text weight="semibold">Email:</Text>
+                                      <Text>{office.email || 'N/A'}</Text>
+                                    </div>
+                                    <div>
+                                      <Text weight="semibold">Ciudad:</Text>
+                                      <Text>{office.city || 'N/A'}</Text>
+                                    </div>
+                                    <div>
+                                      <Text weight="semibold">Dirección:</Text>
+                                      <Text>{office.address || 'N/A'}</Text>
+                                    </div>
+                                  </div>
+                                </TeachingPopoverBody>
+                              </TeachingPopoverSurface>
+                            </TeachingPopover>
+                          ) : (
+                            'N/A'
+                          )}
+                        </TableCell>
                         <TableCell>
                           {office.isSuspended ? (
                             <Badge appearance="filled" color="danger">Suspendido</Badge>
@@ -3999,11 +4310,11 @@ export const CustomersPage = () => {
                     placeholder="Teléfono"
                   />
                 </Field>
-                <Field label="Auth0 ID" required className={styles.formField}>
+                <Field label="Auth0 ID (opcional)" className={styles.formField}>
                   <Input
                     value={userFormData.auth0Id}
                     onChange={(e) => setUserFormData({ ...userFormData, auth0Id: e.target.value })}
-                    placeholder="Auth0 ID"
+                    placeholder="Se generará automáticamente si se deja vacío"
                   />
                 </Field>
                 <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>

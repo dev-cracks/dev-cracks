@@ -44,7 +44,6 @@ import {
   TeachingPopoverSurface,
   TeachingPopoverHeader,
   TeachingPopoverBody,
-  TeachingPopoverFooter,
 } from '@fluentui/react-teaching-popover';
 import {
   OverlayDrawer,
@@ -786,7 +785,6 @@ export const OfficesPage = () => {
                               )}
                             </div>
                           </TeachingPopoverBody>
-                          <TeachingPopoverFooter primaryButton={{ text: 'Cerrar' }} />
                         </TeachingPopoverSurface>
                       </TeachingPopover>
                     ) : (
@@ -827,7 +825,6 @@ export const OfficesPage = () => {
                               ))}
                             </div>
                           </TeachingPopoverBody>
-                          <TeachingPopoverFooter primaryButton={{ text: 'Cerrar' }} />
                         </TeachingPopoverSurface>
                       </TeachingPopover>
                     ) : (

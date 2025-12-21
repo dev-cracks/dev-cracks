@@ -85,6 +85,7 @@ import {
   ArrowSwapRegular,
   BriefcaseRegular,
   ArrowClockwiseRegular,
+  LinkRegular,
 } from '@fluentui/react-icons';
 import {
   TeachingPopover,
@@ -92,13 +93,13 @@ import {
   TeachingPopoverSurface,
   TeachingPopoverHeader,
   TeachingPopoverBody,
-  TeachingPopoverFooter,
 } from '@fluentui/react-teaching-popover';
 import { tenantService, TenantDto, UpdateTenantRequest, CreateTenantRequest } from '../services/tenantService';
 import { UserDto } from '../services/authService';
 import { customerService, CustomerDto } from '../services/customerService';
 import { officeService, OfficeDto } from '../services/officeService';
 import { notificationService } from '../services/notificationService';
+import { userService } from '../services/userService';
 import { TableSkeleton } from '../components/TableSkeleton';
 import { DetailsSkeleton } from '../components/DetailsSkeleton';
 import { FlowSkeleton } from '../components/FlowSkeleton';
@@ -283,6 +284,10 @@ export const TenantsPage = () => {
   const [selectedNewCustomerId, setSelectedNewCustomerId] = useState<string>('');
   const [isChangingCustomer, setIsChangingCustomer] = useState(false);
   const [tenantUsersMap, setTenantUsersMap] = useState<Record<string, UserDto[]>>({});
+  const [customerUsersForPopover, setCustomerUsersForPopover] = useState<UserDto[]>([]);
+  const [isLoadingCustomerUsers, setIsLoadingCustomerUsers] = useState(false);
+  const [popoverOpenForTenant, setPopoverOpenForTenant] = useState<string | null>(null);
+  const [isAssigningUser, setIsAssigningUser] = useState<string | null>(null);
   
   // Form state
   const [formData, setFormData] = useState<CreateTenantRequest>({
@@ -613,6 +618,58 @@ export const TenantsPage = () => {
       setError(err.message || 'Error al cargar usuarios del tenant');
     } finally {
       setIsLoadingUsers(false);
+    }
+  };
+
+  // Cargar usuarios del cliente para el popover
+  const handleLoadCustomerUsers = async (tenant: TenantDto) => {
+    if (!tenant.customerId) {
+      setError('El tenant no tiene un cliente asociado');
+      return;
+    }
+
+    try {
+      setIsLoadingCustomerUsers(true);
+      setError(null);
+      const users = await customerService.getCustomerUsers(tenant.customerId);
+      setCustomerUsersForPopover(users);
+      setPopoverOpenForTenant(tenant.id);
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar usuarios del cliente');
+      setPopoverOpenForTenant(null);
+    } finally {
+      setIsLoadingCustomerUsers(false);
+    }
+  };
+
+  // Asignar usuario al tenant
+  const handleAssignUserToTenant = async (user: UserDto, tenant: TenantDto) => {
+    try {
+      setIsAssigningUser(user.id);
+      setError(null);
+      
+      await userService.updateUser(user.id, {
+        email: user.email,
+        name: user.name || '',
+        role: user.role,
+        tenantId: tenant.id,
+        customerId: tenant.customerId || user.customerId || '',
+        contactEmail: user.contactEmail || '',
+        phone: user.phone || '',
+      });
+
+      // Recargar usuarios del tenant
+      await loadTenantUsers(tenant.id);
+      
+      // Actualizar la lista de usuarios del cliente en el popover
+      if (tenant.customerId) {
+        const updatedUsers = await customerService.getCustomerUsers(tenant.customerId);
+        setCustomerUsersForPopover(updatedUsers);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error al asignar usuario al tenant');
+    } finally {
+      setIsAssigningUser(null);
     }
   };
 
@@ -1070,7 +1127,97 @@ export const TenantsPage = () => {
                                         ))}
                                       </div>
                                     </TeachingPopoverBody>
-                                    <TeachingPopoverFooter primaryButton={{ text: 'Cerrar' }} />
+                                  </TeachingPopoverSurface>
+                                </TeachingPopover>
+                              ) : tenant.customerId ? (
+                                <TeachingPopover
+                                  open={popoverOpenForTenant === tenant.id}
+                                  onOpenChange={(_, data) => {
+                                    setPopoverOpenForTenant(data.open ? tenant.id : null);
+                                    if (!data.open) {
+                                      setCustomerUsersForPopover([]);
+                                    }
+                                  }}
+                                >
+                                  <TeachingPopoverTrigger disableButtonEnhancement>
+                                    <Button
+                                      appearance="subtle"
+                                      icon={<LinkRegular />}
+                                      onClick={() => handleLoadCustomerUsers(tenant)}
+                                      title="Asignar usuarios del cliente"
+                                      style={{
+                                        padding: 0,
+                                        minWidth: 'auto',
+                                        height: 'auto'
+                                      }}
+                                    />
+                                  </TeachingPopoverTrigger>
+                                  <TeachingPopoverSurface>
+                                    <TeachingPopoverHeader>
+                                      Usuarios del Cliente: {tenant.customerName || 'N/A'}
+                                    </TeachingPopoverHeader>
+                                    <TeachingPopoverBody>
+                                      {isLoadingCustomerUsers ? (
+                                        <div style={{ display: 'flex', justifyContent: 'center', padding: tokens.spacingVerticalL }}>
+                                          <Spinner size="small" label="Cargando usuarios..." />
+                                        </div>
+                                      ) : customerUsersForPopover.length === 0 ? (
+                                        <Text>No hay usuarios disponibles en el cliente</Text>
+                                      ) : (
+                                        <div style={{ maxWidth: '600px', maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS }}>
+                                          {customerUsersForPopover.map((user: UserDto) => {
+                                            const tenantUsers = tenantUsersMap[tenant.id] || [];
+                                            const isAssigned = tenantUsers.some((u: UserDto) => u.id === user.id);
+                                            const isAssigning = isAssigningUser === user.id;
+                                            
+                                            return (
+                                              <div
+                                                key={user.id}
+                                                style={{
+                                                  display: 'flex',
+                                                  alignItems: 'center',
+                                                  justifyContent: 'space-between',
+                                                  padding: tokens.spacingVerticalS,
+                                                  ...shorthands.borderRadius(tokens.borderRadiusSmall),
+                                                  backgroundColor: isAssigned ? tokens.colorNeutralBackground2 : 'transparent',
+                                                  cursor: isAssigned ? 'default' : 'pointer',
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                  if (!isAssigned) {
+                                                    e.currentTarget.style.backgroundColor = tokens.colorNeutralBackground2;
+                                                  }
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                  if (!isAssigned) {
+                                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                                  }
+                                                }}
+                                              >
+                                                <Persona
+                                                  name={user.name || user.email}
+                                                  secondaryText={user.email}
+                                                  presence={{ status: user.isActive && !user.isSuspended ? 'available' : 'offline' }}
+                                                />
+                                                {isAssigned ? (
+                                                  <Badge appearance="filled" color="success" size="small">
+                                                    Asignado
+                                                  </Badge>
+                                                ) : (
+                                                  <Button
+                                                    appearance="primary"
+                                                    size="small"
+                                                    onClick={() => handleAssignUserToTenant(user, tenant)}
+                                                    disabled={isAssigning}
+                                                  >
+                                                    {isAssigning ? 'Asignando...' : 'Asignar'}
+                                                  </Button>
+                                                )}
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      )}
+                                    </TeachingPopoverBody>
                                   </TeachingPopoverSurface>
                                 </TeachingPopover>
                               ) : (

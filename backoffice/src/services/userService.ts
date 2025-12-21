@@ -26,7 +26,7 @@ export interface CreateUserRequest {
   role?: 'Admin' | 'User';
   contactEmail?: string;
   phone?: string;
-  auth0Id: string;
+  auth0Id?: string;
 }
 
 export interface UpdateUserRequest {
@@ -83,16 +83,28 @@ export const userService = {
   },
 
   async getUserById(id: string): Promise<UserDto> {
-    const user = await apiService.request<any>(`/backoffice/users/${id}`);
+    // Usar el endpoint /users que requiere rol root
+    const user = await apiService.request<any>(`/users/${id}`);
     return transformUserDto(user);
   },
 
   async createUser(data: CreateUserRequest): Promise<UserDto> {
     // Convertir el rol de string a número para el backend
-    const requestData = {
-      ...data,
+    // Filtrar campos vacíos para que no se envíen como string vacío
+    const requestData: any = {
+      email: data.email,
       role: data.role === 'Admin' ? 1 : (data.role === 'User' ? 0 : undefined),
     };
+    
+    // Solo incluir campos opcionales si tienen valores válidos
+    if (data.name?.trim()) requestData.name = data.name.trim();
+    if (data.tenantId?.trim()) requestData.tenantId = data.tenantId.trim();
+    if (data.customerId?.trim()) requestData.customerId = data.customerId.trim();
+    if (data.officeId?.trim()) requestData.officeId = data.officeId.trim();
+    if (data.contactEmail?.trim()) requestData.contactEmail = data.contactEmail.trim();
+    if (data.phone?.trim()) requestData.phone = data.phone.trim();
+    if (data.auth0Id?.trim()) requestData.auth0Id = data.auth0Id.trim();
+    
     const user = await apiService.request<any>('/backoffice/users', {
       method: 'POST',
       body: JSON.stringify(requestData),
@@ -156,6 +168,34 @@ export const userService = {
 
   async getUserTenants(userId: string): Promise<any[]> {
     return apiService.request<any[]>(`/users/${userId}/tenants`);
+  },
+
+  // Asignar tenant a usuario
+  async assignTenantToUser(userId: string, tenantId: string): Promise<void> {
+    return apiService.request<void>(`/users/${userId}/tenants/${tenantId}`, {
+      method: 'POST',
+    });
+  },
+
+  // Desasignar tenant de usuario
+  async removeTenantFromUser(userId: string, tenantId: string): Promise<void> {
+    return apiService.request<void>(`/users/${userId}/tenants/${tenantId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Asignar oficina a usuario
+  async assignOfficeToUser(userId: string, officeId: string): Promise<void> {
+    return apiService.request<void>(`/users/${userId}/offices/${officeId}`, {
+      method: 'POST',
+    });
+  },
+
+  // Desasignar oficina de usuario
+  async removeOfficeFromUser(userId: string, officeId: string): Promise<void> {
+    return apiService.request<void>(`/users/${userId}/offices/${officeId}`, {
+      method: 'DELETE',
+    });
   },
 };
 
