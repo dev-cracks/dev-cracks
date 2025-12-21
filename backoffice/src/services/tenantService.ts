@@ -101,9 +101,5 @@ export const tenantService = {
   async getTenantsByOffice(officeId: string): Promise<TenantDto[]> {
     return apiService.request<TenantDto[]>(`/tenants/office/${officeId}`);
   },
-
-  async getTenantUsers(tenantId: string): Promise<any[]> {
-    return apiService.request<any[]>(`/tenants/${tenantId}/users`);
-  },
 };
 

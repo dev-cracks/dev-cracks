@@ -252,6 +252,8 @@ export const OfficesPage = () => {
   const [offices, setOffices] = useState<OfficeDto[]>([]);
   const [customers, setCustomers] = useState<CustomerDto[]>([]);
   const [countries, setCountries] = useState<CountryDto[]>([]);
+  const [countrySearchText, setCountrySearchText] = useState('');
+  const [editCountrySearchText, setEditCountrySearchText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -655,7 +657,9 @@ export const OfficesPage = () => {
         postalCode: '',
         phone: '',
         email: '',
+        countryId: '',
       });
+      setCountrySearchText('');
       await loadOffices();
     } catch (err: any) {
       setError(err.message || 'Error al crear sede');
@@ -680,6 +684,7 @@ export const OfficesPage = () => {
       email: office.email || '',
       countryId: office.countryId || '',
     });
+    setEditCountrySearchText('');
     setIsEditDialogOpen(true);
   };
 
@@ -689,6 +694,7 @@ export const OfficesPage = () => {
       return;
     }
 
+    const officeIdBeingUpdated = selectedOffice.id;
     try {
       setError(null);
       setIsSaving(true);
@@ -702,11 +708,13 @@ export const OfficesPage = () => {
         email: formData.email || undefined,
         countryId: formData.countryId || undefined,
       };
-      await officeService.updateOffice(selectedOffice.id, updateData);
+      await officeService.updateOffice(officeIdBeingUpdated, updateData);
+      // Mantener selectedOffice hasta que se complete la carga para que el spinner se muestre
+      await loadOffices();
       setIsEditDialogOpen(false);
       setSelectedOffice(null);
+      setEditCountrySearchText('');
       setIsSaving(false);
-      await loadOffices();
     } catch (err: any) {
       setError(err.message || 'Error al actualizar sede');
       setIsSaving(false);
@@ -809,6 +817,26 @@ export const OfficesPage = () => {
   };
 
   // Filtrar usuarios para el combobox
+  // Filtrar países para el Combobox de crear sede
+  const filteredCountries = useMemo(() => {
+    if (!countrySearchText.trim()) return countries;
+    const searchLower = countrySearchText.toLowerCase();
+    return countries.filter((country) =>
+      country.name.toLowerCase().includes(searchLower) ||
+      country.isoCode.toLowerCase().includes(searchLower)
+    );
+  }, [countries, countrySearchText]);
+
+  // Filtrar países para el Combobox de editar sede
+  const filteredEditCountries = useMemo(() => {
+    if (!editCountrySearchText.trim()) return countries;
+    const searchLower = editCountrySearchText.toLowerCase();
+    return countries.filter((country) =>
+      country.name.toLowerCase().includes(searchLower) ||
+      country.isoCode.toLowerCase().includes(searchLower)
+    );
+  }, [countries, editCountrySearchText]);
+
   const filteredUsersForAssign = useMemo(() => {
     if (!userSearchText.trim()) return allUsersForAssign;
     const searchLower = userSearchText.toLowerCase();
@@ -1140,10 +1168,19 @@ export const OfficesPage = () => {
               filteredOffices.map((office) => {
                 const users = officeUsers[office.id] || [];
                 const hasContactData = office.address || office.phone || office.email;
+                // Mostrar spinner si estamos guardando y esta es la oficina que se está actualizando
+                const isUpdating = isSaving && selectedOffice?.id === office.id;
                 return (
                   <TableRow key={office.id}>
                   <TableCell>
-                    <Text weight="semibold">{office.name}</Text>
+                    {isUpdating ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS }}>
+                        <Spinner size="tiny" />
+                        <Text weight="semibold">{office.name}</Text>
+                      </div>
+                    ) : (
+                      <Text weight="semibold">{office.name}</Text>
+                    )}
                   </TableCell>
                   <TableCell>{office.countryName || 'N/A'}</TableCell>
                   <TableCell>{office.city || 'N/A'}</TableCell>
@@ -1539,7 +1576,9 @@ export const OfficesPage = () => {
                         postalCode: '',
                         phone: '',
                         email: '',
+                        countryId: '',
                       });
+                      setCountrySearchText('');
                       setError(null);
                     }
                   } else {
@@ -1583,17 +1622,23 @@ export const OfficesPage = () => {
               </Field>
               <Field label="País" className={styles.formField}>
                 <Combobox
-                  value={countries.find(c => c.id === formData.countryId)?.name || ''}
+                  value={countrySearchText || countries.find(c => c.id === formData.countryId)?.name || ''}
                   onOptionSelect={(_, data) => {
-                    if (data.optionValue) {
-                      setFormData({ ...formData, countryId: data.optionValue });
+                    const country = countries.find((c) => c.name === data.optionValue);
+                    if (country) {
+                      setFormData({ ...formData, countryId: country.id });
+                      setCountrySearchText('');
                     }
+                  }}
+                  onInput={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    setCountrySearchText(target.value);
                   }}
                   placeholder="Seleccionar país"
                 >
-                  {countries.map((country) => (
-                    <Option key={country.id} value={country.id}>
-                      {country.name}
+                  {filteredCountries.map((country) => (
+                    <Option key={country.id} value={country.name}>
+                      {country.name} ({country.isoCode})
                     </Option>
                   ))}
                 </Combobox>
@@ -1704,7 +1749,7 @@ export const OfficesPage = () => {
               setIsEditDialogOpen(false);
               setSelectedOffice(null);
               setFormData({
-                customerId: '',
+                tenantId: '',
                 name: '',
                 address: '',
                 city: '',
@@ -1712,7 +1757,9 @@ export const OfficesPage = () => {
                 postalCode: '',
                 phone: '',
                 email: '',
+                countryId: '',
               });
+              setEditCountrySearchText('');
               return;
             }
             const hasChanges = 
@@ -1736,7 +1783,9 @@ export const OfficesPage = () => {
                   postalCode: '',
                   phone: '',
                   email: '',
+                  countryId: '',
                 });
+                setEditCountrySearchText('');
                 setError(null);
               }
               return;
@@ -1744,7 +1793,7 @@ export const OfficesPage = () => {
               setIsEditDialogOpen(false);
               setSelectedOffice(null);
               setFormData({
-                customerId: '',
+                tenantId: '',
                 name: '',
                 address: '',
                 city: '',
@@ -1752,7 +1801,9 @@ export const OfficesPage = () => {
                 postalCode: '',
                 phone: '',
                 email: '',
+                countryId: '',
               });
+              setEditCountrySearchText('');
               setError(null);
             }
           }
@@ -1853,7 +1904,7 @@ export const OfficesPage = () => {
                     <Field label="Tenant" required className={styles.formField}>
                       <Combobox
                         value={allTenants.find(t => t.id === formData.tenantId)?.name || ''}
-                        disabled
+                        disabled={true}
                       >
                         {allTenants.map((tenant) => (
                           <Option key={tenant.id} value={tenant.id}>
@@ -1867,21 +1918,29 @@ export const OfficesPage = () => {
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         placeholder="Nombre de la sede"
+                        disabled={isSaving}
                       />
                     </Field>
                     <Field label="País" className={styles.formField}>
                       <Combobox
-                        value={countries.find(c => c.id === formData.countryId)?.name || ''}
+                        value={editCountrySearchText || countries.find(c => c.id === formData.countryId)?.name || ''}
                         onOptionSelect={(_, data) => {
-                          if (data.optionValue) {
-                            setFormData({ ...formData, countryId: data.optionValue });
+                          const country = countries.find((c) => c.name === data.optionValue);
+                          if (country) {
+                            setFormData({ ...formData, countryId: country.id });
+                            setEditCountrySearchText('');
                           }
                         }}
+                        onInput={(e) => {
+                          const target = e.target as HTMLInputElement;
+                          setEditCountrySearchText(target.value);
+                        }}
                         placeholder="Seleccionar país"
+                        disabled={isSaving}
                       >
-                        {countries.map((country) => (
-                          <Option key={country.id} value={country.id}>
-                            {country.name}
+                        {filteredEditCountries.map((country) => (
+                          <Option key={country.id} value={country.name}>
+                            {country.name} ({country.isoCode})
                           </Option>
                         ))}
                       </Combobox>
@@ -1891,6 +1950,7 @@ export const OfficesPage = () => {
                         value={formData.address}
                         onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                         placeholder="Dirección"
+                        disabled={isSaving}
                       />
                     </Field>
                     <Field label="Ciudad" className={styles.formField}>
@@ -1898,6 +1958,7 @@ export const OfficesPage = () => {
                         value={formData.city}
                         onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                         placeholder="Ciudad"
+                        disabled={isSaving}
                       />
                     </Field>
                     <Field label="Estado/Provincia" className={styles.formField}>
@@ -1905,6 +1966,7 @@ export const OfficesPage = () => {
                         value={formData.stateProvince}
                         onChange={(e) => setFormData({ ...formData, stateProvince: e.target.value })}
                         placeholder="Estado/Provincia"
+                        disabled={isSaving}
                       />
                     </Field>
                     <Field label="Código Postal" className={styles.formField}>
@@ -1912,6 +1974,7 @@ export const OfficesPage = () => {
                         value={formData.postalCode}
                         onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
                         placeholder="Código Postal"
+                        disabled={isSaving}
                       />
                     </Field>
                     <Field label="Teléfono" className={styles.formField}>
@@ -1919,6 +1982,7 @@ export const OfficesPage = () => {
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         placeholder="Teléfono"
+                        disabled={isSaving}
                       />
                     </Field>
                     <Field label="Email" className={styles.formField}>
@@ -1927,6 +1991,7 @@ export const OfficesPage = () => {
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         placeholder="Email"
+                        disabled={isSaving}
                       />
                     </Field>
                     {error && (
