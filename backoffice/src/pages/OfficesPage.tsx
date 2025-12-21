@@ -250,6 +250,7 @@ export const OfficesPage = () => {
   const [offices, setOffices] = useState<OfficeDto[]>([]);
   const [customers, setCustomers] = useState<CustomerDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOffice, setSelectedOffice] = useState<OfficeDto | null>(null);
@@ -901,10 +902,21 @@ export const OfficesPage = () => {
           />
         </div>
         <Button
-          appearance="default"
-          icon={<ArrowClockwiseRegular />}
-          onClick={loadOffices}
-          disabled={isLoading || flowLoading}
+          appearance="secondary"
+          icon={!isRefreshing ? <ArrowClockwiseRegular /> : undefined}
+          onClick={async () => {
+            setIsRefreshing(true);
+            try {
+              await loadOffices();
+              if (selectedView === 'flow') {
+                await loadFlowData();
+              }
+            } finally {
+              setIsRefreshing(false);
+            }
+          }}
+          disabled={isRefreshing}
+          loading={isRefreshing}
           title="Actualizar lista de sedes"
         >
           Actualizar

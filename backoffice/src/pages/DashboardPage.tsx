@@ -44,6 +44,16 @@ const useStyles = makeStyles({
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
   },
+  welcomeMessage: {
+    fontSize: '48px',
+    fontWeight: tokens.fontWeightBold,
+    color: tokens.colorNeutralForeground1,
+    marginBottom: tokens.spacingVerticalL,
+    textAlign: 'center',
+    padding: tokens.spacingVerticalXL,
+    backgroundColor: tokens.colorNeutralBackground2,
+    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+  },
   statsGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
@@ -107,7 +117,7 @@ interface CustomerNode {
 
 export const DashboardPage = () => {
   const styles = useStyles();
-  const { userDetails } = useAuth();
+  const { userDetails, user } = useAuth();
   const [userCount, setUserCount] = useState<number | null>(null);
   const [tenantCount, setTenantCount] = useState<number | null>(null);
   const [customerCount, setCustomerCount] = useState<number | null>(null);
@@ -410,6 +420,27 @@ export const DashboardPage = () => {
     );
   };
 
+  // Obtener el nombre del usuario para el mensaje de bienvenida
+  // El nombre viene de la base de datos y se almacena en el state del usuario
+  const getUserDisplayName = () => {
+    // El objeto user ahora incluye el nombre de la base de datos si está disponible
+    const name = user?.name;
+    if (name) return name;
+    
+    // Si no hay nombre, extraer la parte antes del @ del email y capitalizarla
+    const email = user?.email || userDetails?.email;
+    if (email) {
+      const emailName = email.split('@')[0];
+      // Capitalizar la primera letra
+      return emailName.charAt(0).toUpperCase() + emailName.slice(1);
+    }
+    
+    // Último recurso
+    return 'Usuario';
+  };
+  
+  const userName = getUserDisplayName();
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -433,6 +464,10 @@ export const DashboardPage = () => {
         >
           Actualizar Árbol
         </Button>
+      </div>
+
+      <div className={styles.welcomeMessage}>
+        ¡Bienvenido, {userName}!
       </div>
 
       <div className={styles.statsGrid}>

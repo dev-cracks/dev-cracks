@@ -1379,7 +1379,7 @@ export const CustomersPage = () => {
       const createData: CreateCustomerRequest = {
         ...formData,
         parentId: hasParent && createParentId ? createParentId : undefined,
-        skipDefaultStructure: skipDefaultStructure || undefined,
+        skipDefaultStructure: skipDefaultStructure ? true : undefined,
       };
       await customerService.createCustomer(createData);
       setIsCreateDialogOpen(false);
@@ -2442,51 +2442,100 @@ export const CustomersPage = () => {
 
     setIsDeleting(true);
     try {
-      // Eliminar usuarios seleccionados
+      // Paso 1: Eliminar usuarios seleccionados
       const deleteUserPromises = Array.from(deleteUsers).map(userId => 
         userService.deleteUser(userId)
       );
       await Promise.all(deleteUserPromises);
 
-      // Desvincular usuarios no seleccionados
-      const unlinkUserPromises = deleteRelatedUsers
-        .filter(user => !deleteUsers.has(user.id))
-        .map(user => 
-          userService.updateUser(user.id, {
-            email: user.email,
-            customerId: undefined,
-            tenantId: user.tenantId || undefined,
-          })
-        );
+      // Paso 2: Para usuarios no seleccionados, eliminar relaciones con tenants/sedes del cliente
+      const usersToUnlink = deleteRelatedUsers.filter(user => !deleteUsers.has(user.id));
+      
+      // Obtener relaciones de cada usuario
+      const userRelationsPromises = usersToUnlink.map(async (user) => {
+        try {
+          const [userTenants, userOffices] = await Promise.all([
+            userService.getUserTenants(user.id).catch(() => []),
+            userService.getUserOffices(user.id).catch(() => [])
+          ]);
+          return { user, userTenants, userOffices };
+        } catch {
+          return { user, userTenants: [], userOffices: [] };
+        }
+      });
+      const userRelations = await Promise.all(userRelationsPromises);
+
+      // Eliminar relaciones UserTenant con tenants del cliente (seleccionados o no)
+      const tenantIdsToUnlink = new Set([
+        ...Array.from(deleteTenants),
+        ...deleteRelatedTenants.filter(t => !deleteTenants.has(t.id)).map(t => t.id)
+      ]);
+
+      const unlinkUserTenantPromises: Promise<void>[] = [];
+      userRelations.forEach(({ user, userTenants }) => {
+        userTenants.forEach((ut: any) => {
+          if (tenantIdsToUnlink.has(ut.id || ut.tenantId)) {
+            const tenantId = ut.id || ut.tenantId;
+            unlinkUserTenantPromises.push(
+              userService.removeTenantFromUser(user.id, tenantId).catch(() => {})
+            );
+          }
+        });
+      });
+
+      // Eliminar relaciones UserOffice con sedes del cliente (seleccionadas o no)
+      const officeIdsToUnlink = new Set([
+        ...Array.from(deleteOffices),
+        ...deleteRelatedOffices.filter(o => !deleteOffices.has(o.id)).map(o => o.id)
+      ]);
+
+      userRelations.forEach(({ user, userOffices }) => {
+        userOffices.forEach((uo: any) => {
+          if (officeIdsToUnlink.has(uo.id || uo.officeId)) {
+            const officeId = uo.id || uo.officeId;
+            unlinkUserTenantPromises.push(
+              userService.removeOfficeFromUser(user.id, officeId).catch(() => {})
+            );
+          }
+        });
+      });
+
+      await Promise.all(unlinkUserTenantPromises);
+
+      // Actualizar usuarios no seleccionados para desvincular customerId
+      const unlinkUserPromises = usersToUnlink.map(user => 
+        userService.updateUser(user.id, {
+          email: user.email,
+          customerId: undefined,
+          tenantId: undefined, // Desvincular también el tenantId si estaba relacionado
+        }).catch(() => {})
+      );
       await Promise.all(unlinkUserPromises);
 
-      // Eliminar sedes seleccionadas
+      // Paso 3: Eliminar sedes seleccionadas
       const deleteOfficePromises = Array.from(deleteOffices).map(officeId => 
         officeService.deleteOffice(officeId)
       );
       await Promise.all(deleteOfficePromises);
 
-      // Nota: Las sedes no seleccionadas se desvincularán automáticamente 
-      // cuando se elimine el cliente o se desvinculen los tenants relacionados
-
-      // Eliminar tenants seleccionados
+      // Paso 4: Eliminar tenants seleccionados (esto eliminará automáticamente sus oficinas y usuarios)
       const deleteTenantPromises = Array.from(deleteTenants).map(tenantId => 
         tenantService.deleteTenant(tenantId)
       );
       await Promise.all(deleteTenantPromises);
 
-      // Desvincular tenants no seleccionados
+      // Paso 5: Desvincular tenants no seleccionados (eliminar relación con el cliente)
       const unlinkTenantPromises = deleteRelatedTenants
         .filter(tenant => !deleteTenants.has(tenant.id))
         .map(tenant => 
           tenantService.updateTenant(tenant.id, {
             name: tenant.name,
             customerId: undefined,
-          })
+          }).catch(() => {})
         );
       await Promise.all(unlinkTenantPromises);
 
-      // Finalmente, eliminar el cliente
+      // Paso 6: Finalmente, eliminar el cliente
       await customerService.deleteCustomer(selectedCustomer.id);
       
       setIsDeleteDialogOpen(false);

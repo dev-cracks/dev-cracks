@@ -11,6 +11,8 @@ import {
   Switch,
   Label,
   Select,
+  Card,
+  CardHeader,
 } from '@fluentui/react-components';
 import {
   DismissRegular,
@@ -27,7 +29,9 @@ import {
   PeopleTeamRegular,
   LockClosedRegular,
 } from '@fluentui/react-icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { customerService, CustomerDto } from '../services/customerService';
 
 interface SettingsDialogProps {
   open: boolean;
@@ -245,6 +249,31 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
     lineHeight: tokens.lineHeightBase300,
   },
+  cardContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap(tokens.spacingVerticalL),
+    marginBottom: tokens.spacingVerticalXL,
+  },
+  infoRow: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap(tokens.spacingVerticalXXS),
+    padding: `${tokens.spacingVerticalS} 0`,
+    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+  },
+  infoRowLast: {
+    borderBottom: 'none',
+  },
+  infoLabel: {
+    fontSize: tokens.fontSizeBase200,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground2,
+  },
+  infoValue: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground1,
+  },
 });
 
 const categories: Category[] = [
@@ -286,14 +315,39 @@ const categories: Category[] = [
 
 export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   const styles = useStyles();
+  const { userDetails } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState('general');
   const [selectedSubcategory, setSelectedSubcategory] = useState('language-time');
   const [searchQuery, setSearchQuery] = useState('');
+  const [customerInfo, setCustomerInfo] = useState<CustomerDto | null>(null);
+  const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
 
   const handleClose = () => {
     onOpenChange(false);
     setSearchQuery('');
   };
+
+  // Cargar información del cliente cuando se selecciona la categoría account
+  useEffect(() => {
+    const loadCustomerInfo = async () => {
+      if (selectedCategory === 'account' && userDetails?.customerId) {
+        setIsLoadingCustomer(true);
+        try {
+          const customer = await customerService.getCustomerById(userDetails.customerId);
+          setCustomerInfo(customer);
+        } catch (error) {
+          console.error('Error loading customer info:', error);
+          setCustomerInfo(null);
+        } finally {
+          setIsLoadingCustomer(false);
+        }
+      } else {
+        setCustomerInfo(null);
+      }
+    };
+
+    loadCustomerInfo();
+  }, [selectedCategory, userDetails?.customerId]);
 
   const currentCategory = categories.find((cat) => cat.id === selectedCategory);
   const hasSubcategories = currentCategory?.subcategories && currentCategory.subcategories.length > 0;
@@ -451,32 +505,130 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     if (selectedCategory === 'account') {
       return (
         <div className={styles.section}>
-          <Text className={styles.sectionTitle}>Account Settings</Text>
-          <div className={styles.formGroup}>
-            <div className={styles.formRow}>
-              <div className={styles.formLabel}>
-                <Label htmlFor="siteName" className={styles.formLabelText}>
-                  Site Name
-                </Label>
+          <div className={styles.cardContainer}>
+            {/* Card de información del usuario */}
+            <Card>
+              <CardHeader
+                header={<Text weight="semibold">Mi Información como Usuario</Text>}
+                description="Información de tu cuenta de usuario"
+              />
+              <div style={{ padding: '20px' }}>
+                {userDetails ? (
+                  <>
+                    <div className={styles.infoRow}>
+                      <Text className={styles.infoLabel}>Nombre</Text>
+                      <Text className={styles.infoValue}>{userDetails.name || 'No especificado'}</Text>
+                    </div>
+                    <div className={styles.infoRow}>
+                      <Text className={styles.infoLabel}>Email</Text>
+                      <Text className={styles.infoValue}>{userDetails.email}</Text>
+                    </div>
+                    {userDetails.contactEmail && (
+                      <div className={styles.infoRow}>
+                        <Text className={styles.infoLabel}>Email de Contacto</Text>
+                        <Text className={styles.infoValue}>{userDetails.contactEmail}</Text>
+                      </div>
+                    )}
+                    {userDetails.phone && (
+                      <div className={styles.infoRow}>
+                        <Text className={styles.infoLabel}>Teléfono</Text>
+                        <Text className={styles.infoValue}>{userDetails.phone}</Text>
+                      </div>
+                    )}
+                    <div className={styles.infoRow}>
+                      <Text className={styles.infoLabel}>Rol</Text>
+                      <Text className={styles.infoValue}>{userDetails.role === 'Admin' ? 'Administrador' : 'Usuario'}</Text>
+                    </div>
+                    <div className={styles.infoRow}>
+                      <Text className={styles.infoLabel}>Estado</Text>
+                      <Text className={styles.infoValue}>
+                        {userDetails.isSuspended ? 'Suspendido' : userDetails.isActive === false ? 'Inactivo' : 'Activo'}
+                      </Text>
+                    </div>
+                    <div className={`${styles.infoRow} ${styles.infoRowLast}`}>
+                      <Text className={styles.infoLabel}>ID de Usuario</Text>
+                      <Text className={styles.infoValue}>{userDetails.id}</Text>
+                    </div>
+                  </>
+                ) : (
+                  <Text>No se pudo cargar la información del usuario</Text>
+                )}
               </div>
-              <Input id="siteName" placeholder="Dev Cracks" className={styles.formControl} />
-            </div>
-            <div className={styles.formRow}>
-              <div className={styles.formLabel}>
-                <Label htmlFor="siteUrl" className={styles.formLabelText}>
-                  Site URL
-                </Label>
-              </div>
-              <Input id="siteUrl" placeholder="https://devcracks.com" className={styles.formControl} />
-            </div>
-            <div className={styles.formRow}>
-              <div className={styles.formLabel}>
-                <Label htmlFor="maintenanceMode" className={styles.formLabelText}>
-                  Maintenance Mode
-                </Label>
-              </div>
-              <Switch id="maintenanceMode" />
-            </div>
+            </Card>
+
+            {/* Card de información del cliente */}
+            {userDetails?.customerId && (
+              <Card>
+                <CardHeader
+                  header={<Text weight="semibold">Mi Información como Cliente</Text>}
+                  description="Información de tu cuenta de cliente"
+                />
+                <div style={{ padding: '20px' }}>
+                  {isLoadingCustomer ? (
+                    <Text>Cargando información del cliente...</Text>
+                  ) : customerInfo ? (
+                    <>
+                      <div className={styles.infoRow}>
+                        <Text className={styles.infoLabel}>Nombre</Text>
+                        <Text className={styles.infoValue}>{customerInfo.name}</Text>
+                      </div>
+                      <div className={styles.infoRow}>
+                        <Text className={styles.infoLabel}>Identificación</Text>
+                        <Text className={styles.infoValue}>{customerInfo.identification}</Text>
+                      </div>
+                      {customerInfo.countryName && (
+                        <div className={styles.infoRow}>
+                          <Text className={styles.infoLabel}>País</Text>
+                          <Text className={styles.infoValue}>{customerInfo.countryName}</Text>
+                        </div>
+                      )}
+                      {customerInfo.stateProvince && (
+                        <div className={styles.infoRow}>
+                          <Text className={styles.infoLabel}>Estado/Provincia</Text>
+                          <Text className={styles.infoValue}>{customerInfo.stateProvince}</Text>
+                        </div>
+                      )}
+                      {customerInfo.city && (
+                        <div className={styles.infoRow}>
+                          <Text className={styles.infoLabel}>Ciudad</Text>
+                          <Text className={styles.infoValue}>{customerInfo.city}</Text>
+                        </div>
+                      )}
+                      {customerInfo.phone && (
+                        <div className={styles.infoRow}>
+                          <Text className={styles.infoLabel}>Teléfono</Text>
+                          <Text className={styles.infoValue}>{customerInfo.phone}</Text>
+                        </div>
+                      )}
+                      {customerInfo.email && (
+                        <div className={styles.infoRow}>
+                          <Text className={styles.infoLabel}>Email</Text>
+                          <Text className={styles.infoValue}>{customerInfo.email}</Text>
+                        </div>
+                      )}
+                      {customerInfo.parentName && (
+                        <div className={styles.infoRow}>
+                          <Text className={styles.infoLabel}>Cliente Padre</Text>
+                          <Text className={styles.infoValue}>{customerInfo.parentName}</Text>
+                        </div>
+                      )}
+                      <div className={styles.infoRow}>
+                        <Text className={styles.infoLabel}>Estado</Text>
+                        <Text className={styles.infoValue}>
+                          {customerInfo.isSuspended ? 'Suspendido' : customerInfo.isActive === false ? 'Inactivo' : 'Activo'}
+                        </Text>
+                      </div>
+                      <div className={`${styles.infoRow} ${styles.infoRowLast}`}>
+                        <Text className={styles.infoLabel}>ID de Cliente</Text>
+                        <Text className={styles.infoValue}>{customerInfo.id}</Text>
+                      </div>
+                    </>
+                  ) : (
+                    <Text>No se pudo cargar la información del cliente</Text>
+                  )}
+                </div>
+              </Card>
+            )}
           </div>
         </div>
       );

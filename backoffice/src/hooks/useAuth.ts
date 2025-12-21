@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { mapAuth0User, User, UserDto } from '../services/authService';
 import { apiService } from '../services/apiService';
@@ -30,7 +30,23 @@ export const useAuth = (): UseAuthReturn => {
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const isRedirectingRef = useRef(false);
 
-  const user = mapAuth0User(auth0User);
+  // Mapear el usuario de Auth0
+  const auth0MappedUser = mapAuth0User(auth0User);
+
+  // Combinar la información de Auth0 con la información de la base de datos
+  // Priorizar el nombre de la base de datos si está disponible
+  const user = useMemo((): User | null => {
+    if (!auth0MappedUser) return null;
+    
+    return {
+      ...auth0MappedUser,
+      // Usar el nombre de la base de datos si está disponible, sino usar el de Auth0
+      name: userDetails?.name || auth0MappedUser.name,
+      // También actualizar otros campos relevantes de la base de datos
+      tenantId: userDetails?.tenantId || auth0MappedUser.tenantId,
+      role: userDetails?.role || auth0MappedUser.role,
+    };
+  }, [auth0MappedUser, userDetails]);
 
   const getAccessToken = useCallback(async (): Promise<string | undefined> => {
     if (!isAuthenticated) {

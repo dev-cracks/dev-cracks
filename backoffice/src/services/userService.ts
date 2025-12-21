@@ -133,9 +133,22 @@ export const userService = {
   },
 
   async deleteUser(id: string): Promise<void> {
-    return apiService.request<void>(`/backoffice/users/${id}`, {
-      method: 'DELETE',
-    });
+    try {
+      // Intentar primero con el endpoint de backoffice (solo funciona para usuarios del mismo tenant)
+      return await apiService.request<void>(`/backoffice/users/${id}`, {
+        method: 'DELETE',
+      });
+    } catch (error: any) {
+      // Si falla con 403 (Forbidden), probablemente el usuario pertenece a otro tenant
+      // Intentar con el endpoint de administración que requiere rol root
+      if (error?.statusCode === 403 || error?.status === 403) {
+        return await apiService.request<void>(`/users/${id}`, {
+          method: 'DELETE',
+        });
+      }
+      // Si es otro error, relanzarlo
+      throw error;
+    }
   },
 
   async suspendUser(id: string): Promise<UserDto> {
