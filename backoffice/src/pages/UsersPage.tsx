@@ -207,11 +207,14 @@ export const UsersPage = () => {
     phone: '',
   });
 
-  const filteredUsers = users.filter((user) =>
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
-    user.role.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filtrar usuarios solo si hay un término de búsqueda
+  const filteredUsers = searchTerm.trim() === '' 
+    ? users 
+    : users.filter((user) =>
+        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+        user.role.toLowerCase().includes(searchTerm.toLowerCase())
+      );
 
   const handleEdit = (user: UserDto) => {
     setSelectedUser(user);
