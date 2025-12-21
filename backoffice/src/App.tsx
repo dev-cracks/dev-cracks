@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from '@fluentui/react-components';
 import { Layout } from './components/Layout';
 import { DashboardPage } from './pages/DashboardPage';
 import { UsersPage } from './pages/UsersPage';
@@ -14,8 +15,10 @@ const BACKOFFICE_BASE = '/backoffice';
 
 const App = () => {
   return (
-    <BrowserRouter basename={BACKOFFICE_BASE}>
-      <Routes>
+    <>
+      <Toaster />
+      <BrowserRouter basename={BACKOFFICE_BASE}>
+        <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route
           path="/"
@@ -87,6 +90,7 @@ const App = () => {
         />
       </Routes>
     </BrowserRouter>
+    </>
   );
 };
 

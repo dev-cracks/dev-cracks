@@ -22,6 +22,7 @@ export interface CreateUserRequest {
   name?: string;
   tenantId?: string;
   customerId?: string;
+  officeId?: string;
   role?: 'Admin' | 'User';
   contactEmail?: string;
   phone?: string;
@@ -75,17 +76,34 @@ export const userService = {
   },
 
   async createUser(data: CreateUserRequest): Promise<UserDto> {
+    // Convertir el rol de string a número para el backend
+    const requestData = {
+      ...data,
+      role: data.role === 'Admin' ? 1 : (data.role === 'User' ? 0 : undefined),
+    };
     const user = await apiService.request<any>('/backoffice/users', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(requestData),
     });
     return transformUserDto(user);
   },
 
   async updateUser(id: string, data: UpdateUserRequest): Promise<UserDto> {
-    const user = await apiService.request<any>(`/backoffice/users/${id}`, {
+    // Si se está actualizando tenantId o customerId, usar el endpoint /users que requiere rol root
+    // De lo contrario, usar /backoffice/users
+    const isAdminUpdate = data.tenantId !== undefined || data.customerId !== undefined;
+    
+    const endpoint = isAdminUpdate ? `/users/${id}` : `/backoffice/users/${id}`;
+    
+    // Convertir el rol de string a número para el backend
+    const requestData = {
+      ...data,
+      role: data.role === 'Admin' ? 1 : (data.role === 'User' ? 0 : undefined),
+    };
+    
+    const user = await apiService.request<any>(endpoint, {
       method: 'PUT',
-      body: JSON.stringify(data),
+      body: JSON.stringify(requestData),
     });
     return transformUserDto(user);
   },

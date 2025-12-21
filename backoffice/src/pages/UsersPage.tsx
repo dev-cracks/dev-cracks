@@ -68,10 +68,11 @@ import {
   ArrowClockwiseRegular,
   ArrowSwapRegular,
   LinkRegular,
+  SparkleRegular,
 } from '@fluentui/react-icons';
 import { userService, UserDto, CreateUserRequest, UpdateUserRequest } from '../services/userService';
 import { tenantService, TenantDto } from '../services/tenantService';
-import { customerService, CustomerDto } from '../services/customerService';
+import { customerService, CustomerDto, countryService } from '../services/customerService';
 import { officeService, OfficeDto } from '../services/officeService';
 import { TableSkeleton } from '../components/TableSkeleton';
 import { DetailsSkeleton } from '../components/DetailsSkeleton';
@@ -162,6 +163,7 @@ export const UsersPage = () => {
   const [selectedOfficeId, setSelectedOfficeId] = useState<string>('');
   const [availableOffices, setAvailableOffices] = useState<OfficeDto[]>([]);
   const [isAssigning, setIsAssigning] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(false);
 
   const isLoadingRef = useRef(false);
   const hasLoadedRef = useRef(false);
@@ -537,6 +539,113 @@ export const UsersPage = () => {
     } catch (err: any) {
       setError(err.message || 'Error al asignar tenant y sede');
       setIsAssigning(false);
+    }
+  };
+
+  // Inicializar por defecto: crear cliente, tenant y sede por defecto y asignar al usuario
+  const handleInitializeDefault = async () => {
+    if (!selectedUserForAssign) {
+      setError('No hay usuario seleccionado');
+      return;
+    }
+
+    try {
+      setError(null);
+      setIsInitializing(true);
+
+      // Obtener países para usar el primero disponible
+      const countries = await countryService.getAllCountries();
+      if (countries.length === 0) {
+        setError('No hay países disponibles. Por favor, contacte al administrador.');
+        setIsInitializing(false);
+        return;
+      }
+
+      const defaultCountry = countries[0];
+
+      // Crear nombre del cliente basado en el usuario
+      const customerName = selectedUserForAssign.name || selectedUserForAssign.email.split('@')[0];
+      const customerIdentification = `USER-${selectedUserForAssign.id.substring(0, 8).toUpperCase()}`;
+
+      // Crear cliente (esto automáticamente crea un tenant y una oficina por defecto)
+      const response = await customerService.createCustomer({
+        name: `${customerName} - Cliente por Defecto`,
+        identification: customerIdentification,
+        countryId: defaultCountry.id,
+        email: selectedUserForAssign.contactEmail || selectedUserForAssign.email,
+        phone: selectedUserForAssign.phone,
+      });
+
+      // El backend retorna { customer, tenant, office }, pero el servicio tipa solo CustomerDto
+      // Verificar si la respuesta tiene la estructura correcta y extraer el customer
+      let newCustomer: CustomerDto;
+      
+      if (response && typeof response === 'object' && 'customer' in response) {
+        // La respuesta tiene la estructura { customer, tenant, office }
+        newCustomer = (response as any).customer;
+      } else if (response && typeof response === 'object' && 'id' in response) {
+        // La respuesta es directamente el CustomerDto
+        newCustomer = response as CustomerDto;
+      } else {
+        setError('Error al crear cliente: respuesta inválida del servidor');
+        setIsInitializing(false);
+        return;
+      }
+      
+      if (!newCustomer || !newCustomer.id) {
+        setError('Error al crear cliente: no se recibió un ID válido');
+        setIsInitializing(false);
+        return;
+      }
+
+      // El backend ya creó el tenant, intentar obtenerlo de la respuesta o consultarlo
+      let defaultTenant: TenantDto | null = null;
+      
+      // Intentar obtener el tenant de la respuesta
+      if ((response as any)?.tenant?.id) {
+        defaultTenant = (response as any).tenant;
+      } else {
+        // Si no está en la respuesta, obtener los tenants del cliente
+        const customerTenants = await customerService.getCustomerTenants(newCustomer.id);
+        if (customerTenants.length === 0) {
+          setError('No se pudo crear el tenant por defecto');
+          setIsInitializing(false);
+          return;
+        }
+        defaultTenant = customerTenants[0];
+      }
+
+      // Asignar el usuario al tenant creado
+      if (!defaultTenant || !defaultTenant.id) {
+        setError('No se pudo obtener el tenant creado');
+        setIsInitializing(false);
+        return;
+      }
+
+      await userService.updateUser(selectedUserForAssign.id, {
+        email: selectedUserForAssign.email,
+        name: selectedUserForAssign.name || '',
+        role: selectedUserForAssign.role,
+        tenantId: defaultTenant.id,
+        customerId: newCustomer.id,
+        contactEmail: selectedUserForAssign.contactEmail || '',
+        phone: selectedUserForAssign.phone || '',
+      });
+
+      // Recargar datos
+      await loadUsers();
+      await loadTenants();
+      await loadCustomers();
+
+      setIsAssignDrawerOpen(false);
+      setSelectedUserForAssign(null);
+      setSelectedTenantId('');
+      setSelectedOfficeId('');
+      setAvailableOffices([]);
+      setIsInitializing(false);
+    } catch (err: any) {
+      setError(err.message || 'Error al inicializar por defecto');
+      setIsInitializing(false);
     }
   };
 
@@ -1400,6 +1509,20 @@ export const UsersPage = () => {
                     readOnly 
                   />
                 </Field>
+                <div style={{ marginBottom: tokens.spacingVerticalM }}>
+                  <Button
+                    appearance="secondary"
+                    icon={<SparkleRegular />}
+                    onClick={handleInitializeDefault}
+                    disabled={isInitializing || isAssigning}
+                    style={{ width: '100%' }}
+                  >
+                    {isInitializing ? 'Inicializando...' : 'Inicializar por Defecto'}
+                  </Button>
+                  <Text size={300} style={{ marginTop: tokens.spacingVerticalS, color: tokens.colorNeutralForeground3, display: 'block' }}>
+                    Crea un cliente, tenant y sede por defecto y los asigna a este usuario
+                  </Text>
+                </div>
                 <Field label="Tenant" required className={styles.formField}>
                   <Combobox
                     value={selectedTenantId ? tenants.find((t) => t.id === selectedTenantId)?.name || '' : ''}
@@ -1446,14 +1569,14 @@ export const UsersPage = () => {
                   <Button 
                     appearance="secondary" 
                     onClick={() => setIsAssignDrawerOpen(false)}
-                    disabled={isAssigning}
+                    disabled={isAssigning || isInitializing}
                   >
                     Cancelar
                   </Button>
                   <Button 
                     appearance="primary" 
                     onClick={handleAssignTenantAndOffice}
-                    disabled={isAssigning || !selectedTenantId}
+                    disabled={isAssigning || isInitializing || !selectedTenantId}
                   >
                     {isAssigning ? 'Asignando...' : 'Asignar'}
                   </Button>

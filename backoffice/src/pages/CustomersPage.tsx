@@ -40,6 +40,7 @@ import {
   Tab,
   Switch,
   Label,
+  Persona,
 } from '@fluentui/react-components';
 import {
   OverlayDrawer,
@@ -48,8 +49,17 @@ import {
   DrawerHeaderTitle,
 } from '@fluentui/react-drawer';
 import {
+  TeachingPopover,
+  TeachingPopoverTrigger,
+  TeachingPopoverSurface,
+  TeachingPopoverHeader,
+  TeachingPopoverBody,
+  TeachingPopoverFooter,
+} from '@fluentui/react-teaching-popover';
+import {
   useRestoreFocusSource,
   useRestoreFocusTarget,
+  useToastController,
 } from '@fluentui/react-components';
 import {
   ReactFlow,
@@ -102,6 +112,7 @@ import {
   countryService,
 } from '../services/customerService';
 import { UserDto } from '../services/authService';
+import { userService, CreateUserRequest } from '../services/userService';
 import { tenantService, TenantDto, CreateTenantRequest } from '../services/tenantService';
 import { officeService, OfficeDto, CreateOfficeRequest } from '../services/officeService';
 import { notificationService } from '../services/notificationService';
@@ -116,6 +127,142 @@ import { RibbonMenu } from '../components/RibbonMenu';
 function getRoleLabel(role: 'Admin' | 'User'): string {
   return role === 'Admin' ? 'Administrador' : 'Usuario';
 }
+
+// Componente helper para mostrar usuarios agrupados por tenant y sede
+const UsersListByTenantAndOffice = ({ users }: { users: UserDto[] }) => {
+  const [tenantsMap, setTenantsMap] = useState<Map<string, TenantDto>>(new Map());
+  const [officesMap, setOfficesMap] = useState<Map<string, OfficeDto[]>>(new Map());
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        const tenantIds = [...new Set(users.map(u => u.tenantId).filter(Boolean) as string[])];
+        
+        // Cargar información de tenants y sedes
+        const tenantsPromises = tenantIds.map(id => tenantService.getTenantById(id));
+        const tenants = await Promise.all(tenantsPromises);
+        
+        const tenantsMap = new Map<string, TenantDto>();
+        tenants.forEach(tenant => {
+          if (tenant) tenantsMap.set(tenant.id, tenant);
+        });
+
+        const officesPromises = tenantIds.map(id => officeService.getOfficesByTenant(id));
+        const officesArrays = await Promise.all(officesPromises);
+        
+        const officesMap = new Map<string, OfficeDto[]>();
+        tenantIds.forEach((id, index) => {
+          officesMap.set(id, officesArrays[index] || []);
+        });
+
+        setTenantsMap(tenantsMap);
+        setOfficesMap(officesMap);
+      } catch (err) {
+        console.error('Error cargando datos de tenants y sedes:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (users.length > 0) {
+      loadData();
+    } else {
+      setIsLoading(false);
+    }
+  }, [users]);
+
+  if (isLoading) {
+    return <Spinner size="small" label="Cargando información..." />;
+  }
+
+  if (users.length === 0) {
+    return <Text>No hay usuarios asociados a este cliente.</Text>;
+  }
+
+  // Agrupar usuarios por tenant
+  const usersByTenant = new Map<string, UserDto[]>();
+  users.forEach(user => {
+    const tenantId = user.tenantId || 'sin-tenant';
+    if (!usersByTenant.has(tenantId)) {
+      usersByTenant.set(tenantId, []);
+    }
+    usersByTenant.get(tenantId)!.push(user);
+  });
+
+  return (
+    <div style={{ maxWidth: '600px', maxHeight: '300px', overflowY: 'auto' }}>
+      {Array.from(usersByTenant.entries()).map(([tenantId, tenantUsers]) => {
+        const tenant = tenantId !== 'sin-tenant' ? tenantsMap.get(tenantId) : null;
+        const offices = tenantId !== 'sin-tenant' ? officesMap.get(tenantId) || [] : [];
+
+        return (
+          <div key={tenantId} style={{ marginBottom: tokens.spacingVerticalL }}>
+            <Text weight="semibold" style={{ marginBottom: tokens.spacingVerticalS }}>
+              {tenant ? `Tenant: ${tenant.name}` : 'Sin Tenant'}
+            </Text>
+            
+            {offices.length > 0 && (
+              <div style={{ marginLeft: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalS }}>
+                <Text size={200} style={{ marginBottom: tokens.spacingVerticalXS }}>
+                  Sedes:
+                </Text>
+                {offices.map(office => (
+                  <Text key={office.id} size={200} style={{ marginLeft: tokens.spacingHorizontalM }}>
+                    • {office.name} {office.city ? `(${office.city})` : ''}
+                  </Text>
+                ))}
+              </div>
+            )}
+
+            <div style={{ marginLeft: tokens.spacingHorizontalM }}>
+              <Text size={200} style={{ marginBottom: tokens.spacingVerticalXS }}>
+                Usuarios ({tenantUsers.length}):
+              </Text>
+              <Table size="small">
+                <TableHeader>
+                  <TableRow>
+                    <TableHeaderCell style={{ width: '60%', minWidth: '300px' }}>Usuario</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '20%' }}>Rol</TableHeaderCell>
+                    <TableHeaderCell style={{ width: '20%' }}>Estado</TableHeaderCell>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {tenantUsers.map(user => (
+                    <TableRow key={user.id}>
+                      <TableCell style={{ width: '60%', minWidth: '300px' }}>
+                        <Persona
+                          name={user.name || user.email || 'N/A'}
+                          secondaryText={user.contactEmail || user.email || 'Sin email'}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell style={{ width: '20%' }}>
+                        <Badge appearance="outline" size="small">
+                          {user.role === 'Admin' ? 'Admin' : 'User'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell style={{ width: '20%' }}>
+                        {user.isSuspended ? (
+                          <Badge appearance="filled" color="danger" size="small">Suspendido</Badge>
+                        ) : user.isActive ? (
+                          <Badge appearance="filled" color="success" size="small">Activo</Badge>
+                        ) : (
+                          <Badge appearance="outline" size="small">Inactivo</Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 const useStyles = makeStyles({
   container: {
@@ -393,6 +540,7 @@ const useStyles = makeStyles({
 export const CustomersPage = () => {
   const styles = useStyles();
   const { addGroup, removeGroup } = useRibbonMenu();
+  const { dispatchToast } = useToastController();
   
   // Hooks para restauración de foco en el Drawer
   const restoreFocusTargetAttributes = useRestoreFocusTarget();
@@ -417,8 +565,10 @@ export const CustomersPage = () => {
   const [isNotifyUsersDialogOpen, setIsNotifyUsersDialogOpen] = useState(false);
   const [isCreateOfficeDialogOpen, setIsCreateOfficeDialogOpen] = useState(false);
   const [isCreateTenantDialogOpen, setIsCreateTenantDialogOpen] = useState(false);
+  const [isCreateUserDrawerOpen, setIsCreateUserDrawerOpen] = useState(false);
   const [isCreatingOffice, setIsCreatingOffice] = useState(false);
   const [isCreatingTenant, setIsCreatingTenant] = useState(false);
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [notificationTitle, setNotificationTitle] = useState('');
   const [notificationMessage, setNotificationMessage] = useState('');
   const [isSendingNotification, setIsSendingNotification] = useState(false);
@@ -474,6 +624,23 @@ export const CustomersPage = () => {
     name: '',
     customerId: '',
   });
+
+  // Form state for user
+  const [userFormData, setUserFormData] = useState<CreateUserRequest>({
+    email: '',
+    name: '',
+    role: 'User',
+    tenantId: '',
+    customerId: '',
+    contactEmail: '',
+    phone: '',
+    auth0Id: '',
+  });
+  const [availableOffices, setAvailableOffices] = useState<OfficeDto[]>([]);
+  const [selectedOfficeId, setSelectedOfficeId] = useState<string>('');
+  const [usersForPopover, setUsersForPopover] = useState<UserDto[]>([]);
+  const [isLoadingUsersForPopover, setIsLoadingUsersForPopover] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState<string | null>(null);
 
   const isLoadingRef = useRef(false);
   const hasLoadedRef = useRef(false);
@@ -1361,6 +1528,91 @@ export const CustomersPage = () => {
     setIsCreateTenantDialogOpen(true);
   };
 
+  const handleOpenCreateUser = async (customer: CustomerDto) => {
+    setSelectedCustomer(customer);
+    
+    try {
+      // Cargar tenants y sedes del cliente
+      const [tenants, offices] = await Promise.all([
+        customerService.getCustomerTenants(customer.id),
+        officeService.getOfficesByCustomer(customer.id),
+      ]);
+
+      // Validar si el cliente tiene al menos un tenant y una sede
+      if (tenants.length === 0 || offices.length === 0) {
+        dispatchToast(
+          'No se puede crear un usuario para un cliente que no tiene tenants y sedes',
+          { intent: 'warning' }
+        );
+        return;
+      }
+
+      // Si tiene tenants y sedes, abrir el drawer
+      setCustomerTenants(tenants);
+      setAvailableOffices(offices);
+      
+      // Establecer el primer tenant por defecto si existe
+      const defaultTenantId = tenants.length > 0 ? tenants[0].id : '';
+      // Establecer la primera sede del tenant por defecto si existe
+      const defaultOfficeId = offices.filter(o => o.tenantId === defaultTenantId).length > 0 
+        ? offices.filter(o => o.tenantId === defaultTenantId)[0].id 
+        : '';
+      
+      setUserFormData({
+        email: '',
+        name: '',
+        role: 'User',
+        tenantId: defaultTenantId,
+        customerId: customer.id,
+        contactEmail: '',
+        phone: '',
+        auth0Id: '',
+      });
+      setSelectedOfficeId(defaultOfficeId);
+      
+      setIsCreateUserDrawerOpen(true);
+    } catch (err: any) {
+      console.error('Error cargando datos del cliente:', err);
+      dispatchToast(
+        'Error al cargar la información del cliente',
+        { intent: 'error' }
+      );
+    }
+  };
+
+  const handleViewUsersInPopover = async (customer: CustomerDto) => {
+    try {
+      setIsLoadingUsersForPopover(true);
+      // Abrir el popover primero
+      setPopoverOpen(customer.id);
+      
+      // Cargar usuarios del cliente
+      const users = await customerService.getCustomerUsers(customer.id);
+      setUsersForPopover(users);
+    } catch (err: any) {
+      console.error('Error cargando usuarios:', err);
+      dispatchToast(
+        'Error al cargar los usuarios del cliente',
+        { intent: 'error' }
+      );
+      setPopoverOpen(null);
+    } finally {
+      setIsLoadingUsersForPopover(false);
+    }
+  };
+
+  const handleUserBadgeClick = (customer: CustomerDto) => {
+    const userCount = customer.userCount ?? 0;
+    
+    if (userCount > 0) {
+      // Si hay usuarios, mostrar el popover con la lista
+      handleViewUsersInPopover(customer);
+    } else {
+      // Si no hay usuarios, abrir el drawer para crear uno
+      handleOpenCreateUser(customer);
+    }
+  };
+
   const handleCreateOffice = async () => {
     if (!selectedCustomer || !officeFormData.name.trim()) {
       setError('El nombre de la sede es requerido');
@@ -1421,6 +1673,54 @@ export const CustomersPage = () => {
       setError(err.message || 'Error al crear tenant');
     } finally {
       setIsCreatingTenant(false);
+    }
+  };
+
+  const handleCreateUser = async () => {
+    if (!selectedCustomer || !userFormData.email.trim()) {
+      setError('El email es requerido');
+      return;
+    }
+
+    if (!userFormData.tenantId) {
+      setError('El tenant es requerido');
+      return;
+    }
+
+    if (!userFormData.auth0Id.trim()) {
+      setError('El Auth0 ID es requerido');
+      return;
+    }
+
+    try {
+      setError(null);
+      setIsCreatingUser(true);
+      // Incluir el officeId seleccionado en el request
+      const userRequest = {
+        ...userFormData,
+        officeId: selectedOfficeId || undefined,
+      };
+      await userService.createUser(userRequest);
+      setIsCreateUserDrawerOpen(false);
+      setUserFormData({
+        email: '',
+        name: '',
+        role: 'User',
+        tenantId: '',
+        customerId: '',
+        contactEmail: '',
+        phone: '',
+        auth0Id: '',
+      });
+      setSelectedOfficeId('');
+      await loadCustomers();
+      if (selectedView === 'flow') {
+        await loadFlowData();
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error al crear usuario');
+    } finally {
+      setIsCreatingUser(false);
     }
   };
 
@@ -2010,12 +2310,69 @@ export const CustomersPage = () => {
                         </Button>
                       </TableCell>
                       <TableCell>
-                        <CounterBadge 
-                          count={customer.userCount || 0} 
-                          size="medium" 
-                          appearance="filled" 
-                          color={(customer.userCount || 0) === 0 ? 'informative' : 'brand'} 
-                        />
+                        {(() => {
+                          const userCount = customer.userCount ?? 0;
+                          
+                          if (userCount === 0) {
+                            // Si no hay usuarios, mostrar botón para crear
+                            return (
+                              <Button
+                                appearance="subtle"
+                                onClick={() => handleOpenCreateUser(customer)}
+                                style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
+                              >
+                                <Badge 
+                                  size="medium" 
+                                  appearance="filled" 
+                                  color="informative"
+                                  style={{ minWidth: '24px', display: 'inline-flex', justifyContent: 'center', alignItems: 'center' }}
+                                >
+                                  0
+                                </Badge>
+                              </Button>
+                            );
+                          }
+                          
+                          // Si hay usuarios, mostrar TeachingPopover
+                          return (
+                            <TeachingPopover
+                              open={popoverOpen === customer.id}
+                              onOpenChange={(_, data) => {
+                                setPopoverOpen(data.open ? customer.id : null);
+                              }}
+                            >
+                              <TeachingPopoverTrigger disableButtonEnhancement>
+                                <Button
+                                  appearance="subtle"
+                                  onClick={() => handleUserBadgeClick(customer)}
+                                  style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
+                                >
+                                  <CounterBadge 
+                                    count={userCount} 
+                                    size="medium" 
+                                    appearance="filled" 
+                                    color="brand"
+                                  />
+                                </Button>
+                              </TeachingPopoverTrigger>
+                              <TeachingPopoverSurface>
+                                <TeachingPopoverHeader>
+                                  Usuarios del Cliente: {customer.name}
+                                </TeachingPopoverHeader>
+                                <TeachingPopoverBody>
+                                  {isLoadingUsersForPopover ? (
+                                    <Spinner size="small" label="Cargando usuarios..." />
+                                  ) : (
+                                    <UsersListByTenantAndOffice users={usersForPopover} />
+                                  )}
+                                </TeachingPopoverBody>
+                                <TeachingPopoverFooter>
+                                  <Button onClick={() => setPopoverOpen(null)}>Cerrar</Button>
+                                </TeachingPopoverFooter>
+                              </TeachingPopoverSurface>
+                            </TeachingPopover>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell>
                         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS }}>
@@ -3339,6 +3696,269 @@ export const CustomersPage = () => {
                   </Button>
                   <Button appearance="primary" onClick={handleCreateTenant} disabled={isCreatingTenant}>
                     {isCreatingTenant ? 'Creando...' : 'Crear'}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </DrawerBody>
+      </OverlayDrawer>
+
+      {/* Drawer de crear usuario */}
+      <OverlayDrawer
+        {...restoreFocusSourceAttributes}
+        position="end"
+        size="large"
+        open={isCreateUserDrawerOpen}
+        modalType="alert"
+        onOpenChange={(event: any, data: { open: boolean }) => {
+          if (data.open === false) {
+            if (isCreatingUser) {
+              return;
+            }
+            const hasData = userFormData.email.trim() || 
+                            userFormData.name.trim() || 
+                            userFormData.tenantId ||
+                            userFormData.contactEmail.trim() || 
+                            userFormData.phone.trim() || 
+                            userFormData.auth0Id.trim();
+            if (hasData) {
+              if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
+                setIsCreateUserDrawerOpen(false);
+                setUserFormData({
+                  email: '',
+                  name: '',
+                  role: 'User',
+                  tenantId: '',
+                  customerId: '',
+                  contactEmail: '',
+                  phone: '',
+                  auth0Id: '',
+                });
+                setSelectedOfficeId('');
+                setError(null);
+              }
+              return;
+            } else {
+              setIsCreateUserDrawerOpen(false);
+            }
+          } else {
+            setIsCreateUserDrawerOpen(data.open);
+          }
+        }}
+      >
+        <DrawerHeader>
+          <DrawerHeaderTitle 
+            action={
+              <Button
+                appearance="subtle"
+                aria-label="Cerrar"
+                icon={<DismissRegular />}
+                onClick={() => {
+                  if (isCreatingUser) {
+                    return;
+                  }
+                  const hasData = userFormData.email.trim() || 
+                                  userFormData.name.trim() || 
+                                  userFormData.tenantId ||
+                                  userFormData.contactEmail.trim() || 
+                                  userFormData.phone.trim() || 
+                                  userFormData.auth0Id.trim();
+                  if (hasData) {
+                    if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
+                      setIsCreateUserDrawerOpen(false);
+                      setUserFormData({
+                        email: '',
+                        name: '',
+                        role: 'User',
+                        tenantId: '',
+                        customerId: '',
+                        contactEmail: '',
+                        phone: '',
+                        auth0Id: '',
+                      });
+                      setError(null);
+                    }
+                  } else {
+                    setIsCreateUserDrawerOpen(false);
+                  }
+                }}
+              />
+            }
+          >
+            Nuevo Usuario
+          </DrawerHeaderTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
+            {isCreatingUser ? (
+              <DetailsSkeleton rows={8} />
+            ) : (
+              <>
+                {error && (
+                  <MessageBar intent="error" style={{ marginBottom: tokens.spacingVerticalM }}>
+                    <MessageBarBody>{error}</MessageBarBody>
+                  </MessageBar>
+                )}
+                <Field label="Cliente" className={styles.formField}>
+                  <Input
+                    value={selectedCustomer?.name || ''}
+                    readOnly
+                  />
+                </Field>
+                <Field label="Tenant" required className={styles.formField}>
+                  {customerTenants.length === 0 ? (
+                    <Input
+                      value=""
+                      placeholder="No hay tenants disponibles"
+                      readOnly
+                      disabled
+                    />
+                  ) : (
+                    <Combobox
+                      value={customerTenants.find(t => t.id === userFormData.tenantId)?.name || ''}
+                      onOptionSelect={(_, data) => {
+                        if (data.optionValue) {
+                      setUserFormData({ ...userFormData, tenantId: data.optionValue });
+                      // Filtrar sedes del tenant seleccionado y establecer la primera por defecto
+                      const tenantOffices = availableOffices.filter(o => o.tenantId === data.optionValue);
+                      if (tenantOffices.length > 0) {
+                        setSelectedOfficeId(tenantOffices[0].id);
+                      } else {
+                        setSelectedOfficeId('');
+                      }
+                        }
+                      }}
+                    >
+                      {customerTenants.map((tenant) => (
+                        <Option key={tenant.id} value={tenant.id}>
+                          {tenant.name}
+                        </Option>
+                      ))}
+                    </Combobox>
+                  )}
+                </Field>
+                <Field label="Sede" className={styles.formField}>
+                  {availableOffices.length === 0 ? (
+                    <Input
+                      value=""
+                      placeholder="No hay sedes disponibles"
+                      readOnly
+                      disabled
+                    />
+                  ) : (
+                    <Combobox
+                      value={availableOffices
+                        .filter(o => o.tenantId === userFormData.tenantId)
+                        .find(o => o.id === selectedOfficeId)?.name || ''}
+                      onOptionSelect={(_, data) => {
+                        if (data.optionValue) {
+                          setSelectedOfficeId(data.optionValue);
+                        }
+                      }}
+                    >
+                      {availableOffices
+                        .filter(o => o.tenantId === userFormData.tenantId)
+                        .map((office) => (
+                          <Option key={office.id} value={office.id}>
+                            {office.name}
+                          </Option>
+                        ))}
+                    </Combobox>
+                  )}
+                </Field>
+                <Field label="Email" required className={styles.formField}>
+                  <Input
+                    type="email"
+                    value={userFormData.email}
+                    onChange={(e) => {
+                      const emailValue = e.target.value;
+                      setUserFormData({ 
+                        ...userFormData, 
+                        email: emailValue,
+                        contactEmail: emailValue // Actualizar contactEmail automáticamente con el mismo valor
+                      });
+                    }}
+                    placeholder="Email del usuario"
+                  />
+                </Field>
+                <Field label="Nombre" className={styles.formField}>
+                  <Input
+                    value={userFormData.name}
+                    onChange={(e) => setUserFormData({ ...userFormData, name: e.target.value })}
+                    placeholder="Nombre del usuario"
+                  />
+                </Field>
+                <Field label="Rol" className={styles.formField}>
+                  <Combobox
+                    value={userFormData.role === 'Admin' ? 'Administrador' : 'Usuario'}
+                    onOptionSelect={(_, data) => {
+                      if (data.optionValue) {
+                        setUserFormData({ ...userFormData, role: data.optionValue as 'Admin' | 'User' });
+                      }
+                    }}
+                  >
+                    <Option value="User">Usuario</Option>
+                    <Option value="Admin">Administrador</Option>
+                  </Combobox>
+                </Field>
+                <Field label="Email de Contacto" className={styles.formField}>
+                  <Input
+                    type="email"
+                    value={userFormData.contactEmail}
+                    onChange={(e) => setUserFormData({ ...userFormData, contactEmail: e.target.value })}
+                    placeholder="Email de contacto"
+                  />
+                </Field>
+                <Field label="Teléfono" className={styles.formField}>
+                  <Input
+                    value={userFormData.phone}
+                    onChange={(e) => setUserFormData({ ...userFormData, phone: e.target.value })}
+                    placeholder="Teléfono"
+                  />
+                </Field>
+                <Field label="Auth0 ID" required className={styles.formField}>
+                  <Input
+                    value={userFormData.auth0Id}
+                    onChange={(e) => setUserFormData({ ...userFormData, auth0Id: e.target.value })}
+                    placeholder="Auth0 ID"
+                  />
+                </Field>
+                <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
+                  <Button 
+                    appearance="secondary" 
+                    onClick={() => {
+                      const hasData = userFormData.email.trim() || 
+                                      userFormData.name.trim() || 
+                                      userFormData.tenantId ||
+                                      userFormData.contactEmail.trim() || 
+                                      userFormData.phone.trim() || 
+                                      userFormData.auth0Id.trim();
+                      if (hasData) {
+                        if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los datos no guardados.')) {
+                          setIsCreateUserDrawerOpen(false);
+                          setUserFormData({
+                            email: '',
+                            name: '',
+                            role: 'User',
+                            tenantId: '',
+                            customerId: '',
+                            contactEmail: '',
+                            phone: '',
+                            auth0Id: '',
+                          });
+                          setError(null);
+                        }
+                      } else {
+                        setIsCreateUserDrawerOpen(false);
+                      }
+                    }}
+                    disabled={isCreatingUser}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button appearance="primary" onClick={handleCreateUser} disabled={isCreatingUser}>
+                    {isCreatingUser ? 'Creando...' : 'Crear'}
                   </Button>
                 </div>
               </>
