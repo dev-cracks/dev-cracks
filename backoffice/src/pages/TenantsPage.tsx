@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   Card,
   CardHeader,
@@ -392,9 +392,11 @@ export const TenantsPage = () => {
     }
   };
 
-  const filteredTenants = tenants.filter((tenant) =>
-    tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tenant.customerName?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredTenants = useMemo(() => 
+    tenants.filter((tenant) =>
+      tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tenant.customerName?.toLowerCase().includes(searchTerm.toLowerCase())
+    ), [tenants, searchTerm]
   );
 
   const handleCreate = async () => {
@@ -651,14 +653,18 @@ export const TenantsPage = () => {
       setFlowLoading(false);
       flowLoadingRef.current = false;
     }
-  }, [filteredTenants, styles, getLayoutedElements]);
+  }, [filteredTenants, getLayoutedElements]);
 
   // Cargar datos del flow cuando cambia la vista o los tenants
   useEffect(() => {
-    if (selectedView === 'flow' && filteredTenants.length > 0) {
+    if (selectedView === 'flow' && filteredTenants.length > 0 && !flowLoadingRef.current) {
       loadFlowData().catch((err) => {
         console.error('[TenantsPage] Error en loadFlowData:', err);
       });
+    } else if (selectedView === 'flow' && filteredTenants.length === 0) {
+      // Limpiar el flow si no hay tenants
+      setFlowNodes([]);
+      setFlowEdges([]);
     }
   }, [selectedView, filteredTenants.length, loadFlowData]);
 

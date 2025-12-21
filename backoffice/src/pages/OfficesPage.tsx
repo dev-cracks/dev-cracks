@@ -466,17 +466,6 @@ export const OfficesPage = () => {
                 <MessageBarBody>{error}</MessageBarBody>
               </MessageBar>
             )}
-        <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalM }}>
-          <div style={{ flex: 1 }}>
-            <SearchBox
-              placeholder="Buscar por nombre, cliente, dirección o ciudad..."
-              value={searchTerm}
-              onChange={(e, data) => setSearchTerm(data.value)}
-              size="large"
-              style={{ width: '100%' }}
-            />
-          </div>
-        </div>
         <Table>
           <TableHeader>
             <TableRow>
