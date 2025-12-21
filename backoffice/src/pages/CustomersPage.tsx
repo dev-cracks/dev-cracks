@@ -27,6 +27,7 @@ import {
   MessageBar,
   MessageBarBody,
   Badge,
+  CounterBadge,
   Menu,
   MenuTrigger,
   MenuPopover,
@@ -871,21 +872,38 @@ export const CustomersPage = () => {
               <Button
                 appearance="subtle"
                 onClick={() => handleViewOffices(node)}
-                style={{ cursor: 'pointer', padding: 0, minWidth: 'auto' }}
+                style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
               >
-                {node.officeCount || 0}
+                <CounterBadge 
+                  count={node.officeCount || 0} 
+                  size="medium" 
+                  appearance="filled" 
+                  color={(node.officeCount || 0) === 0 ? 'informative' : 'brand'} 
+                />
               </Button>
             </div>
             <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '70px' }}>
               <Button
                 appearance="subtle"
                 onClick={() => handleViewTenants(node)}
-                style={{ cursor: 'pointer', padding: 0, minWidth: 'auto' }}
+                style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
               >
-                {node.tenantCount || 0}
+                <CounterBadge 
+                  count={node.tenantCount || 0} 
+                  size="medium" 
+                  appearance="filled" 
+                  color={(node.tenantCount || 0) === 0 ? 'informative' : 'brand'} 
+                />
               </Button>
             </div>
-            <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '80px' }}>{node.userCount || 0}</div>
+            <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '80px' }}>
+              <CounterBadge 
+                count={node.userCount || 0} 
+                size="medium" 
+                appearance="filled" 
+                color={(node.userCount || 0) === 0 ? 'informative' : 'brand'} 
+              />
+            </div>
             <div className={styles.treeCell}>
               <Menu>
                 <MenuTrigger disableButtonEnhancement>
@@ -1967,21 +1985,38 @@ export const CustomersPage = () => {
                         <Button
                           appearance="subtle"
                           onClick={() => handleViewOffices(customer)}
-                          style={{ cursor: 'pointer', padding: 0, minWidth: 'auto' }}
+                          style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
                         >
-                          {customer.officeCount || 0}
+                          <CounterBadge 
+                            count={customer.officeCount || 0} 
+                            size="medium" 
+                            appearance="filled" 
+                            color={(customer.officeCount || 0) === 0 ? 'informative' : 'brand'} 
+                          />
                         </Button>
                       </TableCell>
                       <TableCell>
                         <Button
                           appearance="subtle"
                           onClick={() => handleViewTenants(customer)}
-                          style={{ cursor: 'pointer', padding: 0, minWidth: 'auto' }}
+                          style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
                         >
-                          {customer.tenantCount || 0}
+                          <CounterBadge 
+                            count={customer.tenantCount || 0} 
+                            size="medium" 
+                            appearance="filled" 
+                            color={(customer.tenantCount || 0) === 0 ? 'informative' : 'brand'} 
+                          />
                         </Button>
                       </TableCell>
-                      <TableCell>{customer.userCount || 0}</TableCell>
+                      <TableCell>
+                        <CounterBadge 
+                          count={customer.userCount || 0} 
+                          size="medium" 
+                          appearance="filled" 
+                          color={(customer.userCount || 0) === 0 ? 'informative' : 'brand'} 
+                        />
+                      </TableCell>
                       <TableCell>
                         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS }}>
                           <Menu>

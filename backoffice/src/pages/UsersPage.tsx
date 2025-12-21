@@ -67,6 +67,7 @@ import {
   DismissRegular,
   ArrowClockwiseRegular,
   ArrowSwapRegular,
+  LinkRegular,
 } from '@fluentui/react-icons';
 import { userService, UserDto, CreateUserRequest, UpdateUserRequest } from '../services/userService';
 import { tenantService, TenantDto } from '../services/tenantService';
@@ -155,6 +156,12 @@ export const UsersPage = () => {
   const [isChangeCustomerDialogOpen, setIsChangeCustomerDialogOpen] = useState(false);
   const [selectedNewCustomerId, setSelectedNewCustomerId] = useState<string>('');
   const [isChangingCustomer, setIsChangingCustomer] = useState(false);
+  const [isAssignDrawerOpen, setIsAssignDrawerOpen] = useState(false);
+  const [selectedUserForAssign, setSelectedUserForAssign] = useState<UserDto | null>(null);
+  const [selectedTenantId, setSelectedTenantId] = useState<string>('');
+  const [selectedOfficeId, setSelectedOfficeId] = useState<string>('');
+  const [availableOffices, setAvailableOffices] = useState<OfficeDto[]>([]);
+  const [isAssigning, setIsAssigning] = useState(false);
 
   const isLoadingRef = useRef(false);
   const hasLoadedRef = useRef(false);
@@ -478,6 +485,61 @@ export const UsersPage = () => {
     }
   };
 
+  // Cargar sedes cuando se selecciona un tenant
+  const handleTenantSelect = async (tenantId: string) => {
+    setSelectedTenantId(tenantId);
+    setSelectedOfficeId('');
+    try {
+      const offices = await officeService.getOfficesByTenant(tenantId);
+      setAvailableOffices(offices);
+    } catch (err: any) {
+      console.error('[UsersPage] Error cargando sedes:', err);
+      setAvailableOffices([]);
+    }
+  };
+
+  // Guardar asignación de tenant y sede
+  const handleAssignTenantAndOffice = async () => {
+    if (!selectedUserForAssign || !selectedTenantId) {
+      setError('Debe seleccionar un tenant');
+      return;
+    }
+
+    try {
+      setError(null);
+      setIsAssigning(true);
+
+      // Obtener el tenant seleccionado para obtener el customerId
+      const selectedTenant = tenants.find(t => t.id === selectedTenantId);
+      if (!selectedTenant) {
+        setError('Tenant no encontrado');
+        setIsAssigning(false);
+        return;
+      }
+
+      await userService.updateUser(selectedUserForAssign.id, {
+        email: selectedUserForAssign.email,
+        name: selectedUserForAssign.name || '',
+        role: selectedUserForAssign.role,
+        tenantId: selectedTenantId,
+        customerId: selectedTenant.customerId || selectedUserForAssign.customerId || '',
+        contactEmail: selectedUserForAssign.contactEmail || '',
+        phone: selectedUserForAssign.phone || '',
+      });
+
+      setIsAssignDrawerOpen(false);
+      setSelectedUserForAssign(null);
+      setSelectedTenantId('');
+      setSelectedOfficeId('');
+      setAvailableOffices([]);
+      await loadUsers();
+      setIsAssigning(false);
+    } catch (err: any) {
+      setError(err.message || 'Error al asignar tenant y sede');
+      setIsAssigning(false);
+    }
+  };
+
   // Manejar loading del drawer de detalles
   useEffect(() => {
     if (isDetailsDialogOpen) {
@@ -649,7 +711,12 @@ export const UsersPage = () => {
                                       height: 'auto'
                                     }}
                                   >
-                                    <CounterBadge count={offices.length} />
+                                    <CounterBadge 
+                                      count={offices.length} 
+                                      size="medium" 
+                                      appearance="filled" 
+                                      color={offices.length === 0 ? 'informative' : 'brand'} 
+                                    />
                                   </Button>
                                 </TeachingPopoverTrigger>
                                 <TeachingPopoverSurface>
@@ -680,7 +747,19 @@ export const UsersPage = () => {
                                 </TeachingPopoverSurface>
                               </TeachingPopover>
                             ) : (
-                              <CounterBadge count={0} />
+                              <Button
+                                appearance="subtle"
+                                icon={<LinkRegular />}
+                                onClick={() => {
+                                  setError(null);
+                                  setSelectedUserForAssign(user);
+                                  setSelectedTenantId('');
+                                  setSelectedOfficeId('');
+                                  setAvailableOffices([]);
+                                  setIsAssignDrawerOpen(true);
+                                }}
+                                title="Asignar sede y tenant"
+                              />
                             )}
                           </TableCell>
                           {/* Tenants */}
@@ -696,7 +775,12 @@ export const UsersPage = () => {
                                       height: 'auto'
                                     }}
                                   >
-                                    <CounterBadge count={associatedTenants.length} />
+                                    <CounterBadge 
+                                      count={associatedTenants.length} 
+                                      size="medium" 
+                                      appearance="filled" 
+                                      color={associatedTenants.length === 0 ? 'informative' : 'brand'} 
+                                    />
                                   </Button>
                                 </TeachingPopoverTrigger>
                                 <TeachingPopoverSurface>
@@ -725,7 +809,19 @@ export const UsersPage = () => {
                                 </TeachingPopoverSurface>
                               </TeachingPopover>
                             ) : (
-                              <CounterBadge count={0} />
+                              <Button
+                                appearance="subtle"
+                                icon={<LinkRegular />}
+                                onClick={() => {
+                                  setError(null);
+                                  setSelectedUserForAssign(user);
+                                  setSelectedTenantId('');
+                                  setSelectedOfficeId('');
+                                  setAvailableOffices([]);
+                                  setIsAssignDrawerOpen(true);
+                                }}
+                                title="Asignar sede y tenant"
+                              />
                             )}
                           </TableCell>
                           {/* Rol */}
@@ -1257,6 +1353,116 @@ export const UsersPage = () => {
           </DialogActions>
         </DialogSurface>
       </Dialog>
+
+      {/* Drawer para asignar tenant y sede */}
+      <OverlayDrawer
+        {...restoreFocusSourceAttributes}
+        position="end"
+        size="large"
+        open={isAssignDrawerOpen}
+        modalType="alert"
+        onOpenChange={(_, data) => {
+          setIsAssignDrawerOpen(data.open);
+          if (!data.open) {
+            setSelectedUserForAssign(null);
+            setSelectedTenantId('');
+            setSelectedOfficeId('');
+            setAvailableOffices([]);
+          }
+        }}
+      >
+        <DrawerHeader>
+          <DrawerHeaderTitle 
+            action={
+              <Button
+                appearance="subtle"
+                aria-label="Cerrar"
+                icon={<DismissRegular />}
+                onClick={() => setIsAssignDrawerOpen(false)}
+              />
+            }
+          >
+            Asignar Tenant y Sede
+          </DrawerHeaderTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
+            {error && (
+              <MessageBar intent="error" style={{ marginBottom: tokens.spacingVerticalM }}>
+                <MessageBarBody>{error}</MessageBarBody>
+              </MessageBar>
+            )}
+            {selectedUserForAssign && (
+              <>
+                <Field label="Usuario" className={styles.formField}>
+                  <Input 
+                    value={selectedUserForAssign.name || selectedUserForAssign.email} 
+                    readOnly 
+                  />
+                </Field>
+                <Field label="Tenant" required className={styles.formField}>
+                  <Combobox
+                    value={selectedTenantId ? tenants.find((t) => t.id === selectedTenantId)?.name || '' : ''}
+                    onOptionSelect={(_, data) => {
+                      const tenant = tenants.find((t) => t.name === data.optionValue);
+                      if (tenant) {
+                        handleTenantSelect(tenant.id);
+                      }
+                    }}
+                  >
+                    {tenants.map((tenant) => (
+                      <Option key={tenant.id} value={tenant.name}>
+                        {tenant.name}
+                      </Option>
+                    ))}
+                  </Combobox>
+                </Field>
+                {selectedTenantId && (
+                  <Field label="Sede" className={styles.formField}>
+                    <Combobox
+                      value={selectedOfficeId ? availableOffices.find((o) => o.id === selectedOfficeId)?.name || '' : ''}
+                      onOptionSelect={(_, data) => {
+                        const office = availableOffices.find((o) => o.name === data.optionValue);
+                        if (office) {
+                          setSelectedOfficeId(office.id);
+                        }
+                      }}
+                    >
+                      {availableOffices.length > 0 ? (
+                        availableOffices.map((office) => (
+                          <Option key={office.id} value={office.name}>
+                            {office.name} {office.city ? `- ${office.city}` : ''}
+                          </Option>
+                        ))
+                      ) : (
+                        <Option value="" disabled>
+                          No hay sedes disponibles para este tenant
+                        </Option>
+                      )}
+                    </Combobox>
+                  </Field>
+                )}
+                <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
+                  <Button 
+                    appearance="secondary" 
+                    onClick={() => setIsAssignDrawerOpen(false)}
+                    disabled={isAssigning}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button 
+                    appearance="primary" 
+                    onClick={handleAssignTenantAndOffice}
+                    disabled={isAssigning || !selectedTenantId}
+                  >
+                    {isAssigning ? 'Asignando...' : 'Asignar'}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </DrawerBody>
+      </OverlayDrawer>
     </div>
   );
 };
