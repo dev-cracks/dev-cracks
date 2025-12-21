@@ -58,6 +58,7 @@ import {
   AddRegular,
   BuildingRegular,
   DismissRegular,
+  ArrowSwapRegular,
 } from '@fluentui/react-icons';
 import {
   officeService,
@@ -69,6 +70,10 @@ import {
   customerService,
   CustomerDto,
 } from '../services/customerService';
+import {
+  tenantService,
+  TenantDto,
+} from '../services/tenantService';
 import { notificationService } from '../services/notificationService';
 import { TableSkeleton } from '../components/TableSkeleton';
 import { DetailsSkeleton } from '../components/DetailsSkeleton';
@@ -167,10 +172,18 @@ export const OfficesPage = () => {
   const [isDetailsLoading, setIsDetailsLoading] = useState(false);
   const [isCreateDrawerLoading, setIsCreateDrawerLoading] = useState(false);
   const [isEditDrawerLoading, setIsEditDrawerLoading] = useState(false);
+  const [isCustomerDetailsDialogOpen, setIsCustomerDetailsDialogOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerDto | null>(null);
+  const [isTenantDetailsDialogOpen, setIsTenantDetailsDialogOpen] = useState(false);
+  const [selectedTenant, setSelectedTenant] = useState<TenantDto | null>(null);
+  const [isChangeTenantDialogOpen, setIsChangeTenantDialogOpen] = useState(false);
+  const [selectedNewTenantId, setSelectedNewTenantId] = useState<string>('');
+  const [allTenants, setAllTenants] = useState<TenantDto[]>([]);
+  const [isChangingTenant, setIsChangingTenant] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState<CreateOfficeRequest>({
-    customerId: '',
+    tenantId: '',
     name: '',
     address: '',
     city: '',
@@ -220,6 +233,19 @@ export const OfficesPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Cargar tenants cuando se necesiten
+  useEffect(() => {
+    const loadTenants = async () => {
+      try {
+        const tenants = await tenantService.getAllTenants();
+        setAllTenants(tenants);
+      } catch (err) {
+        console.error('[OfficesPage] Error cargando tenants:', err);
+      }
+    };
+    loadTenants();
+  }, []);
+
   // Registrar acciones en el RibbonMenu
   useEffect(() => {
     addGroup({
@@ -233,7 +259,7 @@ export const OfficesPage = () => {
           icon: <AddRegular />,
           action: () => {
             setFormData({
-              customerId: '',
+              tenantId: '',
               name: '',
               address: '',
               city: '',
@@ -262,8 +288,8 @@ export const OfficesPage = () => {
   );
 
   const handleCreate = async () => {
-    if (!formData.name || !formData.customerId) {
-      setError('El nombre y el cliente son requeridos');
+    if (!formData.name || !formData.tenantId) {
+      setError('El nombre y el tenant son requeridos');
       return;
     }
 
@@ -274,7 +300,7 @@ export const OfficesPage = () => {
       setIsCreateDialogOpen(false);
       setIsCreating(false);
       setFormData({
-        customerId: '',
+        tenantId: '',
         name: '',
         address: '',
         city: '',
@@ -293,7 +319,7 @@ export const OfficesPage = () => {
   const handleEdit = async (office: OfficeDto) => {
     setSelectedOffice(office);
     setFormData({
-      customerId: office.customerId,
+      tenantId: office.tenantId,
       name: office.name,
       address: office.address || '',
       city: office.city || '',
@@ -455,6 +481,69 @@ export const OfficesPage = () => {
     }
   };
 
+  const handleViewCustomerDetails = async (customerId: string) => {
+    try {
+      const customer = await customerService.getCustomerById(customerId);
+      setSelectedCustomer(customer);
+      setIsCustomerDetailsDialogOpen(true);
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar detalles del cliente');
+    }
+  };
+
+  const handleViewTenantDetails = async (tenant: TenantDto) => {
+    setSelectedTenant(tenant);
+    setIsTenantDetailsDialogOpen(true);
+  };
+
+  const handleChangeTenant = async (office: OfficeDto) => {
+    setSelectedOffice(office);
+    setSelectedNewTenantId(office.tenantId);
+    try {
+      // Cargar todos los tenants disponibles
+      const tenants = await tenantService.getAllTenants();
+      setAllTenants(tenants);
+      setIsChangeTenantDialogOpen(true);
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar tenants');
+    }
+  };
+
+  const handleConfirmChangeTenant = async () => {
+    if (!selectedOffice || !selectedNewTenantId) {
+      setError('Debe seleccionar un tenant');
+      return;
+    }
+
+    if (selectedNewTenantId === selectedOffice.tenantId) {
+      setError('El tenant seleccionado es el mismo que el actual');
+      return;
+    }
+
+    try {
+      setError(null);
+      setIsChangingTenant(true);
+      await officeService.updateOffice(selectedOffice.id, {
+        name: selectedOffice.name,
+        address: selectedOffice.address,
+        city: selectedOffice.city,
+        stateProvince: selectedOffice.stateProvince,
+        postalCode: selectedOffice.postalCode,
+        phone: selectedOffice.phone,
+        email: selectedOffice.email,
+        tenantId: selectedNewTenantId,
+      });
+      setIsChangeTenantDialogOpen(false);
+      setSelectedOffice(null);
+      setSelectedNewTenantId('');
+      await loadOffices();
+      setIsChangingTenant(false);
+    } catch (err: any) {
+      setError(err.message || 'Error al cambiar tenant de la sede');
+      setIsChangingTenant(false);
+    }
+  };
+
   if (isLoading && offices.length === 0) {
     return (
       <div className={styles.container}>
@@ -513,13 +602,13 @@ export const OfficesPage = () => {
           <TableHeader>
             <TableRow>
               <TableHeaderCell>Nombre</TableHeaderCell>
+              <TableHeaderCell>Tenants</TableHeaderCell>
               <TableHeaderCell>Cliente</TableHeaderCell>
               <TableHeaderCell>Dirección</TableHeaderCell>
               <TableHeaderCell>Ciudad</TableHeaderCell>
               <TableHeaderCell>Teléfono</TableHeaderCell>
               <TableHeaderCell>Email</TableHeaderCell>
               <TableHeaderCell>Estado</TableHeaderCell>
-              <TableHeaderCell>Tenants</TableHeaderCell>
               <TableHeaderCell>Acciones</TableHeaderCell>
             </TableRow>
           </TableHeader>
@@ -534,12 +623,76 @@ export const OfficesPage = () => {
               filteredOffices.map((office) => (
                 <TableRow key={office.id}>
                   <TableCell>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS }}>
-                      <HomeRegular fontSize={16} />
-                      {office.name}
-                    </div>
+                    <Text weight="semibold">{office.name}</Text>
                   </TableCell>
-                  <TableCell>{office.customerName || 'N/A'}</TableCell>
+                  <TableCell>
+                    {office.tenantId && office.tenantName ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS }}>
+                        <Button
+                          appearance="subtle"
+                          onClick={() => handleViewTenantDetails({ id: office.tenantId, name: office.tenantName || '' } as TenantDto)}
+                          style={{ 
+                            color: tokens.colorBrandForegroundLink, 
+                            textDecoration: 'none',
+                            fontWeight: tokens.fontWeightSemibold,
+                            padding: 0,
+                            minWidth: 'auto',
+                            height: 'auto'
+                          }}
+                        >
+                          {office.tenantName}
+                        </Button>
+                        <Button
+                          appearance="subtle"
+                          icon={<ArrowSwapRegular />}
+                          onClick={() => handleChangeTenant(office)}
+                          aria-label="Cambiar tenant"
+                          title="Cambiar tenant"
+                          size="small"
+                          style={{
+                            minWidth: 'auto',
+                            padding: tokens.spacingVerticalXS,
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS }}>
+                        <Text>N/A</Text>
+                        <Button
+                          appearance="subtle"
+                          icon={<ArrowSwapRegular />}
+                          onClick={() => handleChangeTenant(office)}
+                          aria-label="Asignar tenant"
+                          title="Asignar tenant"
+                          size="small"
+                          style={{
+                            minWidth: 'auto',
+                            padding: tokens.spacingVerticalXS,
+                          }}
+                        />
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {office.customerId && office.customerName ? (
+                      <Button
+                        appearance="subtle"
+                        onClick={() => handleViewCustomerDetails(office.customerId)}
+                        style={{ 
+                          color: tokens.colorBrandForegroundLink, 
+                          textDecoration: 'none',
+                          fontWeight: tokens.fontWeightSemibold,
+                          padding: 0,
+                          minWidth: 'auto',
+                          height: 'auto'
+                        }}
+                      >
+                        {office.customerName}
+                      </Button>
+                    ) : (
+                      <Text>N/A</Text>
+                    )}
+                  </TableCell>
                   <TableCell>{office.address || 'N/A'}</TableCell>
                   <TableCell>{office.city || 'N/A'}</TableCell>
                   <TableCell>{office.phone || 'N/A'}</TableCell>
@@ -553,7 +706,6 @@ export const OfficesPage = () => {
                       <Badge appearance="outline">Inactivo</Badge>
                     )}
                   </TableCell>
-                  <TableCell style={{ textAlign: 'center' }}>{office.tenantCount || 0}</TableCell>
                   <TableCell>
                     <Menu>
                       <MenuTrigger disableButtonEnhancement>
@@ -612,7 +764,7 @@ export const OfficesPage = () => {
               return;
             }
             const hasData = formData.name.trim() || 
-                            formData.customerId || 
+                            formData.tenantId || 
                             formData.address.trim() || 
                             formData.city.trim() || 
                             formData.stateProvince.trim() || 
@@ -623,7 +775,7 @@ export const OfficesPage = () => {
               if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
                 setIsCreateDialogOpen(false);
                 setFormData({
-                  customerId: '',
+                  tenantId: '',
                   name: '',
                   address: '',
                   city: '',
@@ -655,7 +807,7 @@ export const OfficesPage = () => {
                     return;
                   }
                   const hasData = formData.name.trim() || 
-                                  formData.customerId || 
+                                  formData.tenantId || 
                                   formData.address.trim() || 
                                   formData.city.trim() || 
                                   formData.stateProvince.trim() || 
@@ -666,7 +818,7 @@ export const OfficesPage = () => {
                     if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
                       setIsCreateDialogOpen(false);
                       setFormData({
-                        customerId: '',
+                        tenantId: '',
                         name: '',
                         address: '',
                         city: '',
@@ -693,18 +845,18 @@ export const OfficesPage = () => {
               <DetailsSkeleton rows={8} />
             ) : (
               <>
-              <Field label="Cliente" required className={styles.formField}>
+              <Field label="Tenant" required className={styles.formField}>
                 <Combobox
-                  value={customers.find(c => c.id === formData.customerId)?.name || ''}
+                  value={allTenants.find(t => t.id === formData.tenantId)?.name || ''}
                   onOptionSelect={(_, data) => {
                     if (data.optionValue) {
-                      setFormData({ ...formData, customerId: data.optionValue });
+                      setFormData({ ...formData, tenantId: data.optionValue });
                     }
                   }}
                 >
-                  {customers.map((customer) => (
-                    <Option key={customer.id} value={customer.id}>
-                      {customer.name}
+                  {allTenants.map((tenant) => (
+                    <Option key={tenant.id} value={tenant.id}>
+                      {tenant.name}
                     </Option>
                   ))}
                 </Combobox>
@@ -764,7 +916,7 @@ export const OfficesPage = () => {
                   appearance="secondary" 
                   onClick={() => {
                     const hasData = formData.name.trim() || 
-                                    formData.customerId || 
+                                    formData.tenantId || 
                                     formData.address.trim() || 
                                     formData.city.trim() || 
                                     formData.stateProvince.trim() || 
@@ -775,7 +927,7 @@ export const OfficesPage = () => {
                       if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los datos no guardados.')) {
                         setIsCreateDialogOpen(false);
                         setFormData({
-                          customerId: '',
+                          tenantId: '',
                           name: '',
                           address: '',
                           city: '',
@@ -844,7 +996,7 @@ export const OfficesPage = () => {
                 setIsEditDialogOpen(false);
                 setSelectedOffice(null);
                 setFormData({
-                  customerId: '',
+                  tenantId: '',
                   name: '',
                   address: '',
                   city: '',
@@ -955,14 +1107,14 @@ export const OfficesPage = () => {
               <DetailsSkeleton rows={8} />
             ) : (
               <>
-              <Field label="Cliente" required className={styles.formField}>
+              <Field label="Tenant" required className={styles.formField}>
                 <Combobox
-                  value={customers.find(c => c.id === formData.customerId)?.name || ''}
+                  value={allTenants.find(t => t.id === formData.tenantId)?.name || ''}
                   disabled
                 >
-                  {customers.map((customer) => (
-                    <Option key={customer.id} value={customer.id}>
-                      {customer.name}
+                  {allTenants.map((tenant) => (
+                    <Option key={tenant.id} value={tenant.id}>
+                      {tenant.name}
                     </Option>
                   ))}
                 </Combobox>
@@ -1154,6 +1306,9 @@ export const OfficesPage = () => {
                 <Field label="Nombre" className={styles.formField}>
                   <Input value={selectedOffice.name} readOnly />
                 </Field>
+                <Field label="Tenant" className={styles.formField}>
+                  <Input value={selectedOffice.tenantName || 'N/A'} readOnly />
+                </Field>
                 <Field label="Cliente" className={styles.formField}>
                   <Input value={selectedOffice.customerName || 'N/A'} readOnly />
                 </Field>
@@ -1185,9 +1340,6 @@ export const OfficesPage = () => {
                       <Badge appearance="outline">Inactivo</Badge>
                     )}
                   </div>
-                </Field>
-                <Field label="Tenants" className={styles.formField}>
-                  <Input value={String(selectedOffice.tenantCount || 0)} readOnly />
                 </Field>
                 <Field label="Creado" className={styles.formField}>
                   <Input value={new Date(selectedOffice.createdAt).toLocaleString()} readOnly />
@@ -1256,6 +1408,226 @@ export const OfficesPage = () => {
               {isSendingNotification ? 'Enviando...' : 'Enviar Notificación'}
             </Button>
           </DialogActions>
+        </DialogSurface>
+      </Dialog>
+
+      {/* Drawer de detalles del tenant */}
+      <OverlayDrawer
+        {...restoreFocusSourceAttributes}
+        position="end"
+        size="large"
+        open={isTenantDetailsDialogOpen}
+        modalType="alert"
+        onOpenChange={(event: any, data: { open: boolean }) => {
+          if (data.open === false) {
+            setIsTenantDetailsDialogOpen(false);
+            setSelectedTenant(null);
+          } else {
+            setIsTenantDetailsDialogOpen(true);
+          }
+        }}
+      >
+        <DrawerHeader>
+          <DrawerHeaderTitle 
+            action={
+              <Button
+                appearance="subtle"
+                aria-label="Cerrar"
+                icon={<DismissRegular />}
+                onClick={() => {
+                  setIsTenantDetailsDialogOpen(false);
+                  setSelectedTenant(null);
+                }}
+              />
+            }
+          >
+            Detalles del Tenant
+          </DrawerHeaderTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
+            {selectedTenant ? (
+              <>
+                <Field label="Nombre" className={styles.formField}>
+                  <Input value={selectedTenant.name} readOnly />
+                </Field>
+                <Field label="Cliente" className={styles.formField}>
+                  <Input value={selectedTenant.customerName || 'N/A'} readOnly />
+                </Field>
+                <Field label="Estado" className={styles.formField}>
+                  <div>
+                    {selectedTenant.isSuspended ? (
+                      <Badge appearance="filled" color="danger">Suspendido</Badge>
+                    ) : selectedTenant.isActive ? (
+                      <Badge appearance="filled" color="success">Activo</Badge>
+                    ) : (
+                      <Badge appearance="outline">Inactivo</Badge>
+                    )}
+                  </div>
+                </Field>
+                <Field label="Usuarios" className={styles.formField}>
+                  <Input value={String(selectedTenant.userCount || 0)} readOnly />
+                </Field>
+                <Field label="Creado" className={styles.formField}>
+                  <Input value={new Date(selectedTenant.createdAt).toLocaleString()} readOnly />
+                </Field>
+                <Field label="Actualizado" className={styles.formField}>
+                  <Input value={new Date(selectedTenant.updatedAt).toLocaleString()} readOnly />
+                </Field>
+                <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
+                  <Button appearance="primary" onClick={() => setIsTenantDetailsDialogOpen(false)}>
+                    Cerrar
+                  </Button>
+                </div>
+              </>
+            ) : null}
+          </div>
+        </DrawerBody>
+      </OverlayDrawer>
+
+      {/* Drawer de detalles del cliente */}
+      <OverlayDrawer
+        {...restoreFocusSourceAttributes}
+        position="end"
+        size="large"
+        open={isCustomerDetailsDialogOpen}
+        modalType="alert"
+        onOpenChange={(event: any, data: { open: boolean }) => {
+          if (data.open === false) {
+            setIsCustomerDetailsDialogOpen(false);
+            setSelectedCustomer(null);
+          } else {
+            setIsCustomerDetailsDialogOpen(true);
+          }
+        }}
+      >
+        <DrawerHeader>
+          <DrawerHeaderTitle 
+            action={
+              <Button
+                appearance="subtle"
+                aria-label="Cerrar"
+                icon={<DismissRegular />}
+                onClick={() => {
+                  setIsCustomerDetailsDialogOpen(false);
+                  setSelectedCustomer(null);
+                }}
+              />
+            }
+          >
+            Detalles del Cliente
+          </DrawerHeaderTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
+            {selectedCustomer && (
+              <>
+                <Field label="Nombre" className={styles.formField}>
+                  <Input value={selectedCustomer.name} readOnly />
+                </Field>
+                <Field label="Identificación" className={styles.formField}>
+                  <Input value={selectedCustomer.identification} readOnly />
+                </Field>
+                <Field label="País" className={styles.formField}>
+                  <Input value={selectedCustomer.countryName || 'N/A'} readOnly />
+                </Field>
+                <Field label="Estado/Provincia" className={styles.formField}>
+                  <Input value={selectedCustomer.stateProvince || 'N/A'} readOnly />
+                </Field>
+                <Field label="Ciudad" className={styles.formField}>
+                  <Input value={selectedCustomer.city || 'N/A'} readOnly />
+                </Field>
+                <Field label="Teléfono" className={styles.formField}>
+                  <Input value={selectedCustomer.phone || 'N/A'} readOnly />
+                </Field>
+                <Field label="Correo electrónico" className={styles.formField}>
+                  <Input value={selectedCustomer.email || 'N/A'} readOnly />
+                </Field>
+                <Field label="Estado" className={styles.formField}>
+                  <div>
+                    {selectedCustomer.isSuspended ? (
+                      <Badge appearance="filled" color="danger">Suspendido</Badge>
+                    ) : selectedCustomer.isActive ? (
+                      <Badge appearance="filled" color="success">Activo</Badge>
+                    ) : (
+                      <Badge appearance="outline">Inactivo</Badge>
+                    )}
+                  </div>
+                </Field>
+                <Field label="Tenants" className={styles.formField}>
+                  <Input value={String(selectedCustomer.tenantCount || 0)} readOnly />
+                </Field>
+                <Field label="Usuarios" className={styles.formField}>
+                  <Input value={String(selectedCustomer.userCount || 0)} readOnly />
+                </Field>
+                <Field label="Creado" className={styles.formField}>
+                  <Input value={new Date(selectedCustomer.createdAt).toLocaleString()} readOnly />
+                </Field>
+                <Field label="Actualizado" className={styles.formField}>
+                  <Input value={new Date(selectedCustomer.updatedAt).toLocaleString()} readOnly />
+                </Field>
+                <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
+                  <Button appearance="primary" onClick={() => setIsCustomerDetailsDialogOpen(false)}>
+                    Cerrar
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </DrawerBody>
+      </OverlayDrawer>
+
+      {/* Dialog de cambiar tenant */}
+      <Dialog open={isChangeTenantDialogOpen} onOpenChange={(_, data) => setIsChangeTenantDialogOpen(data.open)}>
+        <DialogSurface>
+          <DialogTitle>Cambiar Tenant de la Sede</DialogTitle>
+          <DialogBody>
+            <DialogContent>
+              <Text>
+                Seleccione un nuevo tenant para la sede "{selectedOffice?.name}".
+              </Text>
+              <Field label="Tenant" required className={styles.formField}>
+                <Combobox
+                  value={allTenants.find(t => t.id === selectedNewTenantId)?.name || ''}
+                  onOptionSelect={(_, data) => {
+                    if (data.optionValue) {
+                      setSelectedNewTenantId(data.optionValue);
+                    }
+                  }}
+                >
+                  {allTenants.map((tenant) => (
+                    <Option key={tenant.id} value={tenant.id}>
+                      {tenant.name}
+                    </Option>
+                  ))}
+                </Combobox>
+              </Field>
+              {selectedOffice?.tenantName && (
+                <Text>
+                  Tenant actual: {selectedOffice.tenantName}
+                </Text>
+              )}
+            </DialogContent>
+            <DialogActions>
+              <Button 
+                appearance="secondary" 
+                onClick={() => {
+                  setIsChangeTenantDialogOpen(false);
+                  setSelectedNewTenantId('');
+                }}
+                disabled={isChangingTenant}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                appearance="primary" 
+                onClick={handleConfirmChangeTenant}
+                disabled={isChangingTenant || !selectedNewTenantId}
+              >
+                {isChangingTenant ? 'Cambiando...' : 'Cambiar Tenant'}
+              </Button>
+            </DialogActions>
+          </DialogBody>
         </DialogSurface>
       </Dialog>
     </div>

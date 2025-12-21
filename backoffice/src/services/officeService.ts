@@ -3,6 +3,8 @@ import { apiService } from './apiService';
 export interface OfficeDto {
   id: string;
   name: string;
+  tenantId: string;
+  tenantName?: string;
   customerId: string;
   customerName?: string;
   address?: string;
@@ -15,11 +17,10 @@ export interface OfficeDto {
   updatedAt: string;
   isActive: boolean;
   isSuspended?: boolean;
-  tenantCount: number;
 }
 
 export interface CreateOfficeRequest {
-  customerId: string;
+  tenantId: string;
   name: string;
   address?: string;
   city?: string;
@@ -31,6 +32,7 @@ export interface CreateOfficeRequest {
 
 export interface UpdateOfficeRequest {
   name: string;
+  tenantId?: string;
   address?: string;
   city?: string;
   stateProvince?: string;
