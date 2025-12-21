@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   Card,
-  CardHeader,
   CardPreview,
   Text,
   makeStyles,
@@ -802,8 +801,77 @@ export const CustomersPage = () => {
   const [contactPopoverOpen, setContactPopoverOpen] = useState<string | null>(null);
   const [officeContactPopoverOpen, setOfficeContactPopoverOpen] = useState<string | null>(null);
 
+  // Estados para tabs en detalles y edición
+  const [detailsActiveTab, setDetailsActiveTab] = useState<'details' | 'tenants' | 'offices' | 'users'>('details');
+  const [editActiveTab, setEditActiveTab] = useState<'details' | 'tenants' | 'offices' | 'users'>('details');
+  
+  // Estados para asignación de tenants, sedes y usuarios
+  const [allTenantsForAssign, setAllTenantsForAssign] = useState<TenantDto[]>([]);
+  const [allUsersForAssign, setAllUsersForAssign] = useState<UserDto[]>([]);
+  const [selectedTenantIdsForAssign, setSelectedTenantIdsForAssign] = useState<Set<string>>(new Set());
+  const [selectedOfficeIdsForAssign, setSelectedOfficeIdsForAssign] = useState<Set<string>>(new Set());
+  const [selectedUserIdsForAssign, setSelectedUserIdsForAssign] = useState<Set<string>>(new Set());
+  const [selectedTenantToAdd, setSelectedTenantToAdd] = useState<string>('');
+  const [selectedOfficeToAdd, setSelectedOfficeToAdd] = useState<string>('');
+  const [selectedUserToAdd, setSelectedUserToAdd] = useState<string>('');
+  const [selectedTenantForOffice, setSelectedTenantForOffice] = useState<string>('');
+  const [isAssigningTenantToCustomer, setIsAssigningTenantToCustomer] = useState(false);
+  const [isAssigningOfficeToCustomer, setIsAssigningOfficeToCustomer] = useState(false);
+  const [isAssigningUserToCustomer, setIsAssigningUserToCustomer] = useState(false);
+  const [isLoadingAllTenants, setIsLoadingAllTenants] = useState(false);
+  const [isLoadingAllUsers, setIsLoadingAllUsers] = useState(false);
+  const [isCreatingOfficeFromTab, setIsCreatingOfficeFromTab] = useState(false);
+  const [availableOfficesFromTenants, setAvailableOfficesFromTenants] = useState<OfficeDto[]>([]);
+  const [isLoadingAvailableOffices, setIsLoadingAvailableOffices] = useState(false);
+
   const isLoadingRef = useRef(false);
   const hasLoadedRef = useRef(false);
+
+  // Función para calcular los conteos de tenants, sedes y usuarios para cada cliente
+  const calculateCustomerCounts = useCallback(async (customers: CustomerDto[]): Promise<CustomerDto[]> => {
+    try {
+      // Calcular conteos para todos los clientes en paralelo
+      const customersWithCounts = await Promise.all(
+        customers.map(async (customer) => {
+          try {
+            // Obtener tenants, sedes y usuarios del cliente en paralelo
+            const [tenants, offices, users] = await Promise.allSettled([
+              customerService.getCustomerTenants(customer.id),
+              officeService.getOfficesByCustomer(customer.id),
+              customerService.getCustomerUsers(customer.id),
+            ]);
+
+            // Extraer los valores o usar arrays vacíos si falló
+            const tenantCount = tenants.status === 'fulfilled' ? tenants.value.length : 0;
+            const officeCount = offices.status === 'fulfilled' ? offices.value.length : 0;
+            const userCount = users.status === 'fulfilled' ? users.value.length : 0;
+
+            // Retornar el cliente con los conteos actualizados
+            return {
+              ...customer,
+              tenantCount,
+              officeCount,
+              userCount,
+            };
+          } catch (err) {
+            console.error(`[CustomersPage] Error calculando conteos para cliente ${customer.id}:`, err);
+            // Si hay error, retornar el cliente con conteos en 0
+            return {
+              ...customer,
+              tenantCount: 0,
+              officeCount: 0,
+              userCount: 0,
+            };
+          }
+        })
+      );
+
+      return customersWithCounts;
+    } catch (err) {
+      console.error('[CustomersPage] Error calculando conteos de clientes:', err);
+      return customers;
+    }
+  }, []);
 
   const loadCustomers = useCallback(async () => {
     if (isLoadingRef.current) {
@@ -816,8 +884,13 @@ export const CustomersPage = () => {
       setError(null);
       console.log('[CustomersPage] Cargando clientes...');
       const data = await customerService.getAllCustomers();
-      setCustomers(data);
       console.log('[CustomersPage] Clientes cargados:', data.length);
+      
+      // Calcular los conteos de tenants, sedes y usuarios
+      console.log('[CustomersPage] Calculando conteos de tenants, sedes y usuarios...');
+      const customersWithCounts = await calculateCustomerCounts(data);
+      setCustomers(customersWithCounts);
+      console.log('[CustomersPage] Conteos calculados correctamente');
     } catch (err: any) {
       console.error('[CustomersPage] Error cargando clientes:', err);
       setError(err.message || 'Error al cargar clientes');
@@ -825,7 +898,7 @@ export const CustomersPage = () => {
       setIsLoading(false);
       isLoadingRef.current = false;
     }
-  }, []);
+  }, [calculateCustomerCounts]);
 
   const loadCountries = useCallback(async () => {
     try {
@@ -1336,6 +1409,7 @@ export const CustomersPage = () => {
 
   const handleEdit = async (customer: CustomerDto) => {
     setSelectedCustomer(customer);
+    setEditActiveTab('details');
     setFormData({
       name: customer.name,
       identification: customer.identification,
@@ -1347,16 +1421,38 @@ export const CustomersPage = () => {
     });
     setEditCountrySearchText('');
     
-    // Cargar tenants del cliente para verificar si tiene
-    setIsLoadingTenants(true);
+    // Cargar datos relacionados
     try {
-      const tenants = await customerService.getCustomerTenants(customer.id);
+      setIsLoadingTenants(true);
+      setIsLoadingOffices(true);
+      setIsLoadingUsers(true);
+      
+      const [tenants, offices, users] = await Promise.all([
+        customerService.getCustomerTenants(customer.id),
+        officeService.getOfficesByCustomer(customer.id),
+        customerService.getCustomerUsers(customer.id),
+      ]);
+      
       setCustomerTenants(tenants);
+      setCustomerOffices(offices);
+      setCustomerUsers(users);
+      
+      // Cargar sedes disponibles después de cargar los tenants
+      if (tenants.length > 0) {
+        // Esperar un momento para que los estados se actualicen
+        setTimeout(() => {
+          loadAvailableOfficesFromTenants();
+        }, 100);
+      }
     } catch (err: any) {
-      console.error('Error cargando tenants:', err);
+      console.error('[CustomersPage] Error cargando datos del cliente:', err);
       setCustomerTenants([]);
+      setCustomerOffices([]);
+      setCustomerUsers([]);
     } finally {
       setIsLoadingTenants(false);
+      setIsLoadingOffices(false);
+      setIsLoadingUsers(false);
     }
     
     setIsEditDialogOpen(true);
@@ -1671,7 +1767,34 @@ export const CustomersPage = () => {
 
   const handleViewDetails = async (customer: CustomerDto) => {
     setSelectedCustomer(customer);
+    setDetailsActiveTab('details');
     setIsDetailsDialogOpen(true);
+    
+    // Cargar datos relacionados
+    try {
+      setIsLoadingTenants(true);
+      setIsLoadingOffices(true);
+      setIsLoadingUsers(true);
+      
+      const [tenants, offices, users] = await Promise.all([
+        customerService.getCustomerTenants(customer.id),
+        officeService.getOfficesByCustomer(customer.id),
+        customerService.getCustomerUsers(customer.id),
+      ]);
+      
+      setCustomerTenants(tenants);
+      setCustomerOffices(offices);
+      setCustomerUsers(users);
+      
+      // Cargar sedes disponibles después de cargar los tenants
+      // El useEffect se encargará de cargar las sedes cuando cambien los estados
+    } catch (err: any) {
+      console.error('[CustomersPage] Error cargando datos del cliente:', err);
+    } finally {
+      setIsLoadingTenants(false);
+      setIsLoadingOffices(false);
+      setIsLoadingUsers(false);
+    }
   };
 
   // Manejar loading del drawer de detalles
@@ -1766,6 +1889,333 @@ export const CustomersPage = () => {
       setSelectedTenant(null);
     } finally {
       setIsLoadingTenant(false);
+    }
+  };
+
+  // Funciones para asignar/desasignar tenants
+  const loadAllTenantsForAssign = useCallback(async () => {
+    if (!selectedCustomer) return;
+    try {
+      setIsLoadingAllTenants(true);
+      const allTenants = await tenantService.getAllTenants();
+      // Filtrar tenants que no pertenecen al cliente
+      const availableTenants = allTenants.filter(
+        (tenant) => tenant.customerId !== selectedCustomer.id
+      );
+      setAllTenantsForAssign(availableTenants);
+    } catch (err: any) {
+      console.error('[CustomersPage] Error cargando todos los tenants:', err);
+    } finally {
+      setIsLoadingAllTenants(false);
+    }
+  }, [selectedCustomer]);
+
+  // Funciones para asignar/desasignar usuarios
+  const loadAllUsersForAssign = useCallback(async () => {
+    if (!selectedCustomer) return;
+    try {
+      setIsLoadingAllUsers(true);
+      const allUsers = await userService.getAllUsers();
+      // Filtrar usuarios que no pertenecen al cliente
+      const customerUserIds = new Set(customerUsers.map(u => u.id));
+      const availableUsers = allUsers.filter(
+        (user) => !customerUserIds.has(user.id)
+      );
+      setAllUsersForAssign(availableUsers);
+    } catch (err: any) {
+      console.error('[CustomersPage] Error cargando todos los usuarios:', err);
+    } finally {
+      setIsLoadingAllUsers(false);
+    }
+  }, [selectedCustomer, customerUsers]);
+
+  // Función para cargar sedes disponibles de los tenants del cliente
+  const loadAvailableOfficesFromTenants = useCallback(async () => {
+    if (!selectedCustomer || customerTenants.length === 0) {
+      setAvailableOfficesFromTenants([]);
+      return;
+    }
+    
+    try {
+      setIsLoadingAvailableOffices(true);
+      console.log('[CustomersPage] Cargando sedes de tenants:', customerTenants.length);
+      
+      // Obtener todas las sedes de todos los tenants del cliente
+      const officePromises = customerTenants.map(tenant => 
+        officeService.getOfficesByTenant(tenant.id).catch(err => {
+          console.error(`[CustomersPage] Error cargando sedes del tenant ${tenant.id}:`, err);
+          return [];
+        })
+      );
+      const officesArrays = await Promise.all(officePromises);
+      const allTenantOffices = officesArrays.flat();
+      
+      console.log('[CustomersPage] Sedes de todos los tenants:', allTenantOffices.length);
+      console.log('[CustomersPage] Sedes del cliente actuales:', customerOffices.length);
+      
+      // Filtrar las sedes que ya están en customerOffices
+      // Usar un Set para comparación más eficiente
+      const customerOfficeIds = new Set(customerOffices.map(o => o.id));
+      const availableOffices = allTenantOffices.filter(
+        (office) => !customerOfficeIds.has(office.id)
+      );
+      
+      console.log('[CustomersPage] Sedes disponibles para agregar:', availableOffices.length);
+      console.log('[CustomersPage] IDs de sedes del cliente:', Array.from(customerOfficeIds));
+      console.log('[CustomersPage] IDs de sedes de tenants:', allTenantOffices.map(o => o.id));
+      console.log('[CustomersPage] Sedes disponibles:', availableOffices.map(o => ({ id: o.id, name: o.name })));
+      
+      setAvailableOfficesFromTenants(availableOffices);
+    } catch (err: any) {
+      console.error('[CustomersPage] Error cargando sedes disponibles de tenants:', err);
+      setAvailableOfficesFromTenants([]);
+    } finally {
+      setIsLoadingAvailableOffices(false);
+    }
+  }, [selectedCustomer, customerTenants, customerOffices]);
+
+  // Cargar todos los tenants y usuarios cuando se abre el drawer de detalles
+  useEffect(() => {
+    if (isDetailsDialogOpen && selectedCustomer) {
+      loadAllTenantsForAssign();
+      loadAllUsersForAssign();
+    }
+  }, [isDetailsDialogOpen, selectedCustomer, loadAllTenantsForAssign, loadAllUsersForAssign]);
+
+  // Cargar todos los tenants y usuarios cuando se abre el drawer de edición
+  useEffect(() => {
+    if (isEditDialogOpen && selectedCustomer) {
+      loadAllTenantsForAssign();
+      loadAllUsersForAssign();
+    }
+  }, [isEditDialogOpen, selectedCustomer, loadAllTenantsForAssign, loadAllUsersForAssign]);
+
+  // Cargar sedes disponibles cuando cambian los tenants o las sedes del cliente
+  useEffect(() => {
+    if ((isDetailsDialogOpen || isEditDialogOpen) && selectedCustomer && customerTenants.length > 0) {
+      console.log('[CustomersPage] useEffect: Cargando sedes disponibles, tenants:', customerTenants.length, 'sedes actuales:', customerOffices.length);
+      console.log('[CustomersPage] useEffect: IDs de tenants:', customerTenants.map(t => t.id));
+      // Cargar inmediatamente cuando cambian los tenants o las sedes
+      loadAvailableOfficesFromTenants();
+    } else if ((isDetailsDialogOpen || isEditDialogOpen) && selectedCustomer && customerTenants.length === 0) {
+      // Si no hay tenants, limpiar las sedes disponibles
+      console.log('[CustomersPage] useEffect: No hay tenants, limpiando sedes disponibles');
+      setAvailableOfficesFromTenants([]);
+    }
+  }, [isDetailsDialogOpen, isEditDialogOpen, selectedCustomer?.id, customerTenants, customerOffices, loadAvailableOfficesFromTenants]);
+
+  const handleAssignTenantToCustomer = async () => {
+    if (!selectedCustomer || !selectedTenantToAdd) return;
+    
+    try {
+      setIsAssigningTenantToCustomer(true);
+      setError(null);
+      // Obtener el nombre del tenant para asignarlo
+      const tenant = allTenantsForAssign.find(t => t.id === selectedTenantToAdd);
+      if (tenant) {
+        await tenantService.updateTenant(selectedTenantToAdd, {
+          name: tenant.name,
+          customerId: selectedCustomer.id,
+        });
+      }
+      setSelectedTenantToAdd('');
+      // Recargar tenants del cliente
+      const tenants = await customerService.getCustomerTenants(selectedCustomer.id);
+      setCustomerTenants(tenants);
+      // Recargar sedes del cliente (pueden haber cambiado)
+      const offices = await officeService.getOfficesByCustomer(selectedCustomer.id);
+      setCustomerOffices(offices);
+      await loadAllTenantsForAssign();
+      await loadAvailableOfficesFromTenants();
+      await loadCustomers();
+      
+      // Actualizar el cliente seleccionado
+      const updatedCustomer = await customerService.getCustomerById(selectedCustomer.id);
+      if (updatedCustomer) {
+        setSelectedCustomer(updatedCustomer);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error al asignar tenant');
+    } finally {
+      setIsAssigningTenantToCustomer(false);
+    }
+  };
+
+  const handleRemoveTenantFromCustomer = async (tenantId: string) => {
+    if (!selectedCustomer) return;
+    
+    try {
+      setIsAssigningTenantToCustomer(true);
+      setError(null);
+      const tenant = customerTenants.find(t => t.id === tenantId);
+      if (tenant) {
+        // Enviar un GUID vacío para desasignar el tenant
+        // El backend elimina la relación cuando CustomerId es Guid.Empty
+        await tenantService.updateTenant(tenantId, {
+          name: tenant.name,
+          customerId: '00000000-0000-0000-0000-000000000000', // GUID vacío para desasignar
+        });
+      }
+      // Recargar tenants del cliente
+      const tenants = await customerService.getCustomerTenants(selectedCustomer.id);
+      setCustomerTenants(tenants);
+      // Recargar sedes del cliente (pueden haber cambiado si se desasignó un tenant)
+      const offices = await officeService.getOfficesByCustomer(selectedCustomer.id);
+      setCustomerOffices(offices);
+      await loadAllTenantsForAssign();
+      await loadAvailableOfficesFromTenants();
+      await loadCustomers();
+      
+      // Actualizar el cliente seleccionado
+      const updatedCustomer = await customerService.getCustomerById(selectedCustomer.id);
+      if (updatedCustomer) {
+        setSelectedCustomer(updatedCustomer);
+      }
+    } catch (err: any) {
+      console.error('[CustomersPage] Error al desasignar tenant:', err);
+      setError(err.message || 'Error al desasignar tenant');
+    } finally {
+      setIsAssigningTenantToCustomer(false);
+    }
+  };
+
+  const handleAssignUserToCustomer = async () => {
+    if (!selectedCustomer || !selectedUserToAdd || !selectedTenantToAdd) return;
+    
+    try {
+      setIsAssigningUserToCustomer(true);
+      setError(null);
+      // Asignar usuario al tenant del cliente
+      await userService.assignTenantToUser(selectedUserToAdd, selectedTenantToAdd);
+      setSelectedUserToAdd('');
+      setSelectedTenantToAdd('');
+      // Recargar usuarios del cliente
+      const users = await customerService.getCustomerUsers(selectedCustomer.id);
+      setCustomerUsers(users);
+      await loadAllUsersForAssign();
+      await loadCustomers();
+      
+      // Actualizar el cliente seleccionado
+      const updatedCustomer = await customerService.getCustomerById(selectedCustomer.id);
+      if (updatedCustomer) {
+        setSelectedCustomer(updatedCustomer);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error al asignar usuario');
+    } finally {
+      setIsAssigningUserToCustomer(false);
+    }
+  };
+
+  const handleRemoveUserFromCustomer = async (userId: string) => {
+    if (!selectedCustomer) return;
+    
+    try {
+      setIsAssigningUserToCustomer(true);
+      setError(null);
+      // Obtener los tenants del usuario
+      const userTenants = await userService.getUserTenants(userId);
+      // Desasignar de todos los tenants del cliente
+      const customerTenantIds = new Set(customerTenants.map(t => t.id));
+      const removePromises = userTenants
+        .filter((ut: any) => customerTenantIds.has(ut.id || ut.tenantId))
+        .map((ut: any) => userService.removeTenantFromUser(userId, ut.id || ut.tenantId));
+      
+      await Promise.all(removePromises);
+      // Recargar usuarios del cliente
+      const users = await customerService.getCustomerUsers(selectedCustomer.id);
+      setCustomerUsers(users);
+      await loadAllUsersForAssign();
+      await loadCustomers();
+      
+      // Actualizar el cliente seleccionado
+      const updatedCustomer = await customerService.getCustomerById(selectedCustomer.id);
+      if (updatedCustomer) {
+        setSelectedCustomer(updatedCustomer);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error al desasignar usuario');
+    } finally {
+      setIsAssigningUserToCustomer(false);
+    }
+  };
+
+  // Función para crear una sede desde el tab
+  const handleCreateOfficeFromTab = async () => {
+    if (!selectedCustomer || !selectedTenantForOffice || !officeFormData.name.trim()) {
+      setError('El nombre de la sede y el tenant son requeridos');
+      return;
+    }
+
+    try {
+      setIsCreatingOfficeFromTab(true);
+      setError(null);
+      await officeService.createOffice({
+        ...officeFormData,
+        tenantId: selectedTenantForOffice,
+      });
+      
+      // Limpiar formulario
+      setOfficeFormData({
+        tenantId: '',
+        name: '',
+        address: '',
+        city: '',
+        stateProvince: '',
+        postalCode: '',
+        phone: '',
+        email: '',
+      });
+      setSelectedTenantForOffice('');
+      setSelectedOfficeToAdd('');
+      
+      // Recargar sedes del cliente
+      const offices = await officeService.getOfficesByCustomer(selectedCustomer.id);
+      setCustomerOffices(offices);
+      await loadAvailableOfficesFromTenants();
+      await loadCustomers();
+      
+      // Actualizar el cliente seleccionado para reflejar los nuevos conteos
+      if (selectedCustomer) {
+        const updatedCustomer = await customerService.getCustomerById(selectedCustomer.id);
+        if (updatedCustomer) {
+          setSelectedCustomer(updatedCustomer);
+        }
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error al crear sede');
+    } finally {
+      setIsCreatingOfficeFromTab(false);
+    }
+  };
+
+  // Función para agregar una sede existente desde los tenants
+  const handleAddExistingOffice = async () => {
+    if (!selectedCustomer || !selectedOfficeToAdd) return;
+
+    try {
+      setIsAssigningOfficeToCustomer(true);
+      setError(null);
+      
+      // La sede ya pertenece a un tenant del cliente, solo necesitamos recargar
+      // Recargar sedes del cliente para actualizar la lista
+      const offices = await officeService.getOfficesByCustomer(selectedCustomer.id);
+      setCustomerOffices(offices);
+      await loadAvailableOfficesFromTenants();
+      await loadCustomers();
+      
+      // Actualizar el cliente seleccionado
+      const updatedCustomer = await customerService.getCustomerById(selectedCustomer.id);
+      if (updatedCustomer) {
+        setSelectedCustomer(updatedCustomer);
+      }
+      
+      setSelectedOfficeToAdd('');
+    } catch (err: any) {
+      console.error('[CustomersPage] Error al agregar sede existente:', err);
+      setError(err.message || 'Error al agregar sede');
+    } finally {
+      setIsAssigningOfficeToCustomer(false);
     }
   };
 
@@ -3328,156 +3778,503 @@ export const CustomersPage = () => {
               <DetailsSkeleton rows={8} />
             ) : isLoadingTenants ? (
               <DetailsSkeleton rows={3} />
-            ) : customerTenants.length === 0 ? (
-              <>
-                <MessageBar intent="warning">
-                  <MessageBarBody>
-                    Este cliente no tiene tenants asociados. Debe asignar un tenant antes de poder editar el cliente.
-                  </MessageBarBody>
-                </MessageBar>
-                <div style={{ marginTop: tokens.spacingVerticalM }}>
-                  <Button
-                    appearance="primary"
-                    icon={<AddRegular />}
-                    onClick={() => setIsAssignTenantDialogOpen(true)}
-                  >
-                    Asignar Tenant
-                  </Button>
-                </div>
-              </>
             ) : (
               <>
-                <Field label="Nombre" required className={styles.formField}>
-                  <Input
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  />
-                </Field>
-                <Field label="Identificación" required className={styles.formField}>
-                  <Input
-                    value={formData.identification}
-                    onChange={(e) => setFormData({ ...formData, identification: e.target.value })}
-                  />
-                </Field>
-                <Field label="País" required className={styles.formField}>
-                  <Combobox
-                    value={editCountrySearchText || countries.find((c) => c.id === formData.countryId)?.name || ''}
-                    onOptionSelect={(_, data) => {
-                      const country = countries.find((c) => c.name === data.optionValue);
-                      if (country) {
-                        setFormData({ ...formData, countryId: country.id });
-                        setEditCountrySearchText('');
-                      }
-                    }}
-                    onInput={(e) => {
-                      const target = e.target as HTMLInputElement;
-                      setEditCountrySearchText(target.value);
-                    }}
-                  >
-                    {filteredEditCountries.map((country) => (
-                      <Option key={country.id} value={country.name}>
-                        {country.name} ({country.isoCode})
-                      </Option>
-                    ))}
-                  </Combobox>
-                </Field>
-                <Field label="Estado/Provincia" className={styles.formField}>
-                  <Input
-                    value={formData.stateProvince}
-                    onChange={(e) => setFormData({ ...formData, stateProvince: e.target.value })}
-                  />
-                </Field>
-                <Field label="Ciudad" className={styles.formField}>
-                  <Input
-                    value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  />
-                </Field>
-                <Field label="Teléfono" className={styles.formField}>
-                  <Input
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  />
-                </Field>
-                <Field label="Correo electrónico" className={styles.formField}>
-                  <Input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </Field>
-                <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
-                  <Button 
-                    appearance="secondary" 
-                    onClick={() => {
-                      if (!selectedCustomer) {
-                        setIsEditDialogOpen(false);
-                        setCustomerTenants([]);
-                        setSelectedCustomer(null);
-                        setFormData({
-                          name: '',
-                          identification: '',
-                          countryId: '',
-                          stateProvince: '',
-                          city: '',
-                          phone: '',
-                          email: '',
-                        });
-                        setEditCountrySearchText('');
-                        return;
-                      }
+                {error && (
+                  <MessageBar intent="error" style={{ marginBottom: tokens.spacingVerticalM }}>
+                    <MessageBarBody>{error}</MessageBarBody>
+                  </MessageBar>
+                )}
 
-                      const hasChanges = 
-                        formData.name !== selectedCustomer.name ||
-                        formData.identification !== selectedCustomer.identification ||
-                        formData.countryId !== selectedCustomer.countryId ||
-                        formData.stateProvince !== (selectedCustomer.stateProvince || '') ||
-                        formData.city !== (selectedCustomer.city || '') ||
-                        formData.phone !== (selectedCustomer.phone || '') ||
-                        formData.email !== (selectedCustomer.email || '');
-                      
-                      if (hasChanges) {
-                        if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los cambios no guardados.')) {
-                          setIsEditDialogOpen(false);
-                          setCustomerTenants([]);
-                          setSelectedCustomer(null);
-                          setFormData({
-                            name: '',
-                            identification: '',
-                            countryId: '',
-                            stateProvince: '',
-                            city: '',
-                            phone: '',
-                            email: '',
-                          });
-                          setEditCountrySearchText('');
-                          setError(null);
-                        }
-                      } else {
-                        setIsEditDialogOpen(false);
-                        setCustomerTenants([]);
-                        setSelectedCustomer(null);
-                        setFormData({
-                          name: '',
-                          identification: '',
-                          countryId: '',
-                          stateProvince: '',
-                          city: '',
-                          phone: '',
-                          email: '',
-                        });
-                        setEditCountrySearchText('');
-                        setError(null);
-                      }
-                    }}
-                    disabled={isSaving}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button appearance="primary" onClick={handleSave} disabled={isSaving} loading={isSaving}>
-                    {isSaving ? 'Guardando...' : 'Guardar'}
-                  </Button>
-                </div>
+                <TabList
+                  selectedValue={editActiveTab}
+                  onTabSelect={(_, data) => setEditActiveTab(data.value as any)}
+                >
+                  <Tab value="details">Detalles</Tab>
+                  <Tab value="tenants">Tenants</Tab>
+                  <Tab value="offices">Sedes</Tab>
+                  <Tab value="users">Usuarios</Tab>
+                </TabList>
+
+                {/* Tab de Detalles */}
+                {editActiveTab === 'details' && (
+                  <div style={{ marginTop: tokens.spacingVerticalL }}>
+                    <Field label="Nombre" required className={styles.formField}>
+                      <Input
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      />
+                    </Field>
+                    <Field label="Identificación" required className={styles.formField}>
+                      <Input
+                        value={formData.identification}
+                        onChange={(e) => setFormData({ ...formData, identification: e.target.value })}
+                      />
+                    </Field>
+                    <Field label="País" required className={styles.formField}>
+                      <Combobox
+                        value={editCountrySearchText || countries.find((c) => c.id === formData.countryId)?.name || ''}
+                        onOptionSelect={(_, data) => {
+                          const country = countries.find((c) => c.name === data.optionValue);
+                          if (country) {
+                            setFormData({ ...formData, countryId: country.id });
+                            setEditCountrySearchText('');
+                          }
+                        }}
+                        onInput={(e) => {
+                          const target = e.target as HTMLInputElement;
+                          setEditCountrySearchText(target.value);
+                        }}
+                      >
+                        {filteredEditCountries.map((country) => (
+                          <Option key={country.id} value={country.name}>
+                            {country.name} ({country.isoCode})
+                          </Option>
+                        ))}
+                      </Combobox>
+                    </Field>
+                    <Field label="Estado/Provincia" className={styles.formField}>
+                      <Input
+                        value={formData.stateProvince}
+                        onChange={(e) => setFormData({ ...formData, stateProvince: e.target.value })}
+                      />
+                    </Field>
+                    <Field label="Ciudad" className={styles.formField}>
+                      <Input
+                        value={formData.city}
+                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      />
+                    </Field>
+                    <Field label="Teléfono" className={styles.formField}>
+                      <Input
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      />
+                    </Field>
+                    <Field label="Correo electrónico" className={styles.formField}>
+                      <Input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      />
+                    </Field>
+                    <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
+                      <Button 
+                        appearance="secondary" 
+                        onClick={() => {
+                          if (!selectedCustomer) {
+                            setIsEditDialogOpen(false);
+                            setCustomerTenants([]);
+                            setSelectedCustomer(null);
+                            setFormData({
+                              name: '',
+                              identification: '',
+                              countryId: '',
+                              stateProvince: '',
+                              city: '',
+                              phone: '',
+                              email: '',
+                            });
+                            setEditCountrySearchText('');
+                            return;
+                          }
+
+                          const hasChanges = 
+                            formData.name !== selectedCustomer.name ||
+                            formData.identification !== selectedCustomer.identification ||
+                            formData.countryId !== selectedCustomer.countryId ||
+                            formData.stateProvince !== (selectedCustomer.stateProvince || '') ||
+                            formData.city !== (selectedCustomer.city || '') ||
+                            formData.phone !== (selectedCustomer.phone || '') ||
+                            formData.email !== (selectedCustomer.email || '');
+                          
+                          if (hasChanges) {
+                            if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los cambios no guardados.')) {
+                              setIsEditDialogOpen(false);
+                              setCustomerTenants([]);
+                              setSelectedCustomer(null);
+                              setFormData({
+                                name: '',
+                                identification: '',
+                                countryId: '',
+                                stateProvince: '',
+                                city: '',
+                                phone: '',
+                                email: '',
+                              });
+                              setEditCountrySearchText('');
+                              setError(null);
+                            }
+                          } else {
+                            setIsEditDialogOpen(false);
+                            setCustomerTenants([]);
+                            setSelectedCustomer(null);
+                            setFormData({
+                              name: '',
+                              identification: '',
+                              countryId: '',
+                              stateProvince: '',
+                              city: '',
+                              phone: '',
+                              email: '',
+                            });
+                            setEditCountrySearchText('');
+                            setError(null);
+                          }
+                        }}
+                        disabled={isSaving}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button appearance="primary" onClick={handleSave} disabled={isSaving}>
+                        {isSaving ? 'Guardando...' : 'Guardar'}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab de Tenants - Mismo contenido que en detalles */}
+                {editActiveTab === 'tenants' && (
+                  <div style={{ marginTop: tokens.spacingVerticalL }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: tokens.spacingVerticalM }}>
+                      <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, alignItems: 'center' }}>
+                        <Combobox
+                          placeholder="Seleccionar tenant para asignar"
+                          value={
+                            selectedTenantToAdd
+                              ? allTenantsForAssign.find((t) => t.id === selectedTenantToAdd)?.name || ''
+                              : ''
+                          }
+                          onOptionSelect={(_, data) => {
+                            const tenant = allTenantsForAssign.find((t) => t.name === data.optionValue);
+                            if (tenant) {
+                              setSelectedTenantToAdd(tenant.id);
+                            }
+                          }}
+                          style={{ width: '300px' }}
+                        >
+                          {allTenantsForAssign.map((tenant) => (
+                            <Option key={tenant.id} value={tenant.name}>
+                              {tenant.name} {tenant.customerName ? `(${tenant.customerName})` : ''}
+                            </Option>
+                          ))}
+                        </Combobox>
+                        <Button
+                          appearance="primary"
+                          icon={<AddRegular />}
+                          onClick={handleAssignTenantToCustomer}
+                          disabled={!selectedTenantToAdd || isAssigningTenantToCustomer || isLoadingAllTenants}
+                        >
+                          Agregar
+                        </Button>
+                      </div>
+                    </div>
+
+                    {isLoadingTenants ? (
+                      <Spinner label="Cargando tenants..." />
+                    ) : (
+                      <div>
+                        {customerTenants.length === 0 ? (
+                          <div style={{ padding: tokens.spacingVerticalXXL, textAlign: 'center' }}>
+                            <Text>No hay tenants asignados</Text>
+                          </div>
+                        ) : (
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHeaderCell>Nombre</TableHeaderCell>
+                                <TableHeaderCell>Estado</TableHeaderCell>
+                                <TableHeaderCell>Acciones</TableHeaderCell>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {customerTenants.map((tenant) => (
+                                <TableRow key={tenant.id}>
+                                  <TableCell>{tenant.name}</TableCell>
+                                  <TableCell>
+                                    {tenant.isSuspended ? (
+                                      <Badge appearance="filled" color="danger">Suspendido</Badge>
+                                    ) : tenant.isActive ? (
+                                      <Badge appearance="filled" color="success">Activo</Badge>
+                                    ) : (
+                                      <Badge appearance="outline">Inactivo</Badge>
+                                    )}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      appearance="subtle"
+                                      icon={<DeleteRegular />}
+                                      onClick={() => handleRemoveTenantFromCustomer(tenant.id)}
+                                      disabled={isAssigningTenantToCustomer}
+                                    >
+                                      Desasignar
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Tab de Sedes - Mismo contenido que en detalles */}
+                {editActiveTab === 'offices' && (
+                  <div style={{ marginTop: tokens.spacingVerticalL }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM, marginBottom: tokens.spacingVerticalM }}>
+                      {/* Sección para agregar sedes existentes */}
+                      {customerTenants.length > 0 && (
+                        <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, alignItems: 'center', flexWrap: 'wrap', padding: tokens.spacingVerticalM, backgroundColor: tokens.colorNeutralBackground2, borderRadius: tokens.borderRadiusMedium }}>
+                          <Text weight="semibold" style={{ width: '100%' }}>Agregar Sede Existente</Text>
+                          <Combobox
+                            placeholder="Seleccionar sede de los tenants asignados"
+                            value={
+                              selectedOfficeToAdd
+                                ? availableOfficesFromTenants.find((o) => o.id === selectedOfficeToAdd)?.name || ''
+                                : ''
+                            }
+                            onOptionSelect={(_, data) => {
+                              const office = availableOfficesFromTenants.find((o) => o.name === data.optionValue);
+                              if (office) {
+                                setSelectedOfficeToAdd(office.id);
+                              }
+                            }}
+                            style={{ width: '300px' }}
+                            disabled={isLoadingAvailableOffices || availableOfficesFromTenants.length === 0}
+                          >
+                            {availableOfficesFromTenants.map((office) => (
+                              <Option key={office.id} value={office.name}>
+                                {office.name} {office.city ? `(${office.city})` : ''} - {office.tenantName || 'N/A'}
+                              </Option>
+                            ))}
+                          </Combobox>
+                          <Button
+                            appearance="primary"
+                            icon={<AddRegular />}
+                            onClick={handleAddExistingOffice}
+                            disabled={!selectedOfficeToAdd || isAssigningOfficeToCustomer || isLoadingAvailableOffices || availableOfficesFromTenants.length === 0}
+                          >
+                            Agregar Sede
+                          </Button>
+                          {isLoadingAvailableOffices && (
+                            <Spinner size="small" label="Cargando sedes..." />
+                          )}
+                          {!isLoadingAvailableOffices && availableOfficesFromTenants.length === 0 && customerTenants.length > 0 && (
+                            <Text size={300} style={{ color: tokens.colorNeutralForeground3 }}>
+                              No hay sedes disponibles para agregar
+                            </Text>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Sección para crear nuevas sedes */}
+                      <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, alignItems: 'center', flexWrap: 'wrap', padding: tokens.spacingVerticalM, backgroundColor: tokens.colorNeutralBackground2, borderRadius: tokens.borderRadiusMedium }}>
+                        <Text weight="semibold" style={{ width: '100%' }}>Crear Nueva Sede</Text>
+                        <Combobox
+                          placeholder="Seleccionar tenant"
+                          value={
+                            selectedTenantForOffice
+                              ? customerTenants.find((t) => t.id === selectedTenantForOffice)?.name || ''
+                              : ''
+                          }
+                          onOptionSelect={(_, data) => {
+                            const tenant = customerTenants.find((t) => t.name === data.optionValue);
+                            if (tenant) {
+                              setSelectedTenantForOffice(tenant.id);
+                            }
+                          }}
+                          style={{ width: '200px' }}
+                          disabled={customerTenants.length === 0}
+                        >
+                          {customerTenants.map((tenant) => (
+                            <Option key={tenant.id} value={tenant.name}>
+                              {tenant.name}
+                            </Option>
+                          ))}
+                        </Combobox>
+                        <Input
+                          placeholder="Nombre de la sede"
+                          value={officeFormData.name}
+                          onChange={(e) => setOfficeFormData({ ...officeFormData, name: e.target.value })}
+                          style={{ width: '200px' }}
+                          disabled={!selectedTenantForOffice || customerTenants.length === 0}
+                        />
+                        <Button
+                          appearance="primary"
+                          icon={<AddRegular />}
+                          onClick={handleCreateOfficeFromTab}
+                          disabled={!selectedTenantForOffice || !officeFormData.name.trim() || isCreatingOfficeFromTab || customerTenants.length === 0}
+                        >
+                          Crear Sede
+                        </Button>
+                      </div>
+                      {customerTenants.length === 0 && (
+                        <MessageBar intent="warning">
+                          <MessageBarBody>
+                            Debe asignar al menos un tenant al cliente antes de poder crear o agregar sedes.
+                          </MessageBarBody>
+                        </MessageBar>
+                      )}
+                    </div>
+
+                    {isLoadingOffices ? (
+                      <Spinner label="Cargando sedes..." />
+                    ) : (
+                      <div>
+                        {customerOffices.length === 0 ? (
+                          <div style={{ padding: tokens.spacingVerticalXXL, textAlign: 'center' }}>
+                            <Text>No hay sedes asignadas</Text>
+                          </div>
+                        ) : (
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHeaderCell>Nombre</TableHeaderCell>
+                                <TableHeaderCell>Ciudad</TableHeaderCell>
+                                <TableHeaderCell>Tenant</TableHeaderCell>
+                                <TableHeaderCell>Estado</TableHeaderCell>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {customerOffices.map((office) => (
+                                <TableRow key={office.id}>
+                                  <TableCell>{office.name}</TableCell>
+                                  <TableCell>{office.city || 'N/A'}</TableCell>
+                                  <TableCell>{office.tenantName || 'N/A'}</TableCell>
+                                  <TableCell>
+                                    {office.isSuspended ? (
+                                      <Badge appearance="filled" color="danger">Suspendida</Badge>
+                                    ) : office.isActive ? (
+                                      <Badge appearance="filled" color="success">Activa</Badge>
+                                    ) : (
+                                      <Badge appearance="outline">Inactiva</Badge>
+                                    )}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Tab de Usuarios - Mismo contenido que en detalles */}
+                {editActiveTab === 'users' && (
+                  <div style={{ marginTop: tokens.spacingVerticalL }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: tokens.spacingVerticalM }}>
+                      <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <Combobox
+                          placeholder="Seleccionar tenant"
+                          value={
+                            selectedTenantToAdd
+                              ? customerTenants.find((t) => t.id === selectedTenantToAdd)?.name || ''
+                              : ''
+                          }
+                          onOptionSelect={(_, data) => {
+                            const tenant = customerTenants.find((t) => t.name === data.optionValue);
+                            if (tenant) {
+                              setSelectedTenantToAdd(tenant.id);
+                            }
+                          }}
+                          style={{ width: '200px' }}
+                          disabled={customerTenants.length === 0}
+                        >
+                          {customerTenants.map((tenant) => (
+                            <Option key={tenant.id} value={tenant.name}>
+                              {tenant.name}
+                            </Option>
+                          ))}
+                        </Combobox>
+                        <Combobox
+                          placeholder="Seleccionar usuario para asignar"
+                          value={
+                            selectedUserToAdd
+                              ? allUsersForAssign.find((u) => u.id === selectedUserToAdd)?.name || allUsersForAssign.find((u) => u.id === selectedUserToAdd)?.email || ''
+                              : ''
+                          }
+                          onOptionSelect={(_, data) => {
+                            const user = allUsersForAssign.find((u) => u.email === data.optionValue || u.name === data.optionValue);
+                            if (user) {
+                              setSelectedUserToAdd(user.id);
+                            }
+                          }}
+                          style={{ width: '300px' }}
+                          disabled={!selectedTenantToAdd || customerTenants.length === 0}
+                        >
+                          {allUsersForAssign.map((user) => (
+                            <Option key={user.id} value={user.email}>
+                              {user.name || user.email} {user.email !== user.name ? `(${user.email})` : ''}
+                            </Option>
+                          ))}
+                        </Combobox>
+                        <Button
+                          appearance="primary"
+                          icon={<AddRegular />}
+                          onClick={handleAssignUserToCustomer}
+                          disabled={!selectedUserToAdd || !selectedTenantToAdd || isAssigningUserToCustomer || isLoadingAllUsers || customerTenants.length === 0}
+                        >
+                          Agregar
+                        </Button>
+                      </div>
+                    </div>
+
+                    {isLoadingUsers ? (
+                      <Spinner label="Cargando usuarios..." />
+                    ) : (
+                      <div>
+                        {customerUsers.length === 0 ? (
+                          <div style={{ padding: tokens.spacingVerticalXXL, textAlign: 'center' }}>
+                            <Text>No hay usuarios asignados</Text>
+                          </div>
+                        ) : (
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHeaderCell>Nombre</TableHeaderCell>
+                                <TableHeaderCell>Email</TableHeaderCell>
+                                <TableHeaderCell>Rol</TableHeaderCell>
+                                <TableHeaderCell>Estado</TableHeaderCell>
+                                <TableHeaderCell>Acciones</TableHeaderCell>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {customerUsers.map((user) => (
+                                <TableRow key={user.id}>
+                                  <TableCell>{user.name || 'N/A'}</TableCell>
+                                  <TableCell>{user.email}</TableCell>
+                                  <TableCell>{getRoleLabel(user.role)}</TableCell>
+                                  <TableCell>
+                                    {user.isSuspended ? (
+                                      <Badge appearance="filled" color="danger">Suspendido</Badge>
+                                    ) : user.isActive ? (
+                                      <Badge appearance="filled" color="success">Activo</Badge>
+                                    ) : (
+                                      <Badge appearance="outline">Inactivo</Badge>
+                                    )}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      appearance="subtle"
+                                      icon={<DeleteRegular />}
+                                      onClick={() => handleRemoveUserFromCustomer(user.id)}
+                                      disabled={isAssigningUserToCustomer}
+                                    >
+                                      Desasignar
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -3857,55 +4654,422 @@ export const CustomersPage = () => {
               <DetailsSkeleton rows={12} />
             ) : selectedCustomer ? (
               <>
-                <Field label="Nombre" className={styles.formField}>
-                  <Input value={selectedCustomer.name} readOnly />
-                </Field>
-                <Field label="Identificación" className={styles.formField}>
-                  <Input value={selectedCustomer.identification} readOnly />
-                </Field>
-                <Field label="País" className={styles.formField}>
-                  <Input value={selectedCustomer.countryName || 'N/A'} readOnly />
-                </Field>
-                <Field label="Estado/Provincia" className={styles.formField}>
-                  <Input value={selectedCustomer.stateProvince || 'N/A'} readOnly />
-                </Field>
-                <Field label="Ciudad" className={styles.formField}>
-                  <Input value={selectedCustomer.city || 'N/A'} readOnly />
-                </Field>
-                <Field label="Teléfono" className={styles.formField}>
-                  <Input value={selectedCustomer.phone || 'N/A'} readOnly />
-                </Field>
-                <Field label="Correo electrónico" className={styles.formField}>
-                  <Input value={selectedCustomer.email || 'N/A'} readOnly />
-                </Field>
-                <Field label="Estado" className={styles.formField}>
-                  <div>
-                    {selectedCustomer.isSuspended ? (
-                      <Badge appearance="filled" color="danger">Suspendido</Badge>
-                    ) : selectedCustomer.isActive ? (
-                      <Badge appearance="filled" color="success">Activo</Badge>
+                {error && (
+                  <MessageBar intent="error" style={{ marginBottom: tokens.spacingVerticalM }}>
+                    <MessageBarBody>{error}</MessageBarBody>
+                  </MessageBar>
+                )}
+
+                <TabList
+                  selectedValue={detailsActiveTab}
+                  onTabSelect={(_, data) => setDetailsActiveTab(data.value as any)}
+                >
+                  <Tab value="details">Detalles</Tab>
+                  <Tab value="tenants">Tenants</Tab>
+                  <Tab value="offices">Sedes</Tab>
+                  <Tab value="users">Usuarios</Tab>
+                </TabList>
+
+                {/* Tab de Detalles */}
+                {detailsActiveTab === 'details' && (
+                  <div style={{ marginTop: tokens.spacingVerticalL }}>
+                    <Field label="Nombre" className={styles.formField}>
+                      <Input value={selectedCustomer.name} readOnly />
+                    </Field>
+                    <Field label="Identificación" className={styles.formField}>
+                      <Input value={selectedCustomer.identification} readOnly />
+                    </Field>
+                    <Field label="País" className={styles.formField}>
+                      <Input value={selectedCustomer.countryName || 'N/A'} readOnly />
+                    </Field>
+                    <Field label="Estado/Provincia" className={styles.formField}>
+                      <Input value={selectedCustomer.stateProvince || 'N/A'} readOnly />
+                    </Field>
+                    <Field label="Ciudad" className={styles.formField}>
+                      <Input value={selectedCustomer.city || 'N/A'} readOnly />
+                    </Field>
+                    <Field label="Teléfono" className={styles.formField}>
+                      <Input value={selectedCustomer.phone || 'N/A'} readOnly />
+                    </Field>
+                    <Field label="Correo electrónico" className={styles.formField}>
+                      <Input value={selectedCustomer.email || 'N/A'} readOnly />
+                    </Field>
+                    <Field label="Estado" className={styles.formField}>
+                      <div>
+                        {selectedCustomer.isSuspended ? (
+                          <Badge appearance="filled" color="danger">Suspendido</Badge>
+                        ) : selectedCustomer.isActive ? (
+                          <Badge appearance="filled" color="success">Activo</Badge>
+                        ) : (
+                          <Badge appearance="outline">Inactivo</Badge>
+                        )}
+                      </div>
+                    </Field>
+                    <Field label="Tenants" className={styles.formField}>
+                      <Input value={String(selectedCustomer.tenantCount || 0)} readOnly />
+                    </Field>
+                    <Field label="Sedes" className={styles.formField}>
+                      <Input value={String(selectedCustomer.officeCount || 0)} readOnly />
+                    </Field>
+                    <Field label="Usuarios" className={styles.formField}>
+                      <Input value={String(selectedCustomer.userCount || 0)} readOnly />
+                    </Field>
+                    <Field label="Creado" className={styles.formField}>
+                      <Input value={new Date(selectedCustomer.createdAt).toLocaleString()} readOnly />
+                    </Field>
+                    <Field label="Actualizado" className={styles.formField}>
+                      <Input value={new Date(selectedCustomer.updatedAt).toLocaleString()} readOnly />
+                    </Field>
+                    <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
+                      <Button appearance="primary" onClick={() => setIsDetailsDialogOpen(false)}>
+                        Cerrar
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab de Tenants */}
+                {detailsActiveTab === 'tenants' && (
+                  <div style={{ marginTop: tokens.spacingVerticalL }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: tokens.spacingVerticalM }}>
+                      <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, alignItems: 'center' }}>
+                        <Combobox
+                          placeholder="Seleccionar tenant para asignar"
+                          value={
+                            selectedTenantToAdd
+                              ? allTenantsForAssign.find((t) => t.id === selectedTenantToAdd)?.name || ''
+                              : ''
+                          }
+                          onOptionSelect={(_, data) => {
+                            const tenant = allTenantsForAssign.find((t) => t.name === data.optionValue);
+                            if (tenant) {
+                              setSelectedTenantToAdd(tenant.id);
+                            }
+                          }}
+                          style={{ width: '300px' }}
+                        >
+                          {allTenantsForAssign.map((tenant) => (
+                            <Option key={tenant.id} value={tenant.name}>
+                              {tenant.name} {tenant.customerName ? `(${tenant.customerName})` : ''}
+                            </Option>
+                          ))}
+                        </Combobox>
+                        <Button
+                          appearance="primary"
+                          icon={<AddRegular />}
+                          onClick={handleAssignTenantToCustomer}
+                          disabled={!selectedTenantToAdd || isAssigningTenantToCustomer || isLoadingAllTenants}
+                        >
+                          Agregar
+                        </Button>
+                      </div>
+                    </div>
+
+                    {isLoadingTenants ? (
+                      <Spinner label="Cargando tenants..." />
                     ) : (
-                      <Badge appearance="outline">Inactivo</Badge>
+                      <div>
+                        {customerTenants.length === 0 ? (
+                          <div style={{ padding: tokens.spacingVerticalXXL, textAlign: 'center' }}>
+                            <Text>No hay tenants asignados</Text>
+                          </div>
+                        ) : (
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHeaderCell>Nombre</TableHeaderCell>
+                                <TableHeaderCell>Estado</TableHeaderCell>
+                                <TableHeaderCell>Acciones</TableHeaderCell>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {customerTenants.map((tenant) => (
+                                <TableRow key={tenant.id}>
+                                  <TableCell>{tenant.name}</TableCell>
+                                  <TableCell>
+                                    {tenant.isSuspended ? (
+                                      <Badge appearance="filled" color="danger">Suspendido</Badge>
+                                    ) : tenant.isActive ? (
+                                      <Badge appearance="filled" color="success">Activo</Badge>
+                                    ) : (
+                                      <Badge appearance="outline">Inactivo</Badge>
+                                    )}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      appearance="subtle"
+                                      icon={<DeleteRegular />}
+                                      onClick={() => handleRemoveTenantFromCustomer(tenant.id)}
+                                      disabled={isAssigningTenantToCustomer}
+                                    >
+                                      Desasignar
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        )}
+                      </div>
                     )}
                   </div>
-                </Field>
-                <Field label="Tenants" className={styles.formField}>
-                  <Input value={String(selectedCustomer.tenantCount || 0)} readOnly />
-                </Field>
-                <Field label="Usuarios" className={styles.formField}>
-                  <Input value={String(selectedCustomer.userCount || 0)} readOnly />
-                </Field>
-                <Field label="Creado" className={styles.formField}>
-                  <Input value={new Date(selectedCustomer.createdAt).toLocaleString()} readOnly />
-                </Field>
-                <Field label="Actualizado" className={styles.formField}>
-                  <Input value={new Date(selectedCustomer.updatedAt).toLocaleString()} readOnly />
-                </Field>
-                <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
-                  <Button appearance="primary" onClick={() => setIsDetailsDialogOpen(false)}>
-                    Cerrar
-                  </Button>
-                </div>
+                )}
+
+                {/* Tab de Sedes */}
+                {detailsActiveTab === 'offices' && (
+                  <div style={{ marginTop: tokens.spacingVerticalL }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM, marginBottom: tokens.spacingVerticalM }}>
+                      {/* Sección para agregar sedes existentes */}
+                      {customerTenants.length > 0 && (
+                        <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, alignItems: 'center', flexWrap: 'wrap', padding: tokens.spacingVerticalM, backgroundColor: tokens.colorNeutralBackground2, borderRadius: tokens.borderRadiusMedium }}>
+                          <Text weight="semibold" style={{ width: '100%' }}>Agregar Sede Existente</Text>
+                          <Combobox
+                            placeholder="Seleccionar sede de los tenants asignados"
+                            value={
+                              selectedOfficeToAdd
+                                ? availableOfficesFromTenants.find((o) => o.id === selectedOfficeToAdd)?.name || ''
+                                : ''
+                            }
+                            onOptionSelect={(_, data) => {
+                              const office = availableOfficesFromTenants.find((o) => o.name === data.optionValue);
+                              if (office) {
+                                setSelectedOfficeToAdd(office.id);
+                              }
+                            }}
+                            style={{ width: '300px' }}
+                            disabled={isLoadingAvailableOffices || availableOfficesFromTenants.length === 0}
+                          >
+                            {availableOfficesFromTenants.map((office) => (
+                              <Option key={office.id} value={office.name}>
+                                {office.name} {office.city ? `(${office.city})` : ''} - {office.tenantName || 'N/A'}
+                              </Option>
+                            ))}
+                          </Combobox>
+                          <Button
+                            appearance="primary"
+                            icon={<AddRegular />}
+                            onClick={handleAddExistingOffice}
+                            disabled={!selectedOfficeToAdd || isAssigningOfficeToCustomer || isLoadingAvailableOffices || availableOfficesFromTenants.length === 0}
+                          >
+                            Agregar Sede
+                          </Button>
+                          {isLoadingAvailableOffices && (
+                            <Spinner size="small" label="Cargando sedes..." />
+                          )}
+                          {!isLoadingAvailableOffices && availableOfficesFromTenants.length === 0 && customerTenants.length > 0 && (
+                            <Text size={300} style={{ color: tokens.colorNeutralForeground3 }}>
+                              No hay sedes disponibles para agregar
+                            </Text>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Sección para crear nuevas sedes */}
+                      <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, alignItems: 'center', flexWrap: 'wrap', padding: tokens.spacingVerticalM, backgroundColor: tokens.colorNeutralBackground2, borderRadius: tokens.borderRadiusMedium }}>
+                        <Text weight="semibold" style={{ width: '100%' }}>Crear Nueva Sede</Text>
+                        <Combobox
+                          placeholder="Seleccionar tenant"
+                          value={
+                            selectedTenantForOffice
+                              ? customerTenants.find((t) => t.id === selectedTenantForOffice)?.name || ''
+                              : ''
+                          }
+                          onOptionSelect={(_, data) => {
+                            const tenant = customerTenants.find((t) => t.name === data.optionValue);
+                            if (tenant) {
+                              setSelectedTenantForOffice(tenant.id);
+                            }
+                          }}
+                          style={{ width: '200px' }}
+                          disabled={customerTenants.length === 0}
+                        >
+                          {customerTenants.map((tenant) => (
+                            <Option key={tenant.id} value={tenant.name}>
+                              {tenant.name}
+                            </Option>
+                          ))}
+                        </Combobox>
+                        <Input
+                          placeholder="Nombre de la sede"
+                          value={officeFormData.name}
+                          onChange={(e) => setOfficeFormData({ ...officeFormData, name: e.target.value })}
+                          style={{ width: '200px' }}
+                          disabled={!selectedTenantForOffice || customerTenants.length === 0}
+                        />
+                        <Button
+                          appearance="primary"
+                          icon={<AddRegular />}
+                          onClick={handleCreateOfficeFromTab}
+                          disabled={!selectedTenantForOffice || !officeFormData.name.trim() || isCreatingOfficeFromTab || customerTenants.length === 0}
+                        >
+                          Crear Sede
+                        </Button>
+                      </div>
+                      {customerTenants.length === 0 && (
+                        <MessageBar intent="warning">
+                          <MessageBarBody>
+                            Debe asignar al menos un tenant al cliente antes de poder crear o agregar sedes.
+                          </MessageBarBody>
+                        </MessageBar>
+                      )}
+                    </div>
+
+                    {isLoadingOffices ? (
+                      <Spinner label="Cargando sedes..." />
+                    ) : (
+                      <div>
+                        {customerOffices.length === 0 ? (
+                          <div style={{ padding: tokens.spacingVerticalXXL, textAlign: 'center' }}>
+                            <Text>No hay sedes asignadas</Text>
+                          </div>
+                        ) : (
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHeaderCell>Nombre</TableHeaderCell>
+                                <TableHeaderCell>Ciudad</TableHeaderCell>
+                                <TableHeaderCell>Tenant</TableHeaderCell>
+                                <TableHeaderCell>Estado</TableHeaderCell>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {customerOffices.map((office) => (
+                                <TableRow key={office.id}>
+                                  <TableCell>{office.name}</TableCell>
+                                  <TableCell>{office.city || 'N/A'}</TableCell>
+                                  <TableCell>{office.tenantName || 'N/A'}</TableCell>
+                                  <TableCell>
+                                    {office.isSuspended ? (
+                                      <Badge appearance="filled" color="danger">Suspendida</Badge>
+                                    ) : office.isActive ? (
+                                      <Badge appearance="filled" color="success">Activa</Badge>
+                                    ) : (
+                                      <Badge appearance="outline">Inactiva</Badge>
+                                    )}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Tab de Usuarios */}
+                {detailsActiveTab === 'users' && (
+                  <div style={{ marginTop: tokens.spacingVerticalL }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: tokens.spacingVerticalM }}>
+                      <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <Combobox
+                          placeholder="Seleccionar tenant"
+                          value={
+                            selectedTenantToAdd
+                              ? customerTenants.find((t) => t.id === selectedTenantToAdd)?.name || ''
+                              : ''
+                          }
+                          onOptionSelect={(_, data) => {
+                            const tenant = customerTenants.find((t) => t.name === data.optionValue);
+                            if (tenant) {
+                              setSelectedTenantToAdd(tenant.id);
+                            }
+                          }}
+                          style={{ width: '200px' }}
+                          disabled={customerTenants.length === 0}
+                        >
+                          {customerTenants.map((tenant) => (
+                            <Option key={tenant.id} value={tenant.name}>
+                              {tenant.name}
+                            </Option>
+                          ))}
+                        </Combobox>
+                        <Combobox
+                          placeholder="Seleccionar usuario para asignar"
+                          value={
+                            selectedUserToAdd
+                              ? allUsersForAssign.find((u) => u.id === selectedUserToAdd)?.name || allUsersForAssign.find((u) => u.id === selectedUserToAdd)?.email || ''
+                              : ''
+                          }
+                          onOptionSelect={(_, data) => {
+                            const user = allUsersForAssign.find((u) => u.email === data.optionValue || u.name === data.optionValue);
+                            if (user) {
+                              setSelectedUserToAdd(user.id);
+                            }
+                          }}
+                          style={{ width: '300px' }}
+                          disabled={!selectedTenantToAdd || customerTenants.length === 0}
+                        >
+                          {allUsersForAssign.map((user) => (
+                            <Option key={user.id} value={user.email}>
+                              {user.name || user.email} {user.email !== user.name ? `(${user.email})` : ''}
+                            </Option>
+                          ))}
+                        </Combobox>
+                        <Button
+                          appearance="primary"
+                          icon={<AddRegular />}
+                          onClick={handleAssignUserToCustomer}
+                          disabled={!selectedUserToAdd || !selectedTenantToAdd || isAssigningUserToCustomer || isLoadingAllUsers || customerTenants.length === 0}
+                        >
+                          Agregar
+                        </Button>
+                      </div>
+                    </div>
+
+                    {isLoadingUsers ? (
+                      <Spinner label="Cargando usuarios..." />
+                    ) : (
+                      <div>
+                        {customerUsers.length === 0 ? (
+                          <div style={{ padding: tokens.spacingVerticalXXL, textAlign: 'center' }}>
+                            <Text>No hay usuarios asignados</Text>
+                          </div>
+                        ) : (
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHeaderCell>Nombre</TableHeaderCell>
+                                <TableHeaderCell>Email</TableHeaderCell>
+                                <TableHeaderCell>Rol</TableHeaderCell>
+                                <TableHeaderCell>Estado</TableHeaderCell>
+                                <TableHeaderCell>Acciones</TableHeaderCell>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {customerUsers.map((user) => (
+                                <TableRow key={user.id}>
+                                  <TableCell>{user.name || 'N/A'}</TableCell>
+                                  <TableCell>{user.email}</TableCell>
+                                  <TableCell>{getRoleLabel(user.role)}</TableCell>
+                                  <TableCell>
+                                    {user.isSuspended ? (
+                                      <Badge appearance="filled" color="danger">Suspendido</Badge>
+                                    ) : user.isActive ? (
+                                      <Badge appearance="filled" color="success">Activo</Badge>
+                                    ) : (
+                                      <Badge appearance="outline">Inactivo</Badge>
+                                    )}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      appearance="subtle"
+                                      icon={<DeleteRegular />}
+                                      onClick={() => handleRemoveUserFromCustomer(user.id)}
+                                      disabled={isAssigningUserToCustomer}
+                                    >
+                                      Desasignar
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </>
             ) : null}
           </div>

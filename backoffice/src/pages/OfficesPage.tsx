@@ -371,12 +371,19 @@ export const OfficesPage = () => {
   }, [offices, loadOfficeUsers]);
 
   // Filtrar oficinas según el término de búsqueda
-  const filteredOffices = offices.filter((office) =>
-    office.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    office.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    office.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    office.city?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredOffices = offices.filter((office) => {
+    const searchLower = searchTerm.toLowerCase();
+    const matchesName = office.name.toLowerCase().includes(searchLower);
+    const matchesAddress = office.address?.toLowerCase().includes(searchLower);
+    const matchesCity = office.city?.toLowerCase().includes(searchLower);
+    const matchesCustomerName = office.customerName?.toLowerCase().includes(searchLower);
+    const matchesTenantName = office.tenantName?.toLowerCase().includes(searchLower);
+    const matchesCustomers = office.customers?.some(c => c.name.toLowerCase().includes(searchLower));
+    const matchesTenants = office.tenants?.some(t => t.name.toLowerCase().includes(searchLower));
+    
+    return matchesName || matchesAddress || matchesCity || matchesCustomerName || 
+           matchesTenantName || matchesCustomers || matchesTenants;
+  });
 
   // Detectar cambios en el tamaño de ventana
   useEffect(() => {
@@ -470,8 +477,16 @@ export const OfficesPage = () => {
             label: (
               <div className={`${styles.flowNode} ${styles.flowNodeOffice}`}>
                 <div className={styles.flowNodeHeader}>{office.name}</div>
-                <div className={styles.flowNodeContent}>Cliente: {office.customerName || 'N/A'}</div>
-                <div className={styles.flowNodeContent}>Tenant: {office.tenantName || 'N/A'}</div>
+                <div className={styles.flowNodeContent}>
+                  Clientes: {office.customers && office.customers.length > 0 
+                    ? office.customers.map(c => c.name).join(', ') 
+                    : 'N/A'}
+                </div>
+                <div className={styles.flowNodeContent}>
+                  Tenants: {office.tenants && office.tenants.length > 0 
+                    ? office.tenants.map(t => t.name).join(', ') 
+                    : 'N/A'}
+                </div>
                 {office.city && (
                   <div className={styles.flowNodeContent}>Ciudad: {office.city}</div>
                 )}
@@ -623,8 +638,12 @@ export const OfficesPage = () => {
 
   const handleEdit = async (office: OfficeDto) => {
     setSelectedOffice(office);
+    // Usar el primer tenant de la lista si existe, o el tenantId legacy
+    const firstTenantId = office.tenants && office.tenants.length > 0 
+      ? office.tenants[0].id 
+      : (office.tenantId || '');
     setFormData({
-      tenantId: office.tenantId,
+      tenantId: firstTenantId,
       name: office.name,
       address: office.address || '',
       city: office.city || '',
@@ -803,7 +822,11 @@ export const OfficesPage = () => {
 
   const handleChangeTenant = async (office: OfficeDto) => {
     setSelectedOffice(office);
-    setSelectedNewTenantId(office.tenantId);
+    // Usar el primer tenant de la lista si existe, o el tenantId legacy, o cadena vacía
+    const firstTenantId = office.tenants && office.tenants.length > 0 
+      ? office.tenants[0].id 
+      : (office.tenantId || '');
+    setSelectedNewTenantId(firstTenantId);
     try {
       // Cargar todos los tenants disponibles
       const tenants = await tenantService.getAllTenants();
@@ -815,19 +838,38 @@ export const OfficesPage = () => {
   };
 
   const handleConfirmChangeTenant = async () => {
-    if (!selectedOffice || !selectedNewTenantId) {
+    if (!selectedOffice || !selectedNewTenantId || selectedNewTenantId.trim() === '') {
       setError('Debe seleccionar un tenant');
       return;
     }
 
-    if (selectedNewTenantId === selectedOffice.tenantId) {
-      setError('El tenant seleccionado es el mismo que el actual');
+    // Validar que el tenant seleccionado sea diferente de los actuales (si existen)
+    const currentTenantIds = selectedOffice.tenants?.map(t => t.id) || [];
+    if (selectedOffice.tenantId) {
+      currentTenantIds.push(selectedOffice.tenantId);
+    }
+    if (currentTenantIds.includes(selectedNewTenantId)) {
+      setError('El tenant seleccionado ya está asociado a esta sede');
+      return;
+    }
+
+    // Validar que el tenantId sea un GUID válido
+    const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!guidRegex.test(selectedNewTenantId)) {
+      setError('El tenant seleccionado no es válido');
       return;
     }
 
     try {
       setError(null);
       setIsChangingTenant(true);
+      console.log('[OfficesPage] Cambiando tenant de la sede:', {
+        officeId: selectedOffice.id,
+        officeName: selectedOffice.name,
+        currentTenantId: selectedOffice.tenantId,
+        newTenantId: selectedNewTenantId
+      });
+      
       await officeService.updateOffice(selectedOffice.id, {
         name: selectedOffice.name,
         address: selectedOffice.address,
@@ -838,12 +880,15 @@ export const OfficesPage = () => {
         email: selectedOffice.email,
         tenantId: selectedNewTenantId,
       });
+      
+      console.log('[OfficesPage] Tenant cambiado exitosamente');
       setIsChangeTenantDialogOpen(false);
       setSelectedOffice(null);
       setSelectedNewTenantId('');
       await loadOffices();
       setIsChangingTenant(false);
     } catch (err: any) {
+      console.error('[OfficesPage] Error al cambiar tenant:', err);
       setError(err.message || 'Error al cambiar tenant de la sede');
       setIsChangingTenant(false);
     }
@@ -980,42 +1025,102 @@ export const OfficesPage = () => {
                     <Text weight="semibold">{office.name}</Text>
                   </TableCell>
                   <TableCell>
-                    {office.customerId && office.customerName ? (
-                      <Button
-                        appearance="subtle"
-                        onClick={() => handleViewCustomerDetails(office.customerId)}
-                        style={{ 
-                          color: tokens.colorBrandForegroundLink, 
-                          textDecoration: 'none',
-                          fontWeight: tokens.fontWeightSemibold,
-                          padding: 0,
-                          minWidth: 'auto',
-                          height: 'auto'
-                        }}
-                      >
-                        {office.customerName}
-                      </Button>
+                    {office.customers && office.customers.length > 0 ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS }}>
+                        <TeachingPopover>
+                          <TeachingPopoverTrigger>
+                            <Button
+                              appearance="subtle"
+                              style={{
+                                padding: 0,
+                                minWidth: 'auto',
+                                height: 'auto'
+                              }}
+                            >
+                              <CounterBadge 
+                                count={office.customers.length} 
+                                size="medium" 
+                                appearance="filled" 
+                                color="brand" 
+                              />
+                            </Button>
+                          </TeachingPopoverTrigger>
+                          <TeachingPopoverSurface>
+                            <TeachingPopoverHeader>Clientes Asociados</TeachingPopoverHeader>
+                            <TeachingPopoverBody>
+                              <div style={{ maxWidth: '400px', maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS }}>
+                                {office.customers.map((customer) => (
+                                  <Button
+                                    key={customer.id}
+                                    appearance="subtle"
+                                    onClick={() => handleViewCustomerDetails(customer.id)}
+                                    style={{ 
+                                      color: tokens.colorBrandForegroundLink, 
+                                      textDecoration: 'none',
+                                      fontWeight: tokens.fontWeightSemibold,
+                                      padding: tokens.spacingVerticalXS,
+                                      justifyContent: 'flex-start',
+                                      textAlign: 'left'
+                                    }}
+                                  >
+                                    {customer.name}
+                                  </Button>
+                                ))}
+                              </div>
+                            </TeachingPopoverBody>
+                          </TeachingPopoverSurface>
+                        </TeachingPopover>
+                      </div>
                     ) : (
                       <Text>N/A</Text>
                     )}
                   </TableCell>
                   <TableCell>
-                    {office.tenantId && office.tenantName ? (
+                    {office.tenants && office.tenants.length > 0 ? (
                       <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS }}>
-                        <Button
-                          appearance="subtle"
-                          onClick={() => handleViewTenantDetails({ id: office.tenantId, name: office.tenantName || '' } as TenantDto)}
-                          style={{ 
-                            color: tokens.colorBrandForegroundLink, 
-                            textDecoration: 'none',
-                            fontWeight: tokens.fontWeightSemibold,
-                            padding: 0,
-                            minWidth: 'auto',
-                            height: 'auto'
-                          }}
-                        >
-                          {office.tenantName}
-                        </Button>
+                        <TeachingPopover>
+                          <TeachingPopoverTrigger>
+                            <Button
+                              appearance="subtle"
+                              style={{
+                                padding: 0,
+                                minWidth: 'auto',
+                                height: 'auto'
+                              }}
+                            >
+                              <CounterBadge 
+                                count={office.tenants.length} 
+                                size="medium" 
+                                appearance="filled" 
+                                color="brand" 
+                              />
+                            </Button>
+                          </TeachingPopoverTrigger>
+                          <TeachingPopoverSurface>
+                            <TeachingPopoverHeader>Tenants Asociados</TeachingPopoverHeader>
+                            <TeachingPopoverBody>
+                              <div style={{ maxWidth: '400px', maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS }}>
+                                {office.tenants.map((tenant) => (
+                                  <Button
+                                    key={tenant.id}
+                                    appearance="subtle"
+                                    onClick={() => handleViewTenantDetails({ id: tenant.id, name: tenant.name } as TenantDto)}
+                                    style={{ 
+                                      color: tokens.colorBrandForegroundLink, 
+                                      textDecoration: 'none',
+                                      fontWeight: tokens.fontWeightSemibold,
+                                      padding: tokens.spacingVerticalXS,
+                                      justifyContent: 'flex-start',
+                                      textAlign: 'left'
+                                    }}
+                                  >
+                                    {tenant.name}
+                                  </Button>
+                                ))}
+                              </div>
+                            </TeachingPopoverBody>
+                          </TeachingPopoverSurface>
+                        </TeachingPopover>
                         <Button
                           appearance="subtle"
                           icon={<ArrowSwapRegular />}
@@ -1820,11 +1925,27 @@ export const OfficesPage = () => {
                 <Field label="Nombre" className={styles.formField}>
                   <Input value={selectedOffice.name} readOnly />
                 </Field>
-                <Field label="Tenant" className={styles.formField}>
-                  <Input value={selectedOffice.tenantName || 'N/A'} readOnly />
+                <Field label="Tenants" className={styles.formField}>
+                  {selectedOffice.tenants && selectedOffice.tenants.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalXS }}>
+                      {selectedOffice.tenants.map((tenant) => (
+                        <Text key={tenant.id} weight="semibold">{tenant.name}</Text>
+                      ))}
+                    </div>
+                  ) : (
+                    <Input value="N/A" readOnly />
+                  )}
                 </Field>
-                <Field label="Cliente" className={styles.formField}>
-                  <Input value={selectedOffice.customerName || 'N/A'} readOnly />
+                <Field label="Clientes" className={styles.formField}>
+                  {selectedOffice.customers && selectedOffice.customers.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalXS }}>
+                      {selectedOffice.customers.map((customer) => (
+                        <Text key={customer.id} weight="semibold">{customer.name}</Text>
+                      ))}
+                    </div>
+                  ) : (
+                    <Input value="N/A" readOnly />
+                  )}
                 </Field>
                 <Field label="Dirección" className={styles.formField}>
                   <Input value={selectedOffice.address || 'N/A'} readOnly />
@@ -2116,9 +2237,9 @@ export const OfficesPage = () => {
                   ))}
                 </Combobox>
               </Field>
-              {selectedOffice?.tenantName && (
+              {selectedOffice?.tenants && selectedOffice.tenants.length > 0 && (
                 <Text>
-                  Tenant actual: {selectedOffice.tenantName}
+                  Tenants actuales: {selectedOffice.tenants.map(t => t.name).join(', ')}
                 </Text>
               )}
             </DialogContent>

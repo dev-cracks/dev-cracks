@@ -1,12 +1,24 @@
 import { apiService } from './apiService';
 
+export interface OfficeTenantDto {
+  id: string;
+  name: string;
+}
+
+export interface OfficeCustomerDto {
+  id: string;
+  name: string;
+}
+
 export interface OfficeDto {
   id: string;
   name: string;
-  tenantId: string;
-  tenantName?: string;
-  customerId: string;
-  customerName?: string;
+  tenantId?: string; // Mantener para compatibilidad
+  tenantName?: string; // Mantener para compatibilidad
+  customerId?: string; // Mantener para compatibilidad
+  customerName?: string; // Mantener para compatibilidad
+  tenants: OfficeTenantDto[];
+  customers: OfficeCustomerDto[];
   address?: string;
   city?: string;
   stateProvince?: string;
