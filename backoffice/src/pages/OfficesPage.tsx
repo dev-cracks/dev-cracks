@@ -916,6 +916,7 @@ export const OfficesPage = () => {
             }
           }}
           disabled={isRefreshing}
+          disabledFocusable={isRefreshing}
           loading={isRefreshing}
           title="Actualizar lista de sedes"
         >

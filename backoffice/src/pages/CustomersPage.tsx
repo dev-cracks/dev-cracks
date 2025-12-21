@@ -1379,7 +1379,7 @@ export const CustomersPage = () => {
       const createData: CreateCustomerRequest = {
         ...formData,
         parentId: hasParent && createParentId ? createParentId : undefined,
-        skipDefaultStructure: skipDefaultStructure ? true : undefined,
+        skipDefaultStructure: skipDefaultStructure,
       };
       await customerService.createCustomer(createData);
       setIsCreateDialogOpen(false);
@@ -1589,6 +1589,14 @@ export const CustomersPage = () => {
       
       setDeleteRelatedTenants(tenants);
       setDeleteRelatedOffices(offices);
+      
+      // Seleccionar todos los tenants por defecto
+      const defaultTenantIds = new Set<string>(tenants.map((t: TenantDto) => t.id));
+      setDeleteTenants(defaultTenantIds);
+      
+      // Seleccionar todas las sedes por defecto (ya que todos los tenants están seleccionados)
+      const defaultOfficeIds = new Set<string>(offices.map((o: OfficeDto) => o.id));
+      setDeleteOffices(defaultOfficeIds);
       
       // Obtener usuarios de todos los tenants relacionados
       const tenantUsersPromises = tenants.map((tenant: TenantDto) => 
@@ -2396,7 +2404,8 @@ export const CustomersPage = () => {
     const newSet = new Set(deleteTenants);
     if (newSet.has(tenantId)) {
       newSet.delete(tenantId);
-      // Si se deselecciona un tenant, también deseleccionar sus sedes relacionadas
+      // Si se deselecciona un tenant, también deseleccionar sus sedes relacionadas por defecto
+      // pero permitir que el usuario las seleccione manualmente si lo desea
       const relatedOffices = deleteRelatedOffices.filter(office => office.tenantId === tenantId);
       const newOfficesSet = new Set(deleteOffices);
       relatedOffices.forEach(office => {
@@ -2405,6 +2414,13 @@ export const CustomersPage = () => {
       setDeleteOffices(newOfficesSet);
     } else {
       newSet.add(tenantId);
+      // Si se selecciona un tenant, marcar sus sedes por defecto pero sin deshabilitarlas
+      const relatedOffices = deleteRelatedOffices.filter(office => office.tenantId === tenantId);
+      const newOfficesSet = new Set(deleteOffices);
+      relatedOffices.forEach(office => {
+        newOfficesSet.add(office.id);
+      });
+      setDeleteOffices(newOfficesSet);
     }
     setDeleteTenants(newSet);
   };
@@ -2413,11 +2429,8 @@ export const CustomersPage = () => {
     const office = deleteRelatedOffices.find(o => o.id === officeId);
     if (!office) return;
     
-    // Si la sede pertenece a un tenant seleccionado para eliminar, no permitir deseleccionarla
-    if (deleteTenants.has(office.tenantId)) {
-      return;
-    }
-    
+    // Permitir seleccionar/deseleccionar sedes libremente, incluso si su tenant está seleccionado
+    // Esto permite dejar registros huérfanos
     const newSet = new Set(deleteOffices);
     if (newSet.has(officeId)) {
       newSet.delete(officeId);
@@ -2620,6 +2633,7 @@ export const CustomersPage = () => {
             }
           }}
           disabled={isRefreshing}
+          disabledFocusable={isRefreshing}
           loading={isRefreshing}
           title="Actualizar lista de clientes"
         >
@@ -3652,7 +3666,7 @@ export const CustomersPage = () => {
                         Seleccione las sedes a eliminar
                       </Text>
                       <Text style={{ marginBottom: tokens.spacingVerticalM, color: tokens.colorNeutralForeground2 }}>
-                        Las sedes relacionadas a tenants seleccionados para eliminar aparecerán marcadas y deshabilitadas. Las sedes no seleccionadas serán desvinculadas.
+                        Las sedes de los tenants seleccionados aparecerán marcadas por defecto, pero puedes deseleccionarlas para dejarlas huérfanas. Las sedes no seleccionadas serán desvinculadas.
                       </Text>
                       {deleteRelatedOffices.length === 0 ? (
                         <Text style={{ color: tokens.colorNeutralForeground3, fontStyle: 'italic' }}>
@@ -3693,15 +3707,13 @@ export const CustomersPage = () => {
                                     </TableHeader>
                                     <TableBody>
                                       {tenantOffices.map((office) => {
-                                        const isDisabled = isTenantSelected;
-                                        const isChecked = isDisabled || deleteOffices.has(office.id);
+                                        const isChecked = deleteOffices.has(office.id);
                                         
                                         return (
                                           <TableRow key={office.id}>
                                             <TableCell>
                                               <Checkbox
                                                 checked={isChecked}
-                                                disabled={isDisabled}
                                                 onChange={() => handleToggleOffice(office.id)}
                                               />
                                             </TableCell>

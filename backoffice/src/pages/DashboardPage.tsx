@@ -15,7 +15,7 @@ import {
   Persona,
   Spinner,
 } from '@fluentui/react-components';
-import { HomeRegular, ArrowClockwiseRegular, BuildingRegular, PeopleRegular, PersonRegular } from '@fluentui/react-icons';
+import { HomeRegular, ArrowClockwiseRegular, BuildingRegular, PeopleRegular, BriefcaseRegular, LocationRegular } from '@fluentui/react-icons';
 import { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { backofficeService } from '../services/backofficeService';
@@ -362,7 +362,7 @@ export const DashboardPage = () => {
               itemType="branch"
             >
               <TreeItemLayout
-                iconBefore={<PeopleRegular />}
+                iconBefore={<BriefcaseRegular />}
                 aside={<Text size={300}>{tenantNode.tenant.name}</Text>}
               >
                 <Text>{tenantNode.tenant.name}</Text>
@@ -374,7 +374,7 @@ export const DashboardPage = () => {
                   itemType="branch"
                 >
                   <TreeItemLayout
-                    iconBefore={<BuildingRegular />}
+                    iconBefore={<LocationRegular />}
                     aside={<Text size={300}>{officeNode.office.name}</Text>}
                   >
                     <Text>{officeNode.office.name}</Text>
@@ -386,7 +386,7 @@ export const DashboardPage = () => {
                       itemType="leaf"
                     >
                       <TreeItemLayout
-                        iconBefore={<PersonRegular />}
+                        iconBefore={<PeopleRegular />}
                       >
                         <div className={styles.personaContainer}>
                           <Persona
