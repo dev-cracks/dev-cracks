@@ -25,6 +25,8 @@ export interface OfficeDto {
   postalCode?: string;
   phone?: string;
   email?: string;
+  countryId?: string;
+  countryName?: string;
   createdAt: string;
   updatedAt: string;
   isActive: boolean;
@@ -40,6 +42,7 @@ export interface CreateOfficeRequest {
   postalCode?: string;
   phone?: string;
   email?: string;
+  countryId?: string;
 }
 
 export interface UpdateOfficeRequest {
@@ -51,6 +54,7 @@ export interface UpdateOfficeRequest {
   postalCode?: string;
   phone?: string;
   email?: string;
+  countryId?: string;
 }
 
 export const officeService = {

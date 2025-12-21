@@ -82,6 +82,8 @@ import {
 import {
   customerService,
   CustomerDto,
+  countryService,
+  CountryDto,
 } from '../services/customerService';
 import {
   tenantService,
@@ -249,6 +251,7 @@ export const OfficesPage = () => {
   const restoreFocusSourceAttributes = useRestoreFocusSource();
   const [offices, setOffices] = useState<OfficeDto[]>([]);
   const [customers, setCustomers] = useState<CustomerDto[]>([]);
+  const [countries, setCountries] = useState<CountryDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -308,6 +311,7 @@ export const OfficesPage = () => {
     postalCode: '',
     phone: '',
     email: '',
+    countryId: '',
   });
 
   const isLoadingRef = useRef(false);
@@ -341,6 +345,15 @@ export const OfficesPage = () => {
     }
   }, []);
 
+  const loadCountries = useCallback(async () => {
+    try {
+      const data = await countryService.getAllCountries();
+      setCountries(data);
+    } catch (err: any) {
+      console.error('[OfficesPage] Error cargando países:', err);
+    }
+  }, []);
+
   const loadOfficeUsers = useCallback(async (officeId: string) => {
     try {
       const users = await officeService.getOfficeUsers(officeId);
@@ -356,6 +369,7 @@ export const OfficesPage = () => {
       hasLoadedRef.current = true;
       loadOffices();
       loadCustomers();
+      loadCountries();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -388,12 +402,13 @@ export const OfficesPage = () => {
     const matchesName = office.name.toLowerCase().includes(searchLower);
     const matchesAddress = office.address?.toLowerCase().includes(searchLower);
     const matchesCity = office.city?.toLowerCase().includes(searchLower);
+    const matchesCountry = office.countryName?.toLowerCase().includes(searchLower);
     const matchesCustomerName = office.customerName?.toLowerCase().includes(searchLower);
     const matchesTenantName = office.tenantName?.toLowerCase().includes(searchLower);
     const matchesCustomers = office.customers?.some(c => c.name.toLowerCase().includes(searchLower));
     const matchesTenants = office.tenants?.some(t => t.name.toLowerCase().includes(searchLower));
     
-    return matchesName || matchesAddress || matchesCity || matchesCustomerName || 
+    return matchesName || matchesAddress || matchesCity || matchesCountry || matchesCustomerName || 
            matchesTenantName || matchesCustomers || matchesTenants;
   });
 
@@ -663,6 +678,7 @@ export const OfficesPage = () => {
       postalCode: office.postalCode || '',
       phone: office.phone || '',
       email: office.email || '',
+      countryId: office.countryId || '',
     });
     setIsEditDialogOpen(true);
   };
@@ -684,6 +700,7 @@ export const OfficesPage = () => {
         postalCode: formData.postalCode || undefined,
         phone: formData.phone || undefined,
         email: formData.email || undefined,
+        countryId: formData.countryId || undefined,
       };
       await officeService.updateOffice(selectedOffice.id, updateData);
       setIsEditDialogOpen(false);
@@ -1102,6 +1119,7 @@ export const OfficesPage = () => {
           <TableHeader>
             <TableRow>
               <TableHeaderCell>Nombre</TableHeaderCell>
+              <TableHeaderCell>País</TableHeaderCell>
               <TableHeaderCell>Ciudad</TableHeaderCell>
               <TableHeaderCell>Datos Contacto</TableHeaderCell>
               <TableHeaderCell>Cliente</TableHeaderCell>
@@ -1114,7 +1132,7 @@ export const OfficesPage = () => {
           <TableBody>
             {filteredOffices.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} style={{ textAlign: 'center', padding: tokens.spacingVerticalXXL }}>
+                <TableCell colSpan={9} style={{ textAlign: 'center', padding: tokens.spacingVerticalXXL }}>
                   <Text>No se encontraron sedes</Text>
                 </TableCell>
               </TableRow>
@@ -1127,6 +1145,7 @@ export const OfficesPage = () => {
                   <TableCell>
                     <Text weight="semibold">{office.name}</Text>
                   </TableCell>
+                  <TableCell>{office.countryName || 'N/A'}</TableCell>
                   <TableCell>{office.city || 'N/A'}</TableCell>
                   <TableCell>
                     {hasContactData ? (
@@ -1562,6 +1581,23 @@ export const OfficesPage = () => {
                   placeholder="Nombre de la sede"
                 />
               </Field>
+              <Field label="País" className={styles.formField}>
+                <Combobox
+                  value={countries.find(c => c.id === formData.countryId)?.name || ''}
+                  onOptionSelect={(_, data) => {
+                    if (data.optionValue) {
+                      setFormData({ ...formData, countryId: data.optionValue });
+                    }
+                  }}
+                  placeholder="Seleccionar país"
+                >
+                  {countries.map((country) => (
+                    <Option key={country.id} value={country.id}>
+                      {country.name}
+                    </Option>
+                  ))}
+                </Combobox>
+              </Field>
               <Field label="Dirección" className={styles.formField}>
                 <Input
                   value={formData.address}
@@ -1611,6 +1647,7 @@ export const OfficesPage = () => {
                   onClick={() => {
                     const hasData = formData.name.trim() || 
                                     formData.tenantId || 
+                                    formData.countryId ||
                                     formData.address.trim() || 
                                     formData.city.trim() || 
                                     formData.stateProvince.trim() || 
@@ -1629,6 +1666,7 @@ export const OfficesPage = () => {
                           postalCode: '',
                           phone: '',
                           email: '',
+                          countryId: '',
                         });
                         setError(null);
                       }
@@ -1831,6 +1869,23 @@ export const OfficesPage = () => {
                         placeholder="Nombre de la sede"
                       />
                     </Field>
+                    <Field label="País" className={styles.formField}>
+                      <Combobox
+                        value={countries.find(c => c.id === formData.countryId)?.name || ''}
+                        onOptionSelect={(_, data) => {
+                          if (data.optionValue) {
+                            setFormData({ ...formData, countryId: data.optionValue });
+                          }
+                        }}
+                        placeholder="Seleccionar país"
+                      >
+                        {countries.map((country) => (
+                          <Option key={country.id} value={country.id}>
+                            {country.name}
+                          </Option>
+                        ))}
+                      </Combobox>
+                    </Field>
                     <Field label="Dirección" className={styles.formField}>
                       <Input
                         value={formData.address}
@@ -1905,7 +1960,8 @@ export const OfficesPage = () => {
                             formData.stateProvince !== (selectedOffice.stateProvince || '') ||
                             formData.postalCode !== (selectedOffice.postalCode || '') ||
                             formData.phone !== (selectedOffice.phone || '') ||
-                            formData.email !== (selectedOffice.email || '');
+                            formData.email !== (selectedOffice.email || '') ||
+                            formData.countryId !== (selectedOffice.countryId || '');
                           if (hasChanges) {
                             if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los cambios no guardados.')) {
                               setIsEditDialogOpen(false);
