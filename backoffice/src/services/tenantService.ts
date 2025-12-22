@@ -5,7 +5,7 @@ import { CustomerDto } from './customerService';
 export interface TenantDto {
   id: string;
   name: string;
-  customerId: string;
+  customerId?: string; // Opcional porque puede no estar disponible hasta que el servidor se reinicie
   customerName?: string;
   officeId?: string;
   officeName?: string;

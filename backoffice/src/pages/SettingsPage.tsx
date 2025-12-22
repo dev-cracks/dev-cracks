@@ -208,15 +208,35 @@ export const SettingsPage = () => {
     if (!currentCustomerId) {
       try {
         const tenant = await tenantService.getCurrentTenant();
-        if (!tenant?.customerId) {
-          alert('Error: No se encontró el cliente asociado. Por favor, recarga la página e intenta de nuevo.');
+        if (!tenant) {
+          alert('Error: No se encontró el tenant. Por favor, recarga la página e intenta de nuevo.');
           return;
         }
-        currentCustomerId = tenant.customerId;
-        setCustomerId(tenant.customerId);
+
+        // Intentar obtener el customerId del tenant (si está disponible en la respuesta)
+        if (tenant.customerId) {
+          currentCustomerId = tenant.customerId;
+          setCustomerId(tenant.customerId);
+        } else {
+          // Si el tenant no tiene customerId en la respuesta, intentar obtenerlo de los customers del tenant
+          try {
+            const tenantCustomers = await tenantService.getTenantCustomers(tenant.id);
+            if (tenantCustomers && tenantCustomers.length > 0) {
+              currentCustomerId = tenantCustomers[0].id;
+              setCustomerId(tenantCustomers[0].id);
+            } else {
+              alert('Error: El tenant no tiene un cliente asociado. Por favor, asocia un cliente al tenant primero.');
+              return;
+            }
+          } catch (customerError) {
+            console.error('Error obteniendo customers del tenant:', customerError);
+            alert('Error: No se pudo obtener el cliente asociado. Por favor, recarga la página después de reiniciar el servidor e intenta de nuevo.');
+            return;
+          }
+        }
       } catch (error) {
         console.error('Error obteniendo tenant:', error);
-        alert('Error: No se pudo obtener la información del cliente. Por favor, recarga la página e intenta de nuevo.');
+        alert('Error: No se pudo obtener la información del tenant. Por favor, recarga la página e intenta de nuevo.');
         return;
       }
     }
