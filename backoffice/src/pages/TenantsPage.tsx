@@ -82,7 +82,6 @@ import {
   TableRegular,
   FlowchartRegular,
   DismissRegular,
-  ArrowSwapRegular,
   BriefcaseRegular,
   ArrowClockwiseRegular,
   LinkRegular,
@@ -284,6 +283,7 @@ export const TenantsPage = () => {
   const [selectedNewCustomerId, setSelectedNewCustomerId] = useState<string>('');
   const [isChangingCustomer, setIsChangingCustomer] = useState(false);
   const [tenantUsersMap, setTenantUsersMap] = useState<Record<string, UserDto[]>>({});
+  const [tenantOfficesMap, setTenantOfficesMap] = useState<Record<string, OfficeDto[]>>({});
   const [customerUsersForPopover, setCustomerUsersForPopover] = useState<UserDto[]>([]);
   const [isLoadingCustomerUsers, setIsLoadingCustomerUsers] = useState(false);
   const [popoverOpenForTenant, setPopoverOpenForTenant] = useState<string | null>(null);
@@ -291,6 +291,8 @@ export const TenantsPage = () => {
   const [tenantCustomersMap, setTenantCustomersMap] = useState<Record<string, CustomerDto[]>>({});
   const [isLoadingTenantCustomers, setIsLoadingTenantCustomers] = useState<string | null>(null);
   const [popoverOpenForTenantCustomers, setPopoverOpenForTenantCustomers] = useState<string | null>(null);
+  const [isLoadingTenantOffices, setIsLoadingTenantOffices] = useState<string | null>(null);
+  const [popoverOpenForTenantOffices, setPopoverOpenForTenantOffices] = useState<string | null>(null);
   
   // Form state
   const [formData, setFormData] = useState<CreateTenantRequest>({
@@ -373,6 +375,16 @@ export const TenantsPage = () => {
     }
   }, []);
 
+  const loadTenantOffices = useCallback(async (tenantId: string) => {
+    try {
+      const offices = await officeService.getOfficesByTenant(tenantId);
+      setTenantOfficesMap((prev) => ({ ...prev, [tenantId]: offices }));
+    } catch (err: any) {
+      console.error('[TenantsPage] Error cargando sedes del tenant:', err);
+      setTenantOfficesMap((prev) => ({ ...prev, [tenantId]: [] }));
+    }
+  }, []);
+
   // Cargar clientes de cada tenant cuando se cargan los tenants
   useEffect(() => {
     if (tenants.length > 0) {
@@ -399,6 +411,15 @@ export const TenantsPage = () => {
       });
     }
   }, [tenants, loadTenantUsers]);
+
+  // Cargar sedes de cada tenant cuando se cargan los tenants
+  useEffect(() => {
+    if (tenants.length > 0) {
+      tenants.forEach((tenant) => {
+        loadTenantOffices(tenant.id);
+      });
+    }
+  }, [tenants, loadTenantOffices]);
 
   // Registrar acciones en el RibbonMenu
   useEffect(() => {
@@ -706,6 +727,7 @@ export const TenantsPage = () => {
       setError(null);
       const offices = await officeService.getOfficesByTenant(tenant.id);
       setTenantOffices(offices);
+      setTenantOfficesMap((prev) => ({ ...prev, [tenant.id]: offices }));
     } catch (err: any) {
       setError(err.message || 'Error al cargar sedes del tenant');
     } finally {
@@ -861,7 +883,7 @@ export const TenantsPage = () => {
               label: (
                 <div className={`${styles.flowNode} ${styles.flowNodeUser}`}>
                   <div className={styles.flowNodeHeader}>{user.name || user.email}</div>
-                  <div className={styles.flowNodeContent}>{user.email}</div>
+                  <div className={styles.flowNodeContent}>{user.contactEmail || user.email}</div>
                   <div className={styles.flowNodeContent}>Rol: {getRoleLabel(user.role)}</div>
                 </div>
               ),
@@ -1041,7 +1063,7 @@ export const TenantsPage = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHeaderCell style={{ width: 'auto', minWidth: '200px' }}>Nombre</TableHeaderCell>
-                        <TableHeaderCell style={{ width: 'auto', minWidth: '180px' }}>Cliente</TableHeaderCell>
+                        <TableHeaderCell style={{ width: 'auto', minWidth: '180px' }}>Clientes</TableHeaderCell>
                         <TableHeaderCell style={{ width: 'auto', minWidth: '80px' }}>Sedes</TableHeaderCell>
                         <TableHeaderCell style={{ width: 'auto', minWidth: '80px' }}>Usuarios</TableHeaderCell>
                         <TableHeaderCell style={{ width: 'auto', minWidth: '150px' }}>Fecha de Creación</TableHeaderCell>
@@ -1165,35 +1187,117 @@ export const TenantsPage = () => {
                                   />
                                 );
                               })()}
-                              <Button
-                                appearance="subtle"
-                                icon={<ArrowSwapRegular />}
-                                onClick={() => handleChangeCustomer(tenant)}
-                                aria-label="Cambiar cliente"
-                                title="Cambiar cliente"
-                                size="small"
-                                style={{
-                                  minWidth: 'auto',
-                                  padding: tokens.spacingVerticalXS,
-                                }}
-                              />
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Button
-                              appearance="subtle"
-                              onClick={() => handleViewOffices(tenant)}
-                              style={{ 
-                                color: tokens.colorBrandForegroundLink, 
-                                textDecoration: 'none',
-                                fontWeight: tokens.fontWeightSemibold,
-                                padding: 0,
-                                minWidth: 'auto',
-                                height: 'auto'
-                              }}
-                            >
-                              Ver sedes
-                            </Button>
+                            {(() => {
+                              const tenantOffices = tenantOfficesMap[tenant.id] || [];
+                              const officesCount = tenantOffices.length;
+                              
+                              return officesCount > 0 ? (
+                                <TeachingPopover
+                                  open={popoverOpenForTenantOffices === tenant.id}
+                                  onOpenChange={(_, data) => {
+                                    setPopoverOpenForTenantOffices(data.open ? tenant.id : null);
+                                    if (data.open && !tenantOfficesMap[tenant.id]) {
+                                      setIsLoadingTenantOffices(tenant.id);
+                                      loadTenantOffices(tenant.id).finally(() => {
+                                        setIsLoadingTenantOffices(null);
+                                      });
+                                    }
+                                  }}
+                                >
+                                  <TeachingPopoverTrigger disableButtonEnhancement>
+                                    <Button
+                                      appearance="subtle"
+                                      style={{
+                                        padding: 0,
+                                        minWidth: 'auto',
+                                        height: 'auto'
+                                      }}
+                                    >
+                                      <CounterBadge 
+                                        count={officesCount} 
+                                        size="medium" 
+                                        appearance="filled" 
+                                        color="brand"
+                                      />
+                                    </Button>
+                                  </TeachingPopoverTrigger>
+                                  <TeachingPopoverSurface>
+                                    <TeachingPopoverHeader>
+                                      Sedes Asociadas
+                                    </TeachingPopoverHeader>
+                                    <TeachingPopoverBody>
+                                      {isLoadingTenantOffices === tenant.id ? (
+                                        <div style={{ display: 'flex', justifyContent: 'center', padding: tokens.spacingVerticalL }}>
+                                          <Spinner size="small" label="Cargando sedes..." />
+                                        </div>
+                                      ) : tenantOffices.length === 0 ? (
+                                        <Text>No hay sedes asociadas</Text>
+                                      ) : (
+                                        <div style={{ maxWidth: '600px', maxHeight: '400px', overflowY: 'auto' }}>
+                                          <Table>
+                                            <TableHeader>
+                                              <TableRow>
+                                                <TableHeaderCell>Nombre</TableHeaderCell>
+                                                <TableHeaderCell>Dirección</TableHeaderCell>
+                                                <TableHeaderCell>Ciudad</TableHeaderCell>
+                                                <TableHeaderCell>Estado</TableHeaderCell>
+                                              </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                              {tenantOffices.map((office) => (
+                                                <TableRow key={office.id}>
+                                                  <TableCell>
+                                                    <Button
+                                                      appearance="subtle"
+                                                      onClick={() => {
+                                                        setSelectedOffice(office);
+                                                        setIsOfficeDetailsDialogOpen(true);
+                                                        setPopoverOpenForTenantOffices(null);
+                                                      }}
+                                                      style={{ 
+                                                        color: tokens.colorBrandForegroundLink, 
+                                                        textDecoration: 'none',
+                                                        fontWeight: tokens.fontWeightSemibold,
+                                                        padding: 0,
+                                                        minWidth: 'auto',
+                                                        height: 'auto'
+                                                      }}
+                                                    >
+                                                      {office.name}
+                                                    </Button>
+                                                  </TableCell>
+                                                  <TableCell>{office.address || 'N/A'}</TableCell>
+                                                  <TableCell>{office.city || 'N/A'}</TableCell>
+                                                  <TableCell>
+                                                    {office.isSuspended ? (
+                                                      <Badge appearance="filled" color="danger">Suspendido</Badge>
+                                                    ) : office.isActive ? (
+                                                      <Badge appearance="filled" color="success">Activo</Badge>
+                                                    ) : (
+                                                      <Badge appearance="outline">Inactivo</Badge>
+                                                    )}
+                                                  </TableCell>
+                                                </TableRow>
+                                              ))}
+                                            </TableBody>
+                                          </Table>
+                                        </div>
+                                      )}
+                                    </TeachingPopoverBody>
+                                  </TeachingPopoverSurface>
+                                </TeachingPopover>
+                              ) : (
+                                <CounterBadge 
+                                  count={0} 
+                                  size="medium" 
+                                  appearance="filled" 
+                                  color="informative"
+                                />
+                              );
+                            })()}
                           </TableCell>
                           <TableCell>
                             {(() => {
@@ -1225,7 +1329,7 @@ export const TenantsPage = () => {
                                           <Persona
                                             key={user.id}
                                             name={user.name || user.email}
-                                            secondaryText={user.email}
+                                            secondaryText={user.contactEmail || user.email}
                                             presence={{ status: user.isActive && !user.isSuspended ? 'available' : 'offline' }}
                                           />
                                         ))}
@@ -1299,7 +1403,7 @@ export const TenantsPage = () => {
                                               >
                                                 <Persona
                                                   name={user.name || user.email}
-                                                  secondaryText={user.email}
+                                                  secondaryText={user.contactEmail || user.email}
                                                   presence={{ status: user.isActive && !user.isSuspended ? 'available' : 'offline' }}
                                                 />
                                                 {isAssigned ? (
@@ -1843,7 +1947,7 @@ export const TenantsPage = () => {
                       {tenantUsers.map((user) => (
                         <TableRow key={user.id}>
                           <TableCell>{user.name || 'Sin nombre'}</TableCell>
-                          <TableCell>{user.email}</TableCell>
+                          <TableCell>{user.contactEmail || user.email}</TableCell>
                           <TableCell>
                             <Badge
                               appearance={user.role === 'Admin' ? 'filled' : 'outline'}
