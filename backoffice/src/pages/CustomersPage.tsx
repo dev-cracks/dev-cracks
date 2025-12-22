@@ -1740,6 +1740,10 @@ export const CustomersPage = () => {
       const uniqueUsers = Array.from(uniqueUsersMap.values());
       
       setDeleteRelatedUsers(uniqueUsers);
+      
+      // Seleccionar todos los usuarios por defecto
+      const defaultUserIds = new Set<string>(uniqueUsers.map((u: UserDto) => u.id));
+      setDeleteUsers(defaultUserIds);
     } catch (err: any) {
       setError(err.message || 'Error al cargar datos relacionados');
     } finally {
@@ -2898,6 +2902,43 @@ export const CustomersPage = () => {
       newSet.add(userId);
     }
     setDeleteUsers(newSet);
+  };
+
+  const handleToggleAllTenants = () => {
+    const allSelected = deleteRelatedTenants.every(tenant => deleteTenants.has(tenant.id));
+    if (allSelected) {
+      // Deseleccionar todos
+      setDeleteTenants(new Set());
+      // También deseleccionar todas las sedes relacionadas
+      setDeleteOffices(new Set());
+    } else {
+      // Seleccionar todos
+      const allTenantIds = new Set(deleteRelatedTenants.map(tenant => tenant.id));
+      setDeleteTenants(allTenantIds);
+      // También seleccionar todas las sedes
+      const allOfficeIds = new Set(deleteRelatedOffices.map(office => office.id));
+      setDeleteOffices(allOfficeIds);
+    }
+  };
+
+  const handleToggleAllOffices = () => {
+    const allSelected = deleteRelatedOffices.every(office => deleteOffices.has(office.id));
+    if (allSelected) {
+      setDeleteOffices(new Set());
+    } else {
+      const allOfficeIds = new Set(deleteRelatedOffices.map(office => office.id));
+      setDeleteOffices(allOfficeIds);
+    }
+  };
+
+  const handleToggleAllUsers = () => {
+    const allSelected = deleteRelatedUsers.every(user => deleteUsers.has(user.id));
+    if (allSelected) {
+      setDeleteUsers(new Set());
+    } else {
+      const allUserIds = new Set(deleteRelatedUsers.map(user => user.id));
+      setDeleteUsers(allUserIds);
+    }
   };
 
   const handleConfirmDelete = async () => {
@@ -4427,7 +4468,12 @@ export const CustomersPage = () => {
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHeaderCell style={{ width: '50px' }}>Seleccionar</TableHeaderCell>
+                                <TableHeaderCell style={{ width: '50px' }}>
+                                  <Checkbox
+                                    checked={deleteRelatedTenants.length > 0 && deleteRelatedTenants.every(tenant => deleteTenants.has(tenant.id))}
+                                    onChange={handleToggleAllTenants}
+                                  />
+                                </TableHeaderCell>
                                 <TableHeaderCell>Nombre</TableHeaderCell>
                                 <TableHeaderCell>Estado</TableHeaderCell>
                               </TableRow>
@@ -4471,8 +4517,14 @@ export const CustomersPage = () => {
                         </Text>
                       ) : (
                         <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                          {/* Mostrar sedes agrupadas por tenant */}
                           {deleteRelatedTenants.map((tenant) => {
-                            const tenantOffices = deleteRelatedOffices.filter(office => office.tenantId === tenant.id);
+                            // Filtrar oficinas que pertenecen a este tenant
+                            // Pueden estar en tenantId (legacy) o en el array tenants (muchos a muchos)
+                            const tenantOffices = deleteRelatedOffices.filter(office => 
+                              office.tenantId === tenant.id || 
+                              (office.tenants && office.tenants.some(t => t.id === tenant.id))
+                            );
                             if (tenantOffices.length === 0) return null;
                             
                             const isTenantSelected = deleteTenants.has(tenant.id);
@@ -4496,7 +4548,21 @@ export const CustomersPage = () => {
                                   <Table>
                                     <TableHeader>
                                       <TableRow>
-                                        <TableHeaderCell style={{ width: '50px' }}>Seleccionar</TableHeaderCell>
+                                        <TableHeaderCell style={{ width: '50px' }}>
+                                          <Checkbox
+                                            checked={tenantOffices.length > 0 && tenantOffices.every(office => deleteOffices.has(office.id))}
+                                            onChange={() => {
+                                              const allSelected = tenantOffices.every(office => deleteOffices.has(office.id));
+                                              const newSet = new Set(deleteOffices);
+                                              if (allSelected) {
+                                                tenantOffices.forEach(office => newSet.delete(office.id));
+                                              } else {
+                                                tenantOffices.forEach(office => newSet.add(office.id));
+                                              }
+                                              setDeleteOffices(newSet);
+                                            }}
+                                          />
+                                        </TableHeaderCell>
                                         <TableHeaderCell>Nombre</TableHeaderCell>
                                         <TableHeaderCell>Dirección</TableHeaderCell>
                                         <TableHeaderCell>Estado</TableHeaderCell>
@@ -4530,6 +4596,86 @@ export const CustomersPage = () => {
                               </div>
                             );
                           })}
+                          
+                          {/* Mostrar sedes que no están asociadas a ningún tenant (solo al cliente) */}
+                          {(() => {
+                            const officesWithoutTenant = deleteRelatedOffices.filter(office => {
+                              // Oficina sin tenantId y sin tenants
+                              if (!office.tenantId && (!office.tenants || office.tenants.length === 0)) {
+                                return true;
+                              }
+                              // Oficina que no está en ningún tenant de deleteRelatedTenants
+                              const hasMatchingTenant = deleteRelatedTenants.some(tenant => 
+                                office.tenantId === tenant.id || 
+                                (office.tenants && office.tenants.some(t => t.id === tenant.id))
+                              );
+                              return !hasMatchingTenant;
+                            });
+                            
+                            if (officesWithoutTenant.length === 0) return null;
+                            
+                            return (
+                              <div style={{ marginBottom: tokens.spacingVerticalL }}>
+                                <Text size={300} weight="semibold" style={{ 
+                                  marginBottom: tokens.spacingVerticalS,
+                                  padding: tokens.spacingVerticalS,
+                                  backgroundColor: tokens.colorNeutralBackground2,
+                                  borderRadius: tokens.borderRadiusSmall
+                                }}>
+                                  Sedes sin Tenant asignado
+                                </Text>
+                                <div style={{ border: `1px solid ${tokens.colorNeutralStroke2}`, borderRadius: tokens.borderRadiusMedium }}>
+                                  <Table>
+                                    <TableHeader>
+                                      <TableRow>
+                                        <TableHeaderCell style={{ width: '50px' }}>
+                                          <Checkbox
+                                            checked={officesWithoutTenant.length > 0 && officesWithoutTenant.every(office => deleteOffices.has(office.id))}
+                                            onChange={() => {
+                                              const allSelected = officesWithoutTenant.every(office => deleteOffices.has(office.id));
+                                              const newSet = new Set(deleteOffices);
+                                              if (allSelected) {
+                                                officesWithoutTenant.forEach(office => newSet.delete(office.id));
+                                              } else {
+                                                officesWithoutTenant.forEach(office => newSet.add(office.id));
+                                              }
+                                              setDeleteOffices(newSet);
+                                            }}
+                                          />
+                                        </TableHeaderCell>
+                                        <TableHeaderCell>Nombre</TableHeaderCell>
+                                        <TableHeaderCell>Dirección</TableHeaderCell>
+                                        <TableHeaderCell>Estado</TableHeaderCell>
+                                      </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                      {officesWithoutTenant.map((office) => {
+                                        const isChecked = deleteOffices.has(office.id);
+                                        
+                                        return (
+                                          <TableRow key={office.id}>
+                                            <TableCell>
+                                              <Checkbox
+                                                checked={isChecked}
+                                                onChange={() => handleToggleOffice(office.id)}
+                                              />
+                                            </TableCell>
+                                            <TableCell>{office.name}</TableCell>
+                                            <TableCell>{office.address || '-'}</TableCell>
+                                            <TableCell>
+                                              <Badge appearance={office.isActive ? 'filled' : 'outline'} color={office.isActive ? 'success' : 'danger'}>
+                                                {office.isActive ? 'Activa' : 'Inactiva'}
+                                              </Badge>
+                                            </TableCell>
+                                          </TableRow>
+                                        );
+                                      })}
+                                    </TableBody>
+                                  </Table>
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </div>
                       )}
                     </div>
@@ -4553,7 +4699,12 @@ export const CustomersPage = () => {
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHeaderCell style={{ width: '50px' }}>Seleccionar</TableHeaderCell>
+                                <TableHeaderCell style={{ width: '50px' }}>
+                                  <Checkbox
+                                    checked={deleteRelatedUsers.length > 0 && deleteRelatedUsers.every(user => deleteUsers.has(user.id))}
+                                    onChange={handleToggleAllUsers}
+                                  />
+                                </TableHeaderCell>
                                 <TableHeaderCell>Nombre</TableHeaderCell>
                                 <TableHeaderCell>Email</TableHeaderCell>
                                 <TableHeaderCell>Rol</TableHeaderCell>
