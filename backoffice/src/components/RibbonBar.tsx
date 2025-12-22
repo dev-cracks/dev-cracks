@@ -15,11 +15,14 @@ import {
   SettingsRegular,
 } from '@fluentui/react-icons';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNotificationContext } from '../contexts/NotificationContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { UserAccountMenu } from './UserAccountMenu';
 import { NotificationPanel } from './NotificationPanel';
+import { tenantService } from '../services/tenantService';
+import { customerParameterService } from '../services/customerService';
 
 const useStyles = makeStyles({
   ribbonBar: {
@@ -43,10 +46,20 @@ const useStyles = makeStyles({
     color: 'white',
     fontSize: '20px',
   },
+  logoImage: {
+    height: '24px',
+    width: 'auto',
+    objectFit: 'contain',
+  },
   logoText: {
     color: 'white',
     fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
+    cursor: 'pointer',
+    textDecoration: 'none',
+    ':hover': {
+      textDecoration: 'underline',
+    },
   },
   searchSection: {
     flex: 1,
@@ -97,19 +110,95 @@ interface RibbonBarProps {
   onMenuToggle?: () => void;
 }
 
+const PARAM_KEYS = {
+  SITE_NAME: 'SiteName',
+  SITE_URL: 'SiteUrl',
+  SITE_LOGO: 'SiteLogo',
+} as const;
+
 export const RibbonBar = ({ onMenuToggle }: RibbonBarProps) => {
   const styles = useStyles();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { unreadCount } = useNotificationContext();
   const { openSettings } = useSettings();
+  const [siteName, setSiteName] = useState('Dev Cracks');
+  const [siteUrl, setSiteUrl] = useState('');
+  const [siteLogo, setSiteLogo] = useState('');
+
+  useEffect(() => {
+    loadSiteSettings();
+
+    // Escuchar evento personalizado para actualizar el logo inmediatamente (con cada cambio)
+    const handleLogoUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent<{ logoUrl: string }>;
+      if (customEvent.detail?.logoUrl !== undefined) {
+        setSiteLogo(customEvent.detail.logoUrl);
+      }
+    };
+
+    // Escuchar evento personalizado para recargar configuración cuando se actualiza (guardado completo)
+    const handleSettingsUpdate = () => {
+      loadSiteSettings();
+    };
+
+    window.addEventListener('siteLogoUpdated', handleLogoUpdate);
+    window.addEventListener('siteSettingsUpdated', handleSettingsUpdate);
+
+    return () => {
+      window.removeEventListener('siteLogoUpdated', handleLogoUpdate);
+      window.removeEventListener('siteSettingsUpdated', handleSettingsUpdate);
+    };
+  }, []);
+
+  const loadSiteSettings = async () => {
+    try {
+      const tenant = await tenantService.getCurrentTenant();
+      if (!tenant?.customerId) {
+        return;
+      }
+
+      const parameters = await customerParameterService.getByCustomerId(tenant.customerId);
+      const paramMap = new Map(parameters.map(p => [p.key, p.value]));
+      
+      setSiteName(paramMap.get(PARAM_KEYS.SITE_NAME) || 'Dev Cracks');
+      setSiteUrl(paramMap.get(PARAM_KEYS.SITE_URL) || '');
+      setSiteLogo(paramMap.get(PARAM_KEYS.SITE_LOGO) || '');
+    } catch (error) {
+      console.error('Error cargando configuración del sitio:', error);
+    }
+  };
+
 
   return (
     <div className={styles.ribbonBar}>
       {/* Sección del logo */}
       <div className={styles.logoSection}>
-        <GridRegular className={styles.logoIcon} />
-        <span className={styles.logoText}>Dev Cracks</span>
+        {siteLogo ? (
+          <img 
+            src={siteLogo} 
+            alt={siteName}
+            className={styles.logoImage}
+            onError={(e) => {
+              // Si falla la carga de la imagen, mostrar el ícono por defecto
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+        ) : (
+          <GridRegular className={styles.logoIcon} />
+        )}
+        {siteUrl ? (
+          <a 
+            href={siteUrl} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className={styles.logoText}
+          >
+            {siteName}
+          </a>
+        ) : (
+          <span className={styles.logoText}>{siteName}</span>
+        )}
       </div>
 
       {/* Barra de búsqueda */}

@@ -118,6 +118,51 @@ export const customerService = {
   },
 };
 
+export interface CustomerParameterDto {
+  id: string;
+  customerId: string;
+  key: string;
+  value: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateOrUpdateCustomerParameterRequest {
+  customerId: string;
+  key: string;
+  value: string;
+}
+
+export const customerParameterService = {
+  async getByCustomerId(customerId: string): Promise<CustomerParameterDto[]> {
+    return apiService.request<CustomerParameterDto[]>(`/customer-parameters/customer/${customerId}`);
+  },
+
+  async getByCustomerIdAndKey(customerId: string, key: string): Promise<CustomerParameterDto | null> {
+    try {
+      return await apiService.request<CustomerParameterDto>(`/customer-parameters/customer/${customerId}/key/${encodeURIComponent(key)}`);
+    } catch (error: any) {
+      if (error?.statusCode === 404) {
+        return null;
+      }
+      throw error;
+    }
+  },
+
+  async createOrUpdate(data: CreateOrUpdateCustomerParameterRequest): Promise<CustomerParameterDto> {
+    return apiService.request<CustomerParameterDto>('/customer-parameters', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async delete(id: string): Promise<void> {
+    return apiService.request<void>(`/customer-parameters/${id}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
 export const countryService = {
   async getAllCountries(): Promise<CountryDto[]> {
     return apiService.request<CountryDto[]>('/countries');
