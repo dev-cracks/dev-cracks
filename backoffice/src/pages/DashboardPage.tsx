@@ -26,6 +26,7 @@ import { userService, UserDto } from '../services/userService';
 import { TenantDto } from '../services/tenantService';
 import { StatsCardSkeleton } from '../components/StatsCardSkeleton';
 import { DetailsSkeleton } from '../components/DetailsSkeleton';
+import { OfficesMap } from '../components/OfficesMap';
 
 const useStyles = makeStyles({
   container: {
@@ -122,6 +123,7 @@ export const DashboardPage = () => {
   const [tenantCount, setTenantCount] = useState<number | null>(null);
   const [customerCount, setCustomerCount] = useState<number | null>(null);
   const [officeCount, setOfficeCount] = useState<number | null>(null);
+  const [offices, setOffices] = useState<OfficeDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [treeData, setTreeData] = useState<TreeData | null>(null);
   const [isLoadingTree, setIsLoadingTree] = useState(false);
@@ -173,9 +175,11 @@ export const DashboardPage = () => {
       // Procesar sedes
       if (offices.status === 'fulfilled') {
         setOfficeCount(offices.value.length);
+        setOffices(offices.value);
       } else {
         handleError(offices.reason, 'sedes');
         setOfficeCount(0);
+        setOffices([]);
       }
     } catch (error: any) {
       // Si es un error de red (API no disponible), solo mostrar warning en desarrollo
@@ -189,6 +193,7 @@ export const DashboardPage = () => {
       setTenantCount(0);
       setCustomerCount(0);
       setOfficeCount(0);
+      setOffices([]);
     } finally {
       setIsLoading(false);
     }
@@ -543,6 +548,26 @@ export const DashboardPage = () => {
           </CardPreview>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader
+          header={<Text weight="semibold">Mapa de Sedes</Text>}
+          description="Ubicación de todas las sedes en el mapa"
+        />
+        <CardPreview>
+          <div style={{ padding: '20px' }}>
+            {isLoading ? (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: tokens.spacingVerticalXL }}>
+                <Spinner size="large" label="Cargando mapa..." />
+              </div>
+            ) : offices.length === 0 ? (
+              <Text>No hay sedes disponibles para mostrar en el mapa</Text>
+            ) : (
+              <OfficesMap offices={offices} />
+            )}
+          </div>
+        </CardPreview>
+      </Card>
 
       <Card className={styles.treeCard}>
         <CardHeader

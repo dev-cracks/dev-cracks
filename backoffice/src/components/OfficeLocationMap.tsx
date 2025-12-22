@@ -99,6 +99,7 @@ export const OfficeLocationMap = ({
   const [addressSearch, setAddressSearch] = useState<string>('');
   const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([]);
   const [isGeocoding, setIsGeocoding] = useState(false);
+  const [isSearchingAddresses, setIsSearchingAddresses] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   
@@ -116,7 +117,8 @@ export const OfficeLocationMap = ({
       setLatitude(initialLatitude ?? null);
       setLongitude(initialLongitude ?? null);
       setFullAddress(initialFullAddress ?? '');
-      setAddressSearch('');
+      // Inicializar el campo de búsqueda con la dirección completa si existe
+      setAddressSearch(initialFullAddress ?? '');
       setAddressSuggestions([]);
       setError(null);
     }
@@ -133,14 +135,19 @@ export const OfficeLocationMap = ({
       return;
     }
 
+    // Reducir el tiempo de debounce para mejor respuesta
     searchTimeoutRef.current = setTimeout(async () => {
+      setIsSearchingAddresses(true);
       try {
         const suggestions = await searchAddresses(addressSearch);
         setAddressSuggestions(suggestions);
       } catch (err) {
         console.error('[OfficeLocationMap] Error buscando direcciones:', err);
+        setAddressSuggestions([]);
+      } finally {
+        setIsSearchingAddresses(false);
       }
-    }, 500);
+    }, 300); // Reducido de 500ms a 300ms para mejor respuesta
 
     return () => {
       if (searchTimeoutRef.current) {
@@ -302,8 +309,12 @@ export const OfficeLocationMap = ({
             <div className={styles.inputContainer}>
               <Field label="Buscar dirección" hint="Escribe una dirección y selecciona de las sugerencias">
                 <Combobox
+                  freeform
                   value={addressSearch}
-                  onInput={(_, data) => setAddressSearch(data.inputValue)}
+                  onInput={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    setAddressSearch(target.value);
+                  }}
                   onOptionSelect={(_, data) => {
                     if (data.optionValue) {
                       const suggestion = addressSuggestions.find(s => s.displayName === data.optionValue);
@@ -312,13 +323,23 @@ export const OfficeLocationMap = ({
                       }
                     }
                   }}
-                  placeholder="Escribe una dirección..."
+                  placeholder="Escribe una dirección (mínimo 3 caracteres)..."
                 >
-                  {addressSuggestions.map((suggestion, index) => (
-                    <Option key={index} value={suggestion.displayName}>
-                      {suggestion.displayName}
+                  {isSearchingAddresses && addressSearch.trim().length >= 3 ? (
+                    <Option disabled value="loading">
+                      Buscando direcciones...
                     </Option>
-                  ))}
+                  ) : addressSuggestions.length > 0 ? (
+                    addressSuggestions.map((suggestion, index) => (
+                      <Option key={index} value={suggestion.displayName}>
+                        {suggestion.displayName}
+                      </Option>
+                    ))
+                  ) : addressSearch.trim().length >= 3 && !isSearchingAddresses ? (
+                    <Option disabled value="no-results">
+                      No se encontraron direcciones
+                    </Option>
+                  ) : null}
                 </Combobox>
               </Field>
 
