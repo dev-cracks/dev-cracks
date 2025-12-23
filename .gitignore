@@ -134,3 +134,9 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Apple Wallet certificates
+wallet-keys/
+*.pem
+*.p12
+*.cer

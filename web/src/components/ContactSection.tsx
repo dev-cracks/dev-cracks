@@ -1,4 +1,5 @@
 import { FormEvent } from 'react';
+import JSZip from 'jszip';
 import { useContactFormStore } from '../hooks/useContactFormStore';
 import { env } from '../config/env';
 
@@ -12,6 +13,178 @@ export const ContactSection = () => {
 
   const isSubmitting = status === 'loading';
   const isSuccess = status === 'success';
+
+  const downloadWalletCard = () => {
+    // Generar contenido vCard
+    const vCardContent = [
+      'BEGIN:VCARD',
+      'VERSION:3.0',
+      `FN:${env.contactRecipientName}`,
+      `ORG:Dev Cracks`,
+      `TEL;TYPE=CELL:+34647007280`,
+      `EMAIL:${env.contactRecipient}`,
+      `URL:https://www.dev-cracks.com`,
+      `NOTE:Desarrollo de software y soluciones tecnológicas`,
+      'END:VCARD'
+    ].join('\n');
+
+    // Crear blob y descargar
+    const blob = new Blob([vCardContent], { type: 'text/vcard;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'dev-cracks-contact.vcf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadWalletPass = async () => {
+    // Generar el JSON del pass para Apple Wallet / Google Wallet
+    const passJson = {
+      formatVersion: 1,
+      passTypeIdentifier: 'pass.com.devcracks.contact',
+      serialNumber: `dev-cracks-${Date.now()}`,
+      teamIdentifier: 'DEVCracks',
+      organizationName: 'Dev Cracks',
+      description: 'Tarjeta de presentación Dev Cracks',
+      logoText: 'Dev Cracks',
+      foregroundColor: 'rgb(88, 166, 255)',
+      backgroundColor: 'rgb(13, 17, 23)',
+      labelColor: 'rgb(200, 209, 217)',
+      generic: {
+        primaryFields: [
+          {
+            key: 'name',
+            label: 'Nombre',
+            value: env.contactRecipientName
+          }
+        ],
+        secondaryFields: [
+          {
+            key: 'phone',
+            label: 'Teléfono',
+            value: '+34 647 007 280'
+          },
+          {
+            key: 'email',
+            label: 'Email',
+            value: env.contactRecipient
+          }
+        ],
+        auxiliaryFields: [
+          {
+            key: 'website',
+            label: 'Web',
+            value: 'www.dev-cracks.com'
+          }
+        ],
+        backFields: [
+          {
+            key: 'description',
+            label: 'Descripción',
+            value: 'Desarrollo de software y soluciones tecnológicas'
+          },
+          {
+            key: 'contact',
+            label: 'Contacto',
+            value: `${env.contactRecipient}\n+34 647 007 280`
+          }
+        ]
+      },
+      barcodes: [
+        {
+          message: `https://www.dev-cracks.com`,
+          format: 'PKBarcodeFormatQR',
+          messageEncoding: 'iso-8859-1'
+        }
+      ]
+    };
+
+    // Crear el contenido del manifest (para .pkpass)
+    const manifestContent = JSON.stringify({
+      'pass.json': await sha256(JSON.stringify(passJson))
+    });
+
+    // Crear un ZIP con los archivos necesarios
+    const zip = new JSZip();
+    
+    // Agregar pass.json
+    zip.file('pass.json', JSON.stringify(passJson, null, 2));
+    
+    // Agregar manifest.json
+    zip.file('manifest.json', manifestContent);
+
+    // Generar el ZIP y descargar
+    const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'dev-cracks-wallet.pkpass';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadiPhoneWalletPass = async () => {
+    try {
+      // Llamar al endpoint del servidor para generar el pass firmado
+      const response = await fetch('/api/wallet-pass', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: env.contactRecipientName,
+          email: env.contactRecipient,
+          phone: '+34 647 007 280',
+          website: 'https://www.dev-cracks.com',
+          description: 'Desarrollo de software y soluciones tecnológicas'
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Error desconocido' }));
+        if (response.status === 503) {
+          alert('Los certificados de Apple Wallet no están configurados. Por favor, contacta al administrador para configurar los certificados necesarios.');
+        } else {
+          alert(`Error al generar el pass: ${errorData.message || 'Error desconocido'}`);
+        }
+        return;
+      }
+
+      // Obtener el blob del pass
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      
+      // Para iPhone, intentar abrir directamente en Wallet si es posible
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      
+      if (isIOS) {
+        // En iOS, abrir directamente
+        window.location.href = url;
+      } else {
+        // En otros dispositivos, descargar normalmente
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'dev-cracks-iphone.pkpass';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+      
+      // Limpiar después de un tiempo
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
+    } catch (error) {
+      console.error('Error generando pass para iPhone:', error);
+      alert('Error al generar el archivo. Por favor, intenta nuevamente.');
+    }
+  };
+
 
   return (
     <section id="contacto" className="contact">
@@ -93,6 +266,60 @@ export const ContactSection = () => {
                   </svg>
                 </span>
                 <span className="contact-info__text">WhatsApp</span>
+              </a>
+            </div>
+            <div className="contact-info__item">
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  downloadWalletCard();
+                }}
+                className="contact-info__link"
+              >
+                <span className="contact-info__icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4H4V6h16v2zm-1 8H5v-6h14v6z" fill="currentColor"/>
+                    <circle cx="8" cy="13" r="1.5" fill="currentColor"/>
+                    <path d="M11 12h5v1.5h-5V12z" fill="currentColor"/>
+                  </svg>
+                </span>
+                <span className="contact-info__text">Tarjeta de Presentación</span>
+              </a>
+            </div>
+            <div className="contact-info__item">
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  downloadWalletPass();
+                }}
+                className="contact-info__link"
+              >
+                <span className="contact-info__icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17 6h-2V4c0-1.1-.9-2-2-2H9c-1.1 0-2 .9-2 2v2H5c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM9 4h4v2H9V4zm9 14H6V9h12v9z" fill="currentColor"/>
+                    <path d="M8 11h8v2H8v-2zm0 4h5v2H8v-2z" fill="currentColor" opacity="0.6"/>
+                  </svg>
+                </span>
+                <span className="contact-info__text">Pase para Wallet</span>
+              </a>
+            </div>
+            <div className="contact-info__item">
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  downloadiPhoneWalletPass();
+                }}
+                className="contact-info__link"
+              >
+                <span className="contact-info__icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" fill="currentColor"/>
+                  </svg>
+                </span>
+                <span className="contact-info__text">Apple Wallet (iPhone)</span>
               </a>
             </div>
           </div>

@@ -3,13 +3,17 @@ import { createServer as createViteServer } from 'vite';
 import { createServer as createHttpServer } from 'http';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
+import { Template } from '@walletpass/pass-js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 async function createServer() {
   const app = express();
   const httpServer = createHttpServer(app);
+
+  // Middleware para parsear JSON
+  app.use(express.json());
 
   try {
     // Crear servidor Vite para la web principal con HMR habilitado
@@ -65,6 +69,102 @@ async function createServer() {
       } catch (e) {
         backofficeVite.ssrFixStacktrace(e);
         return next(e);
+      }
+    });
+
+    // Endpoint para generar Apple Wallet Pass
+    app.post('/api/wallet-pass', async (req, res) => {
+      try {
+        // Verificar si existen los certificados
+        const certPath = resolve(__dirname, 'wallet-keys', 'pass.pem');
+        if (!existsSync(certPath)) {
+          return res.status(503).json({
+            error: 'Wallet certificates not configured',
+            message: 'Los certificados de Apple Wallet no están configurados. Por favor, configura los certificados según las instrucciones en el README.'
+          });
+        }
+
+        const { name, email, phone, website, description } = req.body;
+
+        // Crear template
+        const template = new Template('storeCard', {
+          passTypeIdentifier: process.env.APPLE_PASS_TYPE_ID || 'pass.com.devcracks.contact',
+          teamIdentifier: process.env.APPLE_TEAM_ID || 'DEVCracks',
+          organizationName: 'Dev Cracks',
+          description: description || 'Tarjeta de presentación Dev Cracks',
+          logoText: 'Dev Cracks',
+          foregroundColor: 'rgb(88, 166, 255)',
+          backgroundColor: 'rgb(13, 17, 23)',
+          labelColor: 'rgb(200, 209, 217)'
+        });
+
+        // Cargar certificado
+        const certPassword = process.env.APPLE_CERT_PASSWORD || '';
+        await template.loadCertificate(certPath, certPassword);
+
+        // Crear pass desde template
+        const pass = template.createPass({
+          serialNumber: `dev-cracks-${Date.now()}`,
+          description: description || 'Tarjeta de presentación Dev Cracks'
+        });
+
+        // Agregar campos
+        pass.primaryFields.add({
+          key: 'name',
+          label: 'Nombre',
+          value: name || 'Dev Cracks'
+        });
+
+        pass.secondaryFields.add({
+          key: 'phone',
+          label: 'Teléfono',
+          value: phone || '+34 647 007 280'
+        });
+
+        pass.secondaryFields.add({
+          key: 'email',
+          label: 'Email',
+          value: email || 'connect@devcracks.com'
+        });
+
+        pass.auxiliaryFields.add({
+          key: 'website',
+          label: 'Web',
+          value: website || 'www.dev-cracks.com'
+        });
+
+        pass.backFields.add({
+          key: 'description',
+          label: 'Descripción',
+          value: description || 'Desarrollo de software y soluciones tecnológicas'
+        });
+
+        pass.backFields.add({
+          key: 'contact',
+          label: 'Contacto',
+          value: `${email || 'connect@devcracks.com'}\n${phone || '+34 647 007 280'}`
+        });
+
+        // Agregar código QR
+        pass.barcodes = [{
+          message: website || 'https://www.dev-cracks.com',
+          format: 'PKBarcodeFormatQR',
+          messageEncoding: 'iso-8859-1'
+        }];
+
+        // Generar el buffer del pass
+        const passBuffer = await pass.asBuffer();
+
+        // Enviar como respuesta
+        res.setHeader('Content-Type', 'application/vnd.apple.pkpass');
+        res.setHeader('Content-Disposition', 'attachment; filename="dev-cracks-wallet.pkpass"');
+        res.send(passBuffer);
+      } catch (error) {
+        console.error('Error generating wallet pass:', error);
+        res.status(500).json({
+          error: 'Error generating wallet pass',
+          message: error.message
+        });
       }
     });
 

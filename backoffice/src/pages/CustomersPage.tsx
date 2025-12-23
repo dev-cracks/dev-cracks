@@ -1303,40 +1303,121 @@ export const CustomersPage = () => {
             <div className={styles.treeCell} style={{ minWidth: '130px' }}>{node.phone || 'N/A'}</div>
             <div className={styles.treeCell} style={{ minWidth: '180px' }}>{node.email || 'N/A'}</div>
             <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '70px' }}>
-              <Button
-                appearance="subtle"
-                onClick={() => handleViewTenants(node)}
-                style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
-              >
-                <CounterBadge 
-                  count={node.tenantCount || 0} 
-                  size="medium" 
-                  appearance="filled" 
-                  color={(node.tenantCount || 0) === 0 ? 'informative' : 'brand'} 
-                />
-              </Button>
+              {(() => {
+                const tenantCount = node.tenantCount ?? 0;
+                
+                if (tenantCount === 0) {
+                  // Si no hay tenants, mostrar botón para crear
+                  return (
+                    <Button
+                      appearance="subtle"
+                      onClick={() => handleOpenCreateTenant(node)}
+                      style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
+                    >
+                      <Badge 
+                        size="medium" 
+                        appearance="filled" 
+                        color="informative"
+                        style={{ minWidth: '24px', display: 'inline-flex', justifyContent: 'center', alignItems: 'center' }}
+                      >
+                        0
+                      </Badge>
+                    </Button>
+                  );
+                }
+                
+                // Si hay tenants, mostrar botón para ver
+                return (
+                  <Button
+                    appearance="subtle"
+                    onClick={() => handleViewTenants(node)}
+                    style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
+                  >
+                    <CounterBadge 
+                      count={tenantCount} 
+                      size="medium" 
+                      appearance="filled" 
+                      color="brand"
+                    />
+                  </Button>
+                );
+              })()}
             </div>
             <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '70px' }}>
-              <Button
-                appearance="subtle"
-                onClick={() => handleViewOffices(node)}
-                style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
-              >
-                <CounterBadge 
-                  count={node.officeCount || 0} 
-                  size="medium" 
-                  appearance="filled" 
-                  color={(node.officeCount || 0) === 0 ? 'informative' : 'brand'} 
-                />
-              </Button>
+              {(() => {
+                const officeCount = node.officeCount ?? 0;
+                
+                if (officeCount === 0) {
+                  // Si no hay sedes, mostrar botón para crear
+                  return (
+                    <Button
+                      appearance="subtle"
+                      onClick={() => handleOpenCreateOffice(node)}
+                      style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
+                    >
+                      <Badge 
+                        size="medium" 
+                        appearance="filled" 
+                        color="informative"
+                        style={{ minWidth: '24px', display: 'inline-flex', justifyContent: 'center', alignItems: 'center' }}
+                      >
+                        0
+                      </Badge>
+                    </Button>
+                  );
+                }
+                
+                // Si hay sedes, mostrar botón para ver
+                return (
+                  <Button
+                    appearance="subtle"
+                    onClick={() => handleViewOffices(node)}
+                    style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
+                  >
+                    <CounterBadge 
+                      count={officeCount} 
+                      size="medium" 
+                      appearance="filled" 
+                      color="brand"
+                    />
+                  </Button>
+                );
+              })()}
             </div>
             <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '80px' }}>
-              <CounterBadge 
-                count={node.userCount || 0} 
-                size="medium" 
-                appearance="filled" 
-                color={(node.userCount || 0) === 0 ? 'informative' : 'brand'} 
-              />
+              {(() => {
+                const userCount = node.userCount ?? 0;
+                
+                if (userCount === 0) {
+                  // Si no hay usuarios, mostrar botón para crear
+                  return (
+                    <Button
+                      appearance="subtle"
+                      onClick={() => handleOpenCreateUser(node)}
+                      style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
+                    >
+                      <Badge 
+                        size="medium" 
+                        appearance="filled" 
+                        color="informative"
+                        style={{ minWidth: '24px', display: 'inline-flex', justifyContent: 'center', alignItems: 'center' }}
+                      >
+                        0
+                      </Badge>
+                    </Button>
+                  );
+                }
+                
+                // Si hay usuarios, mostrar CounterBadge
+                return (
+                  <CounterBadge 
+                    count={userCount} 
+                    size="medium" 
+                    appearance="filled" 
+                    color="brand"
+                  />
+                );
+              })()}
             </div>
             <div className={styles.treeCell} style={{ justifyContent: 'center', minWidth: '110px' }}>
               {node.isSuspended ? (
@@ -2263,13 +2344,33 @@ export const CustomersPage = () => {
     }
   };
 
-  const handleOpenCreateTenant = (customer: CustomerDto) => {
+  const handleOpenCreateTenant = async (customer: CustomerDto) => {
     setSelectedCustomer(customer);
     setCreateTenantError(null);
     setTenantFormData({
       name: '',
       customerId: customer.id,
     });
+    setSelectedTenantToAdd('');
+    
+    // Si el cliente no tiene tenants, cargar todos los tenants disponibles para asignar
+    const tenantCount = customer.tenantCount ?? 0;
+    if (tenantCount === 0) {
+      try {
+        setIsLoadingAllTenants(true);
+        const allTenants = await tenantService.getAllTenants();
+        // Filtrar tenants que no pertenecen al cliente
+        const availableTenants = allTenants.filter(
+          (tenant) => tenant.customerId !== customer.id
+        );
+        setAllTenantsForAssign(availableTenants);
+      } catch (err: any) {
+        console.error('[CustomersPage] Error cargando todos los tenants:', err);
+      } finally {
+        setIsLoadingAllTenants(false);
+      }
+    }
+    
     setIsCreateTenantDialogOpen(true);
   };
 
@@ -2423,6 +2524,37 @@ export const CustomersPage = () => {
       }
     } catch (err: any) {
       setCreateTenantError(err.message || 'Error al crear tenant');
+    } finally {
+      setIsCreatingTenant(false);
+    }
+  };
+
+  const handleAssignTenantFromDialog = async () => {
+    if (!selectedCustomer || !selectedTenantToAdd) {
+      setCreateTenantError('Debe seleccionar un tenant');
+      return;
+    }
+    
+    try {
+      setCreateTenantError(null);
+      setIsCreatingTenant(true);
+      // Obtener el nombre del tenant para asignarlo
+      const tenant = allTenantsForAssign.find(t => t.id === selectedTenantToAdd);
+      if (tenant) {
+        await tenantService.updateTenant(selectedTenantToAdd, {
+          name: tenant.name,
+          customerId: selectedCustomer.id,
+        });
+      }
+      setIsCreateTenantDialogOpen(false);
+      setSelectedTenantToAdd('');
+      setCreateTenantError(null);
+      await loadCustomers();
+      if (selectedView === 'flow') {
+        await loadFlowData();
+      }
+    } catch (err: any) {
+      setCreateTenantError(err.message || 'Error al asignar tenant');
     } finally {
       setIsCreatingTenant(false);
     }
@@ -3345,32 +3477,86 @@ export const CustomersPage = () => {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Button
-                          appearance="subtle"
-                          onClick={() => handleViewTenants(customer)}
-                          style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
-                        >
-                          <CounterBadge 
-                            count={customer.tenantCount || 0} 
-                            size="medium" 
-                            appearance="filled" 
-                            color={(customer.tenantCount || 0) === 0 ? 'informative' : 'brand'} 
-                          />
-                        </Button>
+                        {(() => {
+                          const tenantCount = customer.tenantCount ?? 0;
+                          
+                          if (tenantCount === 0) {
+                            // Si no hay tenants, mostrar botón para crear
+                            return (
+                              <Button
+                                appearance="subtle"
+                                onClick={() => handleOpenCreateTenant(customer)}
+                                style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
+                              >
+                                <Badge 
+                                  size="medium" 
+                                  appearance="filled" 
+                                  color="informative"
+                                  style={{ minWidth: '24px', display: 'inline-flex', justifyContent: 'center', alignItems: 'center' }}
+                                >
+                                  0
+                                </Badge>
+                              </Button>
+                            );
+                          }
+                          
+                          // Si hay tenants, mostrar botón para ver
+                          return (
+                            <Button
+                              appearance="subtle"
+                              onClick={() => handleViewTenants(customer)}
+                              style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
+                            >
+                              <CounterBadge 
+                                count={tenantCount} 
+                                size="medium" 
+                                appearance="filled" 
+                                color="brand"
+                              />
+                            </Button>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell>
-                        <Button
-                          appearance="subtle"
-                          onClick={() => handleViewOffices(customer)}
-                          style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
-                        >
-                          <CounterBadge 
-                            count={customer.officeCount || 0} 
-                            size="medium" 
-                            appearance="filled" 
-                            color={(customer.officeCount || 0) === 0 ? 'informative' : 'brand'} 
-                          />
-                        </Button>
+                        {(() => {
+                          const officeCount = customer.officeCount ?? 0;
+                          
+                          if (officeCount === 0) {
+                            // Si no hay sedes, mostrar botón para crear
+                            return (
+                              <Button
+                                appearance="subtle"
+                                onClick={() => handleOpenCreateOffice(customer)}
+                                style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
+                              >
+                                <Badge 
+                                  size="medium" 
+                                  appearance="filled" 
+                                  color="informative"
+                                  style={{ minWidth: '24px', display: 'inline-flex', justifyContent: 'center', alignItems: 'center' }}
+                                >
+                                  0
+                                </Badge>
+                              </Button>
+                            );
+                          }
+                          
+                          // Si hay sedes, mostrar botón para ver
+                          return (
+                            <Button
+                              appearance="subtle"
+                              onClick={() => handleViewOffices(customer)}
+                              style={{ cursor: 'pointer', padding: 0, minWidth: 'auto', height: 'auto' }}
+                            >
+                              <CounterBadge 
+                                count={officeCount} 
+                                size="medium" 
+                                appearance="filled" 
+                                color="brand"
+                              />
+                            </Button>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell>
                         {(() => {
@@ -5899,7 +6085,10 @@ export const CustomersPage = () => {
             if (isCreatingTenant) {
               return;
             }
-            const hasData = tenantFormData.name.trim();
+            const tenantCount = selectedCustomer?.tenantCount ?? 0;
+            const hasData = tenantCount === 0 
+              ? selectedTenantToAdd.trim() 
+              : tenantFormData.name.trim();
             if (hasData) {
               if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
                 setIsCreateTenantDialogOpen(false);
@@ -5907,11 +6096,13 @@ export const CustomersPage = () => {
                   name: '',
                   customerId: '',
                 });
+                setSelectedTenantToAdd('');
                 setCreateTenantError(null);
               }
               return;
             } else {
               setIsCreateTenantDialogOpen(false);
+              setSelectedTenantToAdd('');
               setCreateTenantError(null);
             }
           } else {
@@ -5930,7 +6121,10 @@ export const CustomersPage = () => {
                   if (isCreatingTenant) {
                     return;
                   }
-                  const hasData = tenantFormData.name.trim();
+                  const tenantCount = selectedCustomer?.tenantCount ?? 0;
+                  const hasData = tenantCount === 0 
+                    ? selectedTenantToAdd.trim() 
+                    : tenantFormData.name.trim();
                   if (hasData) {
                     if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
                       setIsCreateTenantDialogOpen(false);
@@ -5938,17 +6132,22 @@ export const CustomersPage = () => {
                         name: '',
                         customerId: '',
                       });
+                      setSelectedTenantToAdd('');
                       setCreateTenantError(null);
                     }
                   } else {
                     setIsCreateTenantDialogOpen(false);
+                    setSelectedTenantToAdd('');
                     setCreateTenantError(null);
                   }
                 }}
               />
             }
           >
-            Nuevo Tenant
+            {(() => {
+              const tenantCount = selectedCustomer?.tenantCount ?? 0;
+              return tenantCount === 0 ? 'Asignar Tenant' : 'Nuevo Tenant';
+            })()}
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
@@ -5963,13 +6162,61 @@ export const CustomersPage = () => {
                     readOnly
                   />
                 </Field>
-                <Field label="Nombre" required className={styles.formField}>
-                  <Input
-                    value={tenantFormData.name}
-                    onChange={(e) => setTenantFormData({ ...tenantFormData, name: e.target.value })}
-                    placeholder="Nombre del tenant"
-                  />
-                </Field>
+                {(() => {
+                  const tenantCount = selectedCustomer?.tenantCount ?? 0;
+                  
+                  // Si el cliente no tiene tenants, mostrar Combobox para asignar uno existente
+                  if (tenantCount === 0) {
+                    return (
+                      <Field label="Seleccionar Tenant" required className={styles.formField}>
+                        {isLoadingAllTenants ? (
+                          <Spinner size="small" label="Cargando tenants..." />
+                        ) : (
+                          <Combobox
+                            value={selectedTenantToAdd
+                              ? allTenantsForAssign.find((t) => t.id === selectedTenantToAdd)?.name || ''
+                              : ''}
+                            onOptionSelect={(_, data) => {
+                              if (data.optionValue) {
+                                const tenant = allTenantsForAssign.find((t) => t.name === data.optionValue);
+                                if (tenant) {
+                                  setSelectedTenantToAdd(tenant.id);
+                                }
+                              } else {
+                                setSelectedTenantToAdd('');
+                              }
+                            }}
+                            placeholder="Seleccione un tenant"
+                          >
+                            {allTenantsForAssign.map((tenant) => (
+                              <Option key={tenant.id} value={tenant.name}>
+                                {tenant.name}
+                              </Option>
+                            ))}
+                          </Combobox>
+                        )}
+                        {allTenantsForAssign.length === 0 && !isLoadingAllTenants && (
+                          <MessageBar intent="informative" style={{ marginTop: tokens.spacingVerticalS }}>
+                            <MessageBarBody>
+                              No hay tenants disponibles para asignar. Todos los tenants existentes ya están asignados a otros clientes.
+                            </MessageBarBody>
+                          </MessageBar>
+                        )}
+                      </Field>
+                    );
+                  }
+                  
+                  // Si el cliente ya tiene tenants, mostrar Input para crear uno nuevo
+                  return (
+                    <Field label="Nombre" required className={styles.formField}>
+                      <Input
+                        value={tenantFormData.name}
+                        onChange={(e) => setTenantFormData({ ...tenantFormData, name: e.target.value })}
+                        placeholder="Nombre del tenant"
+                      />
+                    </Field>
+                  );
+                })()}
                 {createTenantError && (
                   <MessageBar intent="error" style={{ marginTop: tokens.spacingVerticalXL, marginBottom: tokens.spacingVerticalM }}>
                     <MessageBarBody>{createTenantError}</MessageBarBody>
@@ -5979,7 +6226,10 @@ export const CustomersPage = () => {
                   <Button 
                     appearance="secondary" 
                     onClick={() => {
-                      const hasData = tenantFormData.name.trim();
+                      const tenantCount = selectedCustomer?.tenantCount ?? 0;
+                      const hasData = tenantCount === 0 
+                        ? selectedTenantToAdd.trim() 
+                        : tenantFormData.name.trim();
                       if (hasData) {
                         if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los datos no guardados.')) {
                           setIsCreateTenantDialogOpen(false);
@@ -5987,10 +6237,12 @@ export const CustomersPage = () => {
                             name: '',
                             customerId: '',
                           });
+                          setSelectedTenantToAdd('');
                           setCreateTenantError(null);
                         }
                       } else {
                         setIsCreateTenantDialogOpen(false);
+                        setSelectedTenantToAdd('');
                         setCreateTenantError(null);
                       }
                     }}
@@ -5998,9 +6250,31 @@ export const CustomersPage = () => {
                   >
                     Cancelar
                   </Button>
-                  <Button appearance="primary" onClick={handleCreateTenant} disabled={isCreatingTenant} loading={isCreatingTenant}>
-                    {isCreatingTenant ? 'Creando...' : 'Crear'}
-                  </Button>
+                  {(() => {
+                    const tenantCount = selectedCustomer?.tenantCount ?? 0;
+                    if (tenantCount === 0) {
+                      return (
+                        <Button 
+                          appearance="primary" 
+                          onClick={handleAssignTenantFromDialog} 
+                          disabled={isCreatingTenant || !selectedTenantToAdd || isLoadingAllTenants || allTenantsForAssign.length === 0} 
+                          loading={isCreatingTenant}
+                        >
+                          {isCreatingTenant ? 'Asignando...' : 'Asignar'}
+                        </Button>
+                      );
+                    }
+                    return (
+                      <Button 
+                        appearance="primary" 
+                        onClick={handleCreateTenant} 
+                        disabled={isCreatingTenant} 
+                        loading={isCreatingTenant}
+                      >
+                        {isCreatingTenant ? 'Creando...' : 'Crear'}
+                      </Button>
+                    );
+                  })()}
                 </div>
               </>
             )}
