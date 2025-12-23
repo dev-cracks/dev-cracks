@@ -12,9 +12,9 @@ const apiBaseUrl = (() => {
 
     const mappedOrigin =
       {
-        'https://www.dev-cracks.com': 'https://dev-cracks.onrender.com',
-        'https://dev-cracks.com': 'https://dev-cracks.onrender.com',
-        'https://dev-cracks.onrender.com': 'https://dev-cracks.onrender.com'
+        'https://www.dev-cracks.com': 'https://api.fractalize.dev-cracks.com',
+        'https://dev-cracks.com': 'https://api.fractalize.dev-cracks.com',
+        'https://dev-cracks.onrender.com': 'https://api.fractalize.dev-cracks.com'
       }[origin];
 
     if (mappedOrigin) {
