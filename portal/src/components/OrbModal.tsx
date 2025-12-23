@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import TextType from './TextType';
 import Orb from './Orb';
 import { useAuth } from '../hooks/useAuth';
@@ -23,8 +23,11 @@ const OrbModal: React.FC<OrbModal.Props> = ({ isOpen, onClose }) => {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [hasSentInitialMessage, setHasSentInitialMessage] = useState(false);
+  const [orbHoverIntensity, setOrbHoverIntensity] = useState(0.3);
+  const [orbForceHover, setOrbForceHover] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const thinkingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const { user } = useAuth();
 
   // Auto-scroll al último mensaje
@@ -55,6 +58,52 @@ const OrbModal: React.FC<OrbModal.Props> = ({ isOpen, onClose }) => {
     }
   }, [isOpen, hasSentInitialMessage, messages.length, user?.nickname, user?.name]);
 
+  // Efecto para animar el Orb cuando está pensando
+  useEffect(() => {
+    if (isTyping) {
+      // Limpiar intervalo anterior si existe
+      if (thinkingIntervalRef.current) {
+        clearTimeout(thinkingIntervalRef.current);
+      }
+
+      // Activar forceHoverState cuando empieza a pensar
+      setOrbForceHover(true);
+
+      // Función para generar intervalo irregular
+      const updateOrbState = () => {
+        // Alternar hoverIntensity entre diferentes valores de manera más suave (0.5 a 0.7)
+        // Rango más pequeño y valores más estables para evitar cambios bruscos
+        const intensities = [0.5, 0.55, 0.6, 0.65, 0.7];
+        const randomIntensity = intensities[Math.floor(Math.random() * intensities.length)];
+        setOrbHoverIntensity(randomIntensity);
+
+        // Intervalo irregular entre 300ms y 500ms (más lento para evitar parpadeos)
+        const nextInterval = Math.random() * 200 + 300;
+        
+        thinkingIntervalRef.current = setTimeout(updateOrbState, nextInterval);
+      };
+
+      // Iniciar la animación
+      updateOrbState();
+    } else {
+      // Volver a la normalidad cuando no está pensando
+      if (thinkingIntervalRef.current) {
+        clearTimeout(thinkingIntervalRef.current);
+        thinkingIntervalRef.current = null;
+      }
+      setOrbHoverIntensity(0.3);
+      setOrbForceHover(false);
+    }
+
+    // Cleanup
+    return () => {
+      if (thinkingIntervalRef.current) {
+        clearTimeout(thinkingIntervalRef.current);
+        thinkingIntervalRef.current = null;
+      }
+    };
+  }, [isTyping]);
+
   // Resetear cuando se cierra el modal
   useEffect(() => {
     if (!isOpen) {
@@ -62,6 +111,12 @@ const OrbModal: React.FC<OrbModal.Props> = ({ isOpen, onClose }) => {
       setMessages([]);
       setInputValue('');
       setIsTyping(false);
+      setOrbHoverIntensity(0.3);
+      setOrbForceHover(false);
+      if (thinkingIntervalRef.current) {
+        clearTimeout(thinkingIntervalRef.current);
+        thinkingIntervalRef.current = null;
+      }
     }
   }, [isOpen]);
 
@@ -157,10 +212,10 @@ const OrbModal: React.FC<OrbModal.Props> = ({ isOpen, onClose }) => {
         {/* Orb de fondo */}
         <div className="orb-modal-orb-background">
           <Orb
-            hoverIntensity={0.3}
+            hoverIntensity={orbHoverIntensity}
             rotateOnHover={true}
             hue={0}
-            forceHoverState={false}
+            forceHoverState={orbForceHover}
             backgroundColor="#060010"
           />
         </div>
