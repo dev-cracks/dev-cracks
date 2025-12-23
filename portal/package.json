@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.11.0",
+    "dev-cracks": "file:..",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.10.1",
@@ -24,4 +25,3 @@
     "vite": "^5.0.0"
   }
 }
-

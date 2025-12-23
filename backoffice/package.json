@@ -15,6 +15,7 @@
     "@types/dagre": "^0.7.53",
     "@xyflow/react": "^12.10.0",
     "dagre": "^0.8.5",
+    "dev-cracks": "file:..",
     "leaflet": "^1.9.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
