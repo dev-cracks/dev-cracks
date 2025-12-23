@@ -33,13 +33,14 @@ const HomePage = () => (
 
 const AppContent = () => {
   const location = useLocation();
-  const showVideoBackground = location.pathname !== '/';
+  // Mostrar VideoBackground en todas las rutas excepto account
+  const showVideoBackground = location.pathname !== '/account';
 
   return (
     <>
       {showVideoBackground && <VideoBackground />}
       <Routes>
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/servicios" element={<ServicesPage />} />
         <Route path="/account" element={<AccountPage />} />
@@ -49,7 +50,7 @@ const AppContent = () => {
 };
 
 const App = () => (
-  <BrowserRouter>
+  <BrowserRouter basename="/landing">
     <AppContent />
   </BrowserRouter>
 );

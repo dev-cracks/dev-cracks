@@ -10,12 +10,12 @@ $connections = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContin
 if ($connections) {
     $pids = $connections | Select-Object -Unique -ExpandProperty OwningProcess
     
-    foreach ($pid in $pids) {
-        if ($pid) {
-            Write-Host "`nProceso encontrado: PID $pid" -ForegroundColor Green
+    foreach ($processId in $pids) {
+        if ($processId) {
+            Write-Host "`nProceso encontrado: PID $processId" -ForegroundColor Green
             
             # Obtener información del proceso
-            $process = Get-Process -Id $pid -ErrorAction SilentlyContinue
+            $process = Get-Process -Id $processId -ErrorAction SilentlyContinue
             if ($process) {
                 Write-Host "Nombre del proceso: $($process.ProcessName)" -ForegroundColor Cyan
                 if ($process.Path) {
@@ -25,11 +25,11 @@ if ($connections) {
             
             # Terminar el proceso
             try {
-                Stop-Process -Id $pid -Force
-                Write-Host "Proceso $pid terminado exitosamente" -ForegroundColor Green
+                Stop-Process -Id $processId -Force
+                Write-Host "Proceso $processId terminado exitosamente" -ForegroundColor Green
             }
             catch {
-                Write-Host "Error al terminar el proceso $pid : $_" -ForegroundColor Red
+                Write-Host "Error al terminar el proceso $processId : $_" -ForegroundColor Red
             }
         }
     }
