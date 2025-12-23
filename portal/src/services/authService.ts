@@ -4,6 +4,7 @@ export interface User {
   id: string;
   email: string;
   name: string | null;
+  nickname: string | null;
   picture?: string;
   sub: string;
 }
@@ -16,6 +17,7 @@ export const mapAuth0User = (auth0User: Auth0User | undefined): User | null => {
     sub: auth0User.sub,
     email: auth0User.email || '',
     name: auth0User.name || auth0User.nickname || null,
+    nickname: auth0User.nickname || null,
     picture: auth0User.picture
   };
 };
