@@ -52,7 +52,7 @@ export const Header = () => {
       <div className="container header__inner">
         <Link to="/home" className="logo" style={{ textDecoration: 'none', color: 'inherit' }} onClick={() => setIsMenuOpen(false)}>
           <div className="logo__svg">
-            <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="600" height="120" viewBox="0 0 600 120" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="crackGradientHeader" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="#FF0080" />
@@ -62,17 +62,14 @@ export const Header = () => {
                   <feGaussianBlur stdDeviation="5" />
                 </filter>
               </defs>
-              <g transform="translate(106, 120)">
+              <g transform="translate(20, 10) scale(0.5)">
                 <path d="M60 40 L10 100 L60 160" stroke="url(#crackGradientHeader)" strokeWidth="25" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M240 40 L290 100 L240 160" stroke="url(#crackGradientHeader)" strokeWidth="25" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M180 10 L120 110 L170 110 L110 210" stroke="white" strokeWidth="20" strokeLinecap="round" strokeLinejoin="round" filter="url(#glowHeader)" />
                 <path d="M180 10 L120 110 L170 110 L110 210" stroke="white" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
               </g>
-              <text x="256" y="400" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="58" fill="white" letterSpacing="-2">
+              <text x="190" y="82" textAnchor="start" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="52" fill="white" letterSpacing="-2">
                 DEV<tspan fill="url(#crackGradientHeader)">CRACKS</tspan>
-              </text>
-              <text x="256" y="440" textAnchor="middle" fontFamily="Courier New, monospace" fontWeight="bold" fontSize="20" fill="#888" letterSpacing="5">
-                CODE // BREAKER
               </text>
             </svg>
           </div>
