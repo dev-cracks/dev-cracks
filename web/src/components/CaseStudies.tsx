@@ -65,6 +65,32 @@ const caseStudies: CaseStudy[] = [
       { label: 'Productividad', value: '+38%', improvement: 'Aumento' }
     ],
     icon: '🏭'
+  },
+  {
+    industry: 'E-commerce',
+    title: 'Personalización y Recomendaciones con IA',
+    challenge: 'Bajas tasas de conversión, carritos abandonados frecuentes y falta de personalización en la experiencia del cliente.',
+    solution: 'Sistema de recomendaciones con ML, personalización dinámica de contenido y optimización de precios en tiempo real.',
+    metrics: [
+      { label: 'Tasa de Conversión', value: '+52%', improvement: 'Aumento' },
+      { label: 'Carritos Abandonados', value: '-38%', improvement: 'Reducción' },
+      { label: 'Valor Promedio Pedido', value: '+28%', improvement: 'Aumento' },
+      { label: 'ROI', value: '320%', improvement: 'Primer año' }
+    ],
+    icon: '🛍️'
+  },
+  {
+    industry: 'Healthcare',
+    title: 'Optimización de Recursos Hospitalarios',
+    challenge: 'Ineficiencia en asignación de recursos, tiempos de espera prolongados y dificultad para predecir demanda de servicios.',
+    solution: 'Sistema de ML para predicción de demanda, optimización de agendas y asignación inteligente de recursos médicos.',
+    metrics: [
+      { label: 'Tiempos de Espera', value: '-45%', improvement: 'Reducción' },
+      { label: 'Utilización de Recursos', value: '+35%', improvement: 'Aumento' },
+      { label: 'Satisfacción Paciente', value: '+48%', improvement: 'Aumento' },
+      { label: 'Costos Operativos', value: '-30%', improvement: 'Reducción' }
+    ],
+    icon: '🏥'
   }
 ];
 
