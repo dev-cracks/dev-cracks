@@ -60,13 +60,20 @@
 }
 
 .ghost-cursor-page__logo {
-  height: 120px;
-  width: auto;
-  object-fit: contain;
+  height: 300px;
+  width: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   filter: drop-shadow(0 0 20px rgba(177, 158, 239, 0.5));
   transition: filter 0.3s ease;
   position: relative;
   z-index: 2;
+}
+
+.ghost-cursor-page__logo svg {
+  width: 100%;
+  height: 100%;
 }
 
 .ghost-cursor-page__logo-container:hover .ghost-cursor-page__logo {
@@ -177,7 +184,8 @@
   }
 
   .ghost-cursor-page__logo {
-    height: 80px;
+    height: 200px;
+    width: 200px;
   }
 
   .ghost-cursor-page__title {

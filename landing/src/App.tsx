@@ -13,7 +13,6 @@ import { Footer } from './components/Footer';
 import { VideoBackground } from './components/VideoBackground';
 import SplashCursor from './components/SplashCursor';
 import { ServicesPage } from './pages/ServicesPage';
-import { LandingPage } from './pages/LandingPage';
 
 const HomePage = () => (
   <>
