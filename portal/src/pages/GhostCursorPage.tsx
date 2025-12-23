@@ -108,16 +108,56 @@ export const GhostCursorPage = () => {
       )}
       
       <div className="ghost-cursor-page__content">
-        <div 
-          className="ghost-cursor-page__logo-container"
-          onClick={handleLogoClick}
-        >
-          <img 
-            src="/dev-cracks-logo.jpg" 
-            alt="Dev Cracks Logo" 
-            className="ghost-cursor-page__logo"
-          />
-          <h1 className="ghost-cursor-page__title">DEV CRACKS</h1>
+        <div className="ghost-cursor-page__logos-wrapper">
+          <div 
+            className="ghost-cursor-page__logo-container"
+            onClick={handleLogoClick}
+          >
+            <img 
+              src="/dev-cracks-logo.jpg" 
+              alt="Dev Cracks Logo" 
+              className="ghost-cursor-page__logo"
+            />
+            <h1 className="ghost-cursor-page__title">DEV CRACKS</h1>
+          </div>
+
+          <div className="ghost-cursor-page__fractalize-logo">
+            <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="fractalGradient" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#00E5FF" />
+                  <stop offset="50%" stopColor="#2979FF" />
+                  <stop offset="100%" stopColor="#D500F9" />
+                </linearGradient>
+                <linearGradient id="textGradient" x1="0" y1="0" x2="100%" y2="0">
+                  <stop offset="0%" stopColor="#00E5FF" />
+                  <stop offset="100%" stopColor="#D500F9" />
+                </linearGradient>
+              </defs>
+              <g transform="translate(130, 80) scale(1.2)">
+                <path d="M0 0 L100 0 L50 50 Z" fill="url(#fractalGradient)" opacity="0.9"/>
+                <path d="M0 0 L50 50 L0 100 Z" fill="url(#fractalGradient)" opacity="0.8"/>
+                <path d="M50 50 L100 0 L100 100 Z" fill="url(#fractalGradient)" opacity="0.6"/>
+                <path d="M0 100 L100 100 L50 150 Z" fill="url(#fractalGradient)" opacity="0.9"/>
+                <path d="M0 100 L50 150 L0 200 Z" fill="url(#fractalGradient)" opacity="0.7"/>
+                <path d="M50 150 L100 100 L100 200 Z" fill="url(#fractalGradient)" opacity="0.5"/>
+                <path d="M100 0 L200 0 L150 50 Z" fill="url(#fractalGradient)" opacity="0.85"/>
+                <path d="M100 0 L150 50 L100 50 Z" fill="url(#fractalGradient)" opacity="0.6"/>
+                <path d="M100 100 L180 100 L140 140 Z" fill="url(#fractalGradient)" opacity="0.8"/>
+                <path d="M100 100 L140 140 L100 150 Z" fill="url(#fractalGradient)" opacity="0.6"/>
+                <circle cx="50" cy="50" r="3" fill="white" opacity="0.6"/>
+                <circle cx="100" cy="100" r="3" fill="white" opacity="0.6"/>
+                <circle cx="150" cy="50" r="3" fill="white" opacity="0.6"/>
+                <circle cx="50" cy="150" r="3" fill="white" opacity="0.6"/>
+              </g>
+              <text x="256" y="420" textAnchor="middle" fontFamily="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" fontWeight="800" fontSize="64" fill="url(#textGradient)" letterSpacing="4">
+                FRACTALIZE
+              </text>
+              <text x="256" y="460" textAnchor="middle" fontFamily="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" fontWeight="400" fontSize="24" fill="#666" letterSpacing="2">
+                MODULAR SOFTWARE SOLUTIONS
+              </text>
+            </svg>
+          </div>
         </div>
 
         <nav className="ghost-cursor-page__nav">
