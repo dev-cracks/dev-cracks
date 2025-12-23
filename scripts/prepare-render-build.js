@@ -8,6 +8,20 @@ const rootDir = resolve(__dirname, '..');
 // Directorio de salida para Render (usar dist que es el default)
 const renderDistDir = resolve(rootDir, 'dist');
 
+// Copiar archivos de la landing a /landing dentro de dist
+const landingDistDir = resolve(rootDir, 'dist-landing');
+if (existsSync(landingDistDir)) {
+  console.log('📦 Copiando archivos de la landing a dist/landing...');
+  const landingTargetDir = resolve(renderDistDir, 'landing');
+  if (!existsSync(landingTargetDir)) {
+    mkdirSync(landingTargetDir, { recursive: true });
+  }
+  cpSync(landingDistDir, landingTargetDir, { recursive: true });
+  console.log('✅ Landing copiado correctamente');
+} else {
+  console.warn('⚠️  dist-landing no existe. Asegúrate de ejecutar npm run build:landing primero.');
+}
+
 // Copiar archivos del portal a /portal dentro de dist
 const portalDistDir = resolve(rootDir, 'dist-portal');
 if (existsSync(portalDistDir)) {

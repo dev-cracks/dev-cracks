@@ -25,8 +25,8 @@ export const Header = () => {
     setIsMenuOpen(false);
     
     // If we're on the services page, navigate to home first
-    if (location.pathname !== '/') {
-      navigate('/');
+    if (location.pathname !== '/home') {
+      navigate('/home');
       // Wait for navigation to complete before scrolling
       setTimeout(() => {
         const element = document.getElementById(id);
@@ -50,7 +50,7 @@ export const Header = () => {
   return (
     <header className="header">
       <div className="container header__inner">
-        <Link to="/" className="logo" style={{ textDecoration: 'none', color: 'inherit' }} onClick={() => setIsMenuOpen(false)}>
+        <Link to="/home" className="logo" style={{ textDecoration: 'none', color: 'inherit' }} onClick={() => setIsMenuOpen(false)}>
           <img src="/dev-cracks-logo.jpg" alt="Logo de Dev Cracks" />
           <h1>DEV CRACKS</h1>
         </Link>

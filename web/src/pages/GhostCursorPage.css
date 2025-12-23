@@ -1,0 +1,12 @@
+.ghost-cursor-page {
+  transition: opacity 0.3s ease;
+}
+
+.ghost-cursor-page--active {
+  opacity: 1;
+}
+
+.ghost-cursor-page--inactive {
+  opacity: 0.5;
+}
+

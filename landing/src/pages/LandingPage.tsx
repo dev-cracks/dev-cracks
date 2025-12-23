@@ -12,7 +12,7 @@ export const LandingPage = () => {
     setGhostActive(false);
     // Pequeño delay para que se vea la transición
     setTimeout(() => {
-      navigate('/dashboard');
+      window.location.href = '/landing';
     }, 300);
   };
 
