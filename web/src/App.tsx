@@ -7,6 +7,7 @@ import { CaseStudies } from './components/CaseStudies';
 import { WhyUs } from './components/WhyUs';
 import { HotmartPromo } from './components/HotmartPromo';
 import { ContactSection } from './components/ContactSection';
+import { LogoLoop } from './components/LogoLoop';
 import { Footer } from './components/Footer';
 import { VideoBackground } from './components/VideoBackground';
 import { ServicesPage } from './pages/ServicesPage';
@@ -23,6 +24,7 @@ const HomePage = () => (
       <WhyUs />
       <HotmartPromo />
       <ContactSection />
+      <LogoLoop />
     </main>
     <Footer />
   </>

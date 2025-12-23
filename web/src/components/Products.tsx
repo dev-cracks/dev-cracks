@@ -15,7 +15,7 @@ const products: Product[] = [
   {
     name: 'Routeon Enterprise',
     tagline: 'Gestión Centralizada de Franquicias de Paquetería',
-    description: 'Plataforma SaaS para operación, visibilidad en tiempo real y optimización logística de redes de franquicias de paquetería (MRW y similares).',
+    description: 'Plataforma SaaS para operación, visibilidad en tiempo real y optimización logística de redes de franquicias de paquetería.',
     benefits: [
       'Reducción de errores operativos mediante automatización inteligente',
       'Predicción de demanda mediante Machine Learning',
