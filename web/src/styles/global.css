@@ -157,6 +157,7 @@ main {
 
 .header__nav {
   display: flex;
+  align-items: center;
 }
 
 .header__nav ul {
@@ -165,6 +166,12 @@ main {
   margin: 0;
   padding: 0;
   gap: 30px;
+  align-items: center;
+}
+
+.header__nav li {
+  display: flex;
+  align-items: center;
 }
 
 .header__nav a {
@@ -173,6 +180,9 @@ main {
   font-weight: 700;
   font-size: 1.1rem;
   transition: color 0.3s ease, transform 0.3s ease;
+  display: flex;
+  align-items: center;
+  line-height: 1;
 }
 
 .header__nav a:hover {
