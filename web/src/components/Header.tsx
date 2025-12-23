@@ -6,7 +6,9 @@ import { UserMenu } from './UserMenu';
 const navigation = [
   { href: '#inicio', label: 'Inicio', id: 'inicio' },
   { href: '#servicios', label: 'Servicios', id: 'servicios' },
-  { href: '#nosotros', label: 'Nosotros', id: 'nosotros' },
+  { href: '#productos', label: 'Productos', id: 'productos' },
+  { href: '#casos-uso', label: 'Casos de Uso', id: 'casos-uso' },
+  { href: '#nosotros', label: 'Por Qué Elegirnos', id: 'nosotros' },
   { href: '#contacto', label: 'Contacto', id: 'contacto' }
 ];
 

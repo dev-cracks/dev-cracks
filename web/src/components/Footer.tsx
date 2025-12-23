@@ -40,11 +40,107 @@ const HotmartIcon = () => (
   </svg>
 );
 
-export const Footer = () => (
-  <footer className="footer">
-    <div className="container">
-      <p>&copy; {new Date().getFullYear()} Dev Cracks. Todos los derechos reservados.</p>
-      <div className="social-links">
+export const Footer = () => {
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  return (
+    <footer className="footer">
+      <div className="container">
+        <div className="footer__content">
+          <div className="footer__section">
+            <h3 className="footer__title">Productos</h3>
+            <ul className="footer__links">
+              <li>
+                <a href="#productos" onClick={(e) => { e.preventDefault(); scrollToSection('productos'); }}>
+                  Routeon Enterprise
+                </a>
+              </li>
+              <li>
+                <a href="#productos" onClick={(e) => { e.preventDefault(); scrollToSection('productos'); }}>
+                  Dev-Coach Pro
+                </a>
+              </li>
+              <li>
+                <a href="https://discord.gg/9eaBf5qR" target="_blank" rel="noreferrer">
+                  DEV Community
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div className="footer__section">
+            <h3 className="footer__title">Servicios</h3>
+            <ul className="footer__links">
+              <li>
+                <a href="#servicios" onClick={(e) => { e.preventDefault(); scrollToSection('servicios'); }}>
+                  Consultoría Estratégica
+                </a>
+              </li>
+              <li>
+                <a href="#servicios" onClick={(e) => { e.preventDefault(); scrollToSection('servicios'); }}>
+                  Desarrollo a Medida
+                </a>
+              </li>
+              <li>
+                <a href="#servicios" onClick={(e) => { e.preventDefault(); scrollToSection('servicios'); }}>
+                  Data Engineering & ML
+                </a>
+              </li>
+              <li>
+                <a href="#servicios" onClick={(e) => { e.preventDefault(); scrollToSection('servicios'); }}>
+                  Automatización Inteligente
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div className="footer__section">
+            <h3 className="footer__title">Recursos</h3>
+            <ul className="footer__links">
+              <li>
+                <a href="#casos-uso" onClick={(e) => { e.preventDefault(); scrollToSection('casos-uso'); }}>
+                  Casos de Uso
+                </a>
+              </li>
+              <li>
+                <a href="#nosotros" onClick={(e) => { e.preventDefault(); scrollToSection('nosotros'); }}>
+                  Por Qué Elegirnos
+                </a>
+              </li>
+              <li>
+                <a href="https://go.hotmart.com/N102925507I" target="_blank" rel="noreferrer">
+                  Curso de IA
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div className="footer__section">
+            <h3 className="footer__title">Contacto</h3>
+            <ul className="footer__links">
+              <li>
+                <a href="#contacto" onClick={(e) => { e.preventDefault(); scrollToSection('contacto'); }}>
+                  Solicitar Consultoría
+                </a>
+              </li>
+              <li>
+                <a href="mailto:contacto@dev-cracks.com">contacto@dev-cracks.com</a>
+              </li>
+              <li>
+                <a href="tel:+34647007280">+34 647 007 280</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="footer__bottom">
+          <p>&copy; {new Date().getFullYear()} Dev-Cracks. Todos los derechos reservados.</p>
+          <div className="social-links">
         <a href="https://www.youtube.com/@Dev-Cracks" target="_blank" rel="noreferrer" aria-label="YouTube">
           <YouTubeIcon />
         </a>
@@ -66,7 +162,9 @@ export const Footer = () => (
         <a href="https://discord.gg/9eaBf5qR" target="_blank" rel="noreferrer" aria-label="Discord">
           <DiscordIcon />
         </a>
+          </div>
+        </div>
       </div>
-    </div>
-  </footer>
-);
+    </footer>
+  );
+};

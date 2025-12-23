@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { Services } from './components/Services';
+import { Products } from './components/Products';
+import { CaseStudies } from './components/CaseStudies';
 import { WhyUs } from './components/WhyUs';
 import { HotmartPromo } from './components/HotmartPromo';
 import { ContactSection } from './components/ContactSection';
@@ -16,6 +18,8 @@ const HomePage = () => (
     <main>
       <Hero />
       <Services />
+      <Products />
+      <CaseStudies />
       <WhyUs />
       <HotmartPromo />
       <ContactSection />

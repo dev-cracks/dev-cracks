@@ -6,10 +6,13 @@ type ContactStatus = 'idle' | 'loading' | 'success' | 'error';
 interface ContactFormState {
   name: string;
   email: string;
+  company: string;
+  position: string;
+  consultationType: string;
   message: string;
   status: ContactStatus;
   error?: string;
-  setField: (field: 'name' | 'email' | 'message', value: string) => void;
+  setField: (field: 'name' | 'email' | 'company' | 'position' | 'consultationType' | 'message', value: string) => void;
   submit: () => Promise<void>;
   reset: () => void;
 }
@@ -17,6 +20,9 @@ interface ContactFormState {
 export const useContactFormStore = create<ContactFormState>((set, get) => ({
   name: '',
   email: '',
+  company: '',
+  position: '',
+  consultationType: '',
   message: '',
   status: 'idle',
   error: undefined,
@@ -38,6 +44,9 @@ export const useContactFormStore = create<ContactFormState>((set, get) => ({
     set({
       name: '',
       email: '',
+      company: '',
+      position: '',
+      consultationType: '',
       message: '',
       status: 'idle',
       error: undefined
@@ -48,7 +57,7 @@ export const useContactFormStore = create<ContactFormState>((set, get) => ({
     if (!name || !email || !message) {
       set({
         status: 'error',
-        error: 'Completa todos los campos antes de enviar.'
+        error: 'Completa todos los campos obligatorios antes de enviar.'
       });
       return;
     }
@@ -56,10 +65,15 @@ export const useContactFormStore = create<ContactFormState>((set, get) => ({
     set({ status: 'loading', error: undefined });
 
     try {
-      await sendContactEmail({ name, email, message });
+      const { company, position, consultationType } = get();
+      const fullMessage = `Empresa: ${company || 'No especificada'}\nCargo: ${position || 'No especificado'}\nTipo de Consultoría: ${consultationType || 'No especificado'}\n\nMensaje:\n${message}`;
+      await sendContactEmail({ name, email, message: fullMessage });
       set({
         name: '',
         email: '',
+        company: '',
+        position: '',
+        consultationType: '',
         message: '',
         status: 'success',
         error: undefined

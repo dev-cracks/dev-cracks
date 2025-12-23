@@ -4,7 +4,7 @@ import { useContactFormStore } from '../hooks/useContactFormStore';
 import { env } from '../config/env';
 
 export const ContactSection = () => {
-  const { name, email, message, status, error, setField, submit } = useContactFormStore();
+  const { name, email, company, position, consultationType, message, status, error, setField, submit } = useContactFormStore();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -192,54 +192,127 @@ export const ContactSection = () => {
         <div className="contact-header">
           <img src="/dev-cracks-logo.jpg" alt="Logo de Dev Cracks" className="contact-logo" />
           <h2>¡Conectemos! Estamos aquí para ayudarte</h2>
-          <p>Tu idea merece convertirse en realidad. Hablemos y descubramos juntos cómo podemos hacerlo posible.</p>
+          <p>Tu transformación digital merece un partner estratégico. Hablemos y descubramos juntos cómo podemos generar impacto medible en tu empresa.</p>
+          <div className="contact-header__promise">
+            <span className="contact-header__promise-icon">⚡</span>
+            <strong>Respuesta garantizada en menos de 24 horas</strong>
+            <span className="contact-header__promise-text">Nuestro equipo de consultores senior revisará tu solicitud y te contactará directamente.</span>
+          </div>
         </div>
 
         <div className="contact-content">
           <div className="contact-form">
             <form onSubmit={handleSubmit} noValidate>
-              <label htmlFor="name">Nombre:</label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                autoComplete="name"
-                value={name}
-                onChange={(event) => setField('name', event.target.value)}
-                required
-                disabled={isSubmitting}
-              />
+              <div className="contact-form__row">
+                <div className="contact-form__field">
+                  <label htmlFor="name">Nombre completo *</label>
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    autoComplete="name"
+                    value={name}
+                    onChange={(event) => setField('name', event.target.value)}
+                    required
+                    disabled={isSubmitting}
+                    placeholder="Ej: Juan Pérez"
+                  />
+                </div>
 
-              <label htmlFor="email">Email:</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(event) => setField('email', event.target.value)}
-                required
-                disabled={isSubmitting}
-              />
+                <div className="contact-form__field">
+                  <label htmlFor="email">Email corporativo *</label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(event) => setField('email', event.target.value)}
+                    required
+                    disabled={isSubmitting}
+                    placeholder="Ej: juan.perez@empresa.com"
+                  />
+                </div>
+              </div>
 
-              <label htmlFor="message">Mensaje:</label>
-              <textarea
-                id="message"
-                name="message"
-                rows={6}
-                value={message}
-                onChange={(event) => setField('message', event.target.value)}
-                required
-                disabled={isSubmitting}
-              />
+              <div className="contact-form__row">
+                <div className="contact-form__field">
+                  <label htmlFor="company">Empresa</label>
+                  <input
+                    id="company"
+                    name="company"
+                    type="text"
+                    autoComplete="organization"
+                    value={company}
+                    onChange={(event) => setField('company', event.target.value)}
+                    disabled={isSubmitting}
+                    placeholder="Ej: Mi Empresa S.A."
+                  />
+                </div>
+
+                <div className="contact-form__field">
+                  <label htmlFor="position">Cargo / Posición</label>
+                  <input
+                    id="position"
+                    name="position"
+                    type="text"
+                    value={position}
+                    onChange={(event) => setField('position', event.target.value)}
+                    disabled={isSubmitting}
+                    placeholder="Ej: CTO, Head de Innovación"
+                  />
+                </div>
+              </div>
+
+              <div className="contact-form__field">
+                <label htmlFor="consultationType">Tipo de Consultoría</label>
+                <select
+                  id="consultationType"
+                  name="consultationType"
+                  value={consultationType}
+                  onChange={(event) => setField('consultationType', event.target.value)}
+                  disabled={isSubmitting}
+                >
+                  <option value="">Selecciona una opción</option>
+                  <option value="consultoria-estrategica">Consultoría Estratégica en IA</option>
+                  <option value="desarrollo-medida">Desarrollo de Soluciones a Medida</option>
+                  <option value="data-ml">Data Engineering y ML</option>
+                  <option value="integracion-legacy">Integración de Sistemas Legacy</option>
+                  <option value="automatizacion">Automatización de Procesos</option>
+                  <option value="agentes-ia">Agentes Orquestados de IA</option>
+                  <option value="cloud-devops">Cloud & DevOps</option>
+                  <option value="seguridad">Seguridad y Auditoría</option>
+                  <option value="routeon">Routeon Enterprise</option>
+                  <option value="dev-coach">Dev-Coach Pro</option>
+                  <option value="otro">Otro</option>
+                </select>
+              </div>
+
+              <div className="contact-form__field">
+                <label htmlFor="message">Mensaje *</label>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows={6}
+                  value={message}
+                  onChange={(event) => setField('message', event.target.value)}
+                  required
+                  disabled={isSubmitting}
+                  placeholder="Cuéntanos sobre tu proyecto, desafíos o necesidades específicas..."
+                />
+              </div>
 
               <button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Enviando…' : 'Enviar Mensaje'}
+                {isSubmitting ? 'Enviando…' : 'Solicitar Consultoría'}
               </button>
             </form>
 
             <div className="contact-form__feedback" role="status" aria-live="polite">
-              {isSuccess && <p className="contact-form__success">¡Gracias! Revisaremos tu mensaje en breve.</p>}
+              {isSuccess && (
+                <p className="contact-form__success">
+                  ¡Gracias! Un consultor senior se pondrá en contacto contigo en menos de 24 horas.
+                </p>
+              )}
               {status === 'error' && error && <p className="contact-form__error">{error}</p>}
             </div>
           </div>

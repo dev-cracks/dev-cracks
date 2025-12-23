@@ -1,39 +1,40 @@
 import { useEffect, useState } from 'react';
 
+// Slides del carousel con enfoque empresarial
 const carouselSlides = [
   {
-    title: 'Automatización de Procesos',
-    benefit: 'Reduce tiempos operativos',
+    title: 'Automatización Inteligente',
+    benefit: 'Reduce costos operativos',
     percentage: '70%',
-    description: 'Las empresas que automatizan sus procesos reducen el tiempo de ejecución en un 70% y aumentan su productividad significativamente.',
+    description: 'Las empresas que automatizan sus procesos reducen el tiempo de ejecución en un 70% y aumentan su productividad significativamente, generando ROI medible desde el primer trimestre.',
     icon: '⚡'
   },
   {
-    title: 'Inteligencia Artificial',
-    benefit: 'Mejora la toma de decisiones',
+    title: 'Inteligencia Artificial Aplicada',
+    benefit: 'Decisiones basadas en datos',
     percentage: '85%',
-    description: 'La IA permite decisiones más precisas, reduciendo errores en un 85% y optimizando recursos empresariales.',
+    description: 'La IA permite decisiones más precisas, reduciendo errores en un 85% y optimizando recursos empresariales. Transformamos datos en ventaja competitiva.',
     icon: '🤖'
   },
   {
     title: 'Agentes Orquestados de IA',
-    benefit: 'Optimiza flujos de trabajo',
+    benefit: 'Optimización de flujos complejos',
     percentage: '60%',
-    description: 'Los sistemas de agentes coordinados reducen costos operativos hasta en un 60% mientras mejoran la eficiencia.',
+    description: 'Los sistemas de agentes coordinados reducen costos operativos hasta en un 60% mientras mejoran la eficiencia. Automatización que escala con tu negocio.',
     icon: '🎯'
   },
   {
-    title: 'Cloud & DevOps',
-    benefit: 'Acelera el despliegue',
+    title: 'Cloud & DevOps Enterprise',
+    benefit: 'Aceleración del time-to-market',
     percentage: '50%',
-    description: 'Las implementaciones en la nube reducen tiempos de despliegue en un 50% y mejoran la escalabilidad.',
+    description: 'Las implementaciones en la nube reducen tiempos de despliegue en un 50% y mejoran la escalabilidad. Infraestructura que crece contigo.',
     icon: '☁️'
   },
   {
-    title: 'ROI Promedio',
-    benefit: 'Retorno de inversión',
+    title: 'ROI Promedio Verificado',
+    benefit: 'Retorno de inversión comprobado',
     percentage: '300%',
-    description: 'Las empresas que implementan nuestras soluciones obtienen un retorno de inversión promedio del 300% en el primer año.',
+    description: 'Las empresas que implementan nuestras soluciones obtienen un retorno de inversión promedio del 300% en el primer año. Resultados medibles, impacto real.',
     icon: '💰'
   }
 ];
@@ -56,10 +57,19 @@ export const Hero = () => {
   return (
     <section id="inicio" className="hero">
       <div className="container hero__inner">
-        <h2>Construimos el Futuro del Software.</h2>
-        <p>
-          Somos Dev Cracks, un equipo de desarrolladores top, innovando en cada línea de código para transformar ideas
-          en soluciones excepcionales y de alto impacto.
+        {/* Badges de autoridad */}
+        <div className="hero__badges">
+          <span className="hero__badge">Partner de Transformación Digital</span>
+          <span className="hero__badge">Expertos en IA Aplicada</span>
+        </div>
+
+        <h2>Transformación Digital con IA: De la Idea al Impacto Empresarial</h2>
+        <p className="hero__subtitle">
+          <strong>Problema:</strong> Procesos manuales, decisiones basadas en intuición y sistemas legacy limitan tu crecimiento.
+          <br />
+          <strong>Solución:</strong> Implementamos inteligencia artificial, automatización inteligente y arquitecturas modernas que transforman operaciones.
+          <br />
+          <strong>Resultado:</strong> Eficiencia operativa aumentada, ROI comprobado del 300% y ventaja competitiva sostenible.
         </p>
 
         <div className="hero-carousel">
@@ -92,9 +102,14 @@ export const Hero = () => {
           </div>
         </div>
 
-        <a className="btn-primary" href="#contacto">
-          ¡Hablemos de tu proyecto!
-        </a>
+        <div className="hero__ctas">
+          <a className="btn-primary" href="#contacto">
+            Solicitar Demo Corporativa
+          </a>
+          <a className="btn-secondary btn-secondary--outline" href="#contacto">
+            Agendar Consultoría Estratégica
+          </a>
+        </div>
       </div>
     </section>
   );
