@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { Avatar } from '../components/Avatar';
 import { UserDataEditor } from '../components/UserDataEditor';
 import { ChangeHistory } from '../components/ChangeHistory';
+import DarkVeil from '../components/DarkVeil';
 import './AccountPage.css';
 
 export const AccountPage = () => {
@@ -21,6 +22,9 @@ export const AccountPage = () => {
   if (isLoading) {
     return (
       <div className="account-page">
+        <div style={{ width: '100%', height: '100vh', position: 'fixed', top: 0, left: 0, zIndex: 0 }}>
+          <DarkVeil />
+        </div>
         <PillNav />
         <main className="account-page__content-wrapper">
           <div className="account-page__container">
@@ -37,6 +41,9 @@ export const AccountPage = () => {
 
   return (
     <div className="account-page">
+      <div style={{ width: '100%', height: '100vh', position: 'fixed', top: 0, left: 0, zIndex: 0 }}>
+        <DarkVeil />
+      </div>
       <PillNav />
       <main className="account-page__content-wrapper">
         <div className="account-page__container">

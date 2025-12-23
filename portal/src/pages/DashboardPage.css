@@ -2,6 +2,8 @@
   min-height: 100vh;
   background: rgb(6, 0, 16);
   color: #fff;
+  position: relative;
+  z-index: 1;
 }
 
 .dashboard-page__content {

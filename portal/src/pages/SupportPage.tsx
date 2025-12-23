@@ -1,10 +1,14 @@
 import React from 'react';
 import { PillNav } from '../components/PillNav';
+import DarkVeil from '../components/DarkVeil';
 import './SupportPage.css';
 
 export const SupportPage = () => {
   return (
     <div className="support-page">
+      <div style={{ width: '100%', height: '100vh', position: 'fixed', top: 0, left: 0, zIndex: 0 }}>
+        <DarkVeil />
+      </div>
       <PillNav />
       <main className="support-page__content">
         <div className="support-page__container">

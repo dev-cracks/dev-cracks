@@ -1,10 +1,14 @@
 import React from 'react';
 import { PillNav } from '../components/PillNav';
+import DarkVeil from '../components/DarkVeil';
 import './DashboardPage.css';
 
 export const DashboardPage = () => {
   return (
     <div className="dashboard-page">
+      <div style={{ width: '100%', height: '100vh', position: 'fixed', top: 0, left: 0, zIndex: 0 }}>
+        <DarkVeil />
+      </div>
       <PillNav />
       <main className="dashboard-page__content">
         <div className="dashboard-page__container">
