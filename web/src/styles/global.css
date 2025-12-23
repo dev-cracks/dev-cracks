@@ -71,7 +71,7 @@ main {
   }
 
 .header {
-  background-color: rgba(22, 27, 34, 0.95);
+  background-color: rgb(6, 0, 16);
   border-bottom: 1px solid #30363d;
   padding: 20px 0;
   position: fixed;
@@ -405,7 +405,7 @@ main {
   min-height: 550px;
   overflow: hidden;
   border-radius: 15px;
-  background: linear-gradient(135deg, rgba(22, 27, 34, 0.85) 0%, rgba(13, 17, 23, 0.85) 100%);
+  background: rgb(6, 0, 16);
   border: 1px solid rgba(74, 144, 226, 0.3);
   box-shadow: 
     0 10px 40px rgba(0, 0, 0, 0.5),
