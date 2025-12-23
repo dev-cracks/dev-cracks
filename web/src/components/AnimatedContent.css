@@ -1,0 +1,15 @@
+.animated-content {
+  position: relative;
+  display: inline-block;
+}
+
+.animated-content--hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.animated-content--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+

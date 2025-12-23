@@ -1,12 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import GhostCursor from '../components/GhostCursor';
 import { BlurText } from '../components/BlurText';
+import { AnimatedContent } from '../components/AnimatedContent';
 import './GhostCursorPage.css';
+
+type PageState = 'text' | 'logo' | 'navigating';
 
 export const GhostCursorPage = () => {
   const [ghostActive, setGhostActive] = useState(true);
-  const [clicked, setClicked] = useState(false);
+  const [pageState, setPageState] = useState<PageState>('text');
+  const [textVisible, setTextVisible] = useState(true);
+  const [logoVisible, setLogoVisible] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const textTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const logoTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Reproducir audio al cargar la página
   useEffect(() => {
@@ -34,13 +41,57 @@ export const GhostCursorPage = () => {
     };
   }, []);
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const text = "¿Le temes a la IA, Automatización y la transformación digital?";
+
+  // Timer para ocultar texto después de 2 segundos (desde que termina la animación del texto)
+  useEffect(() => {
+    if (pageState === 'text') {
+      // El texto aparece después de 1 segundo y dura ~3 segundos en total
+      // Esperamos 2 segundos adicionales después de que termine la animación
+      const textAnimationDuration = 1000 + (text.split(' ').length * 150) + 600; // delay + animación
+      const waitTime = 2000; // 2 segundos adicionales
+      
+      textTimerRef.current = setTimeout(() => {
+        handleTextComplete();
+      }, textAnimationDuration + waitTime);
+    }
+
+    return () => {
+      if (textTimerRef.current) {
+        clearTimeout(textTimerRef.current);
+      }
+    };
+  }, [pageState, text]);
+
+  // Timer para navegar después de 2 segundos de mostrar el logo
+  useEffect(() => {
+    if (pageState === 'logo' && logoVisible) {
+      logoTimerRef.current = setTimeout(() => {
+        handleNavigate();
+      }, 2000);
+    }
+
+    return () => {
+      if (logoTimerRef.current) {
+        clearTimeout(logoTimerRef.current);
+      }
+    };
+  }, [pageState, logoVisible]);
+
+  const handleTextComplete = () => {
+    if (pageState !== 'text') return;
     
-    if (clicked) return; // Prevenir múltiples clicks
+    setTextVisible(false);
+    setTimeout(() => {
+      setPageState('logo');
+      setLogoVisible(true);
+    }, 600); // Duración de la animación de salida
+  };
+
+  const handleNavigate = () => {
+    if (pageState === 'navigating') return;
     
-    setClicked(true);
+    setPageState('navigating');
     setGhostActive(false);
     
     setTimeout(() => {
@@ -48,17 +99,26 @@ export const GhostCursorPage = () => {
     }, 300);
   };
 
-  // También permitir click después de un tiempo si no se ha hecho click
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!clicked) {
-        // Opcional: auto-navegar después de 3 segundos si no hay interacción
-        // Comentado para que solo navegue con click
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (pageState === 'navigating') return;
+    
+    if (pageState === 'text') {
+      // Si estamos en el estado de texto, ocultar texto y mostrar logo
+      if (textTimerRef.current) {
+        clearTimeout(textTimerRef.current);
       }
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, [clicked]);
+      handleTextComplete();
+    } else if (pageState === 'logo') {
+      // Si estamos en el estado de logo, navegar
+      if (logoTimerRef.current) {
+        clearTimeout(logoTimerRef.current);
+      }
+      handleNavigate();
+    }
+  };
 
   return (
     <div 
@@ -106,16 +166,71 @@ export const GhostCursorPage = () => {
         />
       )}
 
-      <div className="ghost-cursor-page__text-container" style={{ position: 'relative', zIndex: 10, pointerEvents: 'none' }}>
-        <BlurText
-          text="¿Le temes a la IA, Automatización y la transformación digital?"
-          delay={1000}
-          animateBy="words"
-          direction="top"
+      {/* Texto - aparece primero */}
+      {textVisible && (
+        <div 
+          className="ghost-cursor-page__text-container" 
+          style={{ 
+            position: 'relative', 
+            zIndex: 10, 
+            pointerEvents: 'none',
+            opacity: textVisible ? 1 : 0,
+            transform: textVisible ? 'translateY(0)' : 'translateY(-20px)',
+            transition: 'opacity 0.6s ease-out, transform 0.6s ease-out'
+          }}
+        >
+          <BlurText
+            text={text}
+            delay={1000}
+            animateBy="words"
+            direction="top"
+            duration={600}
+            className="text-2xl mb-8"
+          />
+        </div>
+      )}
+
+      {/* Logo - aparece desde abajo después del texto */}
+      {logoVisible && (
+        <AnimatedContent
+          direction="bottom"
           duration={600}
-          className="text-2xl mb-8"
-        />
-      </div>
+          className="ghost-cursor-page__logo-container"
+        >
+          <div 
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '1.5rem'
+            }}
+          >
+            <img 
+              src="/dev-cracks-logo.jpg" 
+              alt="Dev Cracks Logo" 
+              style={{
+                height: '120px',
+                width: 'auto',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 0 20px rgba(177, 158, 239, 0.5))',
+                transition: 'filter 0.3s ease'
+              }}
+            />
+            <h1 
+              style={{
+                fontSize: '3rem',
+                fontWeight: 900,
+                color: '#fff',
+                letterSpacing: '0.1em',
+                textShadow: '0 0 20px rgba(177, 158, 239, 0.5)',
+                margin: 0
+              }}
+            >
+              DEV CRACKS
+            </h1>
+          </div>
+        </AnimatedContent>
+      )}
     </div>
   );
 };
