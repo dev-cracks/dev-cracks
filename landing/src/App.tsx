@@ -13,7 +13,6 @@ import { Footer } from './components/Footer';
 import { VideoBackground } from './components/VideoBackground';
 import SplashCursor from './components/SplashCursor';
 import { ServicesPage } from './pages/ServicesPage';
-import { AccountPage } from './pages/AccountPage';
 import { LandingPage } from './pages/LandingPage';
 
 const HomePage = () => (
@@ -41,8 +40,8 @@ const AppContent = () => {
     return hasSeenSplash !== 'true';
   });
   
-  // Mostrar VideoBackground en todas las rutas excepto account
-  const showVideoBackground = location.pathname !== '/account';
+  // Mostrar VideoBackground en todas las rutas
+  const showVideoBackground = true;
 
   // Guardar flag en localStorage y ocultar SplashCursor cuando se hace click por primera vez en la landing
   useEffect(() => {
@@ -212,7 +211,6 @@ const AppContent = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/servicios" element={<ServicesPage />} />
-        <Route path="/account" element={<AccountPage />} />
       </Routes>
     </>
   );

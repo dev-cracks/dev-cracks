@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.js';
 import { useUserDetails } from '../hooks/useUserDetails.js';
 import { Avatar } from './Avatar.js';
@@ -7,7 +6,6 @@ import { Avatar } from './Avatar.js';
 export const UserMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { canAccessBackoffice } = useUserDetails();
 
@@ -30,15 +28,10 @@ export const UserMenu = () => {
 
   const handleAccountClick = () => {
     setIsOpen(false);
-    navigate('/account');
-  };
-
-  const handlePortalClick = () => {
-    setIsOpen(false);
-    // Abrir portal del cliente en nueva ventana/tab
+    // Redirigir a /portal
     const portalUrl = import.meta.env.VITE_PORTAL_URL || 
       `${window.location.origin}/portal`;
-    window.open(portalUrl, '_blank');
+    window.location.href = portalUrl;
   };
 
   const handleBackofficeClick = () => {
@@ -135,25 +128,6 @@ export const UserMenu = () => {
                 />
               </svg>
               <span>Account</span>
-            </button>
-
-            <button
-              className="user-menu__item"
-              onClick={handlePortalClick}
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 18 18"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M9 0L11.02 6.218L17.559 6.218L12.27 10.064L14.29 16.282L9 12.436L3.71 16.282L5.73 10.064L0.441 6.218L6.98 6.218L9 0Z"
-                  fill="currentColor"
-                />
-              </svg>
-              <span>Portal</span>
             </button>
 
             {canAccessBackoffice && (
