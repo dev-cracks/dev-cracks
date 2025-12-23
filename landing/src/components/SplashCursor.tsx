@@ -30,7 +30,7 @@ export const SplashCursor: React.FC<SplashCursorProps> = ({
   const rafRef = useRef<number | null>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
   const lastMouseRef = useRef({ x: 0, y: 0 });
-  const isActiveRef = useRef(false);
+  const isActiveRef = useRef(true); // Activar por defecto
 
   useEffect(() => {
     const container = containerRef.current;
@@ -39,8 +39,13 @@ export const SplashCursor: React.FC<SplashCursorProps> = ({
     const resize = () => {
       if (!container) return;
       const rect = container.getBoundingClientRect();
-      container.width = rect.width;
-      container.height = rect.height;
+      const dpr = window.devicePixelRatio || 1;
+      container.width = rect.width * dpr;
+      container.height = rect.height * dpr;
+      const ctx = container.getContext('2d');
+      if (ctx) {
+        ctx.scale(dpr, dpr);
+      }
     };
 
     resize();
@@ -48,12 +53,13 @@ export const SplashCursor: React.FC<SplashCursorProps> = ({
 
     const createParticles = (x: number, y: number) => {
       const newParticles: typeof particlesRef.current = [];
+      const dpr = window.devicePixelRatio || 1;
       for (let i = 0; i < particleCount; i++) {
         const angle = (Math.PI * 2 * i) / particleCount + (Math.random() - 0.5) * 0.5;
         const speed = 2 + Math.random() * 3;
         newParticles.push({
-          x,
-          y,
+          x: x / dpr,
+          y: y / dpr,
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
           life: duration,
@@ -69,7 +75,8 @@ export const SplashCursor: React.FC<SplashCursorProps> = ({
       const ctx = container.getContext('2d');
       if (!ctx) return;
 
-      ctx.clearRect(0, 0, container.width, container.height);
+      const dpr = window.devicePixelRatio || 1;
+      ctx.clearRect(0, 0, container.width / dpr, container.height / dpr);
 
       particlesRef.current = particlesRef.current.filter(particle => {
         particle.x += particle.vx;
@@ -101,10 +108,21 @@ export const SplashCursor: React.FC<SplashCursorProps> = ({
       }
     };
 
+    const startAnimation = () => {
+      if (!rafRef.current) {
+        isActiveRef.current = true;
+        rafRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    // Iniciar el loop de animación inmediatamente
+    startAnimation();
+
     const handleMouseMove = (e: MouseEvent) => {
       const rect = container.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const dpr = window.devicePixelRatio || 1;
+      const x = (e.clientX - rect.left) * dpr;
+      const y = (e.clientY - rect.top) * dpr;
 
       const dx = x - lastMouseRef.current.x;
       const dy = y - lastMouseRef.current.y;
@@ -119,7 +137,7 @@ export const SplashCursor: React.FC<SplashCursorProps> = ({
       isActiveRef.current = true;
 
       if (!rafRef.current) {
-        rafRef.current = requestAnimationFrame(animate);
+        startAnimation();
       }
     };
 
@@ -157,4 +175,3 @@ export const SplashCursor: React.FC<SplashCursorProps> = ({
     />
   );
 };
-

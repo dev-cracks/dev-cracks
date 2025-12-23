@@ -35,72 +35,94 @@ const HomePage = () => (
 
 const AppContent = () => {
   const location = useLocation();
-  const [showSplashCursor, setShowSplashCursor] = useState(false);
+  const [showSplashCursor, setShowSplashCursor] = useState(true); // Activar inmediatamente
   
   // Mostrar VideoBackground en todas las rutas excepto account
   const showVideoBackground = location.pathname !== '/account';
 
-  // Reproducir shine.mp3 y activar SplashCursor al cargar la landing
+  // Reproducir shine.mp3 al cargar la landing
   useEffect(() => {
-    const shineAudioElement = document.getElementById('shine-audio') as HTMLAudioElement;
+    // Activar cursor inmediatamente
+    setShowSplashCursor(true);
     
-    if (!shineAudioElement) {
-      console.error('Shine audio element not found in HTML');
-      return;
-    }
-    
-    // Configurar volumen
-    shineAudioElement.volume = 0.5;
-    
-    // Función para intentar reproducir
-    const tryPlayShine = async () => {
-      try {
-        await shineAudioElement.play();
-        console.log('Shine audio playing');
-        setShowSplashCursor(true);
-      } catch (error: any) {
-        console.log('Shine audio play attempt failed:', error);
-        // Si falla, intentar con muted y luego desmutear
+    // Intentar cargar y reproducir el audio
+    const loadAndPlayAudio = async () => {
+      let shineAudioElement = document.getElementById('shine-audio') as HTMLAudioElement;
+      
+      // Si no existe en el HTML, crearlo dinámicamente
+      if (!shineAudioElement) {
+        shineAudioElement = document.createElement('audio');
+        shineAudioElement.id = 'shine-audio';
+        shineAudioElement.playsInline = true;
+        shineAudioElement.preload = 'auto';
+        shineAudioElement.style.display = 'none';
+        const source = document.createElement('source');
+        source.src = '/audio/shine.mp3';
+        source.type = 'audio/mpeg';
+        shineAudioElement.appendChild(source);
+        document.body.appendChild(shineAudioElement);
+      }
+      
+      // Configurar volumen
+      shineAudioElement.volume = 0.5;
+      
+      // Función para intentar reproducir
+      const tryPlayShine = async () => {
         try {
-          shineAudioElement.muted = true;
           await shineAudioElement.play();
-          console.log('Shine audio playing with muted workaround');
-          setTimeout(() => {
-            shineAudioElement.muted = false;
-            console.log('Shine audio unmuted');
-          }, 100);
-          setShowSplashCursor(true);
-        } catch (mutedError) {
-          console.log('Shine audio play failed even with muted:', mutedError);
-          // Activar cursor de todas formas
-          setShowSplashCursor(true);
+          console.log('Shine audio playing');
+        } catch (error: any) {
+          console.log('Shine audio play attempt failed:', error);
+          // Si falla, intentar con muted y luego desmutear
+          try {
+            shineAudioElement.muted = true;
+            await shineAudioElement.play();
+            console.log('Shine audio playing with muted workaround');
+            setTimeout(() => {
+              shineAudioElement.muted = false;
+              console.log('Shine audio unmuted');
+            }, 100);
+          } catch (mutedError) {
+            console.log('Shine audio play failed even with muted:', mutedError);
+          }
+        }
+      };
+      
+      // Intentar reproducir cuando el audio esté listo
+      if (shineAudioElement.readyState >= 2) {
+        tryPlayShine();
+      } else {
+        shineAudioElement.addEventListener('canplay', () => {
+          tryPlayShine();
+        }, { once: true });
+        
+        shineAudioElement.addEventListener('canplaythrough', () => {
+          tryPlayShine();
+        }, { once: true });
+        
+        // Cargar el audio si no está cargando
+        if (shineAudioElement.readyState === 0) {
+          shineAudioElement.load();
         }
       }
-    };
-    
-    // Intentar reproducir cuando el audio esté listo
-    if (shineAudioElement.readyState >= 2) {
-      tryPlayShine();
-    } else {
-      shineAudioElement.addEventListener('canplay', () => {
-        tryPlayShine();
-      }, { once: true });
       
-      shineAudioElement.addEventListener('canplaythrough', () => {
-        tryPlayShine();
-      }, { once: true });
-    }
-    
-    // Intentar después de un pequeño delay
-    const timer = setTimeout(() => {
-      if (shineAudioElement.paused) {
-        tryPlayShine();
-      }
-    }, 100);
-    
-    return () => {
-      clearTimeout(timer);
+      // Intentar después de varios delays
+      const timers: NodeJS.Timeout[] = [];
+      [100, 300, 500, 1000, 2000].forEach((delay) => {
+        const timer = setTimeout(() => {
+          if (shineAudioElement.paused && shineAudioElement.readyState >= 2) {
+            tryPlayShine();
+          }
+        }, delay);
+        timers.push(timer);
+      });
+      
+      return () => {
+        timers.forEach(timer => clearTimeout(timer));
+      };
     };
+    
+    loadAndPlayAudio();
   }, []);
 
   return (
