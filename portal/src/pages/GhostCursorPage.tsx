@@ -63,8 +63,8 @@ export const GhostCursorPage = () => {
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
     { path: '/backoffice', label: 'Backoffice', icon: <BackofficeIcon />, absolute: true },
-    { path: 'https://dev-coach.dev-cracks.com', label: 'Dev-coach', icon: <DevCoachIcon />, external: true },
-    { path: 'https://route-on.dev-cracks.com', label: 'Route-On', icon: <RouteOnIcon />, external: true },
+    { path: '/dev-coach', label: 'Dev-coach', icon: <DevCoachIcon /> },
+    { path: '/route-on', label: 'Route-On', icon: <RouteOnIcon /> },
     { path: '/landing', label: 'Landing', icon: <LandingIcon />, absolute: true }
   ];
 

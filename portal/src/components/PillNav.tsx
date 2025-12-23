@@ -35,7 +35,7 @@ export const PillNav: React.FC<PillNavProps> = ({ className = '' }) => {
   return (
     <nav className={`pill-nav ${className}`}>
       <div className="pill-nav__container">
-        <div className="pill-nav__logo" onClick={() => navigate('/dashboard')}>
+        <div className="pill-nav__logo" onClick={() => navigate('/portal')}>
           <div className="pill-nav__logo-svg">
             <svg width="600" height="120" viewBox="0 0 600 120" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>

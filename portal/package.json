@@ -13,6 +13,7 @@
     "dev-cracks": "file:..",
     "gsap": "^3.14.2",
     "ogl": "^1.0.11",
+    "postprocessing": "^6.38.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.10.1",
