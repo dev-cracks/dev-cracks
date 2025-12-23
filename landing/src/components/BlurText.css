@@ -1,0 +1,32 @@
+.blur-text {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 2rem;
+}
+
+.blur-text__content {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+  letter-spacing: 0.05em;
+  line-height: 1.4;
+  will-change: filter, opacity;
+  text-shadow: 0 0 20px rgba(177, 158, 239, 0.5);
+  display: block;
+  transition: filter 0.1s linear, opacity 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .blur-text {
+    padding: 0 1rem;
+  }
+
+  .blur-text__content {
+    font-size: 1.5rem;
+    line-height: 1.3;
+  }
+}
+

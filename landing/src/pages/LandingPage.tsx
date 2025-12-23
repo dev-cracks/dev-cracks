@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GhostCursor from '../components/GhostCursor';
 import { ShapeBlur } from '../components/ShapeBlur';
+import { BlurText } from '../components/BlurText';
 import './LandingPage.css';
 
 export const LandingPage = () => {
@@ -28,8 +29,10 @@ export const LandingPage = () => {
         padding: 0,
         overflow: 'hidden',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        gap: '3rem'
       }}
     >
       {ghostActive && (
@@ -72,6 +75,14 @@ export const LandingPage = () => {
           />
         </ShapeBlur>
         <h1 className="landing-page__title">DEV CRACKS</h1>
+      </div>
+
+      <div className="landing-page__text-container">
+        <BlurText
+          text="¿Le temes a la IA, Automatización y la transformación digital?"
+          delay={1000}
+          duration={2000}
+        />
       </div>
     </div>
   );
