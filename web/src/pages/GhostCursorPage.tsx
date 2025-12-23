@@ -1,10 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import GhostCursor from '../components/GhostCursor';
+import { BlurText } from '../components/BlurText';
 import './GhostCursorPage.css';
 
 export const GhostCursorPage = () => {
   const [ghostActive, setGhostActive] = useState(true);
   const [clicked, setClicked] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Reproducir audio al cargar la página
+  useEffect(() => {
+    const audio = new Audio('/audio/thunder.mp3');
+    audio.volume = 0.5; // Volumen al 50%
+    audioRef.current = audio;
+    
+    // Intentar reproducir (puede fallar si el usuario no ha interactuado)
+    const playAudio = async () => {
+      try {
+        await audio.play();
+      } catch (error) {
+        // Si falla, esperar a que el usuario interactúe
+        console.log('Audio play failed, waiting for user interaction');
+      }
+    };
+    
+    playAudio();
+    
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -46,7 +74,12 @@ export const GhostCursorPage = () => {
         padding: 0,
         overflow: 'hidden',
         cursor: 'pointer',
-        zIndex: 1
+        zIndex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '3rem'
       }}
     >
       {ghostActive && (
@@ -72,6 +105,17 @@ export const GhostCursorPage = () => {
           fadeDurationMs={1500}
         />
       )}
+
+      <div className="ghost-cursor-page__text-container" style={{ position: 'relative', zIndex: 10, pointerEvents: 'none' }}>
+        <BlurText
+          text="¿Le temes a la IA, Automatización y la transformación digital?"
+          delay={1000}
+          animateBy="words"
+          direction="top"
+          duration={600}
+          className="text-2xl mb-8"
+        />
+      </div>
     </div>
   );
 };
