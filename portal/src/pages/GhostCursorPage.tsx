@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import GhostCursor from '../components/GhostCursor';
+import LiquidEther from '../components/LiquidEther';
 import './GhostCursorPage.css';
 
 export const GhostCursorPage = () => {
@@ -31,26 +31,29 @@ export const GhostCursorPage = () => {
       }}
     >
       {ghostActive && (
-        <GhostCursor
-          style={{ height: '100vh', width: '100vw' }}
-          // Visuals
-          color="#B19EEF"
-          brightness={1}
-          edgeIntensity={0}
-
-          // Trail and motion
-          trailLength={50}
-          inertia={0.5}
-
-          // Post-processing
-          grainIntensity={0.05}
-          bloomStrength={0.1}
-          bloomRadius={1.0}
-          bloomThreshold={0.025}
-
-          // Fade-out behavior
-          fadeDelayMs={1000}
-          fadeDurationMs={1500}
+        <LiquidEther
+          style={{ 
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%'
+          }}
+          colors={['#5227FF', '#FF9FFC', '#B19EEF']}
+          mouseForce={20}
+          cursorSize={100}
+          isViscous={false}
+          viscous={30}
+          iterationsViscous={32}
+          iterationsPoisson={32}
+          resolution={0.5}
+          isBounce={false}
+          autoDemo={true}
+          autoSpeed={0.5}
+          autoIntensity={2.2}
+          takeoverDuration={0.25}
+          autoResumeDelay={3000}
+          autoRampDuration={0.6}
         />
       )}
       
