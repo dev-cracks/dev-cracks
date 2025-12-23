@@ -1,6 +1,7 @@
 import React from 'react';
 import { PillNav } from '../components/PillNav';
 import DarkVeil from '../components/DarkVeil';
+import MagicBento from '../components/MagicBento';
 import './DashboardPage.css';
 
 export const DashboardPage = () => {
@@ -29,6 +30,19 @@ export const DashboardPage = () => {
               <p>Mensajes y alertas importantes</p>
             </div>
           </div>
+
+          <MagicBento 
+            textAutoHide={true}
+            enableStars={true}
+            enableSpotlight={true}
+            enableBorderGlow={true}
+            enableTilt={true}
+            enableMagnetism={true}
+            clickEffect={true}
+            spotlightRadius={300}
+            particleCount={12}
+            glowColor="132, 0, 255"
+          />
         </div>
       </main>
     </div>
