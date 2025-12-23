@@ -25,8 +25,8 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
       useRefreshTokens={true}
       onRedirectCallback={(appState) => {
         console.log('Auth0 redirect callback', appState);
-        // Auth0Provider manejará la redirección automáticamente usando appState.returnTo
-        // No necesitamos hacer redirecciones manuales aquí para evitar ciclos
+        // Auth0Provider will handle redirection automatically using appState.returnTo
+        // We don't need to do manual redirections here to avoid cycles
       }}
       skipRedirectCallback={false}
     >

@@ -129,7 +129,7 @@ export const DashboardPage = () => {
   const [isLoadingTree, setIsLoadingTree] = useState(false);
 
   useEffect(() => {
-    // Solo cargar stats si userDetails está disponible
+    // Only load stats if userDetails is available
     if (userDetails) {
       loadStats();
       loadTreeData();
@@ -140,7 +140,7 @@ export const DashboardPage = () => {
 
   const loadStats = async () => {
     try {
-      // Cargar todas las estadísticas en paralelo
+      // Load all statistics in parallel
       const [users, tenants, customers, offices] = await Promise.allSettled([
         backofficeService.getUsers(),
         tenantService.getAllTenants(),
@@ -148,15 +148,15 @@ export const DashboardPage = () => {
         officeService.getAllOffices(),
       ]);
 
-      // Procesar usuarios
+      // Process users
       if (users.status === 'fulfilled') {
         setUserCount(users.value.length);
       } else {
-        handleError(users.reason, 'usuarios');
+        handleError(users.reason, 'users');
         setUserCount(0);
       }
 
-      // Procesar tenants
+      // Process tenants
       if (tenants.status === 'fulfilled') {
         setTenantCount(tenants.value.length);
       } else {
@@ -164,31 +164,31 @@ export const DashboardPage = () => {
         setTenantCount(0);
       }
 
-      // Procesar clientes
+      // Process customers
       if (customers.status === 'fulfilled') {
         setCustomerCount(customers.value.length);
       } else {
-        handleError(customers.reason, 'clientes');
+        handleError(customers.reason, 'customers');
         setCustomerCount(0);
       }
 
-      // Procesar sedes
+      // Process offices
       if (offices.status === 'fulfilled') {
         setOfficeCount(offices.value.length);
         setOffices(offices.value);
       } else {
-        handleError(offices.reason, 'sedes');
+        handleError(offices.reason, 'offices');
         setOfficeCount(0);
         setOffices([]);
       }
     } catch (error: any) {
-      // Si es un error de red (API no disponible), solo mostrar warning en desarrollo
+      // If it's a network error (API not available), only show warning in development
       if (error?.statusCode === undefined && import.meta.env.DEV) {
         console.warn('[Dev] API server not available. Stats will show 0.');
       } else {
         console.error('Error loading stats:', error);
       }
-      // Para todos los errores, mostrar 0
+      // For all errors, show 0
       setUserCount(0);
       setTenantCount(0);
       setCustomerCount(0);
@@ -203,13 +203,13 @@ export const DashboardPage = () => {
     if (error?.statusCode === undefined && import.meta.env.DEV) {
       console.warn(`[Dev] API server not available for ${resource}. Stats will show 0.`);
     } else if (error?.statusCode === 403) {
-      console.warn(`Acceso denegado a ${resource}. Mostrando 0.`);
+      console.warn(`Access denied to ${resource}. Showing 0.`);
     } else {
       console.error(`Error loading ${resource}:`, error);
     }
   };
 
-  // Cargar datos para el árbol jerárquico
+  // Load data for hierarchical tree
   const loadTreeData = async () => {
     try {
       setIsLoadingTree(true);
@@ -225,12 +225,12 @@ export const DashboardPage = () => {
       const officesData = offices.status === 'fulfilled' ? offices.value : [];
       const usersData = users.status === 'fulfilled' ? users.value : [];
 
-      // Cargar usuarios por sede de forma paralela
+      // Load users by office in parallel
       const officeUsersMap = new Map<string, UserDto[]>();
       const officeUsersPromises = officesData.map(async (office) => {
         try {
           const officeUsers = await officeService.getOfficeUsers(office.id);
-          // Transformar los usuarios al formato UserDto si es necesario
+          // Transform users to UserDto format if necessary
           const transformedUsers = officeUsers.map((u: any) => ({
             id: u.id,
             email: u.email,
@@ -278,28 +278,28 @@ export const DashboardPage = () => {
     }
   };
 
-  // Construir árbol jerárquico de clientes con todos sus niveles
+  // Build hierarchical customer tree with all levels
   const buildCustomerTree = useMemo(() => {
     if (!treeData) return [];
 
     const { customers, tenants, offices, officeUsersMap } = treeData;
 
-    // Función recursiva para construir el árbol de clientes
+    // Recursive function to build customer tree
     const buildCustomerNode = (customer: CustomerDto) => {
-      // Obtener clientes hijos directos
+      // Get direct child customers
       const childCustomers = customers.filter(c => c.parentId === customer.id);
 
-      // Obtener tenants de este cliente específico
+      // Get tenants from this specific customer
       const customerTenants = tenants.filter(t => t.customerId === customer.id);
 
-      // Construir estructura de tenants con sus sedes y usuarios
+      // Build tenant structure with their offices and users
       const tenantNodes = customerTenants.map(tenant => {
-        // Obtener sedes del tenant
+        // Get offices from tenant
         const tenantOffices = offices.filter(o => o.tenantId === tenant.id);
 
-        // Construir estructura de sedes con sus usuarios
+        // Build office structure with their users
         const officeNodes = tenantOffices.map(office => {
-          // Obtener usuarios de la sede desde el mapa
+          // Get users from office from map
           const officeUsers = officeUsersMap.get(office.id) || [];
 
           return {
@@ -321,18 +321,18 @@ export const DashboardPage = () => {
       };
     };
 
-    // Obtener clientes raíz (sin padre)
+    // Get root customers (without parent)
     const rootCustomers = customers.filter(c => !c.parentId || c.parentId === null);
 
     return rootCustomers.map(buildCustomerNode);
   }, [treeData]);
 
-  // Renderizar el árbol
+  // Render tree
   const renderTree = () => {
     if (isLoadingTree) {
       return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: tokens.spacingVerticalXL }}>
-          <Spinner size="large" label="Cargando estructura jerárquica..." />
+          <Spinner size="large" label="Loading hierarchical structure..." />
         </div>
       );
     }
@@ -340,12 +340,12 @@ export const DashboardPage = () => {
     if (!treeData || buildCustomerTree.length === 0) {
       return (
         <div style={{ padding: tokens.spacingVerticalXL, textAlign: 'center' }}>
-          <Text>No hay datos disponibles para mostrar</Text>
+          <Text>No data available to display</Text>
         </div>
       );
     }
 
-    // Función recursiva para renderizar un nodo de cliente
+    // Recursive function to render a customer node
     const renderCustomerNode = (customerNode: CustomerNode, depth: number = 0): JSX.Element => {
       return (
         <TreeItem
@@ -358,9 +358,9 @@ export const DashboardPage = () => {
           >
             <Text weight={depth === 0 ? "semibold" : "regular"}>{customerNode.customer.name}</Text>
           </TreeItemLayout>
-          {/* Renderizar clientes hijos recursivamente */}
+          {/* Render child customers recursively */}
           {customerNode.children.map((childNode) => renderCustomerNode(childNode, depth + 1))}
-          {/* Renderizar tenants del cliente */}
+          {/* Render customer tenants */}
           {customerNode.tenants.map((tenantNode, tenantIdx) => (
             <TreeItem
               key={`tenant-${tenantNode.tenant.id}-${tenantIdx}`}
@@ -372,7 +372,7 @@ export const DashboardPage = () => {
               >
                 <Text>{tenantNode.tenant.name}</Text>
               </TreeItemLayout>
-              {/* Sedes del tenant */}
+              {/* Tenant offices */}
               {tenantNode.offices.map((officeNode, officeIdx) => (
                 <TreeItem
                   key={`office-${officeNode.office.id}-${officeIdx}`}
@@ -384,7 +384,7 @@ export const DashboardPage = () => {
                   >
                     <Text>{officeNode.office.name}</Text>
                   </TreeItemLayout>
-                  {/* Usuarios de la sede */}
+                  {/* Office users */}
                   {officeNode.users.map((user, userIdx) => (
                     <TreeItem
                       key={`user-${user.id}-${userIdx}`}
@@ -417,7 +417,7 @@ export const DashboardPage = () => {
     };
 
     return (
-      <Tree aria-label="Estructura jerárquica de clientes, tenants, sedes y usuarios">
+      <Tree aria-label="Hierarchical structure of customers, tenants, offices and users">
         {buildCustomerTree.map((customerNode, customerIdx) => 
           renderCustomerNode(customerNode, 0)
         )}
@@ -425,23 +425,23 @@ export const DashboardPage = () => {
     );
   };
 
-  // Obtener el nombre del usuario para el mensaje de bienvenida
-  // El nombre viene de la base de datos y se almacena en el state del usuario
+  // Get user name for welcome message
+  // Name comes from database and is stored in user state
   const getUserDisplayName = () => {
-    // El objeto user ahora incluye el nombre de la base de datos si está disponible
+    // User object now includes database name if available
     const name = user?.name;
     if (name) return name;
     
-    // Si no hay nombre, extraer la parte antes del @ del email y capitalizarla
+    // If no name, extract part before @ from email and capitalize it
     const email = user?.email || userDetails?.email;
     if (email) {
       const emailName = email.split('@')[0];
-      // Capitalizar la primera letra
+      // Capitalize first letter
       return emailName.charAt(0).toUpperCase() + emailName.slice(1);
     }
     
-    // Último recurso
-    return 'Usuario';
+    // Last resort
+    return 'User';
   };
   
   const userName = getUserDisplayName();
@@ -456,30 +456,30 @@ export const DashboardPage = () => {
           icon={<ArrowClockwiseRegular />}
           onClick={loadStats}
           disabled={isLoading}
-          title="Actualizar estadísticas del dashboard"
+          title="Refresh dashboard statistics"
         >
-          Actualizar
+          Refresh
         </Button>
         <Button
           appearance="default"
           icon={<ArrowClockwiseRegular />}
           onClick={loadTreeData}
           disabled={isLoadingTree}
-          title="Actualizar estructura jerárquica"
+          title="Refresh hierarchical structure"
         >
-          Actualizar Árbol
+          Refresh Tree
         </Button>
       </div>
 
       <div className={styles.welcomeMessage}>
-        ¡Bienvenido, {userName}!
+        Welcome, {userName}!
       </div>
 
       <div className={styles.statsGrid}>
         <Card className={styles.card}>
           <CardHeader
-            header={<Text weight="semibold">Clientes</Text>}
-            description="Total de clientes en el sistema"
+            header={<Text weight="semibold">Customers</Text>}
+            description="Total customers in the system"
           />
           <CardPreview>
             <div className={styles.previewContent}>
@@ -497,7 +497,7 @@ export const DashboardPage = () => {
         <Card className={styles.card}>
           <CardHeader
             header={<Text weight="semibold">Tenants</Text>}
-            description="Total de tenants en el sistema"
+            description="Total tenants in the system"
           />
           <CardPreview>
             <div className={styles.previewContent}>
@@ -514,8 +514,8 @@ export const DashboardPage = () => {
 
         <Card className={styles.card}>
           <CardHeader
-            header={<Text weight="semibold">Usuarios</Text>}
-            description="Total de usuarios en el sistema"
+            header={<Text weight="semibold">Users</Text>}
+            description="Total users in the system"
           />
           <CardPreview>
             <div className={styles.previewContent}>
@@ -532,8 +532,8 @@ export const DashboardPage = () => {
 
         <Card className={styles.card}>
           <CardHeader
-            header={<Text weight="semibold">Sedes</Text>}
-            description="Total de sedes en el sistema"
+            header={<Text weight="semibold">Offices</Text>}
+            description="Total offices in the system"
           />
           <CardPreview>
             <div className={styles.previewContent}>
@@ -551,17 +551,17 @@ export const DashboardPage = () => {
 
       <Card>
         <CardHeader
-          header={<Text weight="semibold">Mapa de Sedes</Text>}
-          description="Ubicación de todas las sedes en el mapa"
+          header={<Text weight="semibold">Office Map</Text>}
+          description="Location of all offices on the map"
         />
         <CardPreview>
           <div style={{ padding: '20px' }}>
             {isLoading ? (
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: tokens.spacingVerticalXL }}>
-                <Spinner size="large" label="Cargando mapa..." />
+                <Spinner size="large" label="Loading map..." />
               </div>
             ) : offices.length === 0 ? (
-              <Text>No hay sedes disponibles para mostrar en el mapa</Text>
+              <Text>No offices available to display on the map</Text>
             ) : (
               <OfficesMap offices={offices} />
             )}
@@ -571,8 +571,8 @@ export const DashboardPage = () => {
 
       <Card className={styles.treeCard}>
         <CardHeader
-          header={<Text weight="semibold">Estructura Jerárquica</Text>}
-          description="Clientes, tenants, sedes y usuarios organizados jerárquicamente"
+          header={<Text weight="semibold">Hierarchical Structure</Text>}
+          description="Customers, tenants, offices and users organized hierarchically"
         />
         <CardPreview>
           <div className={styles.treeContainer}>
@@ -583,15 +583,15 @@ export const DashboardPage = () => {
 
       <Card>
         <CardHeader
-          header={<Text weight="semibold">Actividad Reciente</Text>}
-          description="Últimas actividades del sistema"
+          header={<Text weight="semibold">Recent Activity</Text>}
+          description="Latest system activities"
         />
         <CardPreview>
           <div style={{ padding: '20px' }}>
             {isLoading ? (
               <DetailsSkeleton rows={5} />
             ) : (
-              <Text>Aquí irá la actividad reciente...</Text>
+              <Text>Recent activity will appear here...</Text>
             )}
           </div>
         </CardPreview>

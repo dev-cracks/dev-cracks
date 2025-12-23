@@ -80,9 +80,9 @@ import { RibbonMenu } from '../components/RibbonMenu';
 import { useAuth } from '../hooks/useAuth';
 import { UserDetailsView } from '../components/UserDetailsView';
 
-// Helper para convertir rol a texto en español
+// Helper to convert role to text in English
 function getRoleLabel(role: 'Admin' | 'User'): string {
-  return role === 'Admin' ? 'Administrador' : 'Usuario';
+  return role === 'Admin' ? 'Administrator' : 'User';
 }
 
 const useStyles = makeStyles({
@@ -194,7 +194,7 @@ export const UsersPage = () => {
       const data = await tenantService.getAllTenants();
       setTenants(data);
     } catch (err: any) {
-      console.error('[UsersPage] Error cargando tenants:', err);
+      console.error('[UsersPage] Error loading tenants:', err);
     }
   }, []);
 
@@ -202,26 +202,26 @@ export const UsersPage = () => {
     try {
       const data = await customerService.getAllCustomers();
       setCustomers(data);
-      // Crear un mapa de customerId a customerName
+      // Create a map of customerId to customerName
       const namesMap: Record<string, string> = {};
       data.forEach((customer) => {
         namesMap[customer.id] = customer.name;
       });
       setCustomerNames(namesMap);
     } catch (err: any) {
-      console.error('[UsersPage] Error cargando clientes:', err);
+      console.error('[UsersPage] Error loading customers:', err);
     }
   }, []);
 
   const loadUserAssociations = useCallback(async (userId: string) => {
     try {
-      // Cargar sedes y tenants asociados directamente al usuario a través de las tablas user_offices y user_tenants
+      // Load offices and tenants directly associated with user through user_offices and user_tenants tables
       const [offices, tenants] = await Promise.all([
         userService.getUserOffices(userId),
         userService.getUserTenants(userId),
       ]);
 
-      // Transformar las oficinas al formato OfficeDto
+      // Transform offices to OfficeDto format
       const officesDto: OfficeDto[] = offices.map((office: any) => ({
         id: office.id,
         name: office.name,
@@ -241,7 +241,7 @@ export const UsersPage = () => {
         isSuspended: office.isSuspended,
       }));
 
-      // Transformar los tenants al formato TenantDto
+      // Transform tenants to TenantDto format
       const tenantsDto: TenantDto[] = tenants.map((tenant: any) => ({
         id: tenant.id,
         name: tenant.name,
@@ -256,8 +256,8 @@ export const UsersPage = () => {
       setUserOffices((prev) => ({ ...prev, [userId]: officesDto }));
       setUserTenants((prev) => ({ ...prev, [userId]: tenantsDto }));
     } catch (err: any) {
-      console.error('[UsersPage] Error cargando asociaciones del usuario:', err);
-      // Si hay error, establecer arrays vacíos para evitar errores en la UI
+      console.error('[UsersPage] Error loading user associations:', err);
+      // If there's an error, set empty arrays to avoid UI errors
       setUserOffices((prev) => ({ ...prev, [userId]: [] }));
       setUserTenants((prev) => ({ ...prev, [userId]: [] }));
     }
@@ -272,7 +272,7 @@ export const UsersPage = () => {
     }
   }, [loadUsers, loadTenants, loadCustomers]);
 
-  // Cargar asociaciones cuando se cargan los usuarios
+  // Load associations when users are loaded
   useEffect(() => {
     if (users.length > 0) {
       users.forEach((user) => {
@@ -281,16 +281,16 @@ export const UsersPage = () => {
     }
   }, [users, loadUserAssociations]);
 
-  // Registrar acciones en el RibbonMenu
+  // Register actions in RibbonMenu
   useEffect(() => {
     addGroup({
       id: 'users',
-      label: 'Usuarios',
+      label: 'Users',
       icon: <PeopleRegular />,
       items: [
         {
           id: 'create',
-          label: 'Nuevo',
+          label: 'New',
           icon: <AddRegular />,
           action: () => {
             setFormData({
@@ -327,7 +327,7 @@ export const UsersPage = () => {
     auth0Id: '',
   });
 
-  // Filtrar usuarios solo si hay un término de búsqueda
+  // Filter users only if there's a search term
   const filteredUsers = searchTerm.trim() === '' 
     ? users 
     : users.filter((user) =>
@@ -344,14 +344,14 @@ export const UsersPage = () => {
 
   const handleCreate = async () => {
     if (!formData.email.trim()) {
-      setError('El email es requerido');
+      setError('Email is required');
       return;
     }
 
     try {
       setError(null);
       setIsCreating(true);
-      // Si no se proporciona auth0Id, el backend lo creará automáticamente en Auth0
+      // If auth0Id is not provided, backend will create it automatically in Auth0
       const userRequest = {
         ...formData,
         auth0Id: formData.auth0Id?.trim() || undefined,
@@ -373,14 +373,14 @@ export const UsersPage = () => {
       });
       await loadUsers();
     } catch (err: any) {
-      setError(err.message || 'Error al crear usuario');
+      setError(err.message || 'Error creating user');
       setIsCreating(false);
     }
   };
 
   const handleSave = async () => {
     if (!selectedUser || !formData.email.trim()) {
-      setError('El email es requerido');
+      setError('Email is required');
       return;
     }
 
@@ -408,7 +408,7 @@ export const UsersPage = () => {
       });
       await loadUsers();
     } catch (err: any) {
-      setError(err.message || 'Error al guardar usuario');
+      setError(err.message || 'Error saving user');
       setIsSaving(false);
     }
   };
@@ -427,7 +427,7 @@ export const UsersPage = () => {
       setSelectedUser(null);
       await loadUsers();
     } catch (err: any) {
-      setError(err.message || 'Error al eliminar usuario');
+      setError(err.message || 'Error deleting user');
     }
   };
 
@@ -436,7 +436,7 @@ export const UsersPage = () => {
       await userService.suspendUser(user.id);
       await loadUsers();
     } catch (err: any) {
-      setError(err.message || 'Error al suspender usuario');
+      setError(err.message || 'Error suspending user');
     }
   };
 
@@ -445,7 +445,7 @@ export const UsersPage = () => {
       await userService.activateUser(user.id);
       await loadUsers();
     } catch (err: any) {
-      setError(err.message || 'Error al activar usuario');
+      setError(err.message || 'Error activating user');
     }
   };
 
@@ -461,7 +461,7 @@ export const UsersPage = () => {
       setSelectedCustomer(customer);
       setIsCustomerDetailsDialogOpen(true);
     } catch (err: any) {
-      setError(err.message || 'Error al cargar detalles del cliente');
+      setError(err.message || 'Error loading customer details');
     }
   };
 
@@ -471,18 +471,18 @@ export const UsersPage = () => {
     try {
       setIsChangeCustomerDialogOpen(true);
     } catch (err: any) {
-      setError(err.message || 'Error al abrir diálogo de cambio de cliente');
+      setError(err.message || 'Error opening change customer dialog');
     }
   };
 
   const handleConfirmChangeCustomer = async () => {
     if (!selectedUser || !selectedNewCustomerId) {
-      setError('Debe seleccionar un cliente');
+      setError('Must select a customer');
       return;
     }
 
     if (selectedNewCustomerId === selectedUser.customerId) {
-      setError('El cliente seleccionado es el mismo que el actual');
+      setError('Selected customer is the same as the current one');
       return;
     }
 
@@ -490,13 +490,13 @@ export const UsersPage = () => {
       setError(null);
       setIsChangingCustomer(true);
       
-      // Obtener el primer tenant del nuevo cliente
+      // Get first tenant from new customer
       const customerTenants = await customerService.getCustomerTenants(selectedNewCustomerId);
       const newTenantId = customerTenants.length > 0 ? customerTenants[0].id : '';
 
-      // Obtener la primera sede del nuevo cliente si existe
+      // Get first office from new customer if it exists
       const customerOffices = await officeService.getOfficesByCustomer(selectedNewCustomerId);
-      // Si hay sedes, usar el tenant de la primera sede
+      // If there are offices, use tenant from first office
       const finalTenantId = customerOffices.length > 0 && customerOffices[0].tenantId 
         ? customerOffices[0].tenantId 
         : newTenantId;
@@ -517,12 +517,12 @@ export const UsersPage = () => {
       await loadUsers();
       setIsChangingCustomer(false);
     } catch (err: any) {
-      setError(err.message || 'Error al cambiar cliente del usuario');
+      setError(err.message || 'Error changing user customer');
       setIsChangingCustomer(false);
     }
   };
 
-  // Cargar sedes cuando se selecciona un tenant
+  // Load offices when a tenant is selected
   const handleTenantSelect = async (tenantId: string) => {
     setSelectedTenantId(tenantId);
     setSelectedOfficeId('');
@@ -530,15 +530,15 @@ export const UsersPage = () => {
       const offices = await officeService.getOfficesByTenant(tenantId);
       setAvailableOffices(offices);
     } catch (err: any) {
-      console.error('[UsersPage] Error cargando sedes:', err);
+      console.error('[UsersPage] Error loading offices:', err);
       setAvailableOffices([]);
     }
   };
 
-  // Guardar asignación de tenant y sede
+  // Save tenant and office assignment
   const handleAssignTenantAndOffice = async () => {
     if (!selectedUserForAssign || !selectedTenantId) {
-      setError('Debe seleccionar un tenant');
+      setError('Must select a tenant');
       return;
     }
 
@@ -546,10 +546,10 @@ export const UsersPage = () => {
       setError(null);
       setIsAssigning(true);
 
-      // Obtener el tenant seleccionado para obtener el customerId
+      // Get selected tenant to obtain customerId
       const selectedTenant = tenants.find(t => t.id === selectedTenantId);
       if (!selectedTenant) {
-        setError('Tenant no encontrado');
+        setError('Tenant not found');
         setIsAssigning(false);
         return;
       }
@@ -573,15 +573,15 @@ export const UsersPage = () => {
       await loadUsers();
       setIsAssigning(false);
     } catch (err: any) {
-      setError(err.message || 'Error al asignar tenant y sede');
+      setError(err.message || 'Error assigning tenant and office');
       setIsAssigning(false);
     }
   };
 
-  // Inicializar por defecto: crear cliente, tenant y sede por defecto y asignar al usuario
+  // Initialize default: create default customer, tenant and office and assign to user
   const handleInitializeDefault = async () => {
     if (!selectedUserForAssign) {
-      setError('No hay usuario seleccionado');
+      setError('No user selected');
       return;
     }
 
@@ -589,83 +589,83 @@ export const UsersPage = () => {
       setError(null);
       setIsInitializing(true);
 
-      // Obtener países para usar el primero disponible
+      // Get countries to use first available
       const countries = await countryService.getAllCountries();
       if (countries.length === 0) {
-        setError('No hay países disponibles. Por favor, contacte al administrador.');
+        setError('No countries available. Please contact administrator.');
         setIsInitializing(false);
         return;
       }
 
       const defaultCountry = countries[0];
 
-      // Crear nombre del cliente basado en el usuario
+      // Create customer name based on user
       const customerName = selectedUserForAssign.name || selectedUserForAssign.email.split('@')[0];
       const customerIdentification = `USER-${selectedUserForAssign.id.substring(0, 8).toUpperCase()}`;
 
-      // Crear cliente (esto automáticamente crea un tenant y una oficina por defecto)
+      // Create customer (this automatically creates a default tenant and office)
       const response = await customerService.createCustomer({
-        name: `${customerName} - Cliente por Defecto`,
+        name: `${customerName} - Default Customer`,
         identification: customerIdentification,
         countryId: defaultCountry.id,
         email: selectedUserForAssign.contactEmail || selectedUserForAssign.email,
         phone: selectedUserForAssign.phone,
       });
 
-      // El backend retorna { customer, tenant, office }, pero el servicio tipa solo CustomerDto
-      // Verificar si la respuesta tiene la estructura correcta y extraer el customer
+      // Backend returns { customer, tenant, office }, but service only types CustomerDto
+      // Verify if response has correct structure and extract customer
       let newCustomer: CustomerDto;
       
       if (response && typeof response === 'object' && 'customer' in response) {
-        // La respuesta tiene la estructura { customer, tenant, office }
+        // Response has structure { customer, tenant, office }
         newCustomer = (response as any).customer;
       } else if (response && typeof response === 'object' && 'id' in response) {
-        // La respuesta es directamente el CustomerDto
+        // Response is directly CustomerDto
         newCustomer = response as CustomerDto;
       } else {
-        setError('Error al crear cliente: respuesta inválida del servidor');
+        setError('Error creating customer: invalid server response');
         setIsInitializing(false);
         return;
       }
       
       if (!newCustomer || !newCustomer.id) {
-        setError('Error al crear cliente: no se recibió un ID válido');
+        setError('Error creating customer: no valid ID received');
         setIsInitializing(false);
         return;
       }
 
-      // El backend ya creó el tenant, intentar obtenerlo de la respuesta o consultarlo
+      // Backend already created tenant, try to get it from response or query it
       let defaultTenant: TenantDto | null = null;
       
-      // Intentar obtener el tenant de la respuesta
+      // Try to get tenant from response
       if ((response as any)?.tenant?.id) {
         defaultTenant = (response as any).tenant;
       } else {
-        // Si no está en la respuesta, obtener los tenants del cliente
+        // If not in response, get customer tenants
         const customerTenants = await customerService.getCustomerTenants(newCustomer.id);
         if (customerTenants.length === 0) {
-          setError('No se pudo crear el tenant por defecto');
+          setError('Could not create default tenant');
           setIsInitializing(false);
           return;
         }
         defaultTenant = customerTenants[0];
       }
 
-      // Asignar el usuario al tenant creado
+      // Assign user to created tenant
       if (!defaultTenant || !defaultTenant.id) {
-        setError('No se pudo obtener el tenant creado');
+        setError('Could not get created tenant');
         setIsInitializing(false);
         return;
       }
 
-      // Obtener la oficina por defecto creada
+      // Get default created office
       let defaultOffice: OfficeDto | null = null;
       
-      // Intentar obtener la oficina de la respuesta
+      // Try to get office from response
       if ((response as any)?.office?.id) {
         defaultOffice = (response as any).office;
       } else {
-        // Si no está en la respuesta, obtener las oficinas del tenant
+        // If not in response, get tenant offices
         const tenantOffices = await officeService.getOfficesByTenant(defaultTenant.id);
         if (tenantOffices.length > 0) {
           defaultOffice = tenantOffices[0];
@@ -683,17 +683,17 @@ export const UsersPage = () => {
         phone: selectedUserForAssign.phone || '',
       });
 
-      // Guardar el ID del usuario antes de recargar para poder recargar sus asociaciones después
+      // Save user ID before reloading to reload associations afterwards
       const userIdToReload = selectedUserForAssign.id;
 
-      // Recargar datos
+      // Reload data
       await loadUsers();
       await loadTenants();
       await loadCustomers();
 
-      // Recargar asociaciones del usuario actualizado después de que se hayan cargado los usuarios
-      // El useEffect se encargará de cargar las asociaciones automáticamente, pero forzamos la recarga
-      // para asegurarnos de que se actualicen inmediatamente
+      // Reload updated user associations after users have been loaded
+      // useEffect will automatically load associations, but we force reload
+      // to ensure they update immediately
       await loadUserAssociations(userIdToReload);
 
       setIsAssignDrawerOpen(false);
@@ -708,7 +708,7 @@ export const UsersPage = () => {
     }
   };
 
-  // Manejar loading del drawer de detalles
+  // Handle loading of details drawer
   useEffect(() => {
     if (isDetailsDialogOpen) {
       setIsDetailsLoading(true);
@@ -721,7 +721,7 @@ export const UsersPage = () => {
     }
   }, [isDetailsDialogOpen]);
 
-  // Manejar loading del drawer de creación
+  // Handle loading of create drawer
   useEffect(() => {
     if (isCreateDialogOpen) {
       setIsCreateDrawerLoading(true);
@@ -734,7 +734,7 @@ export const UsersPage = () => {
     }
   }, [isCreateDialogOpen]);
 
-  // Manejar loading del drawer de edición
+  // Handle loading of edit drawer
   useEffect(() => {
     if (isEditDialogOpen) {
       setIsEditDrawerLoading(true);
@@ -752,12 +752,12 @@ export const UsersPage = () => {
       <div className={styles.container}>
         <div className={styles.header}>
           <PeopleRegular fontSize={32} />
-          <h1 className={styles.title}>Usuarios</h1>
+          <h1 className={styles.title}>Users</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalM }}>
           <div style={{ flex: 1 }}>
             <SearchBox
-              placeholder="Buscar por email, nombre o rol..."
+              placeholder="Search by email, name or role..."
               disabled
               size="large"
               style={{ width: '100%' }}
@@ -778,13 +778,13 @@ export const UsersPage = () => {
       </div>
       <div className={styles.header}>
         <PeopleRegular fontSize={32} />
-        <h1 className={styles.title}>Usuarios</h1>
+        <h1 className={styles.title}>Users</h1>
       </div>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalM }}>
         <div style={{ flex: 1 }}>
           <SearchBox
-            placeholder="Buscar por email, nombre o rol..."
+            placeholder="Search by email, name or role..."
             value={searchTerm}
             onChange={(e, data) => setSearchTerm(data.value)}
             size="large"
@@ -796,9 +796,9 @@ export const UsersPage = () => {
           icon={<ArrowClockwiseRegular />}
           onClick={loadUsers}
           disabled={isLoading}
-          title="Actualizar lista de usuarios"
+          title="Refresh user list"
         >
-          Actualizar
+          Refresh
         </Button>
       </div>
 
@@ -828,26 +828,26 @@ export const UsersPage = () => {
                     ...shorthands.borderRadius(tokens.borderRadiusMedium),
                   }}
                 >
-                  <Spinner size="large" label="Cargando usuarios..." />
+                  <Spinner size="large" label="Loading users..." />
                 </div>
               )}
               {filteredUsers.length === 0 ? (
                 <div style={{ padding: tokens.spacingVerticalXXL, textAlign: 'center' }}>
-                  <Text>No se encontraron usuarios</Text>
+                  <Text>No users found</Text>
                 </div>
               ) : (
                 <Table style={{ tableLayout: 'auto', width: '100%' }}>
                   <TableHeader>
                     <TableRow>
-                      <TableHeaderCell>Nombre</TableHeaderCell>
-                      <TableHeaderCell>Teléfono</TableHeaderCell>
+                      <TableHeaderCell>Name</TableHeaderCell>
+                      <TableHeaderCell>Phone</TableHeaderCell>
                       <TableHeaderCell>Tenants</TableHeaderCell>
-                      <TableHeaderCell>Sedes</TableHeaderCell>
-                      <TableHeaderCell>Rol</TableHeaderCell>
-                      <TableHeaderCell>Estado</TableHeaderCell>
+                      <TableHeaderCell>Offices</TableHeaderCell>
+                      <TableHeaderCell>Role</TableHeaderCell>
+                      <TableHeaderCell>Status</TableHeaderCell>
                       <TableHeaderCell>Auth0 ID</TableHeaderCell>
-                      <TableHeaderCell>Fecha de Creación</TableHeaderCell>
-                      <TableHeaderCell>Acciones</TableHeaderCell>
+                      <TableHeaderCell>Creation Date</TableHeaderCell>
+                      <TableHeaderCell>Actions</TableHeaderCell>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -888,14 +888,14 @@ export const UsersPage = () => {
                                   </Button>
                                 </TeachingPopoverTrigger>
                                 <TeachingPopoverSurface>
-                                  <TeachingPopoverHeader>Tenants Asociados</TeachingPopoverHeader>
+                                  <TeachingPopoverHeader>Associated Tenants</TeachingPopoverHeader>
                                   <TeachingPopoverBody>
                                     <div style={{ maxWidth: '600px', maxHeight: '400px', overflowY: 'auto' }}>
                                       <Table size="small">
                                         <TableHeader>
                                           <TableRow>
-                                            <TableHeaderCell>Nombre</TableHeaderCell>
-                                            <TableHeaderCell>Cliente</TableHeaderCell>
+                                            <TableHeaderCell>Name</TableHeaderCell>
+                                            <TableHeaderCell>Customer</TableHeaderCell>
                                           </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -923,11 +923,11 @@ export const UsersPage = () => {
                                   setAvailableOffices([]);
                                   setIsAssignDrawerOpen(true);
                                 }}
-                                title="Asignar sede y tenant"
+                                title="Assign office and tenant"
                               />
                             )}
                           </TableCell>
-                          {/* Sedes */}
+                          {/* Offices */}
                           <TableCell>
                             {offices.length > 0 ? (
                               <TeachingPopover>
@@ -949,7 +949,7 @@ export const UsersPage = () => {
                                   </Button>
                                 </TeachingPopoverTrigger>
                                 <TeachingPopoverSurface>
-                                  <TeachingPopoverHeader>Sedes Asociadas</TeachingPopoverHeader>
+                                  <TeachingPopoverHeader>Associated Offices</TeachingPopoverHeader>
                                   <TeachingPopoverBody>
                                     <div style={{ maxWidth: '600px', maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM }}>
                                       {offices.map((office) => (
@@ -976,11 +976,11 @@ export const UsersPage = () => {
                                   setAvailableOffices([]);
                                   setIsAssignDrawerOpen(true);
                                 }}
-                                title="Asignar sede y tenant"
+                                title="Assign office and tenant"
                               />
                             )}
                           </TableCell>
-                          {/* Rol */}
+                          {/* Role */}
                           <TableCell>
                             <Badge
                               appearance={user.role === 'Admin' ? 'filled' : 'outline'}
@@ -989,50 +989,50 @@ export const UsersPage = () => {
                               {getRoleLabel(user.role)}
                             </Badge>
                           </TableCell>
-                          {/* Estado */}
+                          {/* Status */}
                           <TableCell>
                             {user.isSuspended ? (
-                              <Badge appearance="filled" color="danger">Suspendido</Badge>
+                              <Badge appearance="filled" color="danger">Suspended</Badge>
                             ) : user.isActive ? (
-                              <Badge appearance="filled" color="success">Activo</Badge>
+                              <Badge appearance="filled" color="success">Active</Badge>
                             ) : (
-                              <Badge appearance="outline">Inactivo</Badge>
+                              <Badge appearance="outline">Inactive</Badge>
                             )}
                           </TableCell>
                           {/* Auth0 ID */}
                           <TableCell>{user.auth0Id || 'N/A'}</TableCell>
-                          {/* Fecha de Creación */}
+                          {/* Creation Date */}
                           <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
-                          {/* Acciones */}
+                          {/* Actions */}
                           <TableCell>
                             <Menu>
                               <MenuTrigger disableButtonEnhancement>
                                 <Button
                                   appearance="subtle"
                                   icon={<MoreHorizontalRegular />}
-                                  aria-label="Más acciones"
+                                  aria-label="More actions"
                                 />
                               </MenuTrigger>
                               <MenuPopover>
                                 <MenuList>
                                   <MenuItem icon={<EyeRegular />} onClick={() => handleViewDetails(user)}>
-                                    Ver detalles
+                                    View details
                                   </MenuItem>
                                   <MenuItem icon={<EditRegular />} onClick={() => handleEdit(user)}>
-                                    Editar
+                                    Edit
                                   </MenuItem>
                                   {user.isSuspended ? (
                                     <MenuItem icon={<PlayRegular />} onClick={() => handleActivate(user)}>
-                                      Activar
+                                      Activate
                                     </MenuItem>
                                   ) : (
                                     <MenuItem icon={<PauseRegular />} onClick={() => handleSuspend(user)}>
-                                      Suspender
+                                      Suspend
                                     </MenuItem>
                                   )}
                                   {user.id !== userDetails?.id && (
                                     <MenuItem icon={<DeleteRegular />} onClick={() => handleDelete(user)}>
-                                      Eliminar
+                                      Delete
                                     </MenuItem>
                                   )}
                                 </MenuList>
@@ -1069,13 +1069,13 @@ export const UsersPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Cerrar"
+                aria-label="Close"
                 icon={<DismissRegular />}
                 onClick={() => setIsCreateDialogOpen(false)}
               />
             }
           >
-            Nuevo Usuario
+            New User
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
@@ -1091,19 +1091,19 @@ export const UsersPage = () => {
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
                 </Field>
-                <Field label="Nombre" className={styles.formField}>
+                <Field label="Name" className={styles.formField}>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   />
                 </Field>
-                <Field label="Rol" className={styles.formField}>
+                <Field label="Role" className={styles.formField}>
                   <Select
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value as 'Admin' | 'User' })}
                   >
-                    <option value="User">Usuario</option>
-                    <option value="Admin">Administrador</option>
+                    <option value="User">User</option>
+                    <option value="Admin">Administrator</option>
                   </Select>
                 </Field>
                 <Field label="Tenant" className={styles.formField}>
@@ -1113,12 +1113,12 @@ export const UsersPage = () => {
                       const tenant = tenants.find((t) => t.name === data.optionValue);
                       if (tenant) {
                         setFormData({ ...formData, tenantId: tenant.id, officeId: '' });
-                        // Cargar sedes del tenant seleccionado
+                        // Load offices from selected tenant
                         try {
                           const offices = await officeService.getOfficesByTenant(tenant.id);
                           setCreateAvailableOffices(offices);
                         } catch (err: any) {
-                          console.error('[UsersPage] Error cargando sedes:', err);
+                          console.error('[UsersPage] Error loading offices:', err);
                           setCreateAvailableOffices([]);
                         }
                       }
@@ -1132,7 +1132,7 @@ export const UsersPage = () => {
                   </Combobox>
                 </Field>
                 {formData.tenantId && (
-                  <Field label="Sede" className={styles.formField}>
+                  <Field label="Office" className={styles.formField}>
                     <Combobox
                       value={formData.officeId ? createAvailableOffices.find((o) => o.id === formData.officeId)?.name || '' : ''}
                       onOptionSelect={(_, data) => {
@@ -1150,27 +1150,27 @@ export const UsersPage = () => {
                         ))
                       ) : (
                         <Option value="" disabled>
-                          No hay sedes disponibles para este tenant
+                          No offices available for this tenant
                         </Option>
                       )}
                     </Combobox>
                   </Field>
                 )}
-                <Field label="Email de Contacto" className={styles.formField}>
+                <Field label="Contact Email" className={styles.formField}>
                   <Input
                     type="email"
                     value={formData.contactEmail}
                     onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
                   />
                 </Field>
-                <Field label="Auth0 ID (opcional)" className={styles.formField}>
+                <Field label="Auth0 ID (optional)" className={styles.formField}>
                   <Input
                     value={formData.auth0Id}
                     onChange={(e) => setFormData({ ...formData, auth0Id: e.target.value })}
-                    placeholder="Se generará automáticamente si se deja vacío"
+                    placeholder="Will be generated automatically if left empty"
                   />
                 </Field>
-                <Field label="Teléfono" className={styles.formField}>
+                <Field label="Phone" className={styles.formField}>
                   <Input
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -1182,10 +1182,10 @@ export const UsersPage = () => {
                     onClick={() => setIsCreateDialogOpen(false)}
                     disabled={isCreating}
                   >
-                    Cancelar
+                    Cancel
                   </Button>
                   <Button appearance="primary" onClick={handleCreate} disabled={isCreating}>
-                    {isCreating ? 'Creando...' : 'Crear'}
+                    {isCreating ? 'Creating...' : 'Create'}
                   </Button>
                 </div>
               </>
@@ -1213,13 +1213,13 @@ export const UsersPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Cerrar"
+                aria-label="Close"
                 icon={<DismissRegular />}
                 onClick={() => setIsEditDialogOpen(false)}
               />
             }
           >
-            Editar Usuario
+            Edit User
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
@@ -1235,19 +1235,19 @@ export const UsersPage = () => {
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
                 </Field>
-                <Field label="Nombre" className={styles.formField}>
+                <Field label="Name" className={styles.formField}>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   />
                 </Field>
-                <Field label="Rol" className={styles.formField}>
+                <Field label="Role" className={styles.formField}>
                   <Select
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value as 'Admin' | 'User' })}
                   >
-                    <option value="User">Usuario</option>
-                    <option value="Admin">Administrador</option>
+                    <option value="User">User</option>
+                    <option value="Admin">Administrator</option>
                   </Select>
                 </Field>
                 <Field label="Tenant" className={styles.formField}>
@@ -1257,16 +1257,16 @@ export const UsersPage = () => {
                       const tenant = tenants.find((t) => t.name === data.optionValue);
                       if (tenant) {
                         setFormData({ ...formData, tenantId: tenant.id, officeId: '' });
-                        // Cargar sedes del tenant seleccionado
+                        // Load offices from selected tenant
                         try {
                           const offices = await officeService.getOfficesByTenant(tenant.id);
                           setEditAvailableOffices(offices);
-                          // Establecer la primera sede por defecto si existe
+                          // Set first office by default if exists
                           if (offices.length > 0) {
                             setFormData(prev => ({ ...prev, tenantId: tenant.id, officeId: offices[0].id }));
                           }
                         } catch (err: any) {
-                          console.error('[UsersPage] Error cargando sedes:', err);
+                          console.error('[UsersPage] Error loading offices:', err);
                           setEditAvailableOffices([]);
                         }
                       }
@@ -1280,7 +1280,7 @@ export const UsersPage = () => {
                   </Combobox>
                 </Field>
                 {formData.tenantId && (
-                  <Field label="Sede" className={styles.formField}>
+                  <Field label="Office" className={styles.formField}>
                     <Combobox
                       value={formData.officeId ? editAvailableOffices.find((o) => o.id === formData.officeId)?.name || '' : ''}
                       onOptionSelect={(_, data) => {
@@ -1298,13 +1298,13 @@ export const UsersPage = () => {
                         ))
                       ) : (
                         <Option value="" disabled>
-                          No hay sedes disponibles para este tenant
+                          No offices available for this tenant
                         </Option>
                       )}
                     </Combobox>
                   </Field>
                 )}
-                <Field label="Email de Contacto" className={styles.formField}>
+                <Field label="Contact Email" className={styles.formField}>
                   <Input
                     type="email"
                     value={formData.contactEmail}
@@ -1318,7 +1318,7 @@ export const UsersPage = () => {
                     placeholder="auth0|..."
                   />
                 </Field>
-                <Field label="Teléfono" className={styles.formField}>
+                <Field label="Phone" className={styles.formField}>
                   <Input
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -1330,10 +1330,10 @@ export const UsersPage = () => {
                     onClick={() => setIsEditDialogOpen(false)}
                     disabled={isSaving}
                   >
-                    Cancelar
+                    Cancel
                   </Button>
                   <Button appearance="primary" onClick={handleSave} disabled={isSaving}>
-                    {isSaving ? 'Guardando...' : 'Guardar'}
+                    {isSaving ? 'Saving...' : 'Save'}
                   </Button>
                 </div>
               </>
@@ -1345,20 +1345,20 @@ export const UsersPage = () => {
       {/* Dialog de eliminación */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={(_, data) => setIsDeleteDialogOpen(data.open)}>
         <DialogSurface>
-          <DialogTitle>Confirmar eliminación</DialogTitle>
+          <DialogTitle>Confirm deletion</DialogTitle>
           <DialogBody>
             <DialogContent>
               <Text>
-                ¿Está seguro de que desea eliminar el usuario "{selectedUser?.name || selectedUser?.email}"? Esta acción no se puede deshacer.
+                Are you sure you want to delete the user "{selectedUser?.name || selectedUser?.email}"? This action cannot be undone.
               </Text>
             </DialogContent>
           </DialogBody>
           <DialogActions>
             <Button appearance="secondary" onClick={() => setIsDeleteDialogOpen(false)}>
-              Cancelar
+              Cancel
             </Button>
             <Button appearance="primary" onClick={handleConfirmDelete}>
-              Eliminar
+              Delete
             </Button>
           </DialogActions>
         </DialogSurface>
@@ -1378,7 +1378,7 @@ export const UsersPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Cerrar"
+                aria-label="Close"
                 icon={<DismissRegular />}
                 onClick={() => {
                   setIsDetailsDialogOpen(false);
@@ -1387,7 +1387,7 @@ export const UsersPage = () => {
               />
             }
           >
-            Detalles del Usuario
+            User Details
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
@@ -1399,41 +1399,41 @@ export const UsersPage = () => {
                 <Field label="Email" className={styles.formField}>
                   <Input value={selectedUser.email} readOnly />
                 </Field>
-                <Field label="Nombre" className={styles.formField}>
+                <Field label="Name" className={styles.formField}>
                   <Input value={selectedUser.name || 'N/A'} readOnly />
                 </Field>
-                <Field label="Rol" className={styles.formField}>
+                <Field label="Role" className={styles.formField}>
                   <Input value={getRoleLabel(selectedUser.role)} readOnly />
                 </Field>
-                <Field label="Estado" className={styles.formField}>
+                <Field label="Status" className={styles.formField}>
                   <div>
                     {selectedUser.isSuspended ? (
-                      <Badge appearance="filled" color="danger">Suspendido</Badge>
+                      <Badge appearance="filled" color="danger">Suspended</Badge>
                     ) : selectedUser.isActive ? (
-                      <Badge appearance="filled" color="success">Activo</Badge>
+                      <Badge appearance="filled" color="success">Active</Badge>
                     ) : (
-                      <Badge appearance="outline">Inactivo</Badge>
+                      <Badge appearance="outline">Inactive</Badge>
                     )}
                   </div>
                 </Field>
-                <Field label="Email de Contacto" className={styles.formField}>
+                <Field label="Contact Email" className={styles.formField}>
                   <Input value={selectedUser.contactEmail || 'N/A'} readOnly />
                 </Field>
                 <Field label="Auth0 ID" className={styles.formField}>
                   <Input value={selectedUser.auth0Id || 'N/A'} readOnly />
                 </Field>
-                <Field label="Teléfono" className={styles.formField}>
+                <Field label="Phone" className={styles.formField}>
                   <Input value={selectedUser.phone || 'N/A'} readOnly />
                 </Field>
-                <Field label="Creado" className={styles.formField}>
+                <Field label="Created" className={styles.formField}>
                   <Input value={new Date(selectedUser.createdAt).toLocaleString()} readOnly />
                 </Field>
-                <Field label="Actualizado" className={styles.formField}>
+                <Field label="Updated" className={styles.formField}>
                   <Input value={new Date(selectedUser.updatedAt).toLocaleString()} readOnly />
                 </Field>
                 <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
                   <Button appearance="primary" onClick={() => setIsDetailsDialogOpen(false)}>
-                    Cerrar
+                    Close
                   </Button>
                 </div>
               </>
@@ -1463,7 +1463,7 @@ export const UsersPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Cerrar"
+                aria-label="Close"
                 icon={<DismissRegular />}
                 onClick={() => {
                   setIsCustomerDetailsDialogOpen(false);
@@ -1472,60 +1472,60 @@ export const UsersPage = () => {
               />
             }
           >
-            Detalles del Cliente
+            Customer Details
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
           <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
             {selectedCustomer && (
               <>
-                <Field label="Nombre" className={styles.formField}>
+                <Field label="Name" className={styles.formField}>
                   <Input value={selectedCustomer.name} readOnly />
                 </Field>
-                <Field label="Identificación" className={styles.formField}>
+                <Field label="Identification" className={styles.formField}>
                   <Input value={selectedCustomer.identification} readOnly />
                 </Field>
-                <Field label="País" className={styles.formField}>
+                <Field label="Country" className={styles.formField}>
                   <Input value={selectedCustomer.countryName || 'N/A'} readOnly />
                 </Field>
-                <Field label="Estado/Provincia" className={styles.formField}>
+                <Field label="State/Province" className={styles.formField}>
                   <Input value={selectedCustomer.stateProvince || 'N/A'} readOnly />
                 </Field>
-                <Field label="Ciudad" className={styles.formField}>
+                <Field label="City" className={styles.formField}>
                   <Input value={selectedCustomer.city || 'N/A'} readOnly />
                 </Field>
-                <Field label="Teléfono" className={styles.formField}>
+                <Field label="Phone" className={styles.formField}>
                   <Input value={selectedCustomer.phone || 'N/A'} readOnly />
                 </Field>
-                <Field label="Correo electrónico" className={styles.formField}>
+                <Field label="Email" className={styles.formField}>
                   <Input value={selectedCustomer.email || 'N/A'} readOnly />
                 </Field>
-                <Field label="Estado" className={styles.formField}>
+                <Field label="Status" className={styles.formField}>
                   <div>
                     {selectedCustomer.isSuspended ? (
-                      <Badge appearance="filled" color="danger">Suspendido</Badge>
+                      <Badge appearance="filled" color="danger">Suspended</Badge>
                     ) : selectedCustomer.isActive ? (
-                      <Badge appearance="filled" color="success">Activo</Badge>
+                      <Badge appearance="filled" color="success">Active</Badge>
                     ) : (
-                      <Badge appearance="outline">Inactivo</Badge>
+                      <Badge appearance="outline">Inactive</Badge>
                     )}
                   </div>
                 </Field>
                 <Field label="Tenants" className={styles.formField}>
                   <Input value={String(selectedCustomer.tenantCount || 0)} readOnly />
                 </Field>
-                <Field label="Usuarios" className={styles.formField}>
+                <Field label="Users" className={styles.formField}>
                   <Input value={String(selectedCustomer.userCount || 0)} readOnly />
                 </Field>
-                <Field label="Creado" className={styles.formField}>
+                <Field label="Created" className={styles.formField}>
                   <Input value={new Date(selectedCustomer.createdAt).toLocaleString()} readOnly />
                 </Field>
-                <Field label="Actualizado" className={styles.formField}>
+                <Field label="Updated" className={styles.formField}>
                   <Input value={new Date(selectedCustomer.updatedAt).toLocaleString()} readOnly />
                 </Field>
                 <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
                   <Button appearance="primary" onClick={() => setIsCustomerDetailsDialogOpen(false)}>
-                    Cerrar
+                    Close
                   </Button>
                 </div>
               </>
@@ -1537,14 +1537,14 @@ export const UsersPage = () => {
       {/* Dialog de cambiar cliente */}
       <Dialog open={isChangeCustomerDialogOpen} onOpenChange={(_, data) => setIsChangeCustomerDialogOpen(data.open)}>
         <DialogSurface>
-          <DialogTitle>Cambiar Cliente del Usuario</DialogTitle>
+          <DialogTitle>Change User Customer</DialogTitle>
           <DialogBody>
             <DialogContent>
               <Text>
-                Seleccione un nuevo cliente para el usuario "{selectedUser?.name || selectedUser?.email}".
-                Al cambiar el cliente, también se actualizarán la sede y el tenant asociados.
+                Select a new customer for user "{selectedUser?.name || selectedUser?.email}".
+                When changing the customer, the associated office and tenant will also be updated.
               </Text>
-              <Field label="Cliente" required className={styles.formField} style={{ marginTop: tokens.spacingVerticalM }}>
+              <Field label="Customer" required className={styles.formField} style={{ marginTop: tokens.spacingVerticalM }}>
                 <Combobox
                   value={customers.find(c => c.id === selectedNewCustomerId)?.name || ''}
                   onOptionSelect={(_, data) => {
@@ -1563,7 +1563,7 @@ export const UsersPage = () => {
               </Field>
               {selectedUser?.customerId && customerNames[selectedUser.customerId] && (
                 <Text size={300} style={{ marginTop: tokens.spacingVerticalS, color: tokens.colorNeutralForeground3 }}>
-                  Cliente actual: {customerNames[selectedUser.customerId]}
+                  Current customer: {customerNames[selectedUser.customerId]}
                 </Text>
               )}
             </DialogContent>
@@ -1577,14 +1577,14 @@ export const UsersPage = () => {
               }}
               disabled={isChangingCustomer}
             >
-              Cancelar
+              Cancel
             </Button>
             <Button 
               appearance="primary" 
               onClick={handleConfirmChangeCustomer}
               disabled={isChangingCustomer || !selectedNewCustomerId}
             >
-              {isChangingCustomer ? 'Cambiando...' : 'Cambiar Cliente'}
+              {isChangingCustomer ? 'Changing...' : 'Change Customer'}
             </Button>
           </DialogActions>
         </DialogSurface>
@@ -1612,13 +1612,13 @@ export const UsersPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Cerrar"
+                aria-label="Close"
                 icon={<DismissRegular />}
                 onClick={() => setIsAssignDrawerOpen(false)}
               />
             }
           >
-            Asignar Tenant y Sede
+            Assign Tenant and Office
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
@@ -1630,7 +1630,7 @@ export const UsersPage = () => {
             )}
             {selectedUserForAssign && (
               <>
-                <Field label="Usuario" className={styles.formField}>
+                <Field label="User" className={styles.formField}>
                   <Input 
                     value={selectedUserForAssign.name || selectedUserForAssign.email} 
                     readOnly 
@@ -1644,10 +1644,10 @@ export const UsersPage = () => {
                     disabled={isInitializing || isAssigning}
                     style={{ width: '100%' }}
                   >
-                    {isInitializing ? 'Inicializando...' : 'Inicializar por Defecto'}
+                    {isInitializing ? 'Initializing...' : 'Initialize Default'}
                   </Button>
                   <Text size={300} style={{ marginTop: tokens.spacingVerticalS, color: tokens.colorNeutralForeground3, display: 'block' }}>
-                    Crea un cliente, tenant y sede por defecto y los asigna a este usuario
+                    Creates a default customer, tenant and office and assigns them to this user
                   </Text>
                 </div>
                 <Field label="Tenant" required className={styles.formField}>
@@ -1668,7 +1668,7 @@ export const UsersPage = () => {
                   </Combobox>
                 </Field>
                 {selectedTenantId && (
-                  <Field label="Sede" className={styles.formField}>
+                  <Field label="Office" className={styles.formField}>
                     <Combobox
                       value={selectedOfficeId ? availableOffices.find((o) => o.id === selectedOfficeId)?.name || '' : ''}
                       onOptionSelect={(_, data) => {
@@ -1686,7 +1686,7 @@ export const UsersPage = () => {
                         ))
                       ) : (
                         <Option value="" disabled>
-                          No hay sedes disponibles para este tenant
+                          No offices available for this tenant
                         </Option>
                       )}
                     </Combobox>
@@ -1698,14 +1698,14 @@ export const UsersPage = () => {
                     onClick={() => setIsAssignDrawerOpen(false)}
                     disabled={isAssigning || isInitializing}
                   >
-                    Cancelar
+                    Cancel
                   </Button>
                   <Button 
                     appearance="primary" 
                     onClick={handleAssignTenantAndOffice}
                     disabled={isAssigning || isInitializing || !selectedTenantId}
                   >
-                    {isAssigning ? 'Asignando...' : 'Asignar'}
+                    {isAssigning ? 'Assigning...' : 'Assign'}
                   </Button>
                 </div>
               </>

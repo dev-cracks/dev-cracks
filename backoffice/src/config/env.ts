@@ -1,4 +1,4 @@
-// Usar la misma configuración que el web principal
+// Use the same configuration as the main web
 const normalizeUrl = (url: string) => url.replace(/\/+$/, '');
 
 const apiBaseUrl = (() => {
@@ -28,14 +28,14 @@ const apiBaseUrl = (() => {
 const apiAudience = (import.meta.env.VITE_AUTH0_API_AUDIENCE as string | undefined) || 
   'fractalize-services-api';
 
-// Determinar el redirect URI correcto basado en si estamos en modo proxy o standalone
+// Determine the correct redirect URI based on whether we're in proxy or standalone mode
 const getRedirectUri = () => {
   if (typeof window !== 'undefined') {
-    // Si estamos accediendo a través del servidor unificado, usar la URL completa con /backoffice
+    // If accessing through unified server, use full URL with /backoffice
     const base = import.meta.env.VITE_BACKOFFICE_BASE || '/backoffice';
     return `${window.location.origin}${base}/login`;
   }
-  // Fallback para desarrollo standalone (aunque ya no se usa)
+  // Fallback for standalone development (though not used anymore)
   return 'http://localhost:5173/backoffice/login';
 };
 

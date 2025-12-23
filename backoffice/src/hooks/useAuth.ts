@@ -30,19 +30,19 @@ export const useAuth = (): UseAuthReturn => {
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const isRedirectingRef = useRef(false);
 
-  // Mapear el usuario de Auth0
+  // Map Auth0 user
   const auth0MappedUser = mapAuth0User(auth0User);
 
-  // Combinar la información de Auth0 con la información de la base de datos
-  // Priorizar el nombre de la base de datos si está disponible
+  // Combine Auth0 information with database information
+  // Prioritize database name if available
   const user = useMemo((): User | null => {
     if (!auth0MappedUser) return null;
     
     return {
       ...auth0MappedUser,
-      // Usar el nombre de la base de datos si está disponible, sino usar el de Auth0
+      // Use database name if available, otherwise use Auth0 name
       name: userDetails?.name || auth0MappedUser.name,
-      // También actualizar otros campos relevantes de la base de datos
+      // Also update other relevant database fields
       tenantId: userDetails?.tenantId || auth0MappedUser.tenantId,
       role: userDetails?.role || auth0MappedUser.role,
     };
@@ -53,7 +53,7 @@ export const useAuth = (): UseAuthReturn => {
       return undefined;
     }
     
-    // Evitar múltiples redirecciones simultáneas
+    // Avoid multiple simultaneous redirections
     if (isRedirectingRef.current) {
       return undefined;
     }
@@ -67,8 +67,8 @@ export const useAuth = (): UseAuthReturn => {
       });
       return token;
     } catch (error: any) {
-      // Detectar si el error es por falta de refresh token
-      // El error puede venir en diferentes formatos de Auth0
+      // Detect if error is due to missing refresh token
+      // Error can come in different formats from Auth0
       const errorMessage = 
         error?.message || 
         error?.error_description || 
@@ -78,18 +78,18 @@ export const useAuth = (): UseAuthReturn => {
       const errorCode = error?.error || error?.code;
       const errorStack = error?.stack || '';
       
-      // Intentar serializar el error de forma segura
+      // Try to serialize error safely
       let errorString = errorMessage + ' ' + String(error) + ' ' + errorStack;
       try {
         errorString += ' ' + JSON.stringify(error);
       } catch {
-        // Si JSON.stringify falla, continuar sin él
+        // If JSON.stringify fails, continue without it
       }
       
       const errorStringLower = errorString.toLowerCase();
       
-      // Verificar múltiples formas del error de refresh token faltante
-      // Buscar patrones comunes: "vl:", "_y:", "Missing Refresh Token", etc.
+      // Check multiple forms of missing refresh token error
+      // Look for common patterns: "vl:", "_y:", "Missing Refresh Token", etc.
       const isMissingRefreshToken = 
         errorStringLower.includes('missing refresh token') ||
         errorStringLower.includes('missing_refresh_token') ||
@@ -99,7 +99,7 @@ export const useAuth = (): UseAuthReturn => {
         errorCode === 'consent_required' ||
         (error?.name && error.name.toLowerCase().includes('refresh')) ||
         (error?.name && error.name.toLowerCase().includes('missing')) ||
-        // Verificar también en el stack trace
+        // Also check in stack trace
         errorStack.toLowerCase().includes('missing refresh token') ||
         errorStack.toLowerCase().includes('_gettokenusingrefreshtoken');
       
@@ -107,8 +107,8 @@ export const useAuth = (): UseAuthReturn => {
         isRedirectingRef.current = true;
         console.warn('[useAuth] Refresh token missing or expired, redirecting to login...');
         
-        // Redirigir al login para obtener un nuevo refresh token
-        // Usar setTimeout para evitar problemas con el estado de React durante el render
+        // Redirect to login to get new refresh token
+        // Use setTimeout to avoid React state issues during render
         setTimeout(() => {
           try {
             loginWithRedirect({
@@ -130,7 +130,7 @@ export const useAuth = (): UseAuthReturn => {
         return undefined;
       }
       
-      // Solo loggear otros errores si no es un error de refresh token
+      // Only log other errors if not a refresh token error
       if (!isMissingRefreshToken) {
         console.error('[useAuth] Error getting access token:', error);
       }
@@ -139,7 +139,7 @@ export const useAuth = (): UseAuthReturn => {
     }
   }, [isAuthenticated, getAccessTokenSilently, loginWithRedirect]);
 
-  // Configurar el provider de token para apiService
+  // Configure token provider for apiService
   useEffect(() => {
     apiService.setAccessTokenProvider(getAccessToken);
   }, [getAccessToken]);
@@ -147,7 +147,7 @@ export const useAuth = (): UseAuthReturn => {
   const loadUserDetails = useCallback(async () => {
     if (!isAuthenticated) return;
     
-    // No intentar cargar detalles si ya se está redirigiendo
+    // Don't try to load details if already redirecting
     if (isRedirectingRef.current) {
       return;
     }
@@ -156,7 +156,7 @@ export const useAuth = (): UseAuthReturn => {
     try {
       const token = await getAccessToken();
       if (!token) {
-        // Si no hay token y se está redirigiendo, no hacer nada más
+        // If no token and redirecting, don't do anything else
         if (isRedirectingRef.current) {
           setIsLoadingDetails(false);
           return;
@@ -166,7 +166,7 @@ export const useAuth = (): UseAuthReturn => {
       }
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // Timeout de 10 segundos
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
       try {
         const response = await fetch(`${apiBaseUrl}/users/me`, {
@@ -183,22 +183,22 @@ export const useAuth = (): UseAuthReturn => {
           const data: UserDto = await response.json();
           setUserDetails(data);
         } else if (response.status === 401 || response.status === 403) {
-          // Si no está autorizado, limpiar detalles del usuario
+          // If not authorized, clear user details
           setUserDetails(null);
         }
       } catch (error: any) {
         clearTimeout(timeoutId);
-        // Ignorar errores de abort (solicitud cancelada) y errores de red
+        // Ignore abort errors (cancelled request) and network errors
         if (error.name !== 'AbortError' && error.name !== 'TypeError') {
           console.error('Error loading user details:', error);
         } else if (error.name === 'TypeError' && import.meta.env.DEV) {
-          // En desarrollo, solo mostrar un warning silencioso si la API no está disponible
+          // In development, only show silent warning if API is not available
           console.warn('[Dev] API server not available. User details will not be loaded.');
         }
       }
     } catch (error) {
-      // No loggear el error aquí si ya se está manejando en getAccessToken
-      // El error de refresh token ya se maneja en getAccessToken y se redirige al login
+      // Don't log error here if already handled in getAccessToken
+      // Refresh token error is already handled in getAccessToken and redirects to login
       if (!isRedirectingRef.current) {
         console.error('Error getting access token:', error);
       }
@@ -207,14 +207,14 @@ export const useAuth = (): UseAuthReturn => {
     }
   }, [isAuthenticated, getAccessToken]);
 
-  // Resetear el flag de redirección cuando el usuario se autentica
+  // Reset redirect flag when user authenticates
   useEffect(() => {
     if (isAuthenticated) {
       isRedirectingRef.current = false;
     }
   }, [isAuthenticated]);
 
-  // Cargar detalles del usuario cuando se autentica
+  // Load user details when authenticated
   useEffect(() => {
     if (isAuthenticated && user && !isRedirectingRef.current) {
       loadUserDetails();
@@ -225,13 +225,13 @@ export const useAuth = (): UseAuthReturn => {
 
 
   const login = useCallback((returnUrl?: string) => {
-    // Asegurar que el returnUrl incluya el base path si no lo tiene
+    // Ensure returnUrl includes base path if it doesn't have it
     const basePath = '/backoffice';
     let finalReturnUrl = returnUrl || window.location.pathname;
     
-    // Si el returnUrl no empieza con el base path, agregarlo
+    // If returnUrl doesn't start with base path, add it
     if (finalReturnUrl && !finalReturnUrl.startsWith(basePath)) {
-      // Si es una ruta relativa, agregar el base path
+      // If it's a relative route, add base path
       if (finalReturnUrl.startsWith('/')) {
         finalReturnUrl = `${basePath}${finalReturnUrl}`;
       } else {
@@ -258,9 +258,9 @@ export const useAuth = (): UseAuthReturn => {
     await loadUserDetails();
   }, [loadUserDetails]);
 
-  // TODO: WORKAROUND - Hardcodeado para testing. Revertir después del testing
+  // TODO: WORKAROUND - Hardcoded for testing. Revert after testing
   // const isAdmin = userDetails?.role === 'Admin';
-  const isAdmin = isAuthenticated; // Todos los usuarios autenticados son Admin temporalmente
+  const isAdmin = isAuthenticated; // All authenticated users are Admin temporarily
 
   return {
     user,

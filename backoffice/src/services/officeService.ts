@@ -13,10 +13,10 @@ export interface OfficeCustomerDto {
 export interface OfficeDto {
   id: string;
   name: string;
-  tenantId?: string; // Mantener para compatibilidad
-  tenantName?: string; // Mantener para compatibilidad
-  customerId?: string; // Mantener para compatibilidad
-  customerName?: string; // Mantener para compatibilidad
+  tenantId?: string; // Keep for compatibility
+  tenantName?: string; // Keep for compatibility
+  customerId?: string; // Keep for compatibility
+  customerName?: string; // Keep for compatibility
   tenants: OfficeTenantDto[];
   customers: OfficeCustomerDto[];
   address?: string;

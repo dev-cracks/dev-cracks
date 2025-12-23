@@ -10,7 +10,7 @@ import { SettingsPage } from './pages/SettingsPage';
 import { LoginPage } from './pages/LoginPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
-// Base path fijo para el backoffice cuando se accede a través del servidor unificado
+// Fixed base path for backoffice when accessed through unified server
 const BACKOFFICE_BASE = '/backoffice';
 
 const App = () => {

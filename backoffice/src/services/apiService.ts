@@ -8,7 +8,7 @@ export interface ApiError {
 export class ApiService {
   private baseUrl: string;
   private retryAttempts: Map<string, number> = new Map();
-  private readonly MAX_RETRIES = 2; // Máximo 2 intentos (primero + 1 reintento)
+  private readonly MAX_RETRIES = 2; // Maximum 2 attempts (first + 1 retry)
 
   constructor(baseUrl: string = apiBaseUrl) {
     this.baseUrl = baseUrl;
@@ -22,7 +22,7 @@ export class ApiService {
     if (attempt >= this.MAX_RETRIES) {
       return false;
     }
-    // Solo reintentar en errores de red o timeouts (sin statusCode) o errores 5xx
+    // Only retry on network errors or timeouts (without statusCode) or 5xx errors
     return statusCode === undefined || (statusCode >= 500 && statusCode < 600);
   }
 
@@ -31,7 +31,7 @@ export class ApiService {
     options: RequestInit = {},
     retryCount: number = 0
   ): Promise<T> {
-    // Logging para depuración - mostrar stack trace para identificar origen
+    // Logging for debugging - show stack trace to identify origin
     const stackTrace = new Error().stack;
     const callerInfo = stackTrace?.split('\n')[2]?.trim() || 'unknown';
     console.log(`[apiService] Request: ${options.method || 'GET'} ${endpoint}`, {
@@ -52,8 +52,8 @@ export class ApiService {
       }
 
       const controller = new AbortController();
-      // Timeout más largo en desarrollo para depuración (10 minutos), 10 segundos en producción
-      const timeoutMs = import.meta.env.DEV ? 600000 : 10000; // 10 minutos en dev, 10 segundos en prod
+      // Longer timeout in development for debugging (10 minutes), 10 seconds in production
+      const timeoutMs = import.meta.env.DEV ? 600000 : 10000; // 10 minutes in dev, 10 seconds in prod
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
       let response: Response;
@@ -71,7 +71,7 @@ export class ApiService {
       } catch (fetchError: any) {
         clearTimeout(timeoutId);
         
-        // Manejar errores de red (servidor no disponible, CORS, etc.)
+        // Handle network errors (server unavailable, CORS, etc.)
         if (fetchError.name === 'AbortError') {
           const error: ApiError = {
             message: 'Request timeout',
@@ -80,7 +80,7 @@ export class ApiService {
           throw error;
         }
         
-        // Error de red (servidor no disponible)
+        // Network error (server unavailable)
         const error: ApiError = {
           message: 'Network error: Unable to connect to the server',
           statusCode: undefined,
@@ -89,7 +89,7 @@ export class ApiService {
       }
 
       if (!response.ok) {
-        // Intentar obtener el mensaje de error del cuerpo de la respuesta
+        // Try to get error message from response body
         let errorMessage = `HTTP error! status: ${response.status}`;
         let errorData: any = null;
         
@@ -99,7 +99,7 @@ export class ApiService {
             errorMessage = errorData.message;
           }
         } catch {
-          // Si no se puede parsear JSON, usar el mensaje por defecto
+          // If JSON cannot be parsed, use default message
         }
 
         const error: ApiError = {
@@ -110,75 +110,75 @@ export class ApiService {
         throw error;
       }
 
-      // Si la respuesta no tiene contenido, retornar void
+      // If response has no content, return void
       if (response.status === 204) {
         return undefined as T;
       }
 
       return response.json();
       } catch (error: any) {
-      // Si es un error de ApiError, verificar si debemos reintentar
+      // If it's an ApiError, check if we should retry
       if (error.statusCode !== undefined || error.message) {
         const apiError = error as ApiError;
         
-        // Verificar si debemos reintentar
+        // Check if we should retry
         if (this.shouldRetry(apiError.statusCode, retryCount)) {
           const retryKey = this.getRetryKey(endpoint, options);
           const currentAttempts = this.retryAttempts.get(retryKey) || 0;
           
           if (currentAttempts < this.MAX_RETRIES) {
             this.retryAttempts.set(retryKey, currentAttempts + 1);
-            console.log(`[apiService] Reintentando ${endpoint} (intento ${currentAttempts + 1}/${this.MAX_RETRIES})`);
+            console.log(`[apiService] Retrying ${endpoint} (attempt ${currentAttempts + 1}/${this.MAX_RETRIES})`);
             
-            // Esperar un poco antes de reintentar (backoff exponencial)
+            // Wait a bit before retrying (exponential backoff)
             await new Promise(resolve => setTimeout(resolve, Math.min(1000 * Math.pow(2, currentAttempts), 5000)));
             
-            // Limpiar el contador después de un tiempo para evitar acumulación
+            // Clean up counter after some time to avoid accumulation
             setTimeout(() => {
               this.retryAttempts.delete(retryKey);
-            }, 60000); // Limpiar después de 1 minuto
+            }, 60000); // Clean up after 1 minute
             
-            // Reintentar
+            // Retry
             return this.request<T>(endpoint, options, retryCount + 1);
           }
         }
         
-        // Limpiar el contador de intentos
+        // Clean up retry counter
         const retryKey = this.getRetryKey(endpoint, options);
         this.retryAttempts.delete(retryKey);
         
         throw error;
       }
       
-      // Para otros errores, convertirlos en ApiError
+      // For other errors, convert them to ApiError
       const apiError: ApiError = {
         message: error.message || 'Unknown error occurred',
         statusCode: undefined,
       };
       
-      // Verificar si debemos reintentar errores desconocidos (probablemente de red)
+      // Check if we should retry unknown errors (probably network errors)
       if (this.shouldRetry(undefined, retryCount)) {
         const retryKey = this.getRetryKey(endpoint, options);
         const currentAttempts = this.retryAttempts.get(retryKey) || 0;
         
         if (currentAttempts < this.MAX_RETRIES) {
           this.retryAttempts.set(retryKey, currentAttempts + 1);
-          console.log(`[apiService] Reintentando ${endpoint} (intento ${currentAttempts + 1}/${this.MAX_RETRIES})`);
+          console.log(`[apiService] Retrying ${endpoint} (attempt ${currentAttempts + 1}/${this.MAX_RETRIES})`);
           
-          // Esperar un poco antes de reintentar
+          // Wait a bit before retrying
           await new Promise(resolve => setTimeout(resolve, Math.min(1000 * Math.pow(2, currentAttempts), 5000)));
           
-          // Limpiar el contador después de un tiempo
+          // Clean up counter after some time
           setTimeout(() => {
             this.retryAttempts.delete(retryKey);
           }, 60000);
           
-          // Reintentar
+          // Retry
           return this.request<T>(endpoint, options, retryCount + 1);
         }
       }
       
-      // Limpiar el contador de intentos
+      // Clean up retry counter
       const retryKey = this.getRetryKey(endpoint, options);
       this.retryAttempts.delete(retryKey);
       
@@ -187,7 +187,7 @@ export class ApiService {
   }
 
   async getAccessToken(): Promise<string | null> {
-    // Este método será sobrescrito por el hook useAuth
+    // This method will be overridden by the useAuth hook
     return null;
   }
 

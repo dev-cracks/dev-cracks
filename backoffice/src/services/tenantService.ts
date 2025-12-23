@@ -5,7 +5,7 @@ import { CustomerDto } from './customerService';
 export interface TenantDto {
   id: string;
   name: string;
-  customerId?: string; // Opcional porque puede no estar disponible hasta que el servidor se reinicie
+  customerId?: string; // Optional because it may not be available until server restarts
   customerName?: string;
   officeId?: string;
   officeName?: string;
@@ -40,11 +40,11 @@ export const tenantService = {
     try {
       return await apiService.request<TenantDto>('/tenants/me');
     } catch (error: any) {
-      // Si el usuario no tiene tenant (404), retornar null silenciosamente
+      // If user has no tenant (404), return null silently
       if (error?.statusCode === 404) {
         return null;
       }
-      // Para otros errores, lanzar la excepción
+      // For other errors, throw the exception
       throw error;
     }
   },

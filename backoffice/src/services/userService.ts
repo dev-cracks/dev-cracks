@@ -40,26 +40,26 @@ export interface UpdateUserRequest {
   phone?: string;
 }
 
-// Helper para convertir rol numérico a texto
+// Helper to convert numeric role to text
 function transformRole(role: number | string | 'Admin' | 'User'): 'Admin' | 'User' {
   if (typeof role === 'string') {
-    // Si ya es string, verificar que sea válido
+    // If already string, verify it's valid
     if (role === 'Admin' || role === 'User') {
       return role;
     }
-    // Si es string pero no válido, intentar convertir
+    // If string but not valid, try to convert
     return role.toLowerCase() === 'admin' ? 'Admin' : 'User';
   }
-  // Si es número, convertir: 0 = User, 1 = Admin
+  // If number, convert: 0 = User, 1 = Admin
   return role === 1 ? 'Admin' : 'User';
 }
 
-// Helper para transformar un UserDto
+// Helper to transform a UserDto
 function transformUserDto(user: any): UserDto {
   return {
     ...user,
     role: transformRole(user.role),
-    // Asegurar que isActive se mapee correctamente (puede venir como IsActive o isActive)
+    // Ensure isActive is mapped correctly (may come as IsActive or isActive)
     isActive: user.isActive ?? user.IsActive ?? true,
     isSuspended: user.isSuspended ?? user.IsSuspended ?? false,
   };
@@ -67,13 +67,13 @@ function transformUserDto(user: any): UserDto {
 
 export const userService = {
   async getAllUsers(): Promise<UserDto[]> {
-    // Usar el endpoint /users que requiere rol root y devuelve todos los usuarios
-    // en lugar de /backoffice/users que solo devuelve usuarios del tenant actual
+    // Use /users endpoint which requires root role and returns all users
+    // instead of /backoffice/users which only returns users from current tenant
     try {
       const users = await apiService.request<any[]>('/users');
       return users.map(transformUserDto);
     } catch (error: any) {
-      // Si falla por permisos, intentar con el endpoint de backoffice como fallback
+      // If fails due to permissions, try backoffice endpoint as fallback
       if (error?.statusCode === 403 || error?.statusCode === 401) {
         const users = await apiService.request<any[]>('/backoffice/users');
         return users.map(transformUserDto);
@@ -83,20 +83,20 @@ export const userService = {
   },
 
   async getUserById(id: string): Promise<UserDto> {
-    // Usar el endpoint /users que requiere rol root
+    // Use /users endpoint which requires root role
     const user = await apiService.request<any>(`/users/${id}`);
     return transformUserDto(user);
   },
 
   async createUser(data: CreateUserRequest): Promise<UserDto> {
-    // Convertir el rol de string a número para el backend
-    // Filtrar campos vacíos para que no se envíen como string vacío
+    // Convert role from string to number for backend
+    // Filter empty fields so they're not sent as empty strings
     const requestData: any = {
       email: data.email,
       role: data.role === 'Admin' ? 1 : (data.role === 'User' ? 0 : undefined),
     };
     
-    // Solo incluir campos opcionales si tienen valores válidos
+    // Only include optional fields if they have valid values
     if (data.name?.trim()) requestData.name = data.name.trim();
     if (data.tenantId?.trim()) requestData.tenantId = data.tenantId.trim();
     if (data.customerId?.trim()) requestData.customerId = data.customerId.trim();
@@ -113,13 +113,13 @@ export const userService = {
   },
 
   async updateUser(id: string, data: UpdateUserRequest): Promise<UserDto> {
-    // Si se está actualizando tenantId o customerId, usar el endpoint /users que requiere rol root
-    // De lo contrario, usar /backoffice/users
+    // If updating tenantId or customerId, use /users endpoint which requires root role
+    // Otherwise, use /backoffice/users
     const isAdminUpdate = data.tenantId !== undefined || data.customerId !== undefined;
     
     const endpoint = isAdminUpdate ? `/users/${id}` : `/backoffice/users/${id}`;
     
-    // Convertir el rol de string a número para el backend
+    // Convert role from string to number for backend
     const requestData = {
       ...data,
       role: data.role === 'Admin' ? 1 : (data.role === 'User' ? 0 : undefined),
@@ -134,19 +134,19 @@ export const userService = {
 
   async deleteUser(id: string): Promise<void> {
     try {
-      // Intentar primero con el endpoint de backoffice (solo funciona para usuarios del mismo tenant)
+      // Try first with backoffice endpoint (only works for users from same tenant)
       return await apiService.request<void>(`/backoffice/users/${id}`, {
         method: 'DELETE',
       });
     } catch (error: any) {
-      // Si falla con 403 (Forbidden), probablemente el usuario pertenece a otro tenant
-      // Intentar con el endpoint de administración que requiere rol root
+      // If fails with 403 (Forbidden), user probably belongs to another tenant
+      // Try with admin endpoint which requires root role
       if (error?.statusCode === 403 || error?.status === 403) {
         return await apiService.request<void>(`/users/${id}`, {
           method: 'DELETE',
         });
       }
-      // Si es otro error, relanzarlo
+      // If it's another error, rethrow it
       throw error;
     }
   },
@@ -183,28 +183,28 @@ export const userService = {
     return apiService.request<any[]>(`/users/${userId}/tenants`);
   },
 
-  // Asignar tenant a usuario
+  // Assign tenant to user
   async assignTenantToUser(userId: string, tenantId: string): Promise<void> {
     return apiService.request<void>(`/users/${userId}/tenants/${tenantId}`, {
       method: 'POST',
     });
   },
 
-  // Desasignar tenant de usuario
+  // Unassign tenant from user
   async removeTenantFromUser(userId: string, tenantId: string): Promise<void> {
     return apiService.request<void>(`/users/${userId}/tenants/${tenantId}`, {
       method: 'DELETE',
     });
   },
 
-  // Asignar oficina a usuario
+  // Assign office to user
   async assignOfficeToUser(userId: string, officeId: string): Promise<void> {
     return apiService.request<void>(`/users/${userId}/offices/${officeId}`, {
       method: 'POST',
     });
   },
 
-  // Desasignar oficina de usuario
+  // Unassign office from user
   async removeOfficeFromUser(userId: string, officeId: string): Promise<void> {
     return apiService.request<void>(`/users/${userId}/offices/${officeId}`, {
       method: 'DELETE',
