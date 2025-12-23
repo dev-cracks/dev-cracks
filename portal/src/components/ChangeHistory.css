@@ -1,0 +1,127 @@
+.change-history {
+  margin-top: 8px;
+}
+
+.change-history__empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.change-history__error {
+  text-align: center;
+  padding: 40px 20px;
+  color: #f85149;
+  background: rgba(248, 81, 73, 0.1);
+  border: 1px solid rgba(248, 81, 73, 0.3);
+  border-radius: 8px;
+}
+
+.change-history__error p {
+  margin: 0;
+  font-weight: 500;
+}
+
+.change-history__list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.change-history__entry {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.3s ease;
+}
+
+.change-history__entry:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(177, 158, 239, 0.3);
+}
+
+.change-history__entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.change-history__field-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(177, 158, 239, 0.2);
+  border: 1px solid rgba(177, 158, 239, 0.3);
+  border-radius: 12px;
+  color: #B19EEF;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.change-history__date {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+}
+
+.change-history__entry-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.change-history__change {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.change-history__change-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+
+.change-history__change-value {
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 6px;
+  word-break: break-word;
+}
+
+.change-history__change-value--old {
+  background: rgba(248, 81, 73, 0.1);
+  border: 1px solid rgba(248, 81, 73, 0.2);
+  color: #f85149;
+}
+
+.change-history__change-value--new {
+  background: rgba(56, 139, 253, 0.1);
+  border: 1px solid rgba(56, 139, 253, 0.2);
+  color: #4A90E2;
+}
+
+.change-history__arrow {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .change-history__entry-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .change-history__arrow {
+    transform: rotate(90deg);
+    text-align: center;
+  }
+}
+

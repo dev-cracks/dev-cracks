@@ -1,0 +1,191 @@
+.account-page {
+  min-height: 100vh;
+  background: rgb(6, 0, 16);
+  color: #fff;
+}
+
+.account-page__content-wrapper {
+  padding: 2rem 0;
+}
+
+.account-page__container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.account-page__header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.account-page__header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: #fff;
+}
+
+.account-page__header p {
+  font-size: 1.125rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+.account-page__content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.account-page__card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 2rem;
+  backdrop-filter: blur(10px);
+}
+
+.account-page__profile {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.account-page__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.account-page__profile-info {
+  flex: 1;
+}
+
+.account-page__profile-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: #fff;
+}
+
+.account-page__profile-email {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.account-page__card-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0 0 1.25rem 0;
+  color: #fff;
+  border-bottom: 2px solid rgba(177, 158, 239, 0.2);
+  padding-bottom: 0.75rem;
+}
+
+.account-page__info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.25rem;
+}
+
+.account-page__info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.account-page__info-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.account-page__info-value {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.account-page__info-value--mono {
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.account-page__status {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.account-page__status--active {
+  background: rgba(56, 139, 253, 0.2);
+  color: #4A90E2;
+  border: 1px solid rgba(56, 139, 253, 0.3);
+}
+
+.account-page__section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(177, 158, 239, 0.2), transparent);
+  margin: 1.5rem 0;
+  border: none;
+}
+
+.account-page__section-subtitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(177, 158, 239, 0.1);
+}
+
+.account-page__picture-section {
+  text-align: center;
+}
+
+.account-page__picture-avatar {
+  width: 200px !important;
+  height: 200px !important;
+  border: 3px solid rgba(177, 158, 239, 0.3) !important;
+  margin-bottom: 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.account-page__picture-note {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .account-page__container {
+    padding: 0 1rem;
+  }
+
+  .account-page__header h1 {
+    font-size: 2rem;
+  }
+
+  .account-page__profile {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .account-page__info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
