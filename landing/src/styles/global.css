@@ -73,7 +73,6 @@ main {
 .header {
   background-color: rgb(6, 0, 16);
   border-bottom: 1px solid #30363d;
-  padding: 20px 0;
   position: fixed;
   top: 0;
   left: 0;
@@ -100,32 +99,24 @@ main {
   position: relative;
 }
 
-.logo img {
-  height: 36px; /* Reducido 40%: 60px * 0.6 = 36px */
-  width: 36px;
-  border-radius: 50%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  /* Zoom in content 30% so the center appears larger */
-  transform: scale(1.3);
-  border: 2px solid rgba(88, 166, 255, 0.3);
-  box-shadow: 
-    0 0 15px rgba(88, 166, 255, 0.2),
-    inset 0 0 10px rgba(88, 166, 255, 0.1);
-  transition: all 0.3s ease;
-  background: rgba(22, 27, 34, 0.6);
-  padding: 0;
-  box-sizing: border-box;
-  overflow: hidden;
+.logo__svg {
+  height: 80px;
+  width: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
 }
 
-.logo:hover img {
-  border-color: rgba(88, 166, 255, 0.6);
-  box-shadow: 
-    0 0 25px rgba(88, 166, 255, 0.4),
-    inset 0 0 15px rgba(88, 166, 255, 0.2);
-  transform: scale(1.35);
+.logo__svg svg {
+  height: 100%;
+  width: auto;
+  transition: transform 0.3s ease;
+}
+
+.logo:hover .logo__svg {
+  transform: scale(1.05);
 }
 
 .logo h1 {
@@ -1359,11 +1350,19 @@ main {
 .contact-logo {
   width: 120px;
   height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
-  object-fit: cover;
   border: 3px solid #58a6ff;
   box-shadow: 0 8px 25px rgba(88, 166, 255, 0.3);
   animation: pulse-glow 3s ease-in-out infinite;
+  overflow: hidden;
+}
+
+.contact-logo svg {
+  width: 100%;
+  height: 100%;
 }
 
 @keyframes pulse-glow {

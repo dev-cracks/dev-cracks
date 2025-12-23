@@ -36,7 +36,31 @@ export const PillNav: React.FC<PillNavProps> = ({ className = '' }) => {
     <nav className={`pill-nav ${className}`}>
       <div className="pill-nav__container">
         <div className="pill-nav__logo" onClick={() => navigate('/dashboard')}>
-          <img src="/dev-cracks-logo.jpg" alt="Dev Cracks Logo" />
+          <div className="pill-nav__logo-svg">
+            <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="crackGradientNav" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#FF0080" />
+                  <stop offset="100%" stopColor="#7928CA" />
+                </linearGradient>
+                <filter id="glowNav" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="5" />
+                </filter>
+              </defs>
+              <g transform="translate(106, 120)">
+                <path d="M60 40 L10 100 L60 160" stroke="url(#crackGradientNav)" strokeWidth="25" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M240 40 L290 100 L240 160" stroke="url(#crackGradientNav)" strokeWidth="25" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M180 10 L120 110 L170 110 L110 210" stroke="white" strokeWidth="20" strokeLinecap="round" strokeLinejoin="round" filter="url(#glowNav)" />
+                <path d="M180 10 L120 110 L170 110 L110 210" stroke="white" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
+              </g>
+              <text x="256" y="400" textAnchor="middle" fontFamily="Arial Black, sans-serif" fontWeight="900" fontSize="58" fill="white" letterSpacing="-2">
+                DEV<tspan fill="url(#crackGradientNav)">CRACKS</tspan>
+              </text>
+              <text x="256" y="440" textAnchor="middle" fontFamily="Courier New, monospace" fontWeight="bold" fontSize="20" fill="#888" letterSpacing="5">
+                CODE // BREAKER
+              </text>
+            </svg>
+          </div>
           <span>DEV CRACKS</span>
         </div>
         <div className="pill-nav__menu">
