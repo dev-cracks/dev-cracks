@@ -71,14 +71,17 @@ const OrbModal: React.FC<OrbModal.Props> = ({ isOpen, onClose }) => {
 
       // Función para generar intervalo irregular
       const updateOrbState = () => {
-        // Alternar hoverIntensity entre diferentes valores de manera más suave (0.5 a 0.7)
-        // Rango más pequeño y valores más estables para evitar cambios bruscos
-        const intensities = [0.5, 0.55, 0.6, 0.65, 0.7];
-        const randomIntensity = intensities[Math.floor(Math.random() * intensities.length)];
+        // Alternar hoverIntensity con picos altos hasta 3.24
+        // Crear una secuencia que incluya valores bajos, medios y picos altos
+        const baseIntensities = [0.5, 0.8, 1.2, 1.8, 2.5];
+        const peakIntensities = [3.0, 3.24, 3.2, 3.1];
+        // Combinar ambos arrays con más probabilidad de picos altos
+        const allIntensities = [...baseIntensities, ...peakIntensities, ...peakIntensities, ...peakIntensities];
+        const randomIntensity = allIntensities[Math.floor(Math.random() * allIntensities.length)];
         setOrbHoverIntensity(randomIntensity);
 
-        // Intervalo irregular entre 300ms y 500ms (más lento para evitar parpadeos)
-        const nextInterval = Math.random() * 200 + 300;
+        // Intervalo irregular entre 200ms y 400ms
+        const nextInterval = Math.random() * 200 + 200;
         
         thinkingIntervalRef.current = setTimeout(updateOrbState, nextInterval);
       };

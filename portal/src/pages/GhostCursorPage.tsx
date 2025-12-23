@@ -14,54 +14,58 @@ export const GhostCursorPage = () => {
     }, 300);
   };
 
-  const handleNavClick = (path: string, external: boolean = false) => {
-    if (external) {
+  const handleNavClick = (path: string, external: boolean = false, absolute: boolean = false) => {
+    if (external || absolute) {
+      // Para rutas externas o absolutas, usar window.location.href
       window.location.href = path;
     } else {
-      setGhostActive(false);
-      setTimeout(() => {
-        window.location.href = path;
-      }, 300);
+      // Si es dashboard, usar el mismo comportamiento que el logo
+      if (path === '/dashboard') {
+        handleLogoClick();
+      } else {
+        // Navegar directamente sin delay para otras rutas internas del portal
+        navigate(path);
+      }
     }
   };
 
   // Iconos SVG en blanco limpio
+  const DashboardIcon = () => (
+    <svg stroke="#ffffff" fill="#ffffff" strokeWidth="2" viewBox="0 0 24 24" height="1.5em" width="1.5em" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" strokeWidth="0"></path>
+    </svg>
+  );
+
   const BackofficeIcon = () => (
-    <svg stroke="#ffffff" fill="#ffffff" strokeWidth="0" viewBox="0 0 24 24" height="1.5em" width="1.5em" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"></path>
-    </svg>
-  );
-
-  const PortalIcon = () => (
-    <svg stroke="#ffffff" fill="#ffffff" strokeWidth="0" viewBox="0 0 24 24" height="1.5em" width="1.5em" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path>
-    </svg>
-  );
-
-  const LandingIcon = () => (
-    <svg stroke="#ffffff" fill="#ffffff" strokeWidth="0" viewBox="0 0 24 24" height="1.5em" width="1.5em" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>
+    <svg stroke="#ffffff" fill="#ffffff" strokeWidth="2" viewBox="0 0 24 24" height="1.5em" width="1.5em" xmlns="http://www.w3.org/2000/svg">
+      <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" strokeWidth="0"></path>
     </svg>
   );
 
   const DevCoachIcon = () => (
-    <svg stroke="#ffffff" fill="#ffffff" strokeWidth="0" viewBox="0 0 24 24" height="1.5em" width="1.5em" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
+    <svg stroke="#ffffff" fill="#ffffff" strokeWidth="2" viewBox="0 0 24 24" height="1.5em" width="1.5em" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" strokeWidth="0"></path>
     </svg>
   );
 
   const RouteOnIcon = () => (
-    <svg stroke="#ffffff" fill="#ffffff" strokeWidth="0" viewBox="0 0 24 24" height="1.5em" width="1.5em" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path>
+    <svg stroke="#ffffff" fill="#ffffff" strokeWidth="2" viewBox="0 0 24 24" height="1.5em" width="1.5em" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" strokeWidth="0"></path>
+    </svg>
+  );
+
+  const LandingIcon = () => (
+    <svg stroke="#ffffff" fill="#ffffff" strokeWidth="2" viewBox="0 0 24 24" height="1.5em" width="1.5em" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" strokeWidth="0"></path>
     </svg>
   );
 
   const navItems = [
-    { path: '/backoffice', label: 'Backoffice', icon: <BackofficeIcon /> },
-    { path: '/portal', label: 'Portal', icon: <PortalIcon /> },
-    { path: '/landing', label: 'Landing', icon: <LandingIcon /> },
-    { path: 'https://dev-coach.dev-cracks.com', label: 'Dev Coach', icon: <DevCoachIcon />, external: true },
-    { path: 'https://route-on.dev-cracks.com', label: 'Route On', icon: <RouteOnIcon />, external: true }
+    { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
+    { path: '/backoffice', label: 'Backoffice', icon: <BackofficeIcon />, absolute: true },
+    { path: 'https://dev-coach.dev-cracks.com', label: 'Dev-coach', icon: <DevCoachIcon />, external: true },
+    { path: 'https://route-on.dev-cracks.com', label: 'Route-On', icon: <RouteOnIcon />, external: true },
+    { path: '/landing', label: 'Landing', icon: <LandingIcon />, absolute: true }
   ];
 
   return (
@@ -140,7 +144,11 @@ export const GhostCursorPage = () => {
             </div>
           </div>
 
-          <div className="ghost-cursor-page__fractalize-logo">
+          <div 
+            className="ghost-cursor-page__fractalize-logo"
+            onClick={handleLogoClick}
+            style={{ cursor: 'pointer' }}
+          >
             <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="fractalGradient" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
@@ -184,7 +192,7 @@ export const GhostCursorPage = () => {
             <button
               key={item.path}
               className="ghost-cursor-page__nav-item"
-              onClick={() => handleNavClick(item.path, item.external)}
+              onClick={() => handleNavClick(item.path, item.external || false, item.absolute || false)}
               title={item.label}
             >
               <span className="ghost-cursor-page__nav-icon">{item.icon}</span>
