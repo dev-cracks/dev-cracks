@@ -11,6 +11,66 @@
     />
   </head>
   <body>
+    <audio id="thunder-audio" autoplay muted playsinline preload="auto" style="display: none;">
+      <source src="/audio/thunder.mp3" type="audio/mpeg">
+    </audio>
+    <script>
+      (function() {
+        const audio = document.getElementById('thunder-audio');
+        if (!audio) return;
+        
+        audio.volume = 0.5;
+        
+        // Función para intentar reproducir
+        function tryPlay() {
+          if (audio.paused || audio.ended) {
+            audio.play().then(function() {
+              console.log('Audio playing automatically');
+              // Desmutear después de que empiece
+              setTimeout(function() {
+                audio.muted = false;
+                console.log('Audio unmuted');
+              }, 100);
+            }).catch(function(error) {
+              console.log('Audio play attempt failed:', error);
+            });
+          }
+        }
+        
+        // Intentar reproducir inmediatamente
+        tryPlay();
+        
+        // Intentar cuando el audio esté listo
+        audio.addEventListener('canplaythrough', function() {
+          console.log('Audio can play through');
+          tryPlay();
+        }, { once: true });
+        
+        audio.addEventListener('canplay', function() {
+          console.log('Audio can play');
+          tryPlay();
+        }, { once: true });
+        
+        // Intentar en DOMContentLoaded
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', tryPlay);
+        } else {
+          tryPlay();
+        }
+        
+        // Intentar cuando la página esté completamente cargada
+        if (document.readyState !== 'complete') {
+          window.addEventListener('load', tryPlay);
+        } else {
+          tryPlay();
+        }
+        
+        // Intentar después de un delay
+        setTimeout(tryPlay, 100);
+        setTimeout(tryPlay, 300);
+        setTimeout(tryPlay, 500);
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

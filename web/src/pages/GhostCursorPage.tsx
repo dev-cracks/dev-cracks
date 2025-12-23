@@ -15,70 +15,138 @@ export const GhostCursorPage = () => {
   const textTimerRef = useRef<NodeJS.Timeout | null>(null);
   const logoTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Reproducir audio al cargar la página
+  // Reproducir audio automáticamente al cargar la página (sin necesidad de interacción)
   useEffect(() => {
-    const audioPath = '/audio/thunder.mp3';
-    const audio = new Audio(audioPath);
-    audio.volume = 0.5; // Volumen al 50%
-    audio.preload = 'auto';
-    audioRef.current = audio;
+    // Buscar el elemento audio en el HTML
+    const audioElement = document.getElementById('thunder-audio') as HTMLAudioElement;
     
-    // Verificar que el audio se cargue correctamente
-    audio.addEventListener('canplaythrough', () => {
-      console.log('Audio loaded and ready to play');
-    });
+    if (!audioElement) {
+      console.error('Audio element not found in HTML');
+      return;
+    }
     
-    audio.addEventListener('error', (e) => {
-      console.error('Audio error:', e);
-      console.error('Audio path:', audioPath);
-      console.error('Audio src:', audio.src);
-    });
+    audioRef.current = audioElement;
     
-    // Intentar reproducir (puede fallar si el usuario no ha interactuado)
-    const playAudio = async () => {
+    // Asegurar que el volumen esté correcto
+    audioElement.volume = 0.5;
+    
+    // Función para intentar reproducir
+    const tryPlay = async () => {
       try {
-        // Verificar que el audio esté listo
-        if (audio.readyState >= 2) { // HAVE_CURRENT_DATA o superior
-          await audio.play();
-          console.log('Audio playing successfully');
-        } else {
-          // Esperar a que el audio esté listo
-          audio.addEventListener('canplay', async () => {
-            try {
-              await audio.play();
-              console.log('Audio playing after canplay event');
-            } catch (err) {
-              console.log('Audio play failed after canplay:', err);
-            }
-          }, { once: true });
+        // Si ya está reproduciendo, verificar que no esté muted
+        if (!audioElement.paused && !audioElement.ended) {
+          if (audioElement.muted) {
+            audioElement.muted = false;
+            console.log('Audio was muted, unmuting now');
+          }
+          return;
         }
-      } catch (error) {
-        // Si falla, esperar a que el usuario interactúe
-        console.log('Audio play failed, waiting for user interaction:', error);
+        
+        // Si está muted, intentar reproducir con muted y luego desmutear
+        if (audioElement.muted) {
+          await audioElement.play();
+          console.log('Audio playing with muted');
+          setTimeout(() => {
+            audioElement.muted = false;
+            console.log('Audio unmuted, volume:', audioElement.volume);
+          }, 100);
+        } else {
+          // Intentar reproducir sin muted
+          await audioElement.play();
+          console.log('Audio playing automatically');
+        }
+      } catch (error: any) {
+        console.log('Audio play attempt failed:', error);
+        // Si falla, intentar con muted
+        try {
+          audioElement.muted = true;
+          await audioElement.play();
+          console.log('Audio playing with muted workaround');
+          setTimeout(() => {
+            audioElement.muted = false;
+            console.log('Audio unmuted after workaround');
+          }, 100);
+        } catch (mutedError) {
+          console.log('Audio play failed even with muted:', mutedError);
+        }
       }
     };
     
-    // Intentar reproducir después de un pequeño delay
-    const timer = setTimeout(() => {
-      playAudio();
-    }, 200);
+    // Verificar estado de reproducción
+    audioElement.addEventListener('playing', () => {
+      console.log('Audio is playing');
+      console.log('Audio volume:', audioElement.volume);
+      console.log('Audio muted:', audioElement.muted);
+      // Asegurar que no esté muted cuando esté reproduciendo
+      if (audioElement.muted) {
+        setTimeout(() => {
+          audioElement.muted = false;
+        }, 50);
+      }
+    });
+    
+    audioElement.addEventListener('error', (e) => {
+      console.error('Audio error:', e);
+      if (audioElement.error) {
+        console.error('Audio error code:', audioElement.error.code);
+        console.error('Audio error message:', audioElement.error.message);
+      }
+    });
+    
+    // Intentar reproducir en múltiples momentos
+    const timers: NodeJS.Timeout[] = [];
+    
+    // Intentar inmediatamente si ya está listo
+    if (audioElement.readyState >= 2) {
+      tryPlay();
+    }
+    
+    // Intentar cuando pueda reproducir
+    audioElement.addEventListener('canplay', () => {
+      console.log('Audio can play');
+      tryPlay();
+    }, { once: true });
+    
+    // Intentar cuando esté completamente listo
+    audioElement.addEventListener('canplaythrough', () => {
+      console.log('Audio can play through');
+      tryPlay();
+    }, { once: true });
+    
+    // Intentar después de varios delays
+    [100, 200, 300, 500, 1000].forEach((delay) => {
+      const timer = setTimeout(() => {
+        if (audioElement.paused) {
+          tryPlay();
+        }
+      }, delay);
+      timers.push(timer);
+    });
     
     return () => {
-      clearTimeout(timer);
+      timers.forEach(timer => clearTimeout(timer));
       if (audioRef.current) {
-        audioRef.current.pause();
         audioRef.current = null;
       }
     };
   }, []);
 
   // Reproducir audio cuando el usuario hace click (si no se ha reproducido)
-  const playAudioOnClick = () => {
+  const playAudioOnClick = useRef(false);
+  
+  const playAudioOnInteraction = () => {
+    if (playAudioOnClick.current) return; // Ya se intentó reproducir
+    
     if (audioRef.current) {
       const audio = audioRef.current;
+      // Intentar reproducir siempre que esté pausado o haya terminado
       if (audio.paused || audio.ended) {
-        audio.play().catch(error => {
-          console.log('Audio play on click failed:', error);
+        audio.currentTime = 0; // Reiniciar desde el principio
+        audio.play().then(() => {
+          console.log('Audio playing on interaction');
+          playAudioOnClick.current = true;
+        }).catch(error => {
+          console.log('Audio play on interaction failed:', error);
         });
       }
     } else {
@@ -86,11 +154,34 @@ export const GhostCursorPage = () => {
       const audio = new Audio('/audio/thunder.mp3');
       audio.volume = 0.5;
       audioRef.current = audio;
-      audio.play().catch(error => {
-        console.log('Audio play on click (new instance) failed:', error);
+      audio.play().then(() => {
+        console.log('Audio playing on interaction (new instance)');
+        playAudioOnClick.current = true;
+      }).catch(error => {
+        console.log('Audio play on interaction (new instance) failed:', error);
       });
     }
   };
+
+  // Agregar listener global para cualquier interacción del usuario
+  useEffect(() => {
+    const handleUserInteraction = () => {
+      playAudioOnInteraction();
+    };
+
+    // Agregar listeners para diferentes tipos de interacción (solo una vez)
+    document.addEventListener('click', handleUserInteraction, { once: true });
+    document.addEventListener('mousedown', handleUserInteraction, { once: true });
+    document.addEventListener('touchstart', handleUserInteraction, { once: true });
+    document.addEventListener('keydown', handleUserInteraction, { once: true });
+
+    return () => {
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('mousedown', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+      document.removeEventListener('keydown', handleUserInteraction);
+    };
+  }, []);
 
   const text = "¿Le temes a la IA, Automatización y la transformación digital?";
 
@@ -155,7 +246,7 @@ export const GhostCursorPage = () => {
     e.stopPropagation();
     
     // Intentar reproducir audio si no se ha reproducido
-    playAudioOnClick();
+    playAudioOnInteraction();
     
     if (pageState === 'navigating') return;
     
