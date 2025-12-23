@@ -28,11 +28,23 @@ const apiBaseUrl = (() => {
 const apiAudience = (import.meta.env.VITE_AUTH0_API_AUDIENCE as string | undefined) || 
   'fractalize-services-api';
 
+// El redirect_uri debe ser la URL base donde se renderiza la aplicación React
+// Auth0Provider manejará el callback automáticamente en cualquier ruta
+const getRedirectUri = () => {
+  if (typeof window !== 'undefined') {
+    // If accessing through unified server, use full URL with /portal
+    const base = '/portal';
+    return `${window.location.origin}${base}`;
+  }
+  // Fallback for standalone development
+  return 'http://localhost:5173/portal';
+};
+
 export const auth0Config = {
   domain: (import.meta.env.VITE_AUTH0_DOMAIN as string | undefined) || 'dev-cracks.eu.auth0.com',
   clientId: (import.meta.env.VITE_AUTH0_CLIENT_ID as string | undefined) || 'puVivGd9KVmrSyVu8hCytE1juOlFLdht',
   authorizationParams: {
-    redirect_uri: typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173',
+    redirect_uri: getRedirectUri(),
     audience: apiAudience,
     scope: 'openid profile email'
   }

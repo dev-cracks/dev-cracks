@@ -29,14 +29,16 @@ const apiAudience = (import.meta.env.VITE_AUTH0_API_AUDIENCE as string | undefin
   'fractalize-services-api';
 
 // Determine the correct redirect URI based on whether we're in proxy or standalone mode
+// El redirect_uri debe ser la URL base donde se renderiza la aplicación React
+// Auth0Provider manejará el callback automáticamente en cualquier ruta
 const getRedirectUri = () => {
   if (typeof window !== 'undefined') {
-    // If accessing through unified server, use full URL with /backoffice
+    // If accessing through unified server, use full URL with /backoffice (sin /login)
     const base = import.meta.env.VITE_BACKOFFICE_BASE || '/backoffice';
-    return `${window.location.origin}${base}/login`;
+    return `${window.location.origin}${base}`;
   }
   // Fallback for standalone development (though not used anymore)
-  return 'http://localhost:5173/backoffice/login';
+  return 'http://localhost:5173/backoffice';
 };
 
 export const auth0Config = {
