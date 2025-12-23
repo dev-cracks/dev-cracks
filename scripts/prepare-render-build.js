@@ -8,6 +8,20 @@ const rootDir = resolve(__dirname, '..');
 // Directorio de salida para Render (usar dist que es el default)
 const renderDistDir = resolve(rootDir, 'dist');
 
+// Copiar archivos del portal a /portal dentro de dist
+const portalDistDir = resolve(rootDir, 'dist-portal');
+if (existsSync(portalDistDir)) {
+  console.log('📦 Copiando archivos del portal a dist/portal...');
+  const portalTargetDir = resolve(renderDistDir, 'portal');
+  if (!existsSync(portalTargetDir)) {
+    mkdirSync(portalTargetDir, { recursive: true });
+  }
+  cpSync(portalDistDir, portalTargetDir, { recursive: true });
+  console.log('✅ Portal copiado correctamente');
+} else {
+  console.warn('⚠️  dist-portal no existe. Asegúrate de ejecutar npm run build:portal primero.');
+}
+
 // Copiar archivos del backoffice a /backoffice dentro de dist
 const backofficeDistDir = resolve(rootDir, 'dist-backoffice');
 if (existsSync(backofficeDistDir)) {

@@ -33,6 +33,14 @@ export const UserMenu = () => {
     navigate('/account');
   };
 
+  const handlePortalClick = () => {
+    setIsOpen(false);
+    // Abrir portal del cliente en nueva ventana/tab
+    const portalUrl = import.meta.env.VITE_PORTAL_URL || 
+      `${window.location.origin}/portal`;
+    window.open(portalUrl, '_blank');
+  };
+
   const handleBackofficeClick = () => {
     setIsOpen(false);
     // Abrir backoffice en nueva ventana/tab
@@ -127,6 +135,25 @@ export const UserMenu = () => {
                 />
               </svg>
               <span>Account</span>
+            </button>
+
+            <button
+              className="user-menu__item"
+              onClick={handlePortalClick}
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9 0L11.02 6.218L17.559 6.218L12.27 10.064L14.29 16.282L9 12.436L3.71 16.282L5.73 10.064L0.441 6.218L6.98 6.218L9 0Z"
+                  fill="currentColor"
+                />
+              </svg>
+              <span>Portal</span>
             </button>
 
             {canAccessBackoffice && (

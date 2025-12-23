@@ -47,6 +47,49 @@ async function createServer() {
       base: '/backoffice/', // Configurar base path directamente
     });
 
+    // Crear servidor Vite para el portal con base path y HMR habilitado
+    const portalVite = await createViteServer({
+      server: { 
+        middlewareMode: true,
+        hmr: {
+          server: httpServer,
+          protocol: 'ws',
+          host: 'localhost',
+          port: 5173,
+          clientPort: 5173,
+        },
+      },
+      appType: 'spa',
+      root: resolve(__dirname, 'portal'),
+      publicDir: resolve(__dirname, 'portal/public'),
+      base: '/portal/', // Configurar base path directamente
+    });
+
+    // Middleware para el portal - debe ir antes del backoffice y la web
+    app.use('/portal', async (req, res, next) => {
+      // Para archivos estáticos y módulos, usar el middleware de Vite directamente
+      if (req.originalUrl.match(/\.(tsx?|jsx?|css|json|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot|map)$/) ||
+          req.originalUrl.match(/^\/(portal\/)?(src|node_modules|@vite|@id|@fs|@react-refresh|assets)/)) {
+        return portalVite.middlewares(req, res, (err) => {
+          // Si hay un error (como 404), continuar al siguiente handler
+          if (err) {
+            next(err);
+          }
+        });
+      }
+      
+      // Para todas las demás rutas (HTML/SPA), servir el index.html transformado
+      try {
+        const template = readFileSync(resolve(__dirname, 'portal/index.html'), 'utf-8');
+        const html = await portalVite.transformIndexHtml(req.originalUrl, template);
+        res.setHeader('Content-Type', 'text/html');
+        return res.send(html);
+      } catch (e) {
+        portalVite.ssrFixStacktrace(e);
+        return next(e);
+      }
+    });
+
     // Middleware para el backoffice - debe ir antes del middleware de la web
     app.use('/backoffice', async (req, res, next) => {
       // Para archivos estáticos y módulos, usar el middleware de Vite directamente
@@ -173,8 +216,8 @@ async function createServer() {
 
     // Fallback para la web principal - servir index.html para rutas SPA
     app.use('*', async (req, res, next) => {
-      // Si la ruta es del backoffice, ya fue manejada arriba
-      if (req.originalUrl.startsWith('/backoffice')) {
+      // Si la ruta es del portal o backoffice, ya fue manejada arriba
+      if (req.originalUrl.startsWith('/portal') || req.originalUrl.startsWith('/backoffice')) {
         return next();
       }
       
@@ -195,6 +238,7 @@ async function createServer() {
     httpServer.listen(port, () => {
       console.log(`\n🚀 Unified development server running at http://localhost:${port}`);
       console.log(`📱 Main web: http://localhost:${port}`);
+      console.log(`🎨 Portal: http://localhost:${port}/portal`);
       console.log(`🔧 Backoffice: http://localhost:${port}/backoffice\n`);
     });
 

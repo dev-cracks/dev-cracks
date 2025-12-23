@@ -8,11 +8,13 @@
     "dev:main": "vite",
     "dev:web": "npm --prefix web run dev",
     "dev:backoffice": "npm --prefix backoffice run dev",
-    "build": "npm run install:all && npm run build:web && npm run build:backoffice && npm run build:render",
+    "dev:portal": "npm --prefix portal run dev",
+    "build": "npm run install:all && npm run build:web && npm run build:portal && npm run build:backoffice && npm run build:render",
     "build:web": "npm --prefix web run build",
+    "build:portal": "npm --prefix portal run build",
     "build:backoffice": "npm --prefix backoffice run build",
     "build:render": "node scripts/prepare-render-build.js",
-    "install:all": "npm install && npm --prefix web install && npm --prefix backoffice install"
+    "install:all": "npm install && npm --prefix web install && npm --prefix portal install && npm --prefix backoffice install"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
