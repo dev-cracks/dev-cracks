@@ -659,7 +659,7 @@ main {
 }
 
 .case-study-card {
-  background: linear-gradient(135deg, rgba(22, 27, 34, 0.9) 0%, rgba(13, 17, 23, 0.9) 100%);
+  background: rgb(6, 0, 16);
   border: 1px solid rgba(74, 144, 226, 0.3);
   border-radius: 15px;
   padding: 35px;
@@ -828,7 +828,7 @@ main {
 }
 
 .product-card {
-  background: linear-gradient(135deg, rgba(22, 27, 34, 0.9) 0%, rgba(13, 17, 23, 0.9) 100%);
+  background: rgb(6, 0, 16);
   border: 1px solid rgba(74, 144, 226, 0.3);
   border-radius: 15px;
   padding: 40px;
@@ -963,7 +963,7 @@ main {
 }
 
 .service-item {
-  background-color: rgba(22, 27, 34, 0.8);
+  background-color: rgb(6, 0, 16);
   padding: 30px;
   border-radius: 10px;
   text-align: center;
@@ -1231,7 +1231,7 @@ main {
 }
 
 .differentiator-card {
-  background: rgba(22, 27, 34, 0.8);
+  background: rgb(6, 0, 16);
   padding: 30px;
   border-radius: 10px;
   text-align: center;
@@ -2385,7 +2385,7 @@ main {
 }
 
 .account-page__card {
-  background: rgba(22, 27, 34, 0.6);
+  background: rgb(6, 0, 16);
   border: 1px solid #30363d;
   border-radius: 12px;
   padding: 24px;
