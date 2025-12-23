@@ -1,6 +1,6 @@
 import React from 'react';
-import { ShapeBlur } from '../components/ShapeBlur';
-import { BlurText } from '../components/BlurText';
+import { ShapeBlur } from '../components/ShapeBlur.js';
+import { BlurText } from '../components/BlurText.js';
 import './LandingPage.css';
 
 export const LandingPage = () => {
