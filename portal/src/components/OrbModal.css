@@ -28,7 +28,7 @@
   max-width: 800px;
   height: 600px;
   background: rgba(10, 10, 10, 0.95);
-  border: 2px solid rgba(255, 0, 128, 0.3);
+  border: px solid rgba(255, 0, 128, 0.3);
   border-radius: 20px;
   box-shadow: 
     0 0 50px rgba(255, 0, 128, 0.3),
@@ -55,9 +55,8 @@
   right: 16px;
   width: 40px;
   height: 40px;
-  background: rgba(255, 0, 128, 0.2);
-  border: 2px solid rgba(255, 0, 128, 0.5);
-  border-radius: 50%;
+  background: rgba(10, 10, 10, 0.95);
+  border: 1px solid rgba(255, 0, 128, 0.5);
   color: #fff;
   font-size: 28px;
   line-height: 1;
