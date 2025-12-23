@@ -50,11 +50,24 @@ main {
 }
 
   .container {
-    max-width: 100%;
+    max-width: 80%;
     margin: 0 auto;
     padding: 0 15px;
     width: 100%;
     box-sizing: border-box;
+  }
+
+  @media (max-width: 1024px) {
+    .container {
+      max-width: 90%;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      max-width: 95%;
+      padding: 0 20px;
+    }
   }
 
 .header {
@@ -327,7 +340,7 @@ main {
 
 .hero-carousel {
   width: 100%;
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto 40px;
   position: relative;
   box-sizing: border-box;
@@ -895,7 +908,7 @@ main {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 40px;
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
 }
 
