@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GhostCursor from '../components/GhostCursor';
 import { ShapeBlur } from '../components/ShapeBlur';
@@ -8,33 +8,6 @@ import './LandingPage.css';
 export const LandingPage = () => {
   const navigate = useNavigate();
   const [ghostActive, setGhostActive] = useState(true);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  // Reproducir audio al cargar la página
-  useEffect(() => {
-    const audio = new Audio('/audio/thunder.mp3');
-    audio.volume = 0.5; // Volumen al 50%
-    audioRef.current = audio;
-    
-    // Intentar reproducir (puede fallar si el usuario no ha interactuado)
-    const playAudio = async () => {
-      try {
-        await audio.play();
-      } catch (error) {
-        // Si falla, esperar a que el usuario interactúe
-        console.log('Audio play failed, waiting for user interaction');
-      }
-    };
-    
-    playAudio();
-    
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
 
   const handleLogoClick = () => {
     setGhostActive(false);

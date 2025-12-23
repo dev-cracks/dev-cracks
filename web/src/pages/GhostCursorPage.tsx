@@ -17,29 +17,80 @@ export const GhostCursorPage = () => {
 
   // Reproducir audio al cargar la página
   useEffect(() => {
-    const audio = new Audio('/audio/thunder.mp3');
+    const audioPath = '/audio/thunder.mp3';
+    const audio = new Audio(audioPath);
     audio.volume = 0.5; // Volumen al 50%
+    audio.preload = 'auto';
     audioRef.current = audio;
+    
+    // Verificar que el audio se cargue correctamente
+    audio.addEventListener('canplaythrough', () => {
+      console.log('Audio loaded and ready to play');
+    });
+    
+    audio.addEventListener('error', (e) => {
+      console.error('Audio error:', e);
+      console.error('Audio path:', audioPath);
+      console.error('Audio src:', audio.src);
+    });
     
     // Intentar reproducir (puede fallar si el usuario no ha interactuado)
     const playAudio = async () => {
       try {
-        await audio.play();
+        // Verificar que el audio esté listo
+        if (audio.readyState >= 2) { // HAVE_CURRENT_DATA o superior
+          await audio.play();
+          console.log('Audio playing successfully');
+        } else {
+          // Esperar a que el audio esté listo
+          audio.addEventListener('canplay', async () => {
+            try {
+              await audio.play();
+              console.log('Audio playing after canplay event');
+            } catch (err) {
+              console.log('Audio play failed after canplay:', err);
+            }
+          }, { once: true });
+        }
       } catch (error) {
         // Si falla, esperar a que el usuario interactúe
-        console.log('Audio play failed, waiting for user interaction');
+        console.log('Audio play failed, waiting for user interaction:', error);
       }
     };
     
-    playAudio();
+    // Intentar reproducir después de un pequeño delay
+    const timer = setTimeout(() => {
+      playAudio();
+    }, 200);
     
     return () => {
+      clearTimeout(timer);
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
       }
     };
   }, []);
+
+  // Reproducir audio cuando el usuario hace click (si no se ha reproducido)
+  const playAudioOnClick = () => {
+    if (audioRef.current) {
+      const audio = audioRef.current;
+      if (audio.paused || audio.ended) {
+        audio.play().catch(error => {
+          console.log('Audio play on click failed:', error);
+        });
+      }
+    } else {
+      // Si no hay audio cargado, intentar cargarlo y reproducirlo
+      const audio = new Audio('/audio/thunder.mp3');
+      audio.volume = 0.5;
+      audioRef.current = audio;
+      audio.play().catch(error => {
+        console.log('Audio play on click (new instance) failed:', error);
+      });
+    }
+  };
 
   const text = "¿Le temes a la IA, Automatización y la transformación digital?";
 
@@ -102,6 +153,9 @@ export const GhostCursorPage = () => {
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Intentar reproducir audio si no se ha reproducido
+    playAudioOnClick();
     
     if (pageState === 'navigating') return;
     
