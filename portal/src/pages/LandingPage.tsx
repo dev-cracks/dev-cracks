@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GhostCursor from '../components/GhostCursor';
+import { ShapeBlur } from '../components/ShapeBlur';
 import './LandingPage.css';
 
 export const LandingPage = () => {
@@ -59,11 +60,17 @@ export const LandingPage = () => {
         className="landing-page__logo-container"
         onClick={handleLogoClick}
       >
-        <img 
-          src="/dev-cracks-logo.jpg" 
-          alt="Dev Cracks Logo" 
-          className="landing-page__logo"
-        />
+        <ShapeBlur
+          intensity={1.5}
+          size={300}
+          color="rgba(177, 158, 239, 0.8)"
+        >
+          <img 
+            src="/dev-cracks-logo.jpg" 
+            alt="Dev Cracks Logo" 
+            className="landing-page__logo"
+          />
+        </ShapeBlur>
         <h1 className="landing-page__title">DEV CRACKS</h1>
       </div>
     </div>

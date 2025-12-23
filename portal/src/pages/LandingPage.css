@@ -32,6 +32,8 @@
   object-fit: contain;
   filter: drop-shadow(0 0 20px rgba(177, 158, 239, 0.5));
   transition: filter 0.3s ease;
+  position: relative;
+  z-index: 2;
 }
 
 .landing-page__logo-container:hover .landing-page__logo {

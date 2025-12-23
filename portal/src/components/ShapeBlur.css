@@ -1,0 +1,19 @@
+.shape-blur {
+  position: relative;
+  display: inline-block;
+  overflow: visible;
+}
+
+.shape-blur__content {
+  position: relative;
+  z-index: 2;
+}
+
+.shape-blur__blur {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.3s ease;
+  will-change: left, top, opacity;
+}
+
