@@ -3,6 +3,7 @@ import { GhostCursorPage } from './pages/GhostCursorPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { AccountPage } from './pages/AccountPage';
 import { SupportPage } from './pages/SupportPage';
+import FloatingIcon from './components/FloatingIcon';
 
 // Fixed base path for portal when accessed through unified server
 const PORTAL_BASE = '/portal';
@@ -15,6 +16,7 @@ const App = () => (
       <Route path="/account" element={<AccountPage />} />
       <Route path="/support" element={<SupportPage />} />
     </Routes>
+    <FloatingIcon />
   </BrowserRouter>
 );
 
