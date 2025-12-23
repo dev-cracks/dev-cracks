@@ -11,7 +11,7 @@ import { ContactSection } from './components/ContactSection';
 import { LogoLoopDemo } from './components/LogoLoopDemo';
 import { Footer } from './components/Footer';
 import { VideoBackground } from './components/VideoBackground';
-import { SplashCursor } from './components/SplashCursor';
+import SplashCursor from './components/SplashCursor';
 import { ServicesPage } from './pages/ServicesPage';
 import { AccountPage } from './pages/AccountPage';
 import { LandingPage } from './pages/LandingPage';
