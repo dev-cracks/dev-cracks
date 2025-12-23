@@ -10,9 +10,16 @@
   opacity: 0.5;
 }
 
-.ghost-cursor-page__logo-container {
+.ghost-cursor-page__content {
   position: relative;
   z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3rem;
+}
+
+.ghost-cursor-page__logo-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -54,6 +61,67 @@
   text-shadow: 0 0 30px rgba(177, 158, 239, 0.8);
 }
 
+.ghost-cursor-page__nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  animation: fadeInUp 0.8s ease-out 0.3s both;
+}
+
+.ghost-cursor-page__nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: rgba(82, 39, 255, 0.1);
+  border: 2px solid rgba(177, 158, 239, 0.3);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  min-width: 100px;
+}
+
+.ghost-cursor-page__nav-item:hover {
+  background: rgba(82, 39, 255, 0.2);
+  border-color: rgba(177, 158, 239, 0.6);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(177, 158, 239, 0.3);
+}
+
+.ghost-cursor-page__nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 0 10px rgba(177, 158, 239, 0.5));
+  transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.ghost-cursor-page__nav-icon svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.ghost-cursor-page__nav-item:hover .ghost-cursor-page__nav-icon {
+  filter: drop-shadow(0 0 15px rgba(177, 158, 239, 0.8));
+  transform: scale(1.1);
+}
+
+.ghost-cursor-page__nav-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(177, 158, 239, 0.5);
+  letter-spacing: 0.05em;
+  transition: text-shadow 0.3s ease;
+}
+
+.ghost-cursor-page__nav-item:hover .ghost-cursor-page__nav-label {
+  text-shadow: 0 0 15px rgba(177, 158, 239, 0.8);
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -72,6 +140,24 @@
 
   .ghost-cursor-page__title {
     font-size: 2rem;
+  }
+
+  .ghost-cursor-page__nav {
+    gap: 1rem;
+  }
+
+  .ghost-cursor-page__nav-item {
+    padding: 0.75rem 1rem;
+    min-width: 80px;
+  }
+
+  .ghost-cursor-page__nav-icon svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .ghost-cursor-page__nav-label {
+    font-size: 0.75rem;
   }
 }
 
