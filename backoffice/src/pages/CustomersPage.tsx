@@ -2282,7 +2282,9 @@ export const CustomersPage = () => {
       setIsAssigningOfficeToCustomer(true);
       setError(null);
       
-      // La sede ya pertenece a un tenant del cliente, solo necesitamos recargar
+      // Asignar explícitamente la sede al cliente
+      await customerService.assignOfficeToCustomer(selectedCustomer.id, selectedOfficeToAdd);
+      
       // Recargar sedes del cliente para actualizar la lista
       const offices = await officeService.getOfficesByCustomer(selectedCustomer.id);
       setCustomerOffices(offices);

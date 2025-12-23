@@ -116,6 +116,19 @@ export const customerService = {
       body: JSON.stringify({ parentId: parentId || null }),
     });
   },
+
+  async assignOfficeToCustomer(id: string, officeId: string): Promise<{ message: string }> {
+    return apiService.request<{ message: string }>(`/customers/${id}/assign-office`, {
+      method: 'POST',
+      body: JSON.stringify({ officeId }),
+    });
+  },
+
+  async removeOfficeFromCustomer(id: string, officeId: string): Promise<{ message: string }> {
+    return apiService.request<{ message: string }>(`/customers/${id}/offices/${officeId}`, {
+      method: 'DELETE',
+    });
+  },
 };
 
 export interface CustomerParameterDto {
