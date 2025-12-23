@@ -100,6 +100,30 @@ export const BlurText: React.FC<BlurTextProps> = ({
         
         if (elapsed < totalDuration) {
           animationRef.current = requestAnimationFrame(animate);
+        } else {
+          // Asegurar que todas las palabras tengan blur = 0 al finalizar
+          setWordStates(prev => {
+            const wordDelayFinal = 150;
+            return prev.map((state, index) => {
+              const wordStartTime = delay + (index * wordDelayFinal);
+              const wordElapsed = totalDuration - wordStartTime;
+              const shouldBeComplete = wordElapsed >= duration;
+              
+              return shouldBeComplete ? {
+                blur: 0,
+                opacity: 1,
+                translateX: 0,
+                translateY: 0
+              } : state;
+            });
+          });
+          
+          if (onAnimationComplete && !completedRef.current) {
+            completedRef.current = true;
+            setTimeout(() => {
+              onAnimationComplete();
+            }, 0);
+          }
         }
       };
       
@@ -124,9 +148,9 @@ export const BlurText: React.FC<BlurTextProps> = ({
             key={index}
             className="blur-text__word"
             style={{
-              filter: `blur(${wordStates[index]?.blur || 20}px)`,
-              opacity: wordStates[index]?.opacity || 0,
-              transform: `translate(${wordStates[index]?.translateX || 0}px, ${wordStates[index]?.translateY || 0}px)`,
+              filter: wordStates[index] ? `blur(${wordStates[index].blur}px)` : 'blur(20px)',
+              opacity: wordStates[index]?.opacity ?? 0,
+              transform: `translate(${wordStates[index]?.translateX ?? 0}px, ${wordStates[index]?.translateY ?? 0}px)`,
               willChange: 'filter, opacity, transform',
               display: 'inline-block',
               marginRight: index < words.length - 1 ? '0.3em' : '0'
