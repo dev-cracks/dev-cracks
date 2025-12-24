@@ -162,7 +162,28 @@
     "noRates": "Keine Tarife registriert",
     "create": "Erstellen",
     "update": "Aktualisieren",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "subscriptionTypes": "Abonnementtypen",
+    "subscriptionTypesDescription": "Verwalten Sie die im System verfügbaren Abonnementtypen",
+    "newSubscriptionType": "Neuer Typ",
+    "editSubscriptionType": "Abonnementtyp bearbeiten",
+    "subscriptionTypeName": "Name",
+    "allowedModel": "Erlaubtes Modell",
+    "maxTokensPerMonth": "Max. Tokens/Monat",
+    "maxMessagesPerMonth": "Max. Nachrichten/Monat",
+    "maxTokensPerMessage": "Max. Tokens/Nachricht",
+    "pricePerMonth": "Monatspreis (€)",
+    "features": "Funktionen",
+    "addFeature": "Hinzufügen",
+    "addFeaturePlaceholder": "Funktion hinzufügen",
+    "noSubscriptionTypes": "Keine Abonnementtypen registriert",
+    "model": "Modell",
+    "tokensPerMonth": "Tokens/Monat",
+    "messagesPerMonth": "Nachrichten/Monat",
+    "tokensPerMessage": "Tokens/Nachricht",
+    "price": "Preis/Monat",
+    "free": "Kostenlos",
+    "unlimited": "∞"
   }
 }
 

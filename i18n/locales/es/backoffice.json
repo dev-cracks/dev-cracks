@@ -162,7 +162,28 @@
     "noRates": "No hay tarifas registradas",
     "create": "Crear",
     "update": "Actualizar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "subscriptionTypes": "Tipos de Suscripción",
+    "subscriptionTypesDescription": "Gestiona los tipos de suscripción disponibles en el sistema",
+    "newSubscriptionType": "Nuevo Tipo",
+    "editSubscriptionType": "Editar Tipo de Suscripción",
+    "subscriptionTypeName": "Nombre",
+    "allowedModel": "Modelo Permitido",
+    "maxTokensPerMonth": "Tokens Máximos/Mes",
+    "maxMessagesPerMonth": "Mensajes Máximos/Mes",
+    "maxTokensPerMessage": "Tokens Máximos/Mensaje",
+    "pricePerMonth": "Precio Mensual (€)",
+    "features": "Características",
+    "addFeature": "Agregar",
+    "addFeaturePlaceholder": "Agregar característica",
+    "noSubscriptionTypes": "No hay tipos de suscripción registrados",
+    "model": "Modelo",
+    "tokensPerMonth": "Tokens/Mes",
+    "messagesPerMonth": "Mensajes/Mes",
+    "tokensPerMessage": "Tokens/Mensaje",
+    "price": "Precio/Mes",
+    "free": "Gratis",
+    "unlimited": "∞"
   }
 }
 

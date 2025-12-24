@@ -162,7 +162,28 @@
     "noRates": "未注册费率",
     "create": "创建",
     "update": "更新",
-    "cancel": "取消"
+    "cancel": "取消",
+    "subscriptionTypes": "订阅类型",
+    "subscriptionTypesDescription": "管理系统中的可用订阅类型",
+    "newSubscriptionType": "新类型",
+    "editSubscriptionType": "编辑订阅类型",
+    "subscriptionTypeName": "名称",
+    "allowedModel": "允许的模型",
+    "maxTokensPerMonth": "每月最大令牌数",
+    "maxMessagesPerMonth": "每月最大消息数",
+    "maxTokensPerMessage": "每条消息最大令牌数",
+    "pricePerMonth": "月价格 (€)",
+    "features": "功能",
+    "addFeature": "添加",
+    "addFeaturePlaceholder": "添加功能",
+    "noSubscriptionTypes": "未注册订阅类型",
+    "model": "模型",
+    "tokensPerMonth": "令牌/月",
+    "messagesPerMonth": "消息/月",
+    "tokensPerMessage": "令牌/消息",
+    "price": "价格/月",
+    "free": "免费",
+    "unlimited": "∞"
   }
 }
 

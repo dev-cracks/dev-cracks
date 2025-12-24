@@ -37,6 +37,18 @@ export interface CreateSubscriptionRequest {
   startDate?: string;
 }
 
+export interface CreateSubscriptionTypeRequest {
+  name: string;
+  allowedModel: string;
+  maxTokensPerMonth?: number;
+  maxMessagesPerMonth?: number;
+  maxTokensPerMessage: number;
+  pricePerMonth: number;
+  features?: string[];
+}
+
+export interface UpdateSubscriptionTypeRequest extends CreateSubscriptionTypeRequest {}
+
 export const subscriptionService = {
   // Subscription Types
   async getAllSubscriptionTypes(): Promise<SubscriptionTypeDto[]> {
@@ -45,6 +57,20 @@ export const subscriptionService = {
 
   async getSubscriptionTypeById(id: string): Promise<SubscriptionTypeDto> {
     return apiService.request<SubscriptionTypeDto>(`/subscriptions/types/${id}`);
+  },
+
+  async createSubscriptionType(request: CreateSubscriptionTypeRequest): Promise<SubscriptionTypeDto> {
+    return apiService.request<SubscriptionTypeDto>('/subscriptions/types', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  },
+
+  async updateSubscriptionType(id: string, request: UpdateSubscriptionTypeRequest): Promise<SubscriptionTypeDto> {
+    return apiService.request<SubscriptionTypeDto>(`/subscriptions/types/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(request),
+    });
   },
 
   // Subscriptions

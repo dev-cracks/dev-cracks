@@ -33,6 +33,7 @@ import { useEffect, useState, useRef } from 'react';
 import { tenantService } from '../services/tenantService';
 import { customerParameterService } from '../services/customerService';
 import { shipmentService, ShipmentCategoryDto, ShipmentRateDto } from '../services/shipmentService';
+import { subscriptionService, SubscriptionTypeDto, CreateSubscriptionTypeRequest } from '../services/subscriptionService';
 import { notificationService } from '../services/notificationService';
 
 const useStyles = makeStyles({
@@ -125,10 +126,27 @@ export const SettingsPage = () => {
   const [selectedRate, setSelectedRate] = useState<ShipmentRateDto | null>(null);
   const [rateForm, setRateForm] = useState({ name: '', description: '', slaDays: 1, baseCost: 0 });
 
+  // Subscription Types state
+  const [subscriptionTypes, setSubscriptionTypes] = useState<SubscriptionTypeDto[]>([]);
+  const [isSubscriptionTypeDialogOpen, setIsSubscriptionTypeDialogOpen] = useState(false);
+  const [isSubscriptionTypeSubmitting, setIsSubscriptionTypeSubmitting] = useState(false);
+  const [selectedSubscriptionType, setSelectedSubscriptionType] = useState<SubscriptionTypeDto | null>(null);
+  const [subscriptionTypeForm, setSubscriptionTypeForm] = useState({
+    name: '',
+    allowedModel: '',
+    maxTokensPerMonth: undefined as number | undefined,
+    maxMessagesPerMonth: undefined as number | undefined,
+    maxTokensPerMessage: 1000,
+    pricePerMonth: 0,
+    features: [] as string[],
+  });
+  const [newFeature, setNewFeature] = useState('');
+
   useEffect(() => {
     loadSettings();
     loadCategories();
     loadRates();
+    loadSubscriptionTypes();
   }, []);
 
   const loadSettings = async () => {
@@ -493,6 +511,123 @@ export const SettingsPage = () => {
     }
   };
 
+  // Subscription Types management
+  const loadSubscriptionTypes = async () => {
+    try {
+      const data = await subscriptionService.getAllSubscriptionTypes();
+      setSubscriptionTypes(data);
+    } catch (error: any) {
+      console.error('Error loading subscription types:', error);
+      notificationService.error('Error', 'No se pudieron cargar los tipos de suscripción');
+    }
+  };
+
+  const handleOpenSubscriptionTypeDialog = (type?: SubscriptionTypeDto) => {
+    if (type) {
+      setSelectedSubscriptionType(type);
+      setSubscriptionTypeForm({
+        name: type.name,
+        allowedModel: type.allowedModel,
+        maxTokensPerMonth: type.maxTokensPerMonth,
+        maxMessagesPerMonth: type.maxMessagesPerMonth,
+        maxTokensPerMessage: type.maxTokensPerMessage,
+        pricePerMonth: type.pricePerMonth,
+        features: type.features || [],
+      });
+    } else {
+      setSelectedSubscriptionType(null);
+      setSubscriptionTypeForm({
+        name: '',
+        allowedModel: '',
+        maxTokensPerMonth: undefined,
+        maxMessagesPerMonth: undefined,
+        maxTokensPerMessage: 1000,
+        pricePerMonth: 0,
+        features: [],
+      });
+    }
+    setNewFeature('');
+    setIsSubscriptionTypeDialogOpen(true);
+  };
+
+  const handleCloseSubscriptionTypeDialog = () => {
+    setIsSubscriptionTypeDialogOpen(false);
+    setSelectedSubscriptionType(null);
+    setSubscriptionTypeForm({
+      name: '',
+      allowedModel: '',
+      maxTokensPerMonth: undefined,
+      maxMessagesPerMonth: undefined,
+      maxTokensPerMessage: 1000,
+      pricePerMonth: 0,
+      features: [],
+    });
+    setNewFeature('');
+  };
+
+  const handleAddFeature = () => {
+    if (newFeature.trim()) {
+      setSubscriptionTypeForm({
+        ...subscriptionTypeForm,
+        features: [...subscriptionTypeForm.features, newFeature.trim()],
+      });
+      setNewFeature('');
+    }
+  };
+
+  const handleRemoveFeature = (index: number) => {
+    setSubscriptionTypeForm({
+      ...subscriptionTypeForm,
+      features: subscriptionTypeForm.features.filter((_, i) => i !== index),
+    });
+  };
+
+  const handleSaveSubscriptionType = async () => {
+    if (!subscriptionTypeForm.name.trim()) {
+      notificationService.error('Error', 'El nombre del tipo de suscripción es requerido');
+      return;
+    }
+    if (!subscriptionTypeForm.allowedModel.trim()) {
+      notificationService.error('Error', 'El modelo permitido es requerido');
+      return;
+    }
+    if (subscriptionTypeForm.maxTokensPerMessage <= 0) {
+      notificationService.error('Error', 'Los tokens máximos por mensaje deben ser mayores a cero');
+      return;
+    }
+    if (subscriptionTypeForm.pricePerMonth < 0) {
+      notificationService.error('Error', 'El precio mensual no puede ser negativo');
+      return;
+    }
+
+    try {
+      setIsSubscriptionTypeSubmitting(true);
+      const request: CreateSubscriptionTypeRequest = {
+        name: subscriptionTypeForm.name,
+        allowedModel: subscriptionTypeForm.allowedModel,
+        maxTokensPerMonth: subscriptionTypeForm.maxTokensPerMonth,
+        maxMessagesPerMonth: subscriptionTypeForm.maxMessagesPerMonth,
+        maxTokensPerMessage: subscriptionTypeForm.maxTokensPerMessage,
+        pricePerMonth: subscriptionTypeForm.pricePerMonth,
+        features: subscriptionTypeForm.features.length > 0 ? subscriptionTypeForm.features : undefined,
+      };
+
+      if (selectedSubscriptionType) {
+        await subscriptionService.updateSubscriptionType(selectedSubscriptionType.id, request);
+        notificationService.success('Éxito', 'Tipo de suscripción actualizado correctamente');
+      } else {
+        await subscriptionService.createSubscriptionType(request);
+        notificationService.success('Éxito', 'Tipo de suscripción creado correctamente');
+      }
+      await loadSubscriptionTypes();
+      handleCloseSubscriptionTypeDialog();
+    } catch (error: any) {
+      notificationService.error('Error', error.message || 'Error al guardar el tipo de suscripción');
+    } finally {
+      setIsSubscriptionTypeSubmitting(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
@@ -844,6 +979,240 @@ export const SettingsPage = () => {
               disabled={isRateSubmitting || !rateForm.name.trim() || rateForm.slaDays <= 0 || rateForm.baseCost < 0}
             >
               {isRateSubmitting ? <Spinner size="tiny" /> : selectedRate ? 'Actualizar' : 'Crear'}
+            </Button>
+          </DialogActions>
+        </DialogSurface>
+      </Dialog>
+
+      {/* Subscription Types Management */}
+      <Card>
+        <CardHeader
+          header={<Text weight="semibold">Tipos de Suscripción</Text>}
+          description="Gestiona los tipos de suscripción disponibles en el sistema"
+          action={
+            <Button
+              appearance="primary"
+              icon={<AddRegular />}
+              onClick={() => handleOpenSubscriptionTypeDialog()}
+            >
+              Nuevo Tipo
+            </Button>
+          }
+        />
+        <div style={{ padding: '20px' }}>
+          <div className={styles.tableContainer}>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHeaderCell>Nombre</TableHeaderCell>
+                  <TableHeaderCell>Modelo</TableHeaderCell>
+                  <TableHeaderCell>Tokens/Mes</TableHeaderCell>
+                  <TableHeaderCell>Mensajes/Mes</TableHeaderCell>
+                  <TableHeaderCell>Tokens/Mensaje</TableHeaderCell>
+                  <TableHeaderCell>Precio/Mes</TableHeaderCell>
+                  <TableHeaderCell>Características</TableHeaderCell>
+                  <TableHeaderCell>Acciones</TableHeaderCell>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {subscriptionTypes.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8}>
+                      <Text>No hay tipos de suscripción registrados</Text>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  subscriptionTypes.map((type) => (
+                    <TableRow key={type.id}>
+                      <TableCell>
+                        <Text weight="semibold">{type.name}</Text>
+                      </TableCell>
+                      <TableCell>
+                        <Text>{type.allowedModel}</Text>
+                      </TableCell>
+                      <TableCell>
+                        <Text>{type.maxTokensPerMonth?.toLocaleString() || '∞'}</Text>
+                      </TableCell>
+                      <TableCell>
+                        <Text>{type.maxMessagesPerMonth?.toLocaleString() || '∞'}</Text>
+                      </TableCell>
+                      <TableCell>
+                        <Text>{type.maxTokensPerMessage.toLocaleString()}</Text>
+                      </TableCell>
+                      <TableCell>
+                        <Text>{type.pricePerMonth > 0 ? `${type.pricePerMonth.toFixed(2)} €` : 'Gratis'}</Text>
+                      </TableCell>
+                      <TableCell>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: tokens.spacingHorizontalXS }}>
+                          {type.features && type.features.length > 0 ? (
+                            type.features.slice(0, 3).map((feature, idx) => (
+                              <Badge key={idx} appearance="outline" size="small">
+                                {feature}
+                              </Badge>
+                            ))
+                          ) : (
+                            <Text size={200}>-</Text>
+                          )}
+                          {type.features && type.features.length > 3 && (
+                            <Badge appearance="outline" size="small">
+                              +{type.features.length - 3}
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          appearance="subtle"
+                          icon={<EditRegular />}
+                          onClick={() => handleOpenSubscriptionTypeDialog(type)}
+                        >
+                          Editar
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      </Card>
+
+      {/* Subscription Type Dialog */}
+      <Dialog open={isSubscriptionTypeDialogOpen} onOpenChange={(_, data) => !data.open && handleCloseSubscriptionTypeDialog()}>
+        <DialogSurface style={{ maxWidth: '600px', width: '90vw' }}>
+          <DialogTitle>
+            {selectedSubscriptionType ? 'Editar Tipo de Suscripción' : 'Nuevo Tipo de Suscripción'}
+          </DialogTitle>
+          <DialogBody>
+            <DialogContent>
+              <div className={styles.formRow}>
+                <Field label="Nombre" required>
+                  <Input
+                    value={subscriptionTypeForm.name}
+                    onChange={(e) => setSubscriptionTypeForm({ ...subscriptionTypeForm, name: e.target.value })}
+                    placeholder="Ej: Básico, Premium, etc."
+                  />
+                </Field>
+                <Field label="Modelo Permitido" required>
+                  <Input
+                    value={subscriptionTypeForm.allowedModel}
+                    onChange={(e) => setSubscriptionTypeForm({ ...subscriptionTypeForm, allowedModel: e.target.value })}
+                    placeholder="Ej: gpt-4, gpt-3.5-turbo, etc."
+                  />
+                </Field>
+              </div>
+              <div className={styles.formRow}>
+                <Field label="Tokens Máximos/Mes">
+                  <Input
+                    type="number"
+                    min="0"
+                    value={subscriptionTypeForm.maxTokensPerMonth?.toString() || ''}
+                    onChange={(e) => setSubscriptionTypeForm({
+                      ...subscriptionTypeForm,
+                      maxTokensPerMonth: e.target.value ? parseInt(e.target.value) : undefined
+                    })}
+                    placeholder="Sin límite si está vacío"
+                  />
+                </Field>
+                <Field label="Mensajes Máximos/Mes">
+                  <Input
+                    type="number"
+                    min="0"
+                    value={subscriptionTypeForm.maxMessagesPerMonth?.toString() || ''}
+                    onChange={(e) => setSubscriptionTypeForm({
+                      ...subscriptionTypeForm,
+                      maxMessagesPerMonth: e.target.value ? parseInt(e.target.value) : undefined
+                    })}
+                    placeholder="Sin límite si está vacío"
+                  />
+                </Field>
+              </div>
+              <div className={styles.formRow}>
+                <Field label="Tokens Máximos/Mensaje" required>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={subscriptionTypeForm.maxTokensPerMessage.toString()}
+                    onChange={(e) => setSubscriptionTypeForm({
+                      ...subscriptionTypeForm,
+                      maxTokensPerMessage: parseInt(e.target.value) || 1000
+                    })}
+                  />
+                </Field>
+                <Field label="Precio Mensual (€)" required>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={subscriptionTypeForm.pricePerMonth.toString()}
+                    onChange={(e) => setSubscriptionTypeForm({
+                      ...subscriptionTypeForm,
+                      pricePerMonth: parseFloat(e.target.value) || 0
+                    })}
+                  />
+                </Field>
+              </div>
+              <Field label="Características">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS }}>
+                  <div style={{ display: 'flex', gap: tokens.spacingHorizontalS }}>
+                    <Input
+                      value={newFeature}
+                      onChange={(e) => setNewFeature(e.target.value)}
+                      placeholder="Agregar característica"
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddFeature();
+                        }
+                      }}
+                      style={{ flex: 1 }}
+                    />
+                    <Button onClick={handleAddFeature} disabled={!newFeature.trim()}>
+                      Agregar
+                    </Button>
+                  </div>
+                  {subscriptionTypeForm.features.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: tokens.spacingHorizontalXS }}>
+                      {subscriptionTypeForm.features.map((feature, index) => (
+                        <Badge
+                          key={index}
+                          appearance="filled"
+                          size="medium"
+                          style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS }}
+                        >
+                          {feature}
+                          <Button
+                            appearance="subtle"
+                            size="small"
+                            icon={<DismissRegular />}
+                            onClick={() => handleRemoveFeature(index)}
+                            style={{ minWidth: 'auto', padding: '2px' }}
+                          />
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Field>
+            </DialogContent>
+          </DialogBody>
+          <DialogActions>
+            <Button appearance="secondary" onClick={handleCloseSubscriptionTypeDialog}>
+              Cancelar
+            </Button>
+            <Button
+              appearance="primary"
+              onClick={handleSaveSubscriptionType}
+              disabled={
+                isSubscriptionTypeSubmitting ||
+                !subscriptionTypeForm.name.trim() ||
+                !subscriptionTypeForm.allowedModel.trim() ||
+                subscriptionTypeForm.maxTokensPerMessage <= 0 ||
+                subscriptionTypeForm.pricePerMonth < 0
+              }
+            >
+              {isSubscriptionTypeSubmitting ? <Spinner size="tiny" /> : selectedSubscriptionType ? 'Actualizar' : 'Crear'}
             </Button>
           </DialogActions>
         </DialogSurface>
