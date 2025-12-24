@@ -40,3 +40,4 @@ const SplitText: React.FC<SplitText.Props> = ({ text, delay = 0, className = '' 
 
 export default SplitText;
 
+
