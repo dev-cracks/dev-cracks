@@ -159,19 +159,21 @@ const AppContent = () => {
   return (
     <>
       {showLightPillar && (
-        <LightPillar
-          topColor="#5227FF"
-          bottomColor="#FF9FFC"
-          intensity={1.5}
-          rotationSpeed={0.3}
-          glowAmount={0.01}
-          pillarWidth={3.0}
-          pillarHeight={0.4}
-          noiseIntensity={0.3}
-          pillarRotation={0}
-          interactive={false}
-          mixBlendMode="normal"
-        />
+        <div style={{ width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0, zIndex: 1, pointerEvents: 'none' }}>
+          <LightPillar
+            topColor="#5227FF"
+            bottomColor="#FF9FFC"
+            intensity={1.0}
+            rotationSpeed={0.3}
+            glowAmount={0.005}
+            pillarWidth={3.0}
+            pillarHeight={0.4}
+            noiseIntensity={0.5}
+            pillarRotation={0}
+            interactive={false}
+            mixBlendMode="normal"
+          />
+        </div>
       )}
       {showSplashCursor && <SplashCursor />}
       <Routes>
