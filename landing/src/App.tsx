@@ -10,7 +10,7 @@ import { HotmartPromo } from './components/HotmartPromo';
 import { ContactSection } from './components/ContactSection';
 import { LogoLoopDemo } from './components/LogoLoopDemo';
 import { Footer } from './components/Footer';
-import { VideoBackground } from './components/VideoBackground';
+import LightPillar from './components/LightPillar';
 import SplashCursor from './components/SplashCursor';
 import { ServicesPage } from './pages/ServicesPage';
 
@@ -39,8 +39,8 @@ const AppContent = () => {
     return hasSeenSplash !== 'true';
   });
   
-  // Mostrar VideoBackground en todas las rutas
-  const showVideoBackground = true;
+  // Mostrar LightPillar en todas las rutas
+  const showLightPillar = true;
 
   // Guardar flag en localStorage y ocultar SplashCursor cuando se hace click por primera vez en la landing
   useEffect(() => {
@@ -158,7 +158,21 @@ const AppContent = () => {
 
   return (
     <>
-      {showVideoBackground && <VideoBackground />}
+      {showLightPillar && (
+        <LightPillar
+          topColor="#5227FF"
+          bottomColor="#FF9FFC"
+          intensity={1.0}
+          rotationSpeed={0.3}
+          glowAmount={0.005}
+          pillarWidth={3.0}
+          pillarHeight={0.4}
+          noiseIntensity={0.5}
+          pillarRotation={0}
+          interactive={false}
+          mixBlendMode="normal"
+        />
+      )}
       {showSplashCursor && <SplashCursor />}
       <Routes>
         <Route path="/" element={<HomePage />} />
