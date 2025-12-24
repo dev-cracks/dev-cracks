@@ -27,6 +27,8 @@ import {
   Badge,
   MessageBar,
   MessageBarBody,
+  Combobox,
+  Option,
 } from '@fluentui/react-components';
 import { SettingsRegular, AddRegular, EditRegular, DeleteRegular, CheckmarkRegular, DismissRegular } from '@fluentui/react-icons';
 import { useEffect, useState, useRef } from 'react';
@@ -34,6 +36,7 @@ import { tenantService } from '../services/tenantService';
 import { customerParameterService } from '../services/customerService';
 import { shipmentService, ShipmentCategoryDto, ShipmentRateDto } from '../services/shipmentService';
 import { subscriptionService, SubscriptionTypeDto, CreateSubscriptionTypeRequest } from '../services/subscriptionService';
+import { openAiModelService, OpenAiModelDto } from '../services/openAiModelService';
 import { notificationService } from '../services/notificationService';
 
 const useStyles = makeStyles({
@@ -128,12 +131,13 @@ export const SettingsPage = () => {
 
   // Subscription Types state
   const [subscriptionTypes, setSubscriptionTypes] = useState<SubscriptionTypeDto[]>([]);
+  const [openAiModels, setOpenAiModels] = useState<OpenAiModelDto[]>([]);
   const [isSubscriptionTypeDialogOpen, setIsSubscriptionTypeDialogOpen] = useState(false);
   const [isSubscriptionTypeSubmitting, setIsSubscriptionTypeSubmitting] = useState(false);
   const [selectedSubscriptionType, setSelectedSubscriptionType] = useState<SubscriptionTypeDto | null>(null);
   const [subscriptionTypeForm, setSubscriptionTypeForm] = useState({
     name: '',
-    allowedModel: '',
+    allowedModelId: '',
     maxTokensPerMonth: undefined as number | undefined,
     maxMessagesPerMonth: undefined as number | undefined,
     maxTokensPerMessage: 1000,
@@ -147,7 +151,18 @@ export const SettingsPage = () => {
     loadCategories();
     loadRates();
     loadSubscriptionTypes();
+    loadOpenAiModels();
   }, []);
+
+  const loadOpenAiModels = async () => {
+    try {
+      const models = await openAiModelService.getActiveModels();
+      setOpenAiModels(models);
+    } catch (error: any) {
+      console.error('Error loading OpenAI models:', error);
+      notificationService.error('Error', 'Error al cargar los modelos de OpenAI');
+    }
+  };
 
   const loadSettings = async () => {
     try {
@@ -527,7 +542,7 @@ export const SettingsPage = () => {
       setSelectedSubscriptionType(type);
       setSubscriptionTypeForm({
         name: type.name,
-        allowedModel: type.allowedModel,
+        allowedModelId: type.allowedModelId,
         maxTokensPerMonth: type.maxTokensPerMonth,
         maxMessagesPerMonth: type.maxMessagesPerMonth,
         maxTokensPerMessage: type.maxTokensPerMessage,
@@ -538,7 +553,7 @@ export const SettingsPage = () => {
       setSelectedSubscriptionType(null);
       setSubscriptionTypeForm({
         name: '',
-        allowedModel: '',
+        allowedModelId: '',
         maxTokensPerMonth: undefined,
         maxMessagesPerMonth: undefined,
         maxTokensPerMessage: 1000,
@@ -555,7 +570,7 @@ export const SettingsPage = () => {
     setSelectedSubscriptionType(null);
     setSubscriptionTypeForm({
       name: '',
-      allowedModel: '',
+      allowedModelId: '',
       maxTokensPerMonth: undefined,
       maxMessagesPerMonth: undefined,
       maxTokensPerMessage: 1000,
@@ -587,7 +602,7 @@ export const SettingsPage = () => {
       notificationService.error('Error', 'El nombre del tipo de suscripción es requerido');
       return;
     }
-    if (!subscriptionTypeForm.allowedModel.trim()) {
+    if (!subscriptionTypeForm.allowedModelId.trim()) {
       notificationService.error('Error', 'El modelo permitido es requerido');
       return;
     }
@@ -604,7 +619,7 @@ export const SettingsPage = () => {
       setIsSubscriptionTypeSubmitting(true);
       const request: CreateSubscriptionTypeRequest = {
         name: subscriptionTypeForm.name,
-        allowedModel: subscriptionTypeForm.allowedModel,
+        allowedModelId: subscriptionTypeForm.allowedModelId,
         maxTokensPerMonth: subscriptionTypeForm.maxTokensPerMonth,
         maxMessagesPerMonth: subscriptionTypeForm.maxMessagesPerMonth,
         maxTokensPerMessage: subscriptionTypeForm.maxTokensPerMessage,
@@ -1028,7 +1043,7 @@ export const SettingsPage = () => {
                         <Text weight="semibold">{type.name}</Text>
                       </TableCell>
                       <TableCell>
-                        <Text>{type.allowedModel}</Text>
+                        <Text>{type.allowedModelName}</Text>
                       </TableCell>
                       <TableCell>
                         <Text>{type.maxTokensPerMonth?.toLocaleString() || '∞'}</Text>
@@ -1095,11 +1110,19 @@ export const SettingsPage = () => {
                   />
                 </Field>
                 <Field label="Modelo Permitido" required>
-                  <Input
-                    value={subscriptionTypeForm.allowedModel}
-                    onChange={(e) => setSubscriptionTypeForm({ ...subscriptionTypeForm, allowedModel: e.target.value })}
-                    placeholder="Ej: gpt-4, gpt-3.5-turbo, etc."
-                  />
+                  <Combobox
+                    placeholder="Seleccionar modelo de OpenAI"
+                    value={subscriptionTypeForm.allowedModelId ? openAiModels.find(m => m.id === subscriptionTypeForm.allowedModelId)?.name || '' : ''}
+                    onOptionSelect={(e, data) => {
+                      setSubscriptionTypeForm({ ...subscriptionTypeForm, allowedModelId: data.optionValue || '' });
+                    }}
+                  >
+                    {openAiModels.map((model) => (
+                      <Option key={model.id} value={model.id} text={model.name}>
+                        {model.name} {model.description ? `- ${model.description}` : ''}
+                      </Option>
+                    ))}
+                  </Combobox>
                 </Field>
               </div>
               <div className={styles.formRow}>
@@ -1207,7 +1230,7 @@ export const SettingsPage = () => {
               disabled={
                 isSubscriptionTypeSubmitting ||
                 !subscriptionTypeForm.name.trim() ||
-                !subscriptionTypeForm.allowedModel.trim() ||
+                !subscriptionTypeForm.allowedModelId.trim() ||
                 subscriptionTypeForm.maxTokensPerMessage <= 0 ||
                 subscriptionTypeForm.pricePerMonth < 0
               }

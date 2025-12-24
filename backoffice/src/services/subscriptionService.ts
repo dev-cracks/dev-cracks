@@ -3,7 +3,8 @@ import { apiService } from './apiService';
 export interface SubscriptionTypeDto {
   id: string;
   name: string;
-  allowedModel: string;
+  allowedModelId: string;
+  allowedModelName: string;
   maxTokensPerMonth?: number;
   maxMessagesPerMonth?: number;
   maxTokensPerMessage: number;
@@ -18,7 +19,8 @@ export interface SubscriptionDto {
   customerId: string;
   subscriptionTypeId: string;
   subscriptionTypeName: string;
-  allowedModel: string;
+  allowedModelId: string;
+  allowedModelName: string;
   startDate: string;
   endDate?: string;
   isActive: boolean;
@@ -39,7 +41,7 @@ export interface CreateSubscriptionRequest {
 
 export interface CreateSubscriptionTypeRequest {
   name: string;
-  allowedModel: string;
+  allowedModelId: string;
   maxTokensPerMonth?: number;
   maxMessagesPerMonth?: number;
   maxTokensPerMessage: number;

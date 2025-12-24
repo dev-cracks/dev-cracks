@@ -388,7 +388,7 @@ export const SubscriptionsPage = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Text>{subscription.allowedModel}</Text>
+                      <Text>{subscription.allowedModelName}</Text>
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -537,7 +537,7 @@ export const SubscriptionsPage = () => {
                 }}
               >
                 {subscriptionTypes.map((type) => {
-                  const optionText = `${type.name} - ${type.allowedModel} (${type.pricePerMonth > 0 ? `$${type.pricePerMonth}/mes` : 'Gratis'})`;
+                  const optionText = `${type.name} - ${type.allowedModelName} (${type.pricePerMonth > 0 ? `$${type.pricePerMonth}/mes` : 'Gratis'})`;
                   return (
                     <Option key={type.id} value={type.id} text={optionText}>
                       {optionText}
