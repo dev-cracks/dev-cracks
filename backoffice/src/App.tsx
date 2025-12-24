@@ -7,6 +7,7 @@ import { TenantsPage } from './pages/TenantsPage';
 import { CustomersPage } from './pages/CustomersPage';
 import { OfficesPage } from './pages/OfficesPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { ShipmentRequestsPage } from './pages/ShipmentRequestsPage';
 import { LoginPage } from './pages/LoginPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -74,6 +75,16 @@ const App = () => {
             <ProtectedRoute>
               <Layout>
                 <OfficesPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/shipments"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ShipmentRequestsPage />
               </Layout>
             </ProtectedRoute>
           }

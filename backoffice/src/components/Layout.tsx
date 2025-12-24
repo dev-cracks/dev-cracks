@@ -15,6 +15,7 @@ import {
   BuildingRegular,
   LocationRegular,
   BriefcaseRegular,
+  BoxArrowUpRegular,
 } from '@fluentui/react-icons';
 import { useState, ReactNode, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -267,6 +268,11 @@ export const Layout = ({ children }: LayoutProps) => {
       name: t('layout.offices'),
       icon: <LocationRegular />,
       path: '/offices',
+    },
+    {
+      name: t('layout.shipments'),
+      icon: <BoxArrowUpRegular />,
+      path: '/shipments',
     },
     {
       name: t('layout.users'),
