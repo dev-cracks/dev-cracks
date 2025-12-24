@@ -50,6 +50,34 @@ if (existsSync(backofficeDistDir)) {
   console.warn('⚠️  dist-backoffice no existe. Asegúrate de ejecutar npm run build:backoffice primero.');
 }
 
+// Copiar archivos de dev-coach a /dev-coach dentro de dist
+const devCoachDistDir = resolve(rootDir, 'dist-dev-coach');
+if (existsSync(devCoachDistDir)) {
+  console.log('📦 Copiando archivos de dev-coach a dist/dev-coach...');
+  const devCoachTargetDir = resolve(renderDistDir, 'dev-coach');
+  if (!existsSync(devCoachTargetDir)) {
+    mkdirSync(devCoachTargetDir, { recursive: true });
+  }
+  cpSync(devCoachDistDir, devCoachTargetDir, { recursive: true });
+  console.log('✅ Dev Coach copiado correctamente');
+} else {
+  console.warn('⚠️  dist-dev-coach no existe. Asegúrate de ejecutar npm run build:dev-coach primero.');
+}
+
+// Copiar archivos de route-on a /route-on dentro de dist
+const routeOnDistDir = resolve(rootDir, 'dist-route-on');
+if (existsSync(routeOnDistDir)) {
+  console.log('📦 Copiando archivos de route-on a dist/route-on...');
+  const routeOnTargetDir = resolve(renderDistDir, 'route-on');
+  if (!existsSync(routeOnTargetDir)) {
+    mkdirSync(routeOnTargetDir, { recursive: true });
+  }
+  cpSync(routeOnDistDir, routeOnTargetDir, { recursive: true });
+  console.log('✅ Route On copiado correctamente');
+} else {
+  console.warn('⚠️  dist-route-on no existe. Asegúrate de ejecutar npm run build:route-on primero.');
+}
+
 // Copiar archivo _redirects a dist
 const redirectsFile = resolve(rootDir, '_redirects');
 if (existsSync(redirectsFile)) {
