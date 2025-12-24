@@ -95,8 +95,13 @@ export class ApiService {
         
         try {
           errorData = await response.json();
+          // Try to get message from different possible fields (RFC 7807 Problem Details format)
           if (errorData?.message) {
             errorMessage = errorData.message;
+          } else if (errorData?.detail) {
+            errorMessage = errorData.detail;
+          } else if (errorData?.title) {
+            errorMessage = errorData.title;
           }
         } catch {
           // If JSON cannot be parsed, use default message

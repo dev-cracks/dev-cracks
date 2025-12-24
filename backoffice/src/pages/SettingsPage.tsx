@@ -11,11 +11,29 @@ import {
   Button,
   Spinner,
   Image,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+  TableHeader,
+  TableHeaderCell,
+  Dialog,
+  DialogSurface,
+  DialogTitle,
+  DialogBody,
+  DialogActions,
+  DialogContent,
+  Field,
+  Badge,
+  MessageBar,
+  MessageBarBody,
 } from '@fluentui/react-components';
-import { SettingsRegular } from '@fluentui/react-icons';
+import { SettingsRegular, AddRegular, EditRegular, DeleteRegular, CheckmarkRegular, DismissRegular } from '@fluentui/react-icons';
 import { useEffect, useState, useRef } from 'react';
 import { tenantService } from '../services/tenantService';
 import { customerParameterService } from '../services/customerService';
+import { shipmentService, ShipmentCategoryDto, ShipmentRateDto } from '../services/shipmentService';
+import { notificationService } from '../services/notificationService';
 
 const useStyles = makeStyles({
   container: {
@@ -56,6 +74,22 @@ const useStyles = makeStyles({
     alignItems: 'center',
     padding: tokens.spacingVerticalXXL,
   },
+  tableContainer: {
+    marginTop: tokens.spacingVerticalM,
+  },
+  actionButtons: {
+    display: 'flex',
+    ...shorthands.gap(tokens.spacingHorizontalS),
+  },
+  formRow: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    ...shorthands.gap(tokens.spacingHorizontalM),
+    marginBottom: tokens.spacingVerticalM,
+    '@media (max-width: 768px)': {
+      gridTemplateColumns: '1fr',
+    },
+  },
 });
 
 const PARAM_KEYS = {
@@ -77,8 +111,24 @@ export const SettingsPage = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [customerId, setCustomerId] = useState<string | null>(null);
 
+  // Categories state
+  const [categories, setCategories] = useState<ShipmentCategoryDto[]>([]);
+  const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
+  const [isCategorySubmitting, setIsCategorySubmitting] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<ShipmentCategoryDto | null>(null);
+  const [categoryForm, setCategoryForm] = useState({ name: '', description: '' });
+
+  // Rates state
+  const [rates, setRates] = useState<ShipmentRateDto[]>([]);
+  const [isRateDialogOpen, setIsRateDialogOpen] = useState(false);
+  const [isRateSubmitting, setIsRateSubmitting] = useState(false);
+  const [selectedRate, setSelectedRate] = useState<ShipmentRateDto | null>(null);
+  const [rateForm, setRateForm] = useState({ name: '', description: '', slaDays: 1, baseCost: 0 });
+
   useEffect(() => {
     loadSettings();
+    loadCategories();
+    loadRates();
   }, []);
 
   const loadSettings = async () => {
@@ -285,6 +335,164 @@ export const SettingsPage = () => {
     }
   };
 
+  // Categories management
+  const loadCategories = async () => {
+    try {
+      const data = await shipmentService.getCategories(false);
+      setCategories(data);
+    } catch (error: any) {
+      console.error('Error loading categories:', error);
+      notificationService.error('Error', 'No se pudieron cargar las categorías');
+    }
+  };
+
+  const handleOpenCategoryDialog = (category?: ShipmentCategoryDto) => {
+    if (category) {
+      setSelectedCategory(category);
+      setCategoryForm({ name: category.name, description: category.description || '' });
+    } else {
+      setSelectedCategory(null);
+      setCategoryForm({ name: '', description: '' });
+    }
+    setIsCategoryDialogOpen(true);
+  };
+
+  const handleCloseCategoryDialog = () => {
+    setIsCategoryDialogOpen(false);
+    setSelectedCategory(null);
+    setCategoryForm({ name: '', description: '' });
+  };
+
+  const handleSaveCategory = async () => {
+    if (!categoryForm.name.trim()) {
+      notificationService.error('Error', 'El nombre de la categoría es requerido');
+      return;
+    }
+
+    try {
+      setIsCategorySubmitting(true);
+      if (selectedCategory) {
+        await shipmentService.updateCategory(selectedCategory.id, categoryForm.name, categoryForm.description || undefined);
+        notificationService.success('Éxito', 'Categoría actualizada correctamente');
+      } else {
+        await shipmentService.createCategory(categoryForm.name, categoryForm.description || undefined);
+        notificationService.success('Éxito', 'Categoría creada correctamente');
+      }
+      await loadCategories();
+      handleCloseCategoryDialog();
+    } catch (error: any) {
+      notificationService.error('Error', error.message || 'Error al guardar la categoría');
+    } finally {
+      setIsCategorySubmitting(false);
+    }
+  };
+
+  const handleToggleCategoryStatus = async (category: ShipmentCategoryDto) => {
+    try {
+      if (category.isActive) {
+        await shipmentService.deactivateCategory(category.id);
+        notificationService.success('Éxito', 'Categoría desactivada');
+      } else {
+        await shipmentService.activateCategory(category.id);
+        notificationService.success('Éxito', 'Categoría activada');
+      }
+      await loadCategories();
+    } catch (error: any) {
+      notificationService.error('Error', error.message || 'Error al cambiar el estado de la categoría');
+    }
+  };
+
+  // Rates management
+  const loadRates = async () => {
+    try {
+      const data = await shipmentService.getRates(false);
+      setRates(data);
+    } catch (error: any) {
+      console.error('Error loading rates:', error);
+      notificationService.error('Error', 'No se pudieron cargar las tarifas');
+    }
+  };
+
+  const handleOpenRateDialog = (rate?: ShipmentRateDto) => {
+    if (rate) {
+      setSelectedRate(rate);
+      setRateForm({ 
+        name: rate.name, 
+        description: rate.description || '', 
+        slaDays: rate.slaDays, 
+        baseCost: rate.baseCost 
+      });
+    } else {
+      setSelectedRate(null);
+      setRateForm({ name: '', description: '', slaDays: 1, baseCost: 0 });
+    }
+    setIsRateDialogOpen(true);
+  };
+
+  const handleCloseRateDialog = () => {
+    setIsRateDialogOpen(false);
+    setSelectedRate(null);
+    setRateForm({ name: '', description: '', slaDays: 1, baseCost: 0 });
+  };
+
+  const handleSaveRate = async () => {
+    if (!rateForm.name.trim()) {
+      notificationService.error('Error', 'El nombre de la tarifa es requerido');
+      return;
+    }
+    if (rateForm.slaDays <= 0) {
+      notificationService.error('Error', 'Los días de SLA deben ser mayores a cero');
+      return;
+    }
+    if (rateForm.baseCost < 0) {
+      notificationService.error('Error', 'El costo base no puede ser negativo');
+      return;
+    }
+
+    try {
+      setIsRateSubmitting(true);
+      if (selectedRate) {
+        await shipmentService.updateRate(
+          selectedRate.id,
+          rateForm.name,
+          rateForm.slaDays,
+          rateForm.baseCost,
+          rateForm.description || undefined
+        );
+        notificationService.success('Éxito', 'Tarifa actualizada correctamente');
+      } else {
+        await shipmentService.createRate(
+          rateForm.name,
+          rateForm.slaDays,
+          rateForm.baseCost,
+          rateForm.description || undefined
+        );
+        notificationService.success('Éxito', 'Tarifa creada correctamente');
+      }
+      await loadRates();
+      handleCloseRateDialog();
+    } catch (error: any) {
+      notificationService.error('Error', error.message || 'Error al guardar la tarifa');
+    } finally {
+      setIsRateSubmitting(false);
+    }
+  };
+
+  const handleToggleRateStatus = async (rate: ShipmentRateDto) => {
+    try {
+      if (rate.isActive) {
+        await shipmentService.deactivateRate(rate.id);
+        notificationService.success('Éxito', 'Tarifa desactivada');
+      } else {
+        await shipmentService.activateRate(rate.id);
+        notificationService.success('Éxito', 'Tarifa activada');
+      }
+      await loadRates();
+    } catch (error: any) {
+      notificationService.error('Error', error.message || 'Error al cambiar el estado de la tarifa');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
@@ -379,6 +587,267 @@ export const SettingsPage = () => {
           </Button>
         </div>
       </Card>
+
+      {/* Categories Management */}
+      <Card>
+        <CardHeader
+          header={<Text weight="semibold">Categorías de Envío</Text>}
+          description="Gestiona las categorías de envío disponibles para este tenant"
+          action={
+            <Button
+              appearance="primary"
+              icon={<AddRegular />}
+              onClick={() => handleOpenCategoryDialog()}
+            >
+              Nueva Categoría
+            </Button>
+          }
+        />
+        <div style={{ padding: '20px' }}>
+          <div className={styles.tableContainer}>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHeaderCell>Nombre</TableHeaderCell>
+                  <TableHeaderCell>Descripción</TableHeaderCell>
+                  <TableHeaderCell>Estado</TableHeaderCell>
+                  <TableHeaderCell>Acciones</TableHeaderCell>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {categories.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4}>
+                      <Text>No hay categorías registradas</Text>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  categories.map((category) => (
+                    <TableRow key={category.id}>
+                      <TableCell>
+                        <Text weight="semibold">{category.name}</Text>
+                      </TableCell>
+                      <TableCell>
+                        <Text>{category.description || '-'}</Text>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          appearance={category.isActive ? 'filled' : 'outline'}
+                          color={category.isActive ? 'success' : 'danger'}
+                        >
+                          {category.isActive ? 'Activa' : 'Inactiva'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className={styles.actionButtons}>
+                          <Button
+                            appearance="subtle"
+                            icon={<EditRegular />}
+                            onClick={() => handleOpenCategoryDialog(category)}
+                          >
+                            Editar
+                          </Button>
+                          <Button
+                            appearance="subtle"
+                            icon={category.isActive ? <DismissRegular /> : <CheckmarkRegular />}
+                            onClick={() => handleToggleCategoryStatus(category)}
+                          >
+                            {category.isActive ? 'Desactivar' : 'Activar'}
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      </Card>
+
+      {/* Rates Management */}
+      <Card>
+        <CardHeader
+          header={<Text weight="semibold">Tarifas de Envío</Text>}
+          description="Gestiona las tarifas de envío disponibles para este tenant"
+          action={
+            <Button
+              appearance="primary"
+              icon={<AddRegular />}
+              onClick={() => handleOpenRateDialog()}
+            >
+              Nueva Tarifa
+            </Button>
+          }
+        />
+        <div style={{ padding: '20px' }}>
+          <div className={styles.tableContainer}>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHeaderCell>Nombre</TableHeaderCell>
+                  <TableHeaderCell>Descripción</TableHeaderCell>
+                  <TableHeaderCell>SLA (días)</TableHeaderCell>
+                  <TableHeaderCell>Costo Base</TableHeaderCell>
+                  <TableHeaderCell>Estado</TableHeaderCell>
+                  <TableHeaderCell>Acciones</TableHeaderCell>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rates.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6}>
+                      <Text>No hay tarifas registradas</Text>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  rates.map((rate) => (
+                    <TableRow key={rate.id}>
+                      <TableCell>
+                        <Text weight="semibold">{rate.name}</Text>
+                      </TableCell>
+                      <TableCell>
+                        <Text>{rate.description || '-'}</Text>
+                      </TableCell>
+                      <TableCell>
+                        <Text>{rate.slaDays}</Text>
+                      </TableCell>
+                      <TableCell>
+                        <Text>{rate.baseCost.toFixed(2)} €</Text>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          appearance={rate.isActive ? 'filled' : 'outline'}
+                          color={rate.isActive ? 'success' : 'danger'}
+                        >
+                          {rate.isActive ? 'Activa' : 'Inactiva'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className={styles.actionButtons}>
+                          <Button
+                            appearance="subtle"
+                            icon={<EditRegular />}
+                            onClick={() => handleOpenRateDialog(rate)}
+                          >
+                            Editar
+                          </Button>
+                          <Button
+                            appearance="subtle"
+                            icon={rate.isActive ? <DismissRegular /> : <CheckmarkRegular />}
+                            onClick={() => handleToggleRateStatus(rate)}
+                          >
+                            {rate.isActive ? 'Desactivar' : 'Activar'}
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      </Card>
+
+      {/* Category Dialog */}
+      <Dialog open={isCategoryDialogOpen} onOpenChange={(_, data) => !data.open && handleCloseCategoryDialog()}>
+        <DialogSurface>
+          <DialogTitle>
+            {selectedCategory ? 'Editar Categoría' : 'Nueva Categoría'}
+          </DialogTitle>
+          <DialogBody>
+            <DialogContent>
+              <Field label="Nombre" required>
+                <Input
+                  value={categoryForm.name}
+                  onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
+                  placeholder="Ej: Documento, Paquete, etc."
+                />
+              </Field>
+              <Field label="Descripción">
+                <Input
+                  value={categoryForm.description}
+                  onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
+                  placeholder="Descripción opcional"
+                />
+              </Field>
+            </DialogContent>
+          </DialogBody>
+          <DialogActions>
+            <Button appearance="secondary" onClick={handleCloseCategoryDialog}>
+              Cancelar
+            </Button>
+            <Button
+              appearance="primary"
+              onClick={handleSaveCategory}
+              disabled={isCategorySubmitting || !categoryForm.name.trim()}
+            >
+              {isCategorySubmitting ? <Spinner size="tiny" /> : selectedCategory ? 'Actualizar' : 'Crear'}
+            </Button>
+          </DialogActions>
+        </DialogSurface>
+      </Dialog>
+
+      {/* Rate Dialog */}
+      <Dialog open={isRateDialogOpen} onOpenChange={(_, data) => !data.open && handleCloseRateDialog()}>
+        <DialogSurface>
+          <DialogTitle>
+            {selectedRate ? 'Editar Tarifa' : 'Nueva Tarifa'}
+          </DialogTitle>
+          <DialogBody>
+            <DialogContent>
+              <div className={styles.formRow}>
+                <Field label="Nombre" required>
+                  <Input
+                    value={rateForm.name}
+                    onChange={(e) => setRateForm({ ...rateForm, name: e.target.value })}
+                    placeholder="Ej: Estándar, Express, etc."
+                  />
+                </Field>
+                <Field label="SLA (días)" required>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={rateForm.slaDays.toString()}
+                    onChange={(e) => setRateForm({ ...rateForm, slaDays: parseInt(e.target.value) || 1 })}
+                  />
+                </Field>
+              </div>
+              <div className={styles.formRow}>
+                <Field label="Costo Base (€)" required>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={rateForm.baseCost.toString()}
+                    onChange={(e) => setRateForm({ ...rateForm, baseCost: parseFloat(e.target.value) || 0 })}
+                  />
+                </Field>
+                <Field label="Descripción">
+                  <Input
+                    value={rateForm.description}
+                    onChange={(e) => setRateForm({ ...rateForm, description: e.target.value })}
+                    placeholder="Descripción opcional"
+                  />
+                </Field>
+              </div>
+            </DialogContent>
+          </DialogBody>
+          <DialogActions>
+            <Button appearance="secondary" onClick={handleCloseRateDialog}>
+              Cancelar
+            </Button>
+            <Button
+              appearance="primary"
+              onClick={handleSaveRate}
+              disabled={isRateSubmitting || !rateForm.name.trim() || rateForm.slaDays <= 0 || rateForm.baseCost < 0}
+            >
+              {isRateSubmitting ? <Spinner size="tiny" /> : selectedRate ? 'Actualizar' : 'Crear'}
+            </Button>
+          </DialogActions>
+        </DialogSurface>
+      </Dialog>
     </div>
   );
 };

@@ -135,5 +135,59 @@ export const shipmentService = {
     const endpoint = availableOnly ? '/shipments/rates/available' : '/shipments/rates';
     return apiService.request<ShipmentRateDto[]>(endpoint);
   },
+
+  // Category CRUD
+  async createCategory(name: string, description?: string): Promise<ShipmentCategoryDto> {
+    return apiService.request<ShipmentCategoryDto>('/shipments/categories', {
+      method: 'POST',
+      body: JSON.stringify({ name, description }),
+    });
+  },
+
+  async updateCategory(id: string, name: string, description?: string): Promise<ShipmentCategoryDto> {
+    return apiService.request<ShipmentCategoryDto>(`/shipments/categories/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ name, description }),
+    });
+  },
+
+  async activateCategory(id: string): Promise<ShipmentCategoryDto> {
+    return apiService.request<ShipmentCategoryDto>(`/shipments/categories/${id}/activate`, {
+      method: 'POST',
+    });
+  },
+
+  async deactivateCategory(id: string): Promise<ShipmentCategoryDto> {
+    return apiService.request<ShipmentCategoryDto>(`/shipments/categories/${id}/deactivate`, {
+      method: 'POST',
+    });
+  },
+
+  // Rate CRUD
+  async createRate(name: string, slaDays: number, baseCost: number, description?: string): Promise<ShipmentRateDto> {
+    return apiService.request<ShipmentRateDto>('/shipments/rates', {
+      method: 'POST',
+      body: JSON.stringify({ name, slaDays, baseCost, description }),
+    });
+  },
+
+  async updateRate(id: string, name: string, slaDays: number, baseCost: number, description?: string): Promise<ShipmentRateDto> {
+    return apiService.request<ShipmentRateDto>(`/shipments/rates/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ name, slaDays, baseCost, description }),
+    });
+  },
+
+  async activateRate(id: string): Promise<ShipmentRateDto> {
+    return apiService.request<ShipmentRateDto>(`/shipments/rates/${id}/activate`, {
+      method: 'POST',
+    });
+  },
+
+  async deactivateRate(id: string): Promise<ShipmentRateDto> {
+    return apiService.request<ShipmentRateDto>(`/shipments/rates/${id}/deactivate`, {
+      method: 'POST',
+    });
+  },
 };
 
