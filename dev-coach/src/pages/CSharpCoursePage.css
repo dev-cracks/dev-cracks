@@ -1,0 +1,292 @@
+.csharp-course-page {
+  min-height: 100vh;
+  position: relative;
+  background: #0a0514;
+  overflow-x: hidden;
+}
+
+.csharp-course-content {
+  min-height: 100vh;
+  padding-top: 120px;
+}
+
+.csharp-course-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.csharp-course-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 2rem;
+  border-radius: 12px;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(177, 158, 239, 0.2);
+}
+
+.back-link {
+  display: inline-block;
+  color: #B19EEF;
+  text-decoration: none;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: #4ECDC4;
+  text-decoration: underline;
+}
+
+.csharp-course-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.csharp-course-subtitle {
+  font-size: 1.25rem;
+  color: #e0e0e0;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.csharp-course-levels {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.csharp-level-section {
+  background: rgba(13, 7, 22, 0.4);
+  border-radius: 12px;
+  overflow: hidden;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(177, 158, 239, 0.3);
+  transition: all 0.3s ease;
+}
+
+.csharp-level-section:hover {
+  border-color: rgba(177, 158, 239, 0.4);
+  box-shadow: 0 4px 20px rgba(177, 158, 239, 0.2);
+}
+
+.csharp-level-header {
+  width: 100%;
+  padding: 1.5rem;
+  background: transparent;
+  border: none;
+  border-left: 4px solid;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.csharp-level-header:hover {
+  background: rgba(177, 158, 239, 0.1);
+}
+
+.csharp-level-header.expanded {
+  border-bottom: 1px solid rgba(177, 158, 239, 0.2);
+}
+
+.csharp-level-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
+}
+
+.csharp-level-info {
+  flex: 1;
+}
+
+.csharp-level-name {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 0.5rem 0;
+}
+
+.csharp-level-description {
+  font-size: 1rem;
+  color: #c0c0c0;
+  margin: 0;
+}
+
+.csharp-level-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.csharp-expand-icon {
+  font-size: 1.5rem;
+  color: #B19EEF;
+  font-weight: 300;
+  min-width: 30px;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.csharp-level-header.expanded .csharp-expand-icon {
+  transform: rotate(0deg);
+}
+
+.csharp-topics-container {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.csharp-topic-section {
+  background: rgba(23, 13, 39, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(177, 158, 239, 0.25);
+  transition: all 0.3s ease;
+}
+
+.csharp-topic-section:hover {
+  border-color: rgba(177, 158, 239, 0.3);
+}
+
+.csharp-topic-header {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s ease;
+}
+
+.csharp-topic-header:hover {
+  background: rgba(177, 158, 239, 0.1);
+}
+
+.csharp-topic-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.csharp-topic-content {
+  padding: 1.5rem;
+  border-top: 1px solid rgba(177, 158, 239, 0.2);
+  animation: slideDown 0.3s ease;
+}
+
+.csharp-theory-section {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(177, 158, 239, 0.2);
+  max-height: 600px;
+  overflow-y: auto;
+  backdrop-filter: blur(3px);
+}
+
+.csharp-theory-section::-webkit-scrollbar {
+  width: 8px;
+}
+
+.csharp-theory-section::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.csharp-theory-section::-webkit-scrollbar-thumb {
+  background: rgba(177, 158, 239, 0.5);
+  border-radius: 4px;
+}
+
+.csharp-theory-section::-webkit-scrollbar-thumb:hover {
+  background: rgba(177, 158, 239, 0.7);
+}
+
+.csharp-challenge-section {
+  text-align: center;
+  padding-top: 1rem;
+}
+
+.csharp-challenge-button {
+  display: inline-block;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #B19EEF 0%, #4ECDC4 100%);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(177, 158, 239, 0.3);
+}
+
+.csharp-challenge-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(177, 158, 239, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .csharp-course-container {
+    padding: 1rem;
+  }
+
+  .csharp-course-title {
+    font-size: 2rem;
+  }
+
+  .csharp-course-subtitle {
+    font-size: 1rem;
+  }
+
+  .csharp-level-name {
+    font-size: 1.5rem;
+  }
+
+  .csharp-level-header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .csharp-topic-content {
+    padding: 1rem;
+  }
+
+  .csharp-theory-section {
+    padding: 1.5rem;
+    max-height: 400px;
+  }
+}
+

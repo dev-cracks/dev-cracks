@@ -290,6 +290,7 @@ export const CoursesPage = () => {
       textColor: "#fff",
       links: [
         { label: "Todos los Cursos", ariaLabel: "Ver todos los cursos", href: "/courses" },
+        { label: "C# de cero a experto", ariaLabel: "Curso completo de C#", href: "/csharp-course" },
         { label: "Arquitectura", ariaLabel: "Cursos de arquitectura", href: "/courses#arquitectura" },
         { label: "Frontend", ariaLabel: "Cursos de frontend", href: "/courses#frontend" }
       ]

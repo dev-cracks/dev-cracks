@@ -1,0 +1,126 @@
+.markdown-renderer {
+  color: #e0e0e0;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.markdown-renderer .markdown-h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #B19EEF;
+  border-bottom: 2px solid #B19EEF;
+  padding-bottom: 0.5rem;
+}
+
+.markdown-renderer .markdown-h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #4ECDC4;
+}
+
+.markdown-renderer .markdown-h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: #FF6B9D;
+}
+
+.markdown-renderer .markdown-h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+.markdown-renderer .markdown-p {
+  margin-bottom: 1rem;
+  color: #e0e0e0;
+}
+
+.markdown-renderer .markdown-ul,
+.markdown-renderer .markdown-ol {
+  margin-bottom: 1rem;
+  padding-left: 2rem;
+}
+
+.markdown-renderer .markdown-li {
+  margin-bottom: 0.5rem;
+  color: #e0e0e0;
+}
+
+.markdown-renderer .markdown-code-inline {
+  background-color: rgba(177, 158, 239, 0.2);
+  color: #B19EEF;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.markdown-renderer .markdown-pre {
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(177, 158, 239, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.markdown-renderer .markdown-code-block {
+  color: #B19EEF;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+  display: block;
+  white-space: pre;
+}
+
+.markdown-renderer .markdown-a {
+  color: #4ECDC4;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.markdown-renderer .markdown-a:hover {
+  color: #B19EEF;
+}
+
+.markdown-renderer .markdown-blockquote {
+  border-left: 4px solid #B19EEF;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: #c0c0c0;
+  font-style: italic;
+}
+
+.markdown-renderer .markdown-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.markdown-renderer .markdown-th {
+  background-color: rgba(177, 158, 239, 0.2);
+  color: #B19EEF;
+  padding: 0.75rem;
+  text-align: left;
+  border: 1px solid rgba(177, 158, 239, 0.3);
+  font-weight: 600;
+}
+
+.markdown-renderer .markdown-td {
+  padding: 0.75rem;
+  border: 1px solid rgba(177, 158, 239, 0.2);
+  color: #e0e0e0;
+}
+
+.markdown-renderer .markdown-tr:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
