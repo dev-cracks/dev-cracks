@@ -24,6 +24,7 @@ import { useAuth } from '../hooks/useAuth';
 import { tenantService, TenantDto } from '../services/tenantService';
 import { RibbonBar } from './RibbonBar';
 import { SettingsDialog } from './SettingsDialog';
+import { Jarvis } from './Jarvis';
 import { useSettings } from '../contexts/SettingsContext';
 
 const useStyles = makeStyles({
@@ -368,6 +369,7 @@ export const Layout = ({ children }: LayoutProps) => {
         </div>
       </div>
       <SettingsDialog open={isSettingsOpen} onOpenChange={(open: boolean) => (!open && closeSettings())} />
+      <Jarvis />
     </div>
   );
 };
