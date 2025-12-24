@@ -105,7 +105,11 @@ const DotGrid = ({
     if (!wrap || !canvas) return;
 
     const { width, height } = wrap.getBoundingClientRect();
-    if (width === 0 || height === 0) return; // Esperar a que el elemento tenga dimensiones
+    if (width === 0 || height === 0) {
+      // Reintentar después de un breve delay si no hay dimensiones
+      setTimeout(() => buildGrid(), 100);
+      return;
+    }
     
     const dpr = window.devicePixelRatio || 1;
     canvas.width = width * dpr;
@@ -139,7 +143,6 @@ const DotGrid = ({
   }, [dotSize, gap]);
 
   useEffect(() => {
-    if (!circlePath) return;
     let rafId: number;
 
     const proxSq = proximity * proximity;
@@ -152,6 +155,12 @@ const DotGrid = ({
       if (!ctx) return;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // No dibujar si no hay puntos
+      if (dotsRef.current.length === 0) {
+        rafId = requestAnimationFrame(draw);
+        return;
+      }
 
       const { x: px, y: py } = pointerRef.current;
 
@@ -175,7 +184,16 @@ const DotGrid = ({
         ctx.save();
         ctx.translate(ox, oy);
         ctx.fillStyle = style;
-        ctx.fill(circlePath);
+        
+        // Usar circlePath si está disponible, sino dibujar círculo directamente
+        if (circlePath) {
+          ctx.fill(circlePath);
+        } else {
+          ctx.beginPath();
+          ctx.arc(0, 0, dotSize / 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        
         ctx.restore();
       }
 
@@ -185,20 +203,27 @@ const DotGrid = ({
     draw();
 
     return () => cancelAnimationFrame(rafId);
-  }, [proximity, baseColor, activeRgb, baseRgb, circlePath]);
+  }, [proximity, baseColor, activeRgb, baseRgb, circlePath, dotSize]);
 
   useEffect(() => {
-    buildGrid();
+    // Esperar un frame para asegurar que el DOM esté listo
+    const timeoutId = setTimeout(() => {
+      buildGrid();
+    }, 0);
 
     let ro: ResizeObserver | null = null;
     if ('ResizeObserver' in window) {
-      ro = new ResizeObserver(buildGrid);
+      ro = new ResizeObserver(() => {
+        // Pequeño delay para asegurar que las dimensiones estén actualizadas
+        setTimeout(buildGrid, 0);
+      });
       wrapperRef.current && ro.observe(wrapperRef.current);
     } else {
       window.addEventListener('resize', buildGrid);
     }
 
     return () => {
+      clearTimeout(timeoutId);
       if (ro) ro.disconnect();
       else window.removeEventListener('resize', buildGrid);
     };

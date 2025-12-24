@@ -12,11 +12,11 @@ const DEV_COACH_BASE = '/dev-coach';
 const App = () => (
   <>
     <DotGrid
-      dotSize={10}
-      gap={15}
+      dotSize={12}
+      gap={25}
       baseColor="#5227FF"
-      activeColor="#5227FF"
-      proximity={120}
+      activeColor="#00FFFF"
+      proximity={150}
       shockRadius={250}
       shockStrength={5}
       resistance={750}
@@ -27,8 +27,7 @@ const App = () => (
         left: 0,
         width: '100vw',
         height: '100vh',
-        zIndex: 0,
-        pointerEvents: 'none'
+        zIndex: 0
       }}
     />
     <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh' }}>
