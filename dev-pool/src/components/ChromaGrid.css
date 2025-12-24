@@ -6,10 +6,10 @@
   grid-template-columns: repeat(var(--cols, 3), 320px);
   grid-auto-rows: auto;
   justify-content: center;
-  gap: 0.75rem;
+  gap: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 2rem;
   box-sizing: border-box;
 
   --x: 50%;
@@ -20,16 +20,16 @@
 @media (max-width: 1124px) {
   .chroma-grid {
     grid-template-columns: repeat(auto-fit, minmax(320px, 320px));
-    gap: 0.5rem;
-    padding: 0.5rem;
+    gap: 1.5rem;
+    padding: 1.5rem;
   }
 }
 
 @media (max-width: 480px) {
   .chroma-grid {
     grid-template-columns: 320px;
-    gap: 0.75rem;
-    padding: 1rem;
+    gap: 1.5rem;
+    padding: 1.5rem;
   }
 }
 

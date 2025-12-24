@@ -5,8 +5,10 @@ export const HomePage = () => {
     <div style={{ 
       minHeight: '100vh', 
       width: '100%',
-      paddingTop: '2rem',
-      paddingBottom: '2rem'
+      paddingTop: '8rem',
+      paddingBottom: '4rem',
+      paddingLeft: '2rem',
+      paddingRight: '2rem'
     }}>
       <ChromaGrid 
         radius={300}
