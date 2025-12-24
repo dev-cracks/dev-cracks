@@ -171,6 +171,24 @@
   color: #4ECDC4;
 }
 
+.featured-course-card {
+  background: rgba(13, 7, 22, 0.95) !important;
+  border: none !important;
+  padding: 2rem !important;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.featured-course-card:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 12px 32px rgba(125, 249, 255, 0.3) !important;
+}
+
+.featured-course-card::before {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .courses-title {
     font-size: 2rem;

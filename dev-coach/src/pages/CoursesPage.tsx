@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import CardNav from '../components/CardNav';
+import ElectricBorder from '../components/ElectricBorder';
 import './CoursesPage.css';
 
 // Logo placeholder
@@ -355,6 +356,76 @@ export const CoursesPage = () => {
           <section key={category} id={category.toLowerCase()} className="courses-section">
             <h2 className="courses-section-title">{category}</h2>
             <div className="courses-grid">
+              {/* Tarjeta destacada para C# de cero a experto en la sección Backend */}
+              {category === 'Backend' && (
+                <ElectricBorder
+                  color="#7df9ff"
+                  speed={1}
+                  chaos={0.5}
+                  thickness={2}
+                  style={{ borderRadius: 16, gridColumn: '1 / -1' }}
+                >
+                  <Link
+                    to="/csharp-course"
+                    className="course-card featured-course-card"
+                    style={{ 
+                      background: 'rgba(13, 7, 22, 0.95)',
+                      border: 'none',
+                      position: 'relative',
+                      zIndex: 1
+                    }}
+                  >
+                    <div className="course-card-header">
+                      <span
+                        className="course-level-badge"
+                        style={{ 
+                          backgroundColor: '#7df9ff',
+                          color: '#000',
+                          fontWeight: '700',
+                          fontSize: '0.9rem',
+                          padding: '0.5rem 1rem'
+                        }}
+                      >
+                        ⭐ CURSO DESTACADO
+                      </span>
+                      <span className="course-duration" style={{ color: '#7df9ff' }}>Completo</span>
+                    </div>
+                    <h3 className="course-card-title" style={{ 
+                      fontSize: '1.75rem',
+                      background: 'linear-gradient(135deg, #7df9ff 0%, #B19EEF 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text'
+                    }}>
+                      C# de cero a experto
+                    </h3>
+                    <p className="course-card-description" style={{ fontSize: '1.1rem', lineHeight: '1.6' }}>
+                      Guía completa de aprendizaje desde fundamentos hasta arquitectura empresarial. 
+                      Domina C# desde Trainee hasta Arquitecto con contenido teórico y challenges prácticos.
+                    </p>
+                    <div className="course-topics">
+                      <span className="course-topics-label">Niveles incluidos:</span>
+                      <ul className="course-topics-list">
+                        <li>Trainee - Fundamentos del lenguaje</li>
+                        <li>Junior - POO, excepciones, colecciones</li>
+                        <li>Middle - Async/await, pattern matching</li>
+                        <li>Senior - Reflexión, performance</li>
+                        <li>Tech Lead - SOLID, arquitectura</li>
+                        <li>Arquitecto - Microservicios, diseño de sistemas</li>
+                      </ul>
+                    </div>
+                    <div className="course-card-footer">
+                      <span className="course-card-link" style={{ 
+                        color: '#7df9ff',
+                        fontSize: '1.1rem',
+                        fontWeight: '600'
+                      }}>
+                        Comenzar curso → 
+                      </span>
+                    </div>
+                  </Link>
+                </ElectricBorder>
+              )}
               {categoryCourses.map((course) => (
                 <Link
                   key={course.id}
