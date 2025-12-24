@@ -83,6 +83,86 @@ async function createServer() {
       base: '/landing/', // Configurar base path directamente
     });
 
+    // Crear servidor Vite para route-on con base path y HMR habilitado
+    const routeOnVite = await createViteServer({
+      server: { 
+        middlewareMode: true,
+        hmr: {
+          server: httpServer,
+          protocol: 'ws',
+          host: 'localhost',
+          port: 5173,
+          clientPort: 5173,
+        },
+      },
+      appType: 'spa',
+      root: resolve(__dirname, 'route-on'),
+      publicDir: resolve(__dirname, 'route-on/public'),
+      base: '/route-on/',
+    });
+
+    // Crear servidor Vite para dev-coach con base path y HMR habilitado
+    const devCoachVite = await createViteServer({
+      server: { 
+        middlewareMode: true,
+        hmr: {
+          server: httpServer,
+          protocol: 'ws',
+          host: 'localhost',
+          port: 5173,
+          clientPort: 5173,
+        },
+      },
+      appType: 'spa',
+      root: resolve(__dirname, 'dev-coach'),
+      publicDir: resolve(__dirname, 'dev-coach/public'),
+      base: '/dev-coach/',
+    });
+
+    // Middleware para route-on - debe ir ANTES de landing para evitar conflictos
+    app.use('/route-on', async (req, res, next) => {
+      if (req.originalUrl.match(/\.(tsx?|jsx?|css|json|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot|map)$/) ||
+          req.originalUrl.match(/^\/(route-on\/)?(src|node_modules|@vite|@id|@fs|@react-refresh|assets)/)) {
+        return routeOnVite.middlewares(req, res, (err) => {
+          if (err) {
+            next(err);
+          }
+        });
+      }
+      
+      try {
+        const template = readFileSync(resolve(__dirname, 'route-on/index.html'), 'utf-8');
+        const html = await routeOnVite.transformIndexHtml(req.originalUrl, template);
+        res.setHeader('Content-Type', 'text/html');
+        return res.send(html);
+      } catch (e) {
+        routeOnVite.ssrFixStacktrace(e);
+        return next(e);
+      }
+    });
+
+    // Middleware para dev-coach - debe ir ANTES de landing para evitar conflictos
+    app.use('/dev-coach', async (req, res, next) => {
+      if (req.originalUrl.match(/\.(tsx?|jsx?|css|json|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot|map)$/) ||
+          req.originalUrl.match(/^\/(dev-coach\/)?(src|node_modules|@vite|@id|@fs|@react-refresh|assets)/)) {
+        return devCoachVite.middlewares(req, res, (err) => {
+          if (err) {
+            next(err);
+          }
+        });
+      }
+      
+      try {
+        const template = readFileSync(resolve(__dirname, 'dev-coach/index.html'), 'utf-8');
+        const html = await devCoachVite.transformIndexHtml(req.originalUrl, template);
+        res.setHeader('Content-Type', 'text/html');
+        return res.send(html);
+      } catch (e) {
+        devCoachVite.ssrFixStacktrace(e);
+        return next(e);
+      }
+    });
+
     // Middleware para la landing - debe ir antes del portal, backoffice y la web
     app.use('/landing', async (req, res, next) => {
       // Para archivos estáticos y módulos, usar el middleware de Vite directamente
@@ -155,6 +235,80 @@ async function createServer() {
       } catch (e) {
         backofficeVite.ssrFixStacktrace(e);
         return next(e);
+      }
+    });
+
+
+    // Almacenamiento en memoria para proyectos (en producción usar base de datos)
+    const projectsStore = new Map();
+
+    // API REST para proyectos de dev-coach
+    // POST /api/projects - Crear o actualizar un proyecto
+    app.post('/api/projects', async (req, res) => {
+      try {
+        const { id, files } = req.body;
+
+        if (!files || !Array.isArray(files)) {
+          return res.status(400).json({
+            error: 'Invalid request',
+            message: 'El campo files es requerido y debe ser un array'
+          });
+        }
+
+        // Validar que los archivos tengan la estructura correcta
+        for (const file of files) {
+          if (!file.filename || typeof file.content !== 'string') {
+            return res.status(400).json({
+              error: 'Invalid file structure',
+              message: 'Cada archivo debe tener filename y content'
+            });
+          }
+        }
+
+        const projectId = id || `project-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const now = new Date().toISOString();
+
+        const project = {
+          id: projectId,
+          files: files,
+          createdAt: projectsStore.has(projectId) 
+            ? projectsStore.get(projectId).createdAt 
+            : now,
+          updatedAt: now
+        };
+
+        projectsStore.set(projectId, project);
+
+        res.json(project);
+      } catch (error) {
+        console.error('Error saving project:', error);
+        res.status(500).json({
+          error: 'Error saving project',
+          message: error.message
+        });
+      }
+    });
+
+    // GET /api/projects/:id - Obtener un proyecto por ID
+    app.get('/api/projects/:id', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const project = projectsStore.get(id);
+
+        if (!project) {
+          return res.status(404).json({
+            error: 'Project not found',
+            message: `Proyecto con ID ${id} no encontrado`
+          });
+        }
+
+        res.json(project);
+      } catch (error) {
+        console.error('Error getting project:', error);
+        res.status(500).json({
+          error: 'Error getting project',
+          message: error.message
+        });
       }
     });
 
@@ -254,13 +408,30 @@ async function createServer() {
       }
     });
 
-    // Middleware para la web principal - todas las demás rutas
-    app.use(webVite.middlewares);
+    // Middleware para la web principal - solo para rutas que NO sean de aplicaciones específicas
+    app.use((req, res, next) => {
+      // Si la ruta es de una aplicación específica, saltar este middleware
+      if (req.originalUrl.startsWith('/landing') || 
+          req.originalUrl.startsWith('/portal') || 
+          req.originalUrl.startsWith('/backoffice') ||
+          req.originalUrl.startsWith('/route-on') ||
+          req.originalUrl.startsWith('/dev-coach') ||
+          req.originalUrl.startsWith('/api/')) {
+        return next();
+      }
+      // Aplicar webVite.middlewares solo para rutas de la web principal
+      webVite.middlewares(req, res, next);
+    });
 
     // Fallback para la web principal - servir index.html para rutas SPA
     app.use('*', async (req, res, next) => {
-      // Si la ruta es de landing, portal o backoffice, ya fue manejada arriba
-      if (req.originalUrl.startsWith('/landing') || req.originalUrl.startsWith('/portal') || req.originalUrl.startsWith('/backoffice')) {
+      // Si la ruta es de landing, portal, backoffice, route-on o dev-coach, ya fue manejada arriba
+      if (req.originalUrl.startsWith('/landing') || 
+          req.originalUrl.startsWith('/portal') || 
+          req.originalUrl.startsWith('/backoffice') ||
+          req.originalUrl.startsWith('/route-on') ||
+          req.originalUrl.startsWith('/dev-coach') ||
+          req.originalUrl.startsWith('/api/')) {
         return next();
       }
       
@@ -283,7 +454,9 @@ async function createServer() {
       console.log(`📱 Main web: http://localhost:${port}`);
       console.log(`✨ Landing: http://localhost:${port}/landing`);
       console.log(`🎨 Portal: http://localhost:${port}/portal`);
-      console.log(`🔧 Backoffice: http://localhost:${port}/backoffice\n`);
+      console.log(`🔧 Backoffice: http://localhost:${port}/backoffice`);
+      console.log(`📦 Route On: http://localhost:${port}/route-on`);
+      console.log(`👨‍🏫 Dev Coach: http://localhost:${port}/dev-coach\n`);
     });
 
     httpServer.on('error', (err) => {
