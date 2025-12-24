@@ -4,23 +4,21 @@ import { ChallengePage } from './pages/ChallengePage';
 import { CoursesPage } from './pages/CoursesPage';
 import { CoursePage } from './pages/CoursePage';
 import NotFoundPage from './pages/NotFoundPage';
-import DotGrid from './components/DotGrid';
+import FloatingLines from './components/FloatingLines';
 
 // Fixed base path for dev-coach when accessed through unified server
 const DEV_COACH_BASE = '/dev-coach';
 
 const App = () => (
   <>
-    <DotGrid
-      dotSize={12}
-      gap={25}
-      baseColor="#5227FF"
-      activeColor="#00FFFF"
-      proximity={150}
-      shockRadius={250}
-      shockStrength={5}
-      resistance={750}
-      returnDuration={1.5}
+    <FloatingLines
+      enabledWaves={['top', 'middle', 'bottom']}
+      lineCount={[10, 15, 20]}
+      lineDistance={[8, 6, 4]}
+      bendRadius={5.0}
+      bendStrength={-0.5}
+      interactive={true}
+      parallax={true}
       style={{
         position: 'fixed',
         top: 0,

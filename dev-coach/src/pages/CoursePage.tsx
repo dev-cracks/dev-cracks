@@ -296,7 +296,7 @@ public class CacheService : ICacheService { }`
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 20px;
-  background: #0D0716;
+  background: transparent;
   color: #fff;
 }
 
@@ -335,7 +335,7 @@ export const CoursePage = () => {
     return (
       <div style={{ 
         minHeight: '100vh', 
-        background: '#0D0716', 
+        background: 'transparent', 
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center',

@@ -61,11 +61,11 @@ interface Pointer {
 }
 
 const DotGrid = ({
-  dotSize = 16,
-  gap = 32,
+  dotSize = 10,
+  gap = 20,
   baseColor = '#5227FF',
-  activeColor = '#5227FF',
-  proximity = 150,
+  activeColor = '#00FFFF',
+  proximity = 120,
   speedTrigger = 100,
   shockRadius = 250,
   shockStrength = 5,
@@ -92,21 +92,16 @@ const DotGrid = ({
   const baseRgb = useMemo(() => hexToRgb(baseColor), [baseColor]);
   const activeRgb = useMemo(() => hexToRgb(activeColor), [activeColor]);
 
-  const circlePath = useMemo(() => {
-    if (typeof window === 'undefined' || !window.Path2D) return null;
-    const p = new window.Path2D();
-    p.arc(0, 0, dotSize / 2, 0, Math.PI * 2);
-    return p;
-  }, [dotSize]);
-
   const buildGrid = useCallback(() => {
     const wrap = wrapperRef.current;
     const canvas = canvasRef.current;
     if (!wrap || !canvas) return;
 
-    const { width, height } = wrap.getBoundingClientRect();
+    const rect = wrap.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    
     if (width === 0 || height === 0) {
-      // Reintentar después de un breve delay si no hay dimensiones
       setTimeout(() => buildGrid(), 100);
       return;
     }
@@ -118,7 +113,9 @@ const DotGrid = ({
     canvas.style.height = `${height}px`;
 
     const ctx = canvas.getContext('2d');
-    if (ctx) ctx.scale(dpr, dpr);
+    if (!ctx) return;
+    
+    ctx.scale(dpr, dpr);
 
     const cols = Math.floor((width + gap) / (dotSize + gap));
     const rows = Math.floor((height + gap) / (dotSize + gap));
@@ -144,86 +141,105 @@ const DotGrid = ({
 
   useEffect(() => {
     let rafId: number;
-
     const proxSq = proximity * proximity;
 
     const draw = () => {
       const canvas = canvasRef.current;
-      if (!canvas) return;
-
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // No dibujar si no hay puntos
-      if (dotsRef.current.length === 0) {
+      const wrap = wrapperRef.current;
+      if (!canvas || !wrap) {
         rafId = requestAnimationFrame(draw);
         return;
       }
 
-      const { x: px, y: py } = pointerRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        rafId = requestAnimationFrame(draw);
+        return;
+      }
 
-      for (const dot of dotsRef.current) {
-        const ox = dot.cx + dot.xOffset;
-        const oy = dot.cy + dot.yOffset;
-        const dx = dot.cx - px;
-        const dy = dot.cy - py;
-        const dsq = dx * dx + dy * dy;
+      const { width, height } = wrap.getBoundingClientRect();
+      if (width === 0 || height === 0) {
+        rafId = requestAnimationFrame(draw);
+        return;
+      }
 
-        let style = baseColor;
-        if (dsq <= proxSq) {
-          const dist = Math.sqrt(dsq);
-          const t = 1 - dist / proximity;
-          const r = Math.round(baseRgb.r + (activeRgb.r - baseRgb.r) * t);
-          const g = Math.round(baseRgb.g + (activeRgb.g - baseRgb.g) * t);
-          const b = Math.round(baseRgb.b + (activeRgb.b - baseRgb.b) * t);
-          style = `rgb(${r},${g},${b})`;
-        }
+      // Obtener el DPR para limpiar correctamente
+      const dpr = window.devicePixelRatio || 1;
+      
+      // Limpiar canvas usando dimensiones reales del canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Restaurar escala si es necesario
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
 
-        ctx.save();
-        ctx.translate(ox, oy);
-        ctx.fillStyle = style;
-        
-        // Usar circlePath si está disponible, sino dibujar círculo directamente
-        if (circlePath) {
-          ctx.fill(circlePath);
-        } else {
+      // Dibujar puntos
+      if (dotsRef.current.length > 0) {
+        const { x: px, y: py } = pointerRef.current;
+
+        for (const dot of dotsRef.current) {
+          const ox = dot.cx + dot.xOffset;
+          const oy = dot.cy + dot.yOffset;
+          const dx = dot.cx - px;
+          const dy = dot.cy - py;
+          const dsq = dx * dx + dy * dy;
+
+          let fillColor = baseColor;
+          
+          if (dsq <= proxSq) {
+            const dist = Math.sqrt(dsq);
+            const t = Math.max(0, Math.min(1, 1 - dist / proximity));
+            const r = Math.round(baseRgb.r + (activeRgb.r - baseRgb.r) * t);
+            const g = Math.round(baseRgb.g + (activeRgb.g - baseRgb.g) * t);
+            const b = Math.round(baseRgb.b + (activeRgb.b - baseRgb.b) * t);
+            fillColor = `rgb(${r},${g},${b})`;
+          }
+
+          ctx.fillStyle = fillColor;
           ctx.beginPath();
-          ctx.arc(0, 0, dotSize / 2, 0, Math.PI * 2);
+          ctx.arc(ox, oy, dotSize / 2, 0, Math.PI * 2);
           ctx.fill();
         }
-        
-        ctx.restore();
       }
 
       rafId = requestAnimationFrame(draw);
     };
 
-    draw();
+    // Esperar un momento antes de iniciar el dibujo
+    const timeoutId = setTimeout(() => {
+      draw();
+    }, 100);
 
-    return () => cancelAnimationFrame(rafId);
-  }, [proximity, baseColor, activeRgb, baseRgb, circlePath, dotSize]);
+    return () => {
+      clearTimeout(timeoutId);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [proximity, baseColor, activeRgb, baseRgb, dotSize]);
 
   useEffect(() => {
-    // Esperar un frame para asegurar que el DOM esté listo
-    const timeoutId = setTimeout(() => {
-      buildGrid();
-    }, 0);
+    const initGrid = () => {
+      if (wrapperRef.current && canvasRef.current) {
+        buildGrid();
+      } else {
+        setTimeout(initGrid, 50);
+      }
+    };
+
+    initGrid();
 
     let ro: ResizeObserver | null = null;
     if ('ResizeObserver' in window) {
       ro = new ResizeObserver(() => {
-        // Pequeño delay para asegurar que las dimensiones estén actualizadas
         setTimeout(buildGrid, 0);
       });
-      wrapperRef.current && ro.observe(wrapperRef.current);
+      if (wrapperRef.current) {
+        ro.observe(wrapperRef.current);
+      }
     } else {
       window.addEventListener('resize', buildGrid);
     }
 
     return () => {
-      clearTimeout(timeoutId);
       if (ro) ro.disconnect();
       else window.removeEventListener('resize', buildGrid);
     };
@@ -268,7 +284,6 @@ const DotGrid = ({
           const pushX = dot.cx - pr.x + vx * 0.005;
           const pushY = dot.cy - pr.y + vy * 0.005;
           
-          // Animación sin InertiaPlugin (usando animaciones estándar de GSAP)
           gsap.to(dot, {
             xOffset: pushX,
             yOffset: pushY,
@@ -304,7 +319,6 @@ const DotGrid = ({
           const pushX = (dot.cx - cx) * shockStrength * falloff;
           const pushY = (dot.cy - cy) * shockStrength * falloff;
           
-          // Animación sin InertiaPlugin (usando animaciones estándar de GSAP)
           gsap.to(dot, {
             xOffset: pushX,
             yOffset: pushY,
@@ -344,4 +358,3 @@ const DotGrid = ({
 };
 
 export default DotGrid;
-

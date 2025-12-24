@@ -328,7 +328,7 @@ export const CoursesPage = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0D0716', paddingTop: '120px' }}>
+    <div style={{ minHeight: '100vh', background: 'transparent', paddingTop: '120px' }}>
       <CardNav
         logo={logo}
         logoAlt="Dev Coach Logo"
