@@ -20,6 +20,17 @@ la web app va a estar basada en https://reactbits.dev/ para lucir muy futurista
 
 y la landing es un diseño propio que puede reutilizar componentes de terceras partes.
 
+## Consideraciones front
+Cada aplicación nueva se creara como una carpeta independiente dentro del bundle
+cada vez que se cree una nueva aplicacion se tendra qeu listar con un icono relacionado en la raiz de /portal
+
+Todos los textos del front que se agregen y/o modifiquen deben ser localizados en los idiomas aleman, frances, español, ingles, chino mandarin; siendo ingles el valor por defecto
+
+todas las rutas nuevas a páginas deben ser accesibles al usar la url directamente y no solo por navegacion dentro de la aplicación.
+
+En el caso del backoffice siemrpe debe estar ajustado a los lineamientos y componentes de FLuent UI, version actual instalada, evitrando crear componentes que ya existen en fluent ui, si se va a crear un componente que agrupe componentes de fluent ui esta bien, en caso contrario preguntar al usuario que hacer.
+
+Intentar reutilizar los componentes al máximo posible sin romper logica funcional.
 
 
 ## Fase 1: Recopilación de Información
