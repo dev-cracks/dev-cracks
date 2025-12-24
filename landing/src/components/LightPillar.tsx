@@ -56,8 +56,9 @@ const LightPillar: React.FC<LightPillarProps> = ({
     if (!containerRef.current || !webGLSupported) return;
 
     const container = containerRef.current;
-    const width = container.clientWidth;
-    const height = container.clientHeight;
+    // Usar viewport para evitar problemas de escala
+    const width = window.innerWidth;
+    const height = window.innerHeight;
 
     // Configuración de la escena
     const scene = new THREE.Scene();
@@ -85,6 +86,11 @@ const LightPillar: React.FC<LightPillarProps> = ({
 
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Asegurar que el canvas no tenga transformaciones que afecten el fondo
+    renderer.domElement.style.width = '100%';
+    renderer.domElement.style.height = '100%';
+    renderer.domElement.style.display = 'block';
+    renderer.domElement.style.transform = 'none';
     container.appendChild(renderer.domElement);
 
     rendererRef.current = renderer;
@@ -306,8 +312,9 @@ const LightPillar: React.FC<LightPillarProps> = ({
       resizeTimeout = window.setTimeout(() => {
         if (!rendererRef.current || !materialRef.current || !containerRef.current) return;
 
-        const newWidth = containerRef.current.clientWidth;
-        const newHeight = containerRef.current.clientHeight;
+        // Usar viewport para evitar problemas de escala
+        const newWidth = window.innerWidth;
+        const newHeight = window.innerHeight;
 
         rendererRef.current.setSize(newWidth, newHeight);
         materialRef.current.uniforms.uResolution.value.set(newWidth, newHeight);
