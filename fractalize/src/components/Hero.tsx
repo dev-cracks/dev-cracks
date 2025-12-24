@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import RippleGrid from './RippleGrid';
 
 export const Hero = () => {
   const { t } = useTranslation('fractalize');
@@ -12,12 +13,23 @@ export const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-900 via-gray-900 to-primary-900">
-      {/* Background effects */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gray-900">
+      {/* RippleGrid Background */}
+      <div className="absolute inset-0 overflow-hidden z-0">
+        <RippleGrid
+          enableRainbow={false}
+          gridColor="#ffffff"
+          rippleIntensity={0.05}
+          gridSize={10}
+          gridThickness={15}
+          mouseInteraction={true}
+          mouseInteractionRadius={1.2}
+          opacity={0.8}
+        />
       </div>
+
+      {/* Overlay para mejorar legibilidad */}
+      <div className="absolute inset-0 bg-gray-900/60 z-[1]" />
 
       <div className="container-custom relative z-10">
         <div className="max-w-5xl mx-auto text-center">
@@ -37,7 +49,7 @@ export const Hero = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed"
+            className="text-xl md:text-2xl text-gray-200 mb-8 max-w-3xl mx-auto leading-relaxed"
           >
             {t('hero.subtitle')}
           </motion.p>
@@ -69,7 +81,7 @@ export const Hero = () => {
             transition={{ duration: 1, delay: 0.6 }}
             className="mt-16 relative"
           >
-            <div className="bg-gray-800/50 backdrop-blur-lg rounded-2xl border border-gray-700 p-8 shadow-2xl">
+            <div className="bg-gray-800/70 backdrop-blur-lg rounded-2xl border border-gray-700/50 p-8 shadow-2xl">
               <div className="grid grid-cols-3 gap-4">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
                   <div
