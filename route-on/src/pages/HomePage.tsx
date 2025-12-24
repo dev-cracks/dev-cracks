@@ -32,7 +32,7 @@ export const HomePage = () => {
   ];
 
   return (
-    <div style={{ height: '100vh', background: '#1a1a1a', position: 'relative' }}>
+    <div style={{ width: '100%', height: '100vh', background: '#1a1a1a', position: 'relative', overflow: 'hidden' }}>
       <StaggeredMenu
         position="right"
         items={menuItems}

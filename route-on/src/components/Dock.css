@@ -3,6 +3,8 @@
   display: flex;
   max-width: 100%;
   align-items: center;
+  position: relative;
+  overflow: visible;
 }
 
 .dock-panel {
@@ -13,11 +15,13 @@
   display: flex;
   align-items: flex-end;
   width: fit-content;
+  max-width: calc(100vw - 1rem);
   gap: 1rem;
   border-radius: 1rem;
   background-color: #060010;
   border: 1px solid #222;
   padding: 0 0.5rem 0.5rem;
+  box-sizing: border-box;
 }
 
 .dock-item {
