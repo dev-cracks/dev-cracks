@@ -1,17 +1,25 @@
 .dock-outer {
-  margin: 0 0.5rem;
+  margin: 0;
   display: flex;
   max-width: 100%;
-  align-items: center;
-  position: relative;
+  align-items: flex-end;
+  justify-content: center;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   overflow: visible;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.dock-outer .dock-panel {
+  pointer-events: auto;
 }
 
 .dock-panel {
-  position: absolute;
+  position: relative;
   bottom: 0.5rem;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   align-items: flex-end;
   width: fit-content;
