@@ -1,5 +1,7 @@
 import StaggeredMenu from '../components/StaggeredMenu';
 import FloatingIcon from '../components/FloatingIcon';
+import Dock from '../components/Dock';
+import { VscHome, VscArchive, VscAccount, VscSettingsGear } from 'react-icons/vsc';
 
 // Logo placeholder - deberías reemplazar esto con tu logo real
 const logoUrl = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="110" height="24"%3E%3Ctext x="0" y="18" font-family="Arial" font-size="16" fill="%23fff"%3ERoute On%3C/text%3E%3C/svg%3E';
@@ -22,6 +24,13 @@ const socialItems = [
 ];
 
 export const HomePage = () => {
+  const dockItems = [
+    { icon: <VscHome size={18} />, label: 'Home', onClick: () => alert('Home!') },
+    { icon: <VscArchive size={18} />, label: 'Archive', onClick: () => alert('Archive!') },
+    { icon: <VscAccount size={18} />, label: 'Profile', onClick: () => alert('Profile!') },
+    { icon: <VscSettingsGear size={18} />, label: 'Settings', onClick: () => alert('Settings!') },
+  ];
+
   return (
     <div style={{ height: '100vh', background: '#1a1a1a', position: 'relative' }}>
       <StaggeredMenu
@@ -41,6 +50,13 @@ export const HomePage = () => {
       />
       
       <FloatingIcon />
+
+      <Dock 
+        items={dockItems}
+        panelHeight={68}
+        baseItemSize={50}
+        magnification={70}
+      />
     </div>
   );
 };

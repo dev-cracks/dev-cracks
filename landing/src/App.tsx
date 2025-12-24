@@ -52,53 +52,12 @@ const AppContent = () => {
     }
     
     // Función para manejar el primer click
-    const handleFirstClick = async () => {
+    const handleFirstClick = () => {
       // Guardar la flag en localStorage
       localStorage.setItem('hasSeenSplashScreen', 'true');
       
       // Ocultar el SplashCursor
       setShowSplashCursor(false);
-      
-      // Reproducir shine.mp3
-      let shineAudioElement = document.getElementById('shine-audio') as HTMLAudioElement;
-      
-      // Si no existe en el HTML, crearlo dinámicamente
-      if (!shineAudioElement) {
-        shineAudioElement = document.createElement('audio');
-        shineAudioElement.id = 'shine-audio';
-        shineAudioElement.playsInline = true;
-        shineAudioElement.preload = 'auto';
-        shineAudioElement.style.display = 'none';
-        const source = document.createElement('source');
-        source.src = '/audio/shine.mp3';
-        source.type = 'audio/mpeg';
-        shineAudioElement.appendChild(source);
-        document.body.appendChild(shineAudioElement);
-      }
-      
-      // Configurar volumen
-      shineAudioElement.volume = 0.5;
-      
-      // Intentar reproducir
-      try {
-        shineAudioElement.currentTime = 0; // Reiniciar desde el principio
-        await shineAudioElement.play();
-        console.log('Shine audio playing on first click');
-      } catch (error: any) {
-        console.log('Shine audio play on first click failed:', error);
-        // Si falla, intentar con muted y luego desmutear
-        try {
-          shineAudioElement.muted = true;
-          await shineAudioElement.play();
-          console.log('Shine audio playing with muted workaround');
-          setTimeout(() => {
-            shineAudioElement.muted = false;
-            console.log('Shine audio unmuted');
-          }, 100);
-        } catch (mutedError) {
-          console.log('Shine audio play failed even with muted:', mutedError);
-        }
-      }
       
       // Remover los listeners después de ejecutar
       document.removeEventListener('click', handleFirstClick);
@@ -115,14 +74,9 @@ const AppContent = () => {
     };
   }, []);
 
-  // Reproducir shine.mp3 al cargar la landing (solo si el cursor está visible)
+  // Reproducir shine.mp3 automáticamente al cargar la landing
   useEffect(() => {
-    // Solo reproducir audio automáticamente si el cursor está visible (primera vez)
-    if (!showSplashCursor) {
-      return;
-    }
-    
-    // Intentar cargar y reproducir el audio
+    // Intentar cargar y reproducir el audio automáticamente
     const loadAndPlayAudio = async () => {
       let shineAudioElement = document.getElementById('shine-audio') as HTMLAudioElement;
       
