@@ -58,8 +58,8 @@ export const Header = () => {
             <svg width="600" height="120" viewBox="0 0 600 120" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="crackGradientHeader" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#FF9FFC" />
-                  <stop offset="100%" stopColor="#5227FF" />
+                  <stop offset="0%" stopColor="#FF0080" />
+                  <stop offset="100%" stopColor="#7928CA" />
                 </linearGradient>
                 <filter id="glowHeader" x="-20%" y="-20%" width="140%" height="140%">
                   <feGaussianBlur stdDeviation="5" />
