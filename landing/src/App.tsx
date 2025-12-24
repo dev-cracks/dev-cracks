@@ -162,12 +162,12 @@ const AppContent = () => {
         <LightPillar
           topColor="#5227FF"
           bottomColor="#FF9FFC"
-          intensity={1.0}
+          intensity={1.5}
           rotationSpeed={0.3}
-          glowAmount={0.005}
+          glowAmount={0.01}
           pillarWidth={3.0}
           pillarHeight={0.4}
-          noiseIntensity={0.5}
+          noiseIntensity={0.3}
           pillarRotation={0}
           interactive={false}
           mixBlendMode="normal"

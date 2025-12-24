@@ -12,7 +12,7 @@ html {
 :root {
   color-scheme: dark;
   font-family: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background-color: #0d1117;
+  background-color: transparent;
   color: #e6edf3;
   scroll-behavior: smooth;
 }
@@ -20,7 +20,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: #0d1117;
+  background-color: transparent;
   color: #e6edf3;
   overflow-x: hidden;
   width: 100%;
@@ -71,7 +71,7 @@ main {
   }
 
 .header {
-  background-color: rgb(6, 0, 16);
+  background-color: transparent;
   border-bottom: 1px solid #30363d;
   position: fixed;
   top: 0;
@@ -331,27 +331,62 @@ main {
     0 0 30px rgba(123, 95, 255, 0.2);
 }
 
-.hero__falling-text-wrapper {
+.hero__content-container {
+  width: 100%;
   min-height: 400px;
+  height: 400px;
   margin-bottom: 40px;
   position: relative;
+  box-sizing: border-box;
+}
+
+.hero__falling-text-wrapper {
+  width: 100%;
+  max-width: 100%;
+  min-height: 400px;
+  height: 400px;
+  position: absolute;
+  top: 0;
+  left: 0;
   z-index: 2;
   opacity: 1;
   transition: opacity 0.5s ease-out;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 0;
+  box-sizing: border-box;
+  visibility: visible;
 }
 
 .hero__falling-text-wrapper.fade-out {
   opacity: 0;
   pointer-events: none;
+  visibility: hidden;
 }
 
 .hero__title-wrapper {
-  margin-bottom: 60px;
+  margin-bottom: 0;
   text-align: center;
+  min-height: 400px;
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transition: opacity 0.5s ease-in;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hero__title-wrapper.visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .hero__title-line {
@@ -367,10 +402,13 @@ main {
     0 0 45px rgba(123, 95, 255, 0.4),
     0 2px 4px rgba(0, 0, 0, 0.5);
   letter-spacing: -0.5px;
+  width: 100%;
+  text-align: center;
 }
 
 .hero__title-line:last-child {
   margin-bottom: 0;
+  font-size: 3.5rem;
 }
 
 @media (max-width: 768px) {
@@ -446,7 +484,7 @@ main {
   min-height: 550px;
   overflow: hidden;
   border-radius: 15px;
-  background: rgb(6, 0, 16);
+  background: transparent;
   border: 1px solid rgba(82, 39, 255, 0.3);
   box-shadow: 
     0 10px 40px rgba(0, 0, 0, 0.5),
@@ -661,9 +699,10 @@ main {
 .hotmart-promo,
 .contact {
   padding: 80px 20px;
-  border-bottom: 1px solid #30363d;
+  border-bottom: 1px solid rgba(48, 54, 61, 0.3);
   position: relative;
   z-index: 1;
+  background: transparent;
 }
 
 .services h2,
@@ -700,7 +739,7 @@ main {
 }
 
 .case-study-card {
-  background: rgb(6, 0, 16);
+  background: transparent;
   border: 1px solid rgba(82, 39, 255, 0.3);
   border-radius: 15px;
   padding: 35px;
@@ -839,7 +878,7 @@ main {
 .case-studies__cta {
   text-align: center;
   padding: 40px;
-  background: rgba(22, 27, 34, 0.6);
+  background: rgba(22, 27, 34, 0.1);
   border-radius: 15px;
   border: 1px solid rgba(82, 39, 255, 0.3);
 }
@@ -869,7 +908,7 @@ main {
 }
 
 .product-card {
-  background: rgb(6, 0, 16);
+  background: transparent;
   border: 1px solid rgba(82, 39, 255, 0.3);
   border-radius: 15px;
   padding: 40px;
@@ -1004,7 +1043,7 @@ main {
 }
 
 .service-item {
-  background-color: rgb(6, 0, 16);
+  background-color: transparent;
   padding: 30px;
   border-radius: 10px;
   text-align: center;
@@ -1222,7 +1261,7 @@ main {
 
 .comparison-table__cell {
   padding: 20px;
-  background: rgba(22, 27, 34, 0.9);
+  background: rgba(22, 27, 34, 0.2);
   color: #c9d1d9;
   font-size: 0.95rem;
   line-height: 1.6;
@@ -1231,7 +1270,7 @@ main {
 .comparison-table__cell--feature {
   font-weight: 600;
   color: #e6edf3;
-  background: rgba(22, 27, 34, 0.95);
+  background: rgba(22, 27, 34, 0.25);
 }
 
 .comparison-table__cell--devcracks {
@@ -1241,7 +1280,7 @@ main {
 }
 
 .comparison-table__cell--competitor {
-  background: rgba(22, 27, 34, 0.7);
+  background: rgba(22, 27, 34, 0.15);
   color: #6e7681;
 }
 
@@ -1272,7 +1311,7 @@ main {
 }
 
 .differentiator-card {
-  background: rgb(6, 0, 16);
+  background: transparent;
   padding: 30px;
   border-radius: 10px;
   text-align: center;
@@ -1771,7 +1810,7 @@ main {
   height: 40px;
   border-radius: 50%;
   transition: all 0.3s ease;
-  background: rgba(22, 27, 34, 0.6);
+  background: rgba(22, 27, 34, 0.1);
   border: 1px solid rgba(123, 95, 255, 0.2);
 }
 
@@ -2434,7 +2473,7 @@ main {
 }
 
 .account-page__card {
-  background: rgb(6, 0, 16);
+  background: transparent;
   border: 1px solid #30363d;
   border-radius: 12px;
   padding: 24px;

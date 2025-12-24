@@ -44,8 +44,12 @@ const FallingText: React.FC<FallingText.Props> = ({
       .join(' ');
 
     textRef.current.innerHTML = newHTML;
-    textRef.current.style.whiteSpace = 'normal';
-    textRef.current.style.wordSpacing = '0.3em';
+    textRef.current.style.display = 'flex';
+    textRef.current.style.flexWrap = 'wrap';
+    textRef.current.style.justifyContent = 'center';
+    textRef.current.style.alignItems = 'center';
+    textRef.current.style.alignContent = 'center';
+    textRef.current.style.gap = '0.5em';
   }, [text, highlightWords, highlightClass]);
 
   useEffect(() => {
@@ -119,16 +123,28 @@ const FallingText: React.FC<FallingText.Props> = ({
 
       const wordSpans = textRef.current.querySelectorAll<HTMLSpanElement>('.word');
       const wordBodies: Array<{ elem: HTMLSpanElement; body: Matter.Body }> = [];
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const centerX = containerRect.width / 2;
+      const centerY = containerRect.height / 2;
 
-      Array.from(wordSpans).forEach((elem) => {
+      Array.from(wordSpans).forEach((elem, index) => {
         // Obtener posición inicial antes de hacerla absoluta
         const rect = elem.getBoundingClientRect();
-        const containerRect = containerRef.current!.getBoundingClientRect();
         
         if (rect.width === 0 || rect.height === 0) return;
 
-        const x = rect.left - containerRect.left + rect.width / 2;
-        const y = rect.top - containerRect.top + rect.height / 2;
+        // Usar la posición real del elemento, pero si está muy a la izquierda, distribuir mejor
+        let x = rect.left - containerRect.left + rect.width / 2;
+        let y = rect.top - containerRect.top + rect.height / 2;
+        
+        // Si todas las palabras están muy a la izquierda, distribuirlas mejor
+        if (x < containerRect.width * 0.3) {
+          // Distribuir las palabras en un área más amplia alrededor del centro
+          const angle = (index / wordSpans.length) * Math.PI * 2;
+          const radius = Math.min(containerRect.width, containerRect.height) * 0.3;
+          x = centerX + Math.cos(angle) * radius;
+          y = centerY + Math.sin(angle) * radius;
+        }
 
         // Hacer la palabra absoluta en su posición inicial
         elem.style.position = 'absolute';

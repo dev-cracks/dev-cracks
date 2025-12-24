@@ -125,6 +125,22 @@ async function createServer() {
       appType: 'spa',
     });
 
+    // Crear servidor Vite para fractalize con base path y HMR habilitado
+    const fractalizeVite = await createViteServer({
+      configFile: resolve(__dirname, 'fractalize/vite.config.ts'),
+      server: { 
+        middlewareMode: true,
+        hmr: {
+          server: httpServer,
+          protocol: 'ws',
+          host: 'localhost',
+          port: 5173,
+          clientPort: 5173,
+        },
+      },
+      appType: 'spa',
+    });
+
     // Middleware para route-on - debe ir ANTES de landing para evitar conflictos
     app.use('/route-on', async (req, res, next) => {
       if (req.originalUrl.match(/\.(tsx?|jsx?|css|json|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot|map)$/) ||
@@ -187,6 +203,28 @@ async function createServer() {
         return res.send(html);
       } catch (e) {
         devPoolVite.ssrFixStacktrace(e);
+        return next(e);
+      }
+    });
+
+    // Middleware para fractalize - debe ir ANTES de landing para evitar conflictos
+    app.use('/fractalize', async (req, res, next) => {
+      if (req.originalUrl.match(/\.(tsx?|jsx?|css|json|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot|map)$/) ||
+          req.originalUrl.match(/^\/(fractalize\/)?(src|node_modules|@vite|@id|@fs|@react-refresh|assets)/)) {
+        return fractalizeVite.middlewares(req, res, (err) => {
+          if (err) {
+            next(err);
+          }
+        });
+      }
+      
+      try {
+        const template = readFileSync(resolve(__dirname, 'fractalize/index.html'), 'utf-8');
+        const html = await fractalizeVite.transformIndexHtml(req.originalUrl, template);
+        res.setHeader('Content-Type', 'text/html');
+        return res.send(html);
+      } catch (e) {
+        fractalizeVite.ssrFixStacktrace(e);
         return next(e);
       }
     });
@@ -445,6 +483,7 @@ async function createServer() {
           req.originalUrl.startsWith('/route-on') ||
           req.originalUrl.startsWith('/dev-coach') ||
           req.originalUrl.startsWith('/dev-pool') ||
+          req.originalUrl.startsWith('/fractalize') ||
           req.originalUrl.startsWith('/api/')) {
         return next();
       }
@@ -454,13 +493,14 @@ async function createServer() {
 
     // Fallback para la web principal - servir index.html para rutas SPA
     app.use('*', async (req, res, next) => {
-      // Si la ruta es de landing, portal, backoffice, route-on o dev-coach, ya fue manejada arriba
+      // Si la ruta es de landing, portal, backoffice, route-on, dev-coach, dev-pool o fractalize, ya fue manejada arriba
       if (req.originalUrl.startsWith('/landing') || 
           req.originalUrl.startsWith('/portal') || 
           req.originalUrl.startsWith('/backoffice') ||
           req.originalUrl.startsWith('/route-on') ||
           req.originalUrl.startsWith('/dev-coach') ||
           req.originalUrl.startsWith('/dev-pool') ||
+          req.originalUrl.startsWith('/fractalize') ||
           req.originalUrl.startsWith('/api/')) {
         return next();
       }
@@ -487,7 +527,8 @@ async function createServer() {
       console.log(`🔧 Backoffice: http://localhost:${port}/backoffice`);
       console.log(`📦 Route On: http://localhost:${port}/route-on`);
       console.log(`👨‍🏫 Dev Coach: http://localhost:${port}/dev-coach`);
-      console.log(`👥 Dev Pool: http://localhost:${port}/dev-pool\n`);
+      console.log(`👥 Dev Pool: http://localhost:${port}/dev-pool`);
+      console.log(`🔷 Fractalize: http://localhost:${port}/fractalize\n`);
     });
 
     httpServer.on('error', (err) => {

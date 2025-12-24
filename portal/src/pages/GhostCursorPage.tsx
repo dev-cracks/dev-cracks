@@ -14,6 +14,13 @@ export const GhostCursorPage = () => {
     }, 300);
   };
 
+  const handleFractalizeClick = () => {
+    setGhostActive(false);
+    setTimeout(() => {
+      window.location.href = '/fractalize';
+    }, 300);
+  };
+
   const handleNavClick = (path: string, external: boolean = false, absolute: boolean = false) => {
     if (external || absolute) {
       // Para rutas externas o absolutas, usar window.location.href
@@ -54,6 +61,14 @@ export const GhostCursorPage = () => {
     </svg>
   );
 
+  const FractalizeIcon = () => (
+    <svg stroke="#ffffff" fill="#ffffff" strokeWidth="2" viewBox="0 0 24 24" height="1.5em" width="1.5em" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2L2 7L12 12L22 7L12 2Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
+      <path d="M2 17L12 22L22 17" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
+      <path d="M2 12L12 17L22 12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
+    </svg>
+  );
+
   const LandingIcon = () => (
     <svg stroke="#ffffff" fill="#ffffff" strokeWidth="2" viewBox="0 0 24 24" height="1.5em" width="1.5em" xmlns="http://www.w3.org/2000/svg">
       <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" strokeWidth="0"></path>
@@ -72,6 +87,7 @@ export const GhostCursorPage = () => {
     { path: '/dev-coach', label: 'Dev-coach', icon: <DevCoachIcon />, absolute: true },
     { path: '/dev-pool', label: 'Dev-pool', icon: <DevPoolIcon />, absolute: true },
     { path: '/route-on', label: 'Route-On', icon: <RouteOnIcon />, absolute: true },
+    { path: '/fractalize', label: 'Fractalize', icon: <FractalizeIcon />, absolute: true },
     { path: '/landing', label: 'Landing', icon: <LandingIcon />, absolute: true }
   ];
 
@@ -153,7 +169,7 @@ export const GhostCursorPage = () => {
 
           <div 
             className="ghost-cursor-page__fractalize-logo"
-            onClick={handleLogoClick}
+            onClick={handleFractalizeClick}
             style={{ cursor: 'pointer' }}
           >
             <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">

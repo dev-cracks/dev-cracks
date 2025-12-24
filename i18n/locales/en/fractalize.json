@@ -1,0 +1,213 @@
+{
+  "nav": {
+    "ecosystem": "Ecosystem",
+    "modules": "Modules",
+    "benefits": "Benefits",
+    "industry": "Industries",
+    "pricing": "Pricing",
+    "requestDemo": "Request Demo"
+  },
+  "hero": {
+    "title": "Transform Your Logistics Operation",
+    "titleHighlight": "with Modular Technology",
+    "subtitle": "Modular enterprise platform designed for logistics companies, transportation, parcel delivery and distribution. Pay only for the modules you need.",
+    "ctaPrimary": "Request Demo",
+    "ctaSecondary": "Explore Modules"
+  },
+  "ecosystem": {
+    "title": "A Powerful Modular Ecosystem",
+    "subtitle": "Centralize operations, optimize processes and eliminate operational friction with our enterprise technology platform.",
+    "feature1": {
+      "title": "Atomic Architecture",
+      "description": "Each module works independently. Buy only what you need and scale as you grow."
+    },
+    "feature2": {
+      "title": "Total Integration",
+      "description": "All modules communicate with each other natively, eliminating information silos."
+    },
+    "feature3": {
+      "title": "Logistics Focus",
+      "description": "Specifically designed to optimize transportation, warehousing and distribution operations."
+    },
+    "benefit": "Centralize your business management in a single platform, reducing costs and increasing efficiency."
+  },
+  "modules": {
+    "title": "Powerful Modules",
+    "subtitle": "Choose the modules you need. Each one is a complete and independent solution.",
+    "discover": "Discover module",
+    "crm": {
+      "title": "CRM",
+      "description": "Complete customer relationship management, optimized for the logistics sector."
+    },
+    "erp": {
+      "title": "ERP",
+      "description": "Enterprise resource planning for complex logistics operations."
+    },
+    "inventory": {
+      "title": "Inventory Management",
+      "description": "Total control of stock, warehouses and merchandise movements in real time."
+    },
+    "hr": {
+      "title": "Human Resources",
+      "description": "Complete personnel administration, from recruitment to development."
+    },
+    "payroll": {
+      "title": "Payroll",
+      "description": "Automatic calculation of payroll, benefits and regulatory compliance."
+    },
+    "invoicing": {
+      "title": "E-Invoicing",
+      "description": "Electronic invoice issuance and management with full compliance."
+    },
+    "finance": {
+      "title": "Finance",
+      "description": "Complete financial control with real-time reports and analysis."
+    },
+    "automation": {
+      "title": "Operational Automation",
+      "description": "Automate repetitive processes and optimize workflows."
+    }
+  },
+  "benefits": {
+    "title": "Strategic Benefits",
+    "subtitle": "Optimize operations, reduce costs and scale your business with our platform.",
+    "optimization": {
+      "title": "Operational Optimization",
+      "description": "Reduce execution times by up to 70% and significantly increase productivity."
+    },
+    "costs": {
+      "title": "Cost Reduction",
+      "description": "Eliminate redundancies and optimize resources, generating measurable ROI from the first quarter."
+    },
+    "integration": {
+      "title": "Total Integration",
+      "description": "All modules work together without friction, sharing information in real time."
+    },
+    "automation": {
+      "title": "Intelligent Automation",
+      "description": "Automate complex processes and make data-driven decisions in real time."
+    },
+    "security": {
+      "title": "Security and Stability",
+      "description": "Robust infrastructure with compliance to enterprise security standards."
+    },
+    "scalability": {
+      "title": "Real Scalability",
+      "description": "Grow with your business. Add modules when you need them, without limits."
+    }
+  },
+  "industry": {
+    "title": "Industry Focus",
+    "subtitle": "Specific solutions for each type of logistics company.",
+    "parcel": {
+      "title": "Parcel and Last Mile",
+      "description": "Optimize last mile deliveries with real-time tracking.",
+      "benefit1": "Real-time tracking",
+      "benefit2": "Route optimization",
+      "benefit3": "Delivery management"
+    },
+    "operators": {
+      "title": "Logistics Operators",
+      "description": "Manage multiple clients and complex operations from a single platform.",
+      "benefit1": "Multi-client",
+      "benefit2": "Centralized coordination",
+      "benefit3": "Advanced KPIs"
+    },
+    "transport": {
+      "title": "Transport Companies",
+      "description": "Total control of fleets, routes and transport operations.",
+      "benefit1": "Fleet management",
+      "benefit2": "Route planning",
+      "benefit3": "Preventive maintenance"
+    },
+    "warehouse": {
+      "title": "Warehousing and Distribution",
+      "description": "Optimize warehouses and distribution centers with advanced technology.",
+      "benefit1": "Inventory control",
+      "benefit2": "Space optimization",
+      "benefit3": "Order management"
+    },
+    "franchise": {
+      "title": "Messaging Franchises",
+      "description": "Manage multiple points of sale and operations from a control center.",
+      "benefit1": "Multi-branch",
+      "benefit2": "Consolidated reports",
+      "benefit3": "Operational standardization"
+    }
+  },
+  "trust": {
+    "title": "Trust and Credibility",
+    "subtitle": "Companies that trust Fractalize to transform their operations.",
+    "metrics": {
+      "roi": "Average ROI",
+      "efficiency": "Efficiency Improvement",
+      "satisfaction": "Customer Satisfaction"
+    },
+    "testimonial1": {
+      "initials": "JM",
+      "name": "John Martinez",
+      "position": "CEO, Express Logistics",
+      "quote": "Fractalize completely transformed our operations. We reduced costs by 40% and significantly improved operational efficiency."
+    },
+    "testimonial2": {
+      "initials": "MC",
+      "name": "Mary Cortés",
+      "position": "Operations Director, Northern Transport",
+      "quote": "Fractalize's modularity allowed us to start with the essentials and grow according to our needs. Excellent investment."
+    }
+  },
+  "pricing": {
+    "title": "Transparent Pricing",
+    "subtitle": "Choose the plan that best fits your company. No surprises, no hidden commitments.",
+    "popular": "Most Popular",
+    "modular": {
+      "name": "Modular Plan",
+      "description": "Pay only for the modules you need",
+      "feature1": "Individual modules",
+      "feature2": "Flexible monthly payment",
+      "feature3": "Standard support",
+      "feature4": "Updates included",
+      "cta": "Get Started"
+    },
+    "complete": {
+      "name": "Complete Platform",
+      "description": "Access to all modules",
+      "feature1": "All modules included",
+      "feature2": "Volume discount",
+      "feature3": "Priority support",
+      "feature4": "Personalized onboarding",
+      "cta": "Request Demo"
+    },
+    "enterprise": {
+      "name": "Enterprise Plan",
+      "description": "Customized solution for large companies",
+      "feature1": "Complete customization",
+      "feature2": "Dedicated 24/7 support",
+      "feature3": "Custom integrations",
+      "feature4": "Dedicated account manager",
+      "cta": "Contact Sales"
+    }
+  },
+  "cta": {
+    "title": "Ready to Transform Your Logistics Operation?",
+    "subtitle": "Request a personalized demo and discover how Fractalize can optimize your business.",
+    "requestDemo": "Request Demo",
+    "contactAdvisor": "Talk to an Advisor"
+  },
+  "footer": {
+    "description": "Modular enterprise technology platform for the logistics and distribution sector.",
+    "modules": "Modules",
+    "inventory": "Inventory",
+    "hr": "HR",
+    "company": "Company",
+    "about": "About",
+    "contact": "Contact",
+    "careers": "Careers",
+    "legal": "Legal",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "cookies": "Cookies",
+    "rights": "All rights reserved."
+  }
+}
+

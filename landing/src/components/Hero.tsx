@@ -41,22 +41,16 @@ const carouselSlides = [
   }
 ];
 
-// Lista de miedos y conceptos retrógrados sobre IA
+// Lista de miedos y conceptos retrógrados sobre IA - palabras clave
 const miedosRetrogrados = [
-  'Miedo a perder el control',
-  'Pensar que la IA es solo para grandes empresas',
-  'Creer que es demasiado costosa',
-  'Temor a que reemplace a los empleados',
-  'Desconfianza en la tecnología',
-  'Aferrarse a procesos manuales',
-  'Resistencia al cambio',
-  'Falta de conocimiento técnico',
-  'Miedo a la complejidad',
-  'Pensar que no es necesaria',
-  'Desconfianza en los datos',
-  'Miedo a la inversión inicial',
-  'Creer que es solo una moda',
-  'Temor a la seguridad',
+  'Miedo',
+  'Resistencia',
+  'Obsolescencia',
+  'Desconfianza',
+  'Temor',
+  'Procesos manuales',
+  'Sistemas legacy',
+  'Falta de visión',
   'Resistencia cultural'
 ];
 
@@ -75,10 +69,10 @@ export const Hero = () => {
   }, []);
 
   useEffect(() => {
-    // Iniciar fade out después de 2 segundos
+    // Iniciar fade out después de 6 segundos (triple del tiempo original)
     const fadeTimer = setTimeout(() => {
       setFadeOut(true);
-    }, 2000);
+    }, 6000);
 
     // Ocultar completamente después del fade
     const hideTimer = setTimeout(() => {
@@ -87,7 +81,7 @@ export const Hero = () => {
       setTimeout(() => {
         setShowMainContent(true);
       }, 300);
-    }, 2500);
+    }, 6500);
 
     return () => {
       clearTimeout(fadeTimer);
@@ -110,26 +104,27 @@ export const Hero = () => {
           <span className="hero__badge">Expertos en IA Aplicada</span>
         </div>
 
-        {/* FallingText con miedos retrógrados */}
-        {showFallingText && (
-          <div className={`hero__falling-text-wrapper ${fadeOut ? 'fade-out' : ''}`}>
-            <FallingText
-              text={miedosText}
-              highlightWords={miedosRetrogrados}
-              highlightClass="highlighted"
-              trigger="auto"
-              backgroundColor="transparent"
-              wireframes={false}
-              gravity={0.56}
-              fontSize="1.5rem"
-              mouseConstraintStiffness={0.9}
-            />
-          </div>
-        )}
+        {/* Contenedor fijo para mantener el espacio */}
+        <div className="hero__content-container">
+          {/* FallingText con miedos retrógrados */}
+          {showFallingText && (
+            <div className={`hero__falling-text-wrapper ${fadeOut ? 'fade-out' : ''}`}>
+              <FallingText
+                text={miedosText}
+                highlightWords={miedosRetrogrados}
+                highlightClass="highlighted"
+                trigger="auto"
+                backgroundColor="transparent"
+                wireframes={false}
+                gravity={0.56}
+                fontSize="2rem"
+                mouseConstraintStiffness={0.9}
+              />
+            </div>
+          )}
 
-        {/* Contenido principal con SplitText */}
-        {showMainContent && (
-          <div className="hero__title-wrapper">
+          {/* Contenido principal con SplitText */}
+          <div className={`hero__title-wrapper ${showMainContent ? 'visible' : ''}`}>
             <h2 className="hero__title-line">
               <SplitText text="Transformación Digital con IA" delay={300} />
             </h2>
@@ -137,7 +132,7 @@ export const Hero = () => {
               <SplitText text="De la Idea al Impacto Empresarial" delay={800} />
             </h2>
           </div>
-        )}
+        </div>
 
         <div className="hero-carousel">
           <div className="hero-carousel__slides">

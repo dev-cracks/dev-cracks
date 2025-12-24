@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { getCachedUserImage, cacheUserImage } from '../services/imageCache';
+import { getGravatarAvatarUrl, getGravatarAvatarUrlSync, cacheGravatarHash, getGravatarHash } from '../utils/gravatarUtils';
 
 interface AvatarProps {
   picture?: string | null;
@@ -22,11 +23,20 @@ const fontSizeMap = {
   large: '2rem'
 };
 
+// Mapear tamaños a píxeles para Gravatar
+const gravatarSizeMap = {
+  small: 32,
+  medium: 48,
+  large: 80
+};
+
 export const Avatar = ({ picture, name, email, userId, size = 'medium', className = '' }: AvatarProps) => {
   const [imageError, setImageError] = useState(false);
+  const [gravatarError, setGravatarError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const currentPictureRef = useRef<string | null>(null);
+  const gravatarUrlRef = useRef<string | null>(null);
 
   const displayName = name || email;
   const initial = displayName[0]?.toUpperCase() || '?';
@@ -37,8 +47,10 @@ export const Avatar = ({ picture, name, email, userId, size = 'medium', classNam
   useEffect(() => {
     // Resetear estados cuando cambian las props
     setImageError(false);
+    setGravatarError(false);
     setIsLoading(true);
     
+    // Prioridad 1: Usar picture de Auth0 si está disponible
     if (userId && picture) {
       // Intentar obtener del caché primero
       const cachedUrl = getCachedUserImage(userId);
@@ -47,6 +59,7 @@ export const Avatar = ({ picture, name, email, userId, size = 'medium', classNam
         // Si hay caché, usarlo
         setImageUrl(cachedUrl);
         currentPictureRef.current = picture;
+        setIsLoading(false);
       } else {
         // Si no hay caché, mostrar la imagen original inmediatamente
         setImageUrl(picture);
@@ -68,25 +81,82 @@ export const Avatar = ({ picture, name, email, userId, size = 'medium', classNam
       // Si hay imagen pero no userId, mostrar directamente
       setImageUrl(picture);
       currentPictureRef.current = picture;
-    } else {
-      // No hay imagen
-      setImageUrl(null);
       setIsLoading(false);
-      currentPictureRef.current = null;
+    } else {
+      // Prioridad 2: No hay picture de Auth0, intentar Gravatar
+      // Intentar obtener URL de Gravatar desde caché primero
+      const cachedGravatarUrl = getGravatarAvatarUrlSync(email, gravatarSizeMap[size]);
+      
+      if (cachedGravatarUrl) {
+        gravatarUrlRef.current = cachedGravatarUrl;
+        setImageUrl(cachedGravatarUrl);
+        setIsLoading(false);
+      } else if (email) {
+        // Generar hash y URL de Gravatar de forma asíncrona
+        getGravatarAvatarUrl(email, gravatarSizeMap[size])
+          .then((gravatarUrl) => {
+            gravatarUrlRef.current = gravatarUrl;
+            setImageUrl(gravatarUrl);
+            setIsLoading(false);
+            
+            // Cachear el hash para uso futuro
+            getGravatarHash(email).then((hash) => {
+              cacheGravatarHash(email, hash);
+            }).catch(() => {
+              // Silenciar errores de caché
+            });
+          })
+          .catch(() => {
+            // Si Gravatar falla, mostrar iniciales
+            setGravatarError(true);
+            setImageUrl(null);
+            setIsLoading(false);
+          });
+      } else {
+        // No hay email, mostrar iniciales
+        setImageUrl(null);
+        setIsLoading(false);
+        currentPictureRef.current = null;
+      }
     }
-  }, [userId, picture]);
+  }, [userId, picture, email, size]);
 
   const handleImageError = () => {
-    setImageError(true);
-    setIsLoading(false);
+    // Si la imagen actual es de Auth0 (picture) y falla, intentar Gravatar como fallback
+    if (currentPictureRef.current && !gravatarUrlRef.current && email && !gravatarError) {
+      setImageError(true);
+      // Intentar Gravatar
+      getGravatarAvatarUrl(email, gravatarSizeMap[size])
+        .then((gravatarUrl) => {
+          gravatarUrlRef.current = gravatarUrl;
+          setImageUrl(gravatarUrl);
+          setIsLoading(false);
+          
+          // Cachear el hash
+          getGravatarHash(email).then((hash) => {
+            cacheGravatarHash(email, hash);
+          }).catch(() => {});
+        })
+        .catch(() => {
+          // Si Gravatar también falla, mostrar iniciales
+          setGravatarError(true);
+          setImageUrl(null);
+          setIsLoading(false);
+        });
+    } else {
+      // Si ya intentamos Gravatar o no hay email, mostrar iniciales
+      setGravatarError(true);
+      setImageUrl(null);
+      setIsLoading(false);
+    }
   };
 
   const handleImageLoad = () => {
     setIsLoading(false);
   };
 
-  // Si no hay imagen o hubo un error, mostrar inicial
-  if (!imageUrl || imageError) {
+  // Si no hay imagen o hubo un error (y ya intentamos Gravatar si aplica), mostrar inicial
+  if (!imageUrl || (imageError && gravatarError)) {
     return (
       <div
         className={`avatar avatar--fallback ${className}`}

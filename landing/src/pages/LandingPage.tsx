@@ -13,7 +13,7 @@ export const LandingPage = () => {
         height: '100vh', 
         width: '100vw',
         position: 'relative',
-        backgroundColor: 'rgb(6, 0, 16)',
+        backgroundColor: 'transparent',
         margin: 0,
         padding: 0,
         overflow: 'hidden',
