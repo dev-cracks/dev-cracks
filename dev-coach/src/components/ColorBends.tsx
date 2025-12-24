@@ -70,10 +70,10 @@ void main() {
             float m1 = length(warped + sin(5.0 * warped.y * uFrequency - 3.0 * t + float(i)) / 4.0);
             float m = mix(m0, m1, kMix);
             float w = 1.0 - exp(-6.0 / exp(6.0 * m));
-            sumCol += uColors[i] * w;
+            sumCol += uColors[i] * w * 1.5;
             cover = max(cover, w);
       }
-      col = clamp(sumCol, 0.0, 1.0);
+      col = clamp(sumCol * 1.2, 0.0, 1.0);
       a = uTransparent > 0 ? cover : 1.0;
     } else {
         vec2 s = q;
@@ -186,6 +186,10 @@ export default function ColorBends({
     renderer.domElement.style.width = '100%';
     renderer.domElement.style.height = '100%';
     renderer.domElement.style.display = 'block';
+    renderer.domElement.style.position = 'absolute';
+    renderer.domElement.style.top = '0';
+    renderer.domElement.style.left = '0';
+    renderer.domElement.style.pointerEvents = 'none';
     container.appendChild(renderer.domElement);
 
     const clock = new THREE.Clock();
@@ -198,16 +202,11 @@ export default function ColorBends({
       (material.uniforms.uCanvas.value as THREE.Vector2).set(w, h);
     };
 
-    // Inicializar con dimensiones correctas
-    const initSize = () => {
-      if (!container) return;
-      const w = container.clientWidth || window.innerWidth;
-      const h = container.clientHeight || window.innerHeight;
-      renderer.setSize(w, h, false);
-      (material.uniforms.uCanvas.value as THREE.Vector2).set(w, h);
-    };
-    
-    initSize();
+    // Inicializar inmediatamente con dimensiones de window
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    renderer.setSize(w, h, false);
+    (material.uniforms.uCanvas.value as THREE.Vector2).set(w, h);
 
     if ('ResizeObserver' in window) {
       const ro = new ResizeObserver(handleResize);

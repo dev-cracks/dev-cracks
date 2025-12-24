@@ -84,32 +84,27 @@ export const CSharpCoursePage = () => {
 
   return (
     <div className="csharp-course-page">
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
-        zIndex: 0,
-        pointerEvents: 'none'
-      }}>
-        <ColorBends
-          colors={["#ff5c7a", "#8a5cff", "#00ffd1"]}
-          rotation={30}
-          speed={0.4}
-          scale={1.0}
-          frequency={1.6}
-          warpStrength={1.5}
-          mouseInfluence={0.9}
-          parallax={0.7}
-          noise={0.05}
-          transparent
-          style={{
-            width: '100%',
-            height: '100%'
-          }}
-        />
-      </div>
+      <ColorBends
+        colors={["#ff5c7a", "#8a5cff", "#00ffd1"]}
+        rotation={30}
+        speed={0.3}
+        scale={1.0}
+        frequency={1.2}
+        warpStrength={1.5}
+        mouseInfluence={1.0}
+        parallax={0.8}
+        noise={0.05}
+        transparent={false}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 0,
+          pointerEvents: 'none'
+        }}
+      />
       
       <div className="csharp-course-content" style={{ position: 'relative', zIndex: 1 }}>
         <CardNav

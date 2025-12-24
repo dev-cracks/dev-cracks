@@ -1,7 +1,7 @@
 .csharp-course-page {
   min-height: 100vh;
   position: relative;
-  background: #0a0514;
+  background: #000000;
   overflow-x: hidden;
 }
 
@@ -19,10 +19,10 @@
 .csharp-course-header {
   text-align: center;
   margin-bottom: 3rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.05);
   padding: 2rem;
   border-radius: 12px;
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(1px);
   border: 1px solid rgba(177, 158, 239, 0.2);
 }
 
@@ -62,10 +62,10 @@
 }
 
 .csharp-level-section {
-  background: rgba(13, 7, 22, 0.4);
+  background: rgba(13, 7, 22, 0.05);
   border-radius: 12px;
   overflow: hidden;
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(1px);
   border: 1px solid rgba(177, 158, 239, 0.3);
   transition: all 0.3s ease;
 }
@@ -164,7 +164,7 @@
 }
 
 .csharp-topic-section {
-  background: rgba(23, 13, 39, 0.3);
+  background: rgba(23, 13, 39, 0.05);
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid rgba(177, 158, 239, 0.25);
@@ -205,14 +205,14 @@
 }
 
 .csharp-theory-section {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.05);
   border-radius: 8px;
   padding: 2rem;
   margin-bottom: 1.5rem;
   border: 1px solid rgba(177, 158, 239, 0.2);
   max-height: 600px;
   overflow-y: auto;
-  backdrop-filter: blur(3px);
+  backdrop-filter: blur(0.5px);
 }
 
 .csharp-theory-section::-webkit-scrollbar {
