@@ -1,0 +1,21 @@
+.text-type {
+  display: inline-block;
+  white-space: pre-wrap;
+}
+
+.text-type__content {
+  color: inherit;
+}
+
+.text-type__cursor {
+  margin-left: 0.25rem;
+  display: inline-block;
+  opacity: 1;
+  color: rgba(255, 0, 128, 0.9);
+  font-weight: bold;
+}
+
+.text-type__cursor--hidden {
+  display: none;
+}
+
