@@ -107,6 +107,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   vec2 baseUv = (2.0 * fragCoord - iResolution.xy) / iResolution.y;
   baseUv.y *= -1.0;
   
+  // Zoom in - escalar las coordenadas para ver menos del patrón (más grande/cerca)
+  baseUv *= 1.5;
+  
   if (parallax) {
     baseUv += parallaxOffset;
   }
