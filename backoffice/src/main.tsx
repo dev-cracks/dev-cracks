@@ -7,6 +7,8 @@ import { auth0Config } from './config/env';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { RibbonMenuProvider } from './contexts/RibbonMenuContext';
+import { I18nProvider } from './components/I18nProvider';
+import './i18n/config'; // Inicializa i18n
 import './styles/global.css';
 
 console.log('Backoffice starting...', { 
@@ -17,29 +19,31 @@ console.log('Backoffice starting...', {
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <Auth0Provider
-      domain={auth0Config.domain}
-      clientId={auth0Config.clientId}
-      authorizationParams={auth0Config.authorizationParams}
-      cacheLocation="localstorage"
-      useRefreshTokens={true}
-      onRedirectCallback={(appState) => {
-        console.log('Auth0 redirect callback', appState);
-        // Auth0Provider will handle redirection automatically using appState.returnTo
-        // We don't need to do manual redirections here to avoid cycles
-      }}
-      skipRedirectCallback={false}
-    >
-      <FluentProvider theme={webLightTheme}>
-        <NotificationProvider>
-          <SettingsProvider>
-            <RibbonMenuProvider>
-              <App />
-            </RibbonMenuProvider>
-          </SettingsProvider>
-        </NotificationProvider>
-      </FluentProvider>
-    </Auth0Provider>
+    <I18nProvider>
+      <Auth0Provider
+        domain={auth0Config.domain}
+        clientId={auth0Config.clientId}
+        authorizationParams={auth0Config.authorizationParams}
+        cacheLocation="localstorage"
+        useRefreshTokens={true}
+        onRedirectCallback={(appState) => {
+          console.log('Auth0 redirect callback', appState);
+          // Auth0Provider will handle redirection automatically using appState.returnTo
+          // We don't need to do manual redirections here to avoid cycles
+        }}
+        skipRedirectCallback={false}
+      >
+        <FluentProvider theme={webLightTheme}>
+          <NotificationProvider>
+            <SettingsProvider>
+              <RibbonMenuProvider>
+                <App />
+              </RibbonMenuProvider>
+            </SettingsProvider>
+          </NotificationProvider>
+        </FluentProvider>
+      </Auth0Provider>
+    </I18nProvider>
   </React.StrictMode>
 );
 

@@ -18,6 +18,7 @@ import {
 } from '@fluentui/react-icons';
 import { useState, ReactNode, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { tenantService, TenantDto } from '../services/tenantService';
 import { RibbonBar } from './RibbonBar';
@@ -195,6 +196,7 @@ export const Layout = ({ children }: LayoutProps) => {
   const styles = useStyles();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation('backoffice');
   const { user, userDetails, isAdmin, logout, refreshUser } = useAuth();
   const { isOpen: isSettingsOpen, closeSettings } = useSettings();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -247,32 +249,32 @@ export const Layout = ({ children }: LayoutProps) => {
 
   const navigationItems = [
     {
-      name: 'Dashboard',
+      name: t('layout.dashboard'),
       icon: <HomeRegular />,
       path: '/dashboard',
     },
     {
-      name: 'Clientes',
+      name: t('layout.customers'),
       icon: <BuildingRegular />,
       path: '/customers',
     },
     {
-      name: 'Tenants',
+      name: t('layout.tenants'),
       icon: <BriefcaseRegular />,
       path: '/tenants',
     },
     {
-      name: 'Sedes',
+      name: t('layout.offices'),
       icon: <LocationRegular />,
       path: '/offices',
     },
     {
-      name: 'Usuarios',
+      name: t('layout.users'),
       icon: <PeopleRegular />,
       path: '/users',
     },
     {
-      name: 'Configuración',
+      name: t('layout.settings'),
       icon: <SettingsRegular />,
       path: '/settings',
     },
@@ -311,7 +313,7 @@ export const Layout = ({ children }: LayoutProps) => {
             isSidebarCollapsed && styles.headerCollapsed
           )}>
             {!isSidebarCollapsed && (
-              <Body1 className={styles.headerTitle}>Menú Principal</Body1>
+              <Body1 className={styles.headerTitle}>{t('layout.mainMenu')}</Body1>
             )}
             <Button
               appearance="subtle"

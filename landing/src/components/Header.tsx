@@ -1,22 +1,25 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { UserMenu } from './UserMenu';
-
-const navigation = [
-  { href: '#inicio', label: 'Inicio', id: 'inicio' },
-  { href: '#servicios', label: 'Servicios', id: 'servicios' },
-  { href: '#productos', label: 'Productos', id: 'productos' },
-  { href: '#casos-uso', label: 'Casos de Uso', id: 'casos-uso' },
-  { href: '#nosotros', label: 'Por Qué Elegirnos', id: 'nosotros' },
-  { href: '#contacto', label: 'Contacto', id: 'contacto' }
-];
+import { LanguageSelector } from './LanguageSelector';
 
 export const Header = () => {
+  const { t } = useTranslation('landing');
   const location = useLocation();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, isLoading, isAuthenticated, login, logout } = useAuth();
+
+  const navigation = [
+    { href: '#inicio', label: t('navigation.home'), id: 'inicio' },
+    { href: '#servicios', label: t('navigation.services'), id: 'servicios' },
+    { href: '#productos', label: t('navigation.products'), id: 'productos' },
+    { href: '#casos-uso', label: t('navigation.useCases'), id: 'casos-uso' },
+    { href: '#nosotros', label: t('navigation.whyUs'), id: 'nosotros' },
+    { href: '#contacto', label: t('navigation.contact'), id: 'contacto' }
+  ];
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string, id: string) => {
     e.preventDefault();
@@ -93,7 +96,8 @@ export const Header = () => {
                 </a>
               </li>
             ))}
-            <li className="header__auth">
+            <li className="header__auth" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <LanguageSelector />
               {!isLoading && (
                 isAuthenticated ? (
                   <UserMenu />
@@ -101,9 +105,9 @@ export const Header = () => {
                   <button 
                     className="header__auth-button header__auth-button--login"
                     onClick={() => login()}
-                    aria-label="Login"
+                    aria-label={t('common.login')}
                   >
-                    Login
+                    {t('common.login')}
                   </button>
                 )
               )}

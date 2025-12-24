@@ -1,0 +1,19 @@
+{
+  "navigation": {
+    "home": "Home",
+    "services": "Services",
+    "products": "Products",
+    "useCases": "Use Cases",
+    "whyUs": "Why Choose Us",
+    "contact": "Contact"
+  },
+  "hero": {
+    "title": "DEV CRACKS",
+    "subtitle": "CODE // BREAKER",
+    "question": "Are you afraid of AI, Automation and digital transformation?"
+  },
+  "common": {
+    "login": "Login"
+  }
+}
+

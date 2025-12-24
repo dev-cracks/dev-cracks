@@ -21,6 +21,7 @@ import { useNotificationContext } from '../contexts/NotificationContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { UserAccountMenu } from './UserAccountMenu';
 import { NotificationPanel } from './NotificationPanel';
+import { LanguageSelector } from './LanguageSelector';
 import { tenantService } from '../services/tenantService';
 import { customerParameterService } from '../services/customerService';
 
@@ -254,6 +255,7 @@ export const RibbonBar = ({ onMenuToggle }: RibbonBarProps) => {
           title="Settings"
           onClick={openSettings}
         />
+        <LanguageSelector />
         {user && (
           <UserAccountMenu
             trigger={

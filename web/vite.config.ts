@@ -14,6 +14,9 @@ export default defineConfig({
     outDir: resolve(__dirname, '../dist'),
     emptyOutDir: true
   },
-  plugins: [react()]
+  plugins: [react()],
+  resolve: {
+    dedupe: ['react', 'react-dom', 'react-i18next'],
+  }
 });
 

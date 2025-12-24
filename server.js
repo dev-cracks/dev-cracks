@@ -31,6 +31,7 @@ async function createServer() {
 
     // Crear servidor Vite para el backoffice con base path y HMR habilitado
     const backofficeVite = await createViteServer({
+      configFile: resolve(__dirname, 'backoffice/vite.config.ts'),
       server: { 
         middlewareMode: true,
         hmr: {
@@ -42,13 +43,11 @@ async function createServer() {
         },
       },
       appType: 'spa',
-      root: resolve(__dirname, 'backoffice'),
-      publicDir: resolve(__dirname, 'backoffice/public'),
-      base: '/backoffice/', // Configurar base path directamente
     });
 
     // Crear servidor Vite para el portal con base path y HMR habilitado
     const portalVite = await createViteServer({
+      configFile: resolve(__dirname, 'portal/vite.config.ts'),
       server: { 
         middlewareMode: true,
         hmr: {
@@ -60,13 +59,11 @@ async function createServer() {
         },
       },
       appType: 'spa',
-      root: resolve(__dirname, 'portal'),
-      publicDir: resolve(__dirname, 'portal/public'),
-      base: '/portal/', // Configurar base path directamente
     });
 
     // Crear servidor Vite para la landing con base path y HMR habilitado
     const landingVite = await createViteServer({
+      configFile: resolve(__dirname, 'landing/vite.config.ts'),
       server: { 
         middlewareMode: true,
         hmr: {
@@ -78,13 +75,11 @@ async function createServer() {
         },
       },
       appType: 'spa',
-      root: resolve(__dirname, 'landing'),
-      publicDir: resolve(__dirname, 'landing/public'),
-      base: '/landing/', // Configurar base path directamente
     });
 
     // Crear servidor Vite para route-on con base path y HMR habilitado
     const routeOnVite = await createViteServer({
+      configFile: resolve(__dirname, 'route-on/vite.config.ts'),
       server: { 
         middlewareMode: true,
         hmr: {
@@ -96,13 +91,11 @@ async function createServer() {
         },
       },
       appType: 'spa',
-      root: resolve(__dirname, 'route-on'),
-      publicDir: resolve(__dirname, 'route-on/public'),
-      base: '/route-on/',
     });
 
     // Crear servidor Vite para dev-coach con base path y HMR habilitado
     const devCoachVite = await createViteServer({
+      configFile: resolve(__dirname, 'dev-coach/vite.config.ts'),
       server: { 
         middlewareMode: true,
         hmr: {
@@ -114,13 +107,11 @@ async function createServer() {
         },
       },
       appType: 'spa',
-      root: resolve(__dirname, 'dev-coach'),
-      publicDir: resolve(__dirname, 'dev-coach/public'),
-      base: '/dev-coach/',
     });
 
     // Crear servidor Vite para dev-pool con base path y HMR habilitado
     const devPoolVite = await createViteServer({
+      configFile: resolve(__dirname, 'dev-pool/vite.config.ts'),
       server: { 
         middlewareMode: true,
         hmr: {
@@ -132,9 +123,6 @@ async function createServer() {
         },
       },
       appType: 'spa',
-      root: resolve(__dirname, 'dev-pool'),
-      publicDir: resolve(__dirname, 'dev-pool/public'),
-      base: '/dev-pool/',
     });
 
     // Middleware para route-on - debe ir ANTES de landing para evitar conflictos

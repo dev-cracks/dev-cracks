@@ -1,0 +1,19 @@
+{
+  "navigation": {
+    "home": "Inicio",
+    "services": "Servicios",
+    "products": "Productos",
+    "useCases": "Casos de Uso",
+    "whyUs": "Por Qué Elegirnos",
+    "contact": "Contacto"
+  },
+  "hero": {
+    "title": "DEV CRACKS",
+    "subtitle": "CODE // BREAKER",
+    "question": "¿Le temes a la IA, Automatización y la transformación digital?"
+  },
+  "common": {
+    "login": "Iniciar Sesión"
+  }
+}
+

@@ -1,9 +1,11 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ShapeBlur } from '../components/ShapeBlur.js';
 import { BlurText } from '../components/BlurText.js';
 import './LandingPage.css';
 
 export const LandingPage = () => {
+  const { t } = useTranslation('landing');
   return (
     <div 
       className="landing-page"
@@ -59,7 +61,7 @@ export const LandingPage = () => {
 
       <div className="landing-page__text-container">
         <BlurText
-          text="¿Le temes a la IA, Automatización y la transformación digital?"
+          text={t('hero.question')}
           delay={1000}
           animateBy="words"
           direction="top"

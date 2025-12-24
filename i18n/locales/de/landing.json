@@ -1,0 +1,19 @@
+{
+  "navigation": {
+    "home": "Startseite",
+    "services": "Dienstleistungen",
+    "products": "Produkte",
+    "useCases": "Anwendungsfälle",
+    "whyUs": "Warum uns wählen",
+    "contact": "Kontakt"
+  },
+  "hero": {
+    "title": "DEV CRACKS",
+    "subtitle": "CODE // BREAKER",
+    "question": "Haben Sie Angst vor KI, Automatisierung und digitaler Transformation?"
+  },
+  "common": {
+    "login": "Anmelden"
+  }
+}
+

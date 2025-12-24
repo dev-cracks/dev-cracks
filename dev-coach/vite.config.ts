@@ -22,6 +22,7 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'src'),
     },
+    dedupe: ['react', 'react-dom', 'react-i18next'],
   },
   optimizeDeps: {
     include: ['monaco-editor']

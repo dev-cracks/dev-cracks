@@ -1,0 +1,19 @@
+{
+  "navigation": {
+    "home": "首页",
+    "services": "服务",
+    "products": "产品",
+    "useCases": "用例",
+    "whyUs": "为什么选择我们",
+    "contact": "联系"
+  },
+  "hero": {
+    "title": "DEV CRACKS",
+    "subtitle": "CODE // BREAKER",
+    "question": "您是否害怕AI、自动化和数字化转型？"
+  },
+  "common": {
+    "login": "登录"
+  }
+}
+

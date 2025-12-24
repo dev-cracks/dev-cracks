@@ -31,6 +31,7 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'src'),
     },
+    dedupe: ['react', 'react-dom', 'react-i18next'],
   },
   define: {
     'import.meta.env.VITE_BACKOFFICE_BASE': JSON.stringify('/backoffice'),

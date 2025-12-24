@@ -20,6 +20,11 @@
     "build:render": "node scripts/prepare-render-build.js",
     "install:all": "npm install && npm --prefix web install && npm --prefix landing install && npm --prefix portal install && npm --prefix backoffice install && npm --prefix dev-coach install && npm --prefix route-on install"
   },
+  "dependencies": {
+    "i18next": "^23.7.6",
+    "i18next-browser-languagedetector": "^7.2.0",
+    "react-i18next": "^13.5.0"
+  },
   "devDependencies": {
     "concurrently": "^8.2.2",
     "@vitejs/plugin-react-swc": "^3.5.0",

@@ -17,6 +17,7 @@ import {
 } from '@fluentui/react-components';
 import { HomeRegular, ArrowClockwiseRegular, BuildingRegular, PeopleRegular, BriefcaseRegular, LocationRegular } from '@fluentui/react-icons';
 import { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { backofficeService } from '../services/backofficeService';
 import { tenantService } from '../services/tenantService';
@@ -118,6 +119,7 @@ interface CustomerNode {
 
 export const DashboardPage = () => {
   const styles = useStyles();
+  const { t } = useTranslation('backoffice');
   const { userDetails, user } = useAuth();
   const [userCount, setUserCount] = useState<number | null>(null);
   const [tenantCount, setTenantCount] = useState<number | null>(null);
@@ -332,7 +334,7 @@ export const DashboardPage = () => {
     if (isLoadingTree) {
       return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: tokens.spacingVerticalXL }}>
-          <Spinner size="large" label="Loading hierarchical structure..." />
+          <Spinner size="large" label={t('dashboard.loadingHierarchicalStructure')} />
         </div>
       );
     }
@@ -340,7 +342,7 @@ export const DashboardPage = () => {
     if (!treeData || buildCustomerTree.length === 0) {
       return (
         <div style={{ padding: tokens.spacingVerticalXL, textAlign: 'center' }}>
-          <Text>No data available to display</Text>
+          <Text>{t('dashboard.noDataAvailable')}</Text>
         </div>
       );
     }
@@ -450,36 +452,36 @@ export const DashboardPage = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <HomeRegular fontSize={32} />
-        <h1 className={styles.title}>Dashboard</h1>
+        <h1 className={styles.title}>{t('dashboard.title')}</h1>
         <Button
           appearance="default"
           icon={<ArrowClockwiseRegular />}
           onClick={loadStats}
           disabled={isLoading}
-          title="Refresh dashboard statistics"
+          title={t('dashboard.refresh')}
         >
-          Refresh
+          {t('dashboard.refresh')}
         </Button>
         <Button
           appearance="default"
           icon={<ArrowClockwiseRegular />}
           onClick={loadTreeData}
           disabled={isLoadingTree}
-          title="Refresh hierarchical structure"
+          title={t('dashboard.refreshTree')}
         >
-          Refresh Tree
+          {t('dashboard.refreshTree')}
         </Button>
       </div>
 
       <div className={styles.welcomeMessage}>
-        Welcome, {userName}!
+        {t('dashboard.welcome', { name: userName })}
       </div>
 
       <div className={styles.statsGrid}>
         <Card className={styles.card}>
           <CardHeader
-            header={<Text weight="semibold">Customers</Text>}
-            description="Total customers in the system"
+            header={<Text weight="semibold">{t('dashboard.customers')}</Text>}
+            description={t('dashboard.customersDescription')}
           />
           <CardPreview>
             <div className={styles.previewContent}>
@@ -496,8 +498,8 @@ export const DashboardPage = () => {
 
         <Card className={styles.card}>
           <CardHeader
-            header={<Text weight="semibold">Tenants</Text>}
-            description="Total tenants in the system"
+            header={<Text weight="semibold">{t('dashboard.tenants')}</Text>}
+            description={t('dashboard.tenantsDescription')}
           />
           <CardPreview>
             <div className={styles.previewContent}>
@@ -514,8 +516,8 @@ export const DashboardPage = () => {
 
         <Card className={styles.card}>
           <CardHeader
-            header={<Text weight="semibold">Users</Text>}
-            description="Total users in the system"
+            header={<Text weight="semibold">{t('dashboard.users')}</Text>}
+            description={t('dashboard.usersDescription')}
           />
           <CardPreview>
             <div className={styles.previewContent}>
@@ -532,8 +534,8 @@ export const DashboardPage = () => {
 
         <Card className={styles.card}>
           <CardHeader
-            header={<Text weight="semibold">Offices</Text>}
-            description="Total offices in the system"
+            header={<Text weight="semibold">{t('dashboard.offices')}</Text>}
+            description={t('dashboard.officesDescription')}
           />
           <CardPreview>
             <div className={styles.previewContent}>
@@ -551,17 +553,17 @@ export const DashboardPage = () => {
 
       <Card>
         <CardHeader
-          header={<Text weight="semibold">Office Map</Text>}
-          description="Location of all offices on the map"
+          header={<Text weight="semibold">{t('dashboard.officeMap')}</Text>}
+          description={t('dashboard.officeMapDescription')}
         />
         <CardPreview>
           <div style={{ padding: '20px' }}>
             {isLoading ? (
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: tokens.spacingVerticalXL }}>
-                <Spinner size="large" label="Loading map..." />
+                <Spinner size="large" label={t('dashboard.loadingMap')} />
               </div>
             ) : offices.length === 0 ? (
-              <Text>No offices available to display on the map</Text>
+              <Text>{t('dashboard.noOfficesAvailable')}</Text>
             ) : (
               <OfficesMap offices={offices} />
             )}
@@ -571,8 +573,8 @@ export const DashboardPage = () => {
 
       <Card className={styles.treeCard}>
         <CardHeader
-          header={<Text weight="semibold">Hierarchical Structure</Text>}
-          description="Customers, tenants, offices and users organized hierarchically"
+          header={<Text weight="semibold">{t('dashboard.hierarchicalStructure')}</Text>}
+          description={t('dashboard.hierarchicalStructureDescription')}
         />
         <CardPreview>
           <div className={styles.treeContainer}>
@@ -583,8 +585,8 @@ export const DashboardPage = () => {
 
       <Card>
         <CardHeader
-          header={<Text weight="semibold">Recent Activity</Text>}
-          description="Latest system activities"
+          header={<Text weight="semibold">{t('dashboard.recentActivity')}</Text>}
+          description={t('dashboard.recentActivityDescription')}
         />
         <CardPreview>
           <div style={{ padding: '20px' }}>

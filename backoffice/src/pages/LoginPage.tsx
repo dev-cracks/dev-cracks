@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Spinner, makeStyles, tokens } from '@fluentui/react-components';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 
 const useStyles = makeStyles({
@@ -30,6 +31,7 @@ export const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, isLoading, login } = useAuth();
+  const { t } = useTranslation('backoffice');
 
   useEffect(() => {
     // Solo redirigir si está autenticado y no estamos ya en proceso de login
@@ -57,12 +59,12 @@ export const LoginPage = () => {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Dev Cracks Backoffice</h1>
+      <h1 className={styles.title}>{t('login.title')}</h1>
       <p className={styles.subtitle}>
-        Inicia sesión para acceder al panel de administración
+        {t('login.subtitle')}
       </p>
       <Button appearance="primary" size="large" onClick={handleLogin}>
-        Iniciar Sesión
+        {t('login.signIn')}
       </Button>
     </div>
   );

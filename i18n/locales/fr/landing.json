@@ -1,0 +1,19 @@
+{
+  "navigation": {
+    "home": "Accueil",
+    "services": "Services",
+    "products": "Produits",
+    "useCases": "Cas d'usage",
+    "whyUs": "Pourquoi nous choisir",
+    "contact": "Contact"
+  },
+  "hero": {
+    "title": "DEV CRACKS",
+    "subtitle": "CODE // BREAKER",
+    "question": "Avez-vous peur de l'IA, de l'automatisation et de la transformation numérique?"
+  },
+  "common": {
+    "login": "Se connecter"
+  }
+}
+
