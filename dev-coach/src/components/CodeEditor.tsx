@@ -43,6 +43,12 @@ export const CodeEditor = ({ files, onFilesChange, onSave }: CodeEditorProps) =>
         return 'javascript';
       case 'ts':
         return 'typescript';
+      case 'cs':
+        return 'csharp';
+      case 'json':
+        return 'json';
+      case 'xml':
+        return 'xml';
       default:
         return 'plaintext';
     }

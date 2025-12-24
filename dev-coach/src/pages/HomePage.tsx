@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import CardNav from '../components/CardNav';
 
 // Logo placeholder - deberías reemplazar esto con tu logo real
@@ -15,13 +16,13 @@ export const HomePage = () => {
       ]
     },
     {
-      label: "Niveles",
+      label: "Cursos",
       bgColor: "#170D27",
       textColor: "#fff",
       links: [
-        { label: "Junior", ariaLabel: "Desafíos para desarrolladores Junior", href: "/challenge/3" },
-        { label: "Senior", ariaLabel: "Desafíos para desarrolladores Senior", href: "/challenge/4" },
-        { label: "Arquitecto", ariaLabel: "Desafíos para arquitectos", href: "/challenge/5" }
+        { label: "Todos los Cursos", ariaLabel: "Ver todos los cursos", href: "/courses" },
+        { label: "Arquitectura", ariaLabel: "Cursos de arquitectura", href: "/courses#arquitectura" },
+        { label: "Frontend", ariaLabel: "Cursos de frontend", href: "/courses#frontend" }
       ]
     },
     {
@@ -60,6 +61,31 @@ export const HomePage = () => {
         <p style={{ fontSize: '1.5rem', color: '#888', marginBottom: '3rem' }}>
           Lleva tu carrera de Junior a Senior, Tech Lead o Arquitecto
         </p>
+        <Link 
+          to="/courses" 
+          style={{
+            display: 'inline-block',
+            background: 'linear-gradient(135deg, #B19EEF 0%, #4ECDC4 100%)',
+            color: '#fff',
+            padding: '1rem 2.5rem',
+            fontSize: '1.1rem',
+            fontWeight: '600',
+            borderRadius: '8px',
+            textDecoration: 'none',
+            transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+            marginTop: '2rem'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 8px 24px rgba(177, 158, 239, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+        >
+          Explorar Cursos →
+        </Link>
       </div>
     </div>
   );
