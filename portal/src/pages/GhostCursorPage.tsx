@@ -60,10 +60,17 @@ export const GhostCursorPage = () => {
     </svg>
   );
 
+  const DevPoolIcon = () => (
+    <svg stroke="#ffffff" fill="#ffffff" strokeWidth="2" viewBox="0 0 24 24" height="1.5em" width="1.5em" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" strokeWidth="0"></path>
+    </svg>
+  );
+
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
     { path: '/backoffice', label: 'Backoffice', icon: <BackofficeIcon />, absolute: true },
     { path: '/dev-coach', label: 'Dev-coach', icon: <DevCoachIcon />, absolute: true },
+    { path: '/dev-pool', label: 'Dev-pool', icon: <DevPoolIcon />, absolute: true },
     { path: '/route-on', label: 'Route-On', icon: <RouteOnIcon />, absolute: true },
     { path: '/landing', label: 'Landing', icon: <LandingIcon />, absolute: true }
   ];

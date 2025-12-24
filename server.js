@@ -119,6 +119,24 @@ async function createServer() {
       base: '/dev-coach/',
     });
 
+    // Crear servidor Vite para dev-pool con base path y HMR habilitado
+    const devPoolVite = await createViteServer({
+      server: { 
+        middlewareMode: true,
+        hmr: {
+          server: httpServer,
+          protocol: 'ws',
+          host: 'localhost',
+          port: 5173,
+          clientPort: 5173,
+        },
+      },
+      appType: 'spa',
+      root: resolve(__dirname, 'dev-pool'),
+      publicDir: resolve(__dirname, 'dev-pool/public'),
+      base: '/dev-pool/',
+    });
+
     // Middleware para route-on - debe ir ANTES de landing para evitar conflictos
     app.use('/route-on', async (req, res, next) => {
       if (req.originalUrl.match(/\.(tsx?|jsx?|css|json|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot|map)$/) ||
@@ -159,6 +177,28 @@ async function createServer() {
         return res.send(html);
       } catch (e) {
         devCoachVite.ssrFixStacktrace(e);
+        return next(e);
+      }
+    });
+
+    // Middleware para dev-pool - debe ir ANTES de landing para evitar conflictos
+    app.use('/dev-pool', async (req, res, next) => {
+      if (req.originalUrl.match(/\.(tsx?|jsx?|css|json|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot|map)$/) ||
+          req.originalUrl.match(/^\/(dev-pool\/)?(src|node_modules|@vite|@id|@fs|@react-refresh|assets)/)) {
+        return devPoolVite.middlewares(req, res, (err) => {
+          if (err) {
+            next(err);
+          }
+        });
+      }
+      
+      try {
+        const template = readFileSync(resolve(__dirname, 'dev-pool/index.html'), 'utf-8');
+        const html = await devPoolVite.transformIndexHtml(req.originalUrl, template);
+        res.setHeader('Content-Type', 'text/html');
+        return res.send(html);
+      } catch (e) {
+        devPoolVite.ssrFixStacktrace(e);
         return next(e);
       }
     });
@@ -416,6 +456,7 @@ async function createServer() {
           req.originalUrl.startsWith('/backoffice') ||
           req.originalUrl.startsWith('/route-on') ||
           req.originalUrl.startsWith('/dev-coach') ||
+          req.originalUrl.startsWith('/dev-pool') ||
           req.originalUrl.startsWith('/api/')) {
         return next();
       }
@@ -431,6 +472,7 @@ async function createServer() {
           req.originalUrl.startsWith('/backoffice') ||
           req.originalUrl.startsWith('/route-on') ||
           req.originalUrl.startsWith('/dev-coach') ||
+          req.originalUrl.startsWith('/dev-pool') ||
           req.originalUrl.startsWith('/api/')) {
         return next();
       }
@@ -456,7 +498,8 @@ async function createServer() {
       console.log(`🎨 Portal: http://localhost:${port}/portal`);
       console.log(`🔧 Backoffice: http://localhost:${port}/backoffice`);
       console.log(`📦 Route On: http://localhost:${port}/route-on`);
-      console.log(`👨‍🏫 Dev Coach: http://localhost:${port}/dev-coach\n`);
+      console.log(`👨‍🏫 Dev Coach: http://localhost:${port}/dev-coach`);
+      console.log(`👥 Dev Pool: http://localhost:${port}/dev-pool\n`);
     });
 
     httpServer.on('error', (err) => {
