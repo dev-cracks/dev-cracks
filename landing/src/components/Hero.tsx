@@ -168,7 +168,12 @@ export const Hero = () => {
           <a className="btn-primary" href="#contacto">
             Solicitar Demo Corporativa
           </a>
-          <a className="btn-secondary btn-secondary--outline" href="#contacto">
+          <a 
+            className="btn-secondary btn-secondary--outline" 
+            href="https://calendly.com/dev-cracks"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Agendar Consultoría Estratégica
           </a>
         </div>

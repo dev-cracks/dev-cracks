@@ -419,6 +419,17 @@ export const ContactSection = () => {
                 <span className="contact-info__text">Apple Wallet (iPhone)</span>
               </a>
             </div>
+            <div className="contact-info__item">
+              <a
+                href="https://calendly.com/dev-cracks"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="contact-info__link"
+              >
+                <span className="contact-info__icon">📅</span>
+                <span className="contact-info__text">Agendar una Cita</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>

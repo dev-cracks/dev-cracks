@@ -23,6 +23,8 @@ import {
   AddRegular,
   DocumentRegular,
   DismissRegular,
+  EyeRegular,
+  EyeOffRegular,
 } from '@fluentui/react-icons';
 import {
   shipmentService,
@@ -77,6 +79,8 @@ export const ShipmentRequestsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [showContactGlobal, setShowContactGlobal] = useState(false);
+  const [visibleContacts, setVisibleContacts] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let isMounted = true;
@@ -186,6 +190,29 @@ export const ShipmentRequestsPage = () => {
     }
   };
 
+  const toggleContactGlobal = () => {
+    const newValue = !showContactGlobal;
+    setShowContactGlobal(newValue);
+    // Limpiar visibilidades individuales cuando se cambia el estado global
+    setVisibleContacts(new Set());
+  };
+
+  const toggleContactCell = (requestId: string) => {
+    setVisibleContacts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(requestId)) {
+        newSet.delete(requestId);
+      } else {
+        newSet.add(requestId);
+      }
+      return newSet;
+    });
+  };
+
+  const isContactVisible = (requestId: string) => {
+    return showContactGlobal || visibleContacts.has(requestId);
+  };
+
   console.log('[ShipmentRequestsPage] Render state:', { isLoading, error, requestsCount: requests.length });
 
   try {
@@ -252,15 +279,27 @@ export const ShipmentRequestsPage = () => {
               <TableHeaderCell>Cliente</TableHeaderCell>
               <TableHeaderCell>Origen</TableHeaderCell>
               <TableHeaderCell>Destino</TableHeaderCell>
-              <TableHeaderCell>Contacto</TableHeaderCell>
+              <TableHeaderCell>
+                <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS }}>
+                  <span>Contacto</span>
+                  <Button
+                    appearance="subtle"
+                    icon={showContactGlobal ? <EyeRegular /> : <EyeOffRegular />}
+                    onClick={toggleContactGlobal}
+                    size="small"
+                    title={showContactGlobal ? 'Ocultar todos los contactos' : 'Mostrar todos los contactos'}
+                  />
+                </div>
+              </TableHeaderCell>
+              <TableHeaderCell>Fecha de Solicitud</TableHeaderCell>
               <TableHeaderCell>Fecha Estimada</TableHeaderCell>
-              <TableHeaderCell>Acciones</TableHeaderCell>
+              <TableHeaderCell>Imprimir</TableHeaderCell>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredRequests.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7}>
+                <TableCell colSpan={8}>
                   <div style={{ textAlign: 'center', padding: tokens.spacingVerticalXL }}>
                     <Text>No hay solicitudes registradas</Text>
                   </div>
@@ -290,16 +329,46 @@ export const ShipmentRequestsPage = () => {
                     )}
                   </TableCell>
                   <TableCell>
-                    <Text>{request.contactName}</Text>
-                    {request.contactPhone && (
-                      <Text size={200} style={{ display: 'block', color: tokens.colorNeutralForeground3 }}>
-                        {request.contactPhone}
-                      </Text>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS }}>
+                      {isContactVisible(request.id) ? (
+                        <>
+                          <div style={{ flex: 1 }}>
+                            <Text>{request.contactName}</Text>
+                            {request.contactPhone && (
+                              <Text size={200} style={{ display: 'block', color: tokens.colorNeutralForeground3 }}>
+                                {request.contactPhone}
+                              </Text>
+                            )}
+                          </div>
+                          <Button
+                            appearance="subtle"
+                            icon={<EyeRegular />}
+                            onClick={() => toggleContactCell(request.id)}
+                            size="small"
+                            title="Ocultar contacto"
+                          />
+                        </>
+                      ) : (
+                        <Button
+                          appearance="subtle"
+                          icon={<EyeOffRegular />}
+                          onClick={() => toggleContactCell(request.id)}
+                          size="small"
+                          title="Mostrar contacto"
+                        />
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {request.requestDate ? (
+                      <Text>{new Date(request.requestDate).toLocaleString()}</Text>
+                    ) : (
+                      <Text>N/A</Text>
                     )}
                   </TableCell>
                   <TableCell>
                     {request.estimatedDeliveryDate ? (
-                      <Text>{new Date(request.estimatedDeliveryDate).toLocaleDateString()}</Text>
+                      <Text>{new Date(request.estimatedDeliveryDate).toLocaleString()}</Text>
                     ) : (
                       <Text>N/A</Text>
                     )}
