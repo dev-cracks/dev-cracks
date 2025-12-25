@@ -8,6 +8,7 @@ import { CustomersPage } from './pages/CustomersPage';
 import { OfficesPage } from './pages/OfficesPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ShipmentRequestsPage } from './pages/ShipmentRequestsPage';
+import { NewShipmentRequestPage } from './pages/NewShipmentRequestPage';
 import { SubscriptionsPage } from './pages/SubscriptionsPage';
 import { LoginPage } from './pages/LoginPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -86,6 +87,16 @@ const App = () => {
             <ProtectedRoute>
               <Layout>
                 <ShipmentRequestsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/shipments/new"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <NewShipmentRequestPage />
               </Layout>
             </ProtectedRoute>
           }
