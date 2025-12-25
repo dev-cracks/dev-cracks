@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { Services } from './components/Services';
@@ -33,6 +33,8 @@ const HomePage = () => (
 
 const AppContent = () => {
   const location = useLocation();
+  const convaiRef = useRef<HTMLDivElement>(null);
+  
   // Inicializar el estado basado en si ya se vio el splash
   const [showSplashCursor, setShowSplashCursor] = useState(() => {
     const hasSeenSplash = localStorage.getItem('hasSeenSplashScreen');
@@ -41,6 +43,51 @@ const AppContent = () => {
   
   // Mostrar LightPillar en todas las rutas
   const showLightPillar = true;
+
+  // Inicializar el widget de ElevenLabs ConvAI
+  useEffect(() => {
+    const initConvAI = () => {
+      if (convaiRef.current && !convaiRef.current.querySelector('elevenlabs-convai')) {
+        // Verificar si el custom element está definido
+        if (customElements.get('elevenlabs-convai')) {
+          const convaiElement = document.createElement('elevenlabs-convai');
+          convaiElement.setAttribute('agent-id', 'agent_9701kdb1tg3sfcb81vzf0g95vpjk');
+          convaiRef.current.appendChild(convaiElement);
+        }
+      }
+    };
+
+    // Intentar inicializar después de un pequeño delay para asegurar que el script se haya cargado
+    const timer = setTimeout(() => {
+      initConvAI();
+    }, 500);
+
+    // También intentar cuando el DOM esté listo
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      initConvAI();
+    } else {
+      window.addEventListener('load', initConvAI);
+    }
+
+    // Verificar periódicamente si el custom element está disponible
+    const checkInterval = setInterval(() => {
+      if (customElements.get('elevenlabs-convai')) {
+        clearInterval(checkInterval);
+        initConvAI();
+      }
+    }, 100);
+
+    // Limpiar después de 10 segundos
+    setTimeout(() => {
+      clearInterval(checkInterval);
+    }, 10000);
+
+    return () => {
+      clearTimeout(timer);
+      clearInterval(checkInterval);
+      window.removeEventListener('load', initConvAI);
+    };
+  }, []);
 
   // Guardar flag en localStorage y ocultar SplashCursor cuando se hace click por primera vez en la landing
   useEffect(() => {
@@ -181,6 +228,7 @@ const AppContent = () => {
         <Route path="/home" element={<HomePage />} />
         <Route path="/servicios" element={<ServicesPage />} />
       </Routes>
+      <div ref={convaiRef}></div>
     </>
   );
 };
