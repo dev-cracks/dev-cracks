@@ -6,6 +6,7 @@ import { CoursePage } from './pages/CoursePage';
 import { CSharpCoursePage } from './pages/CSharpCoursePage';
 import NotFoundPage from './pages/NotFoundPage';
 import FloatingLines from './components/FloatingLines';
+import { usePendo } from './hooks/usePendo';
 
 // Fixed base path for dev-coach when accessed through unified server
 const DEV_COACH_BASE = '/dev-coach';
@@ -13,6 +14,9 @@ const DEV_COACH_BASE = '/dev-coach';
 const AppContent = () => {
   const location = useLocation();
   const isCSharpCourse = location.pathname === '/csharp-course';
+  
+  // Inicializar Pendo cuando el usuario esté autenticado
+  usePendo();
 
   return (
     <>
