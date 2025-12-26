@@ -147,7 +147,7 @@ export const Footer = () => {
         <a href="https://www.instagram.com/devcracks/" target="_blank" rel="noreferrer" aria-label="Instagram">
           <InstagramIcon />
         </a>
-        <a href="https://www.facebook.com/profile.php?id=61583564556687" target="_blank" rel="noreferrer" aria-label="Facebook">
+        <a href="https://www.facebook.com/DevCracksEs" target="_blank" rel="noreferrer" aria-label="Facebook">
           <FacebookIcon />
         </a>
         <a href="https://x.com/DevCracks" target="_blank" rel="noreferrer" aria-label="X (Twitter)">

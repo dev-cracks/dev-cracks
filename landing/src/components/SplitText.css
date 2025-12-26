@@ -4,6 +4,7 @@
 }
 
 .split-text-char {
+  text-transform: uppercase ;
   display: inline-block;
   opacity: 0;
   transform: translateY(20px) rotateX(90deg);
