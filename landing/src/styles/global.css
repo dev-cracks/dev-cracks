@@ -430,15 +430,16 @@ main {
 .hero__badge {
   display: inline-block;
   padding: 8px 20px;
-  background: linear-gradient(135deg, rgba(82, 39, 255, 0.2) 0%, rgba(82, 39, 255, 0.1) 100%);
-  border: 1px solid rgba(82, 39, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 20px;
-  color: #5227FF;
+  color: #ffffff;
   font-size: 0.9rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 15px rgba(82, 39, 255, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
 }
 
 .hero__subtitle {
@@ -1448,6 +1449,7 @@ main {
   box-shadow: 0 8px 25px rgba(123, 95, 255, 0.3);
   animation: pulse-glow 3s ease-in-out infinite;
   overflow: hidden;
+  background-color: #000;
 }
 
 .contact-logo svg {
