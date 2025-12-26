@@ -14,7 +14,7 @@ export const supportedLanguages = {
 export type SupportedLanguage = keyof typeof supportedLanguages;
 
 // Idioma por defecto
-export const defaultLanguage: SupportedLanguage = 'en';
+export const defaultLanguage: SupportedLanguage = 'es';
 
 // Configuración base de i18next
 export const i18nConfig = {
