@@ -167,13 +167,14 @@ main {
 
 .header__nav a {
   text-decoration: none;
-  color: #8b949e;
+  color: #fff;
   font-weight: 700;
   font-size: 1.1rem;
   transition: color 0.3s ease, transform 0.3s ease;
   display: flex;
   align-items: center;
   line-height: 1;
+  text-transform: uppercase;
 }
 
 .header__nav a:hover {
@@ -1925,6 +1926,7 @@ main {
     padding: 15px 0;
     font-size: 1.2rem;
     transition: all 0.3s ease;
+    color: #fff!important;
   }
 
   .header__nav a:hover {

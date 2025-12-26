@@ -109,7 +109,7 @@ export const Footer = () => {
               </li>
               <li>
                 <a href="#nosotros" onClick={(e) => { e.preventDefault(); scrollToSection('nosotros'); }}>
-                  Por Qué Elegirnos
+                  Nosotros
                 </a>
               </li>
               <li>
