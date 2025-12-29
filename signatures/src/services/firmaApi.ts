@@ -1,5 +1,4 @@
 import { API_BASE_URL } from '../config/env';
-import { useAuth } from '../hooks/useAuth';
 
 export interface Workspace {
   firmaWorkspaceId: string;
@@ -14,6 +13,8 @@ export interface Template {
   documentUrl?: string;
   createdAt: string;
   updatedAt: string;
+  workspaceId?: string;
+  workspaceName?: string;
 }
 
 export interface JwtToken {
@@ -33,6 +34,11 @@ class FirmaApiService {
   // Método para establecer el proveedor de tokens (debe ser llamado desde un componente React)
   setAccessTokenProvider(provider: () => Promise<string | undefined>) {
     this.getAccessToken = provider;
+  }
+
+  // Método para verificar si el proveedor de tokens está configurado
+  isAccessTokenProviderReady(): boolean {
+    return this.getAccessToken !== null;
   }
 
   private async getAuthHeaders(): Promise<HeadersInit> {
@@ -76,6 +82,32 @@ class FirmaApiService {
     }
 
     return await response.json();
+  }
+
+  async listAllTemplates(): Promise<Template[]> {
+    // Primero obtener todos los workspaces
+    const workspaces = await this.listWorkspaces();
+    
+    // Luego obtener todas las plantillas de cada workspace
+    const allTemplatesPromises = workspaces.map(async (workspace) => {
+      try {
+        const templates = await this.listTemplatesByWorkspace(workspace.firmaWorkspaceId);
+        // Agregar información del workspace a cada plantilla
+        return templates.map(template => ({
+          ...template,
+          workspaceId: workspace.firmaWorkspaceId,
+          workspaceName: workspace.name,
+        }));
+      } catch (error) {
+        // Si falla al obtener plantillas de un workspace, continuar con los demás
+        console.warn(`Error al obtener plantillas del workspace ${workspace.name}:`, error);
+        return [];
+      }
+    });
+
+    const allTemplatesArrays = await Promise.all(allTemplatesPromises);
+    // Aplanar el array de arrays en un solo array
+    return allTemplatesArrays.flat();
   }
 
   async generateTemplateJwt(firmaTemplateId: string, workspaceId: string): Promise<JwtToken> {

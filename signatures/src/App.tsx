@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
 import SigningPage from './pages/SigningPage';
 import Dashboard from './pages/Dashboard';
 import RequestSignature from './pages/RequestSignature';
@@ -29,12 +30,14 @@ function App() {
         <Route path="/sign" element={<SigningPage />} />
         <Route path="/sign/:token" element={<SigningPage />} />
         
-        {/* Rutas de la aplicación (con layout) */}
+        {/* Rutas de la aplicación (con layout y protección) */}
         <Route
           element={
-            <Layout>
-              <Outlet />
-            </Layout>
+            <ProtectedRoute>
+              <Layout>
+                <Outlet />
+              </Layout>
+            </ProtectedRoute>
           }
         >
           <Route index element={<Navigate to="/dashboard" replace />} />
