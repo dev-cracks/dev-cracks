@@ -1,0 +1,10 @@
+{
+  "signing": {
+    "title": "Signature de document",
+    "subtitle": "Veuillez examiner et signer le document ci-dessous",
+    "loading": "Chargement du document...",
+    "error": "Erreur lors du chargement du document",
+    "complete": "Document signé avec succès"
+  }
+}
+

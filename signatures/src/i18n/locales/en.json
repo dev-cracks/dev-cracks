@@ -1,0 +1,10 @@
+{
+  "signing": {
+    "title": "Document Signing",
+    "subtitle": "Please review and sign the document below",
+    "loading": "Loading document...",
+    "error": "Error loading document",
+    "complete": "Document signed successfully"
+  }
+}
+

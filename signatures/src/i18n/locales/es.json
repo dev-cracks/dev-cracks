@@ -1,0 +1,10 @@
+{
+  "signing": {
+    "title": "Firma de Documento",
+    "subtitle": "Por favor, revisa y firma el documento a continuación",
+    "loading": "Cargando documento...",
+    "error": "Error al cargar el documento",
+    "complete": "Documento firmado exitosamente"
+  }
+}
+

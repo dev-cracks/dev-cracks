@@ -141,6 +141,23 @@ async function createServer() {
       appType: 'spa',
     });
 
+    // Crear servidor Vite para signatures con base path y HMR habilitado
+    const signaturesVite = await createViteServer({
+      configFile: resolve(__dirname, 'signatures/vite.config.ts'),
+      root: resolve(__dirname, 'signatures'),
+      server: { 
+        middlewareMode: true,
+        hmr: {
+          server: httpServer,
+          protocol: 'ws',
+          host: 'localhost',
+          port: 5173,
+          clientPort: 5173,
+        },
+      },
+      appType: 'spa',
+    });
+
     // Middleware para route-on - debe ir ANTES de landing para evitar conflictos
     app.use('/route-on', async (req, res, next) => {
       if (req.originalUrl.match(/\.(tsx?|jsx?|css|json|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot|map)$/) ||
@@ -225,6 +242,46 @@ async function createServer() {
         return res.send(html);
       } catch (e) {
         fractalizeVite.ssrFixStacktrace(e);
+        return next(e);
+      }
+    });
+
+    // Middleware para signatures - debe ir ANTES de landing para evitar conflictos
+    app.use('/signatures', async (req, res, next) => {
+      // Para archivos estáticos y módulos, usar el middleware de Vite directamente
+      const isStaticFile = req.originalUrl.match(/\.(tsx?|jsx?|css|json|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot|map)$/);
+      const isModulePath = req.originalUrl.match(/^\/(signatures\/)?(src|node_modules|@vite|@id|@fs|@react-refresh|assets)/);
+      
+      if (isStaticFile || isModulePath) {
+        // Cuando Vite tiene base path configurado, ajustar la URL para que Vite la resuelva correctamente
+        const originalUrl = req.url;
+        const originalOriginalUrl = req.originalUrl;
+        const adjustedUrl = req.originalUrl.replace(/^\/signatures/, '') || '/';
+        
+        // Temporalmente ajustar las propiedades del request
+        req.url = adjustedUrl;
+        req.originalUrl = adjustedUrl;
+        
+        return signaturesVite.middlewares(req, res, (err) => {
+          // Restaurar las propiedades originales
+          req.url = originalUrl;
+          req.originalUrl = originalOriginalUrl;
+          
+          // Si hay un error (como 404), continuar al siguiente handler
+          if (err) {
+            next(err);
+          }
+        });
+      }
+      
+      // Para todas las demás rutas (HTML/SPA), servir el index.html transformado
+      try {
+        const template = readFileSync(resolve(__dirname, 'signatures/index.html'), 'utf-8');
+        const html = await signaturesVite.transformIndexHtml(req.originalUrl, template);
+        res.setHeader('Content-Type', 'text/html');
+        return res.send(html);
+      } catch (e) {
+        signaturesVite.ssrFixStacktrace(e);
         return next(e);
       }
     });
@@ -484,6 +541,7 @@ async function createServer() {
           req.originalUrl.startsWith('/dev-coach') ||
           req.originalUrl.startsWith('/dev-pool') ||
           req.originalUrl.startsWith('/fractalize') ||
+          req.originalUrl.startsWith('/signatures') ||
           req.originalUrl.startsWith('/api/')) {
         return next();
       }
@@ -501,6 +559,7 @@ async function createServer() {
           req.originalUrl.startsWith('/dev-coach') ||
           req.originalUrl.startsWith('/dev-pool') ||
           req.originalUrl.startsWith('/fractalize') ||
+          req.originalUrl.startsWith('/signatures') ||
           req.originalUrl.startsWith('/api/')) {
         return next();
       }
@@ -528,7 +587,8 @@ async function createServer() {
       console.log(`📦 Route On: http://localhost:${port}/route-on`);
       console.log(`👨‍🏫 Dev Coach: http://localhost:${port}/dev-coach`);
       console.log(`👥 Dev Pool: http://localhost:${port}/dev-pool`);
-      console.log(`🔷 Fractalize: http://localhost:${port}/fractalize\n`);
+      console.log(`🔷 Fractalize: http://localhost:${port}/fractalize`);
+      console.log(`✍️ Signatures: http://localhost:${port}/signatures\n`);
     });
 
     httpServer.on('error', (err) => {

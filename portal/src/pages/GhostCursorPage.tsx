@@ -81,6 +81,12 @@ export const GhostCursorPage = () => {
     </svg>
   );
 
+  const SignaturesIcon = () => (
+    <svg stroke="#ffffff" fill="#ffffff" strokeWidth="2" viewBox="0 0 24 24" height="1.5em" width="1.5em" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20.5 2l-5 5L19 9l5-5L20.5 2zM19 9l-1 1-5-5 1-1 5 5zm-9 3l-1 1-5-5 1-1 5 5zM9 14l-1 1-5-5 1-1 5 5zM18 5l-5 5-3-3 5-5 3 3zM4 19h16v-2H4v2zm2-4h2v2H6v-2zm4-4h2v2h-2v-2z" strokeWidth="0"></path>
+    </svg>
+  );
+
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
     { path: '/backoffice', label: 'Backoffice', icon: <BackofficeIcon />, absolute: true },
@@ -88,6 +94,7 @@ export const GhostCursorPage = () => {
     { path: '/dev-pool', label: 'Dev-pool', icon: <DevPoolIcon />, absolute: true },
     { path: '/route-on', label: 'Route-On', icon: <RouteOnIcon />, absolute: true },
     { path: '/fractalize', label: 'Fractalize', icon: <FractalizeIcon />, absolute: true },
+    { path: '/signatures', label: 'Signatures', icon: <SignaturesIcon />, absolute: true },
     { path: '/landing', label: 'Landing', icon: <LandingIcon />, absolute: true }
   ];
 

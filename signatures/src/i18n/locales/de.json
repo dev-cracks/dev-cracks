@@ -1,0 +1,10 @@
+{
+  "signing": {
+    "title": "Dokumentunterzeichnung",
+    "subtitle": "Bitte überprüfen und unterzeichnen Sie das folgende Dokument",
+    "loading": "Dokument wird geladen...",
+    "error": "Fehler beim Laden des Dokuments",
+    "complete": "Dokument erfolgreich unterzeichnet"
+  }
+}
+
