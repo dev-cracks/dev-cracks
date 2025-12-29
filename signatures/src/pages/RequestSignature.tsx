@@ -114,12 +114,14 @@ export default function RequestSignature() {
         sendEmail: false, // No enviar email automáticamente
       };
 
-      // Si la plantilla tiene Id local, lo usamos
-      if (selectedTemplate.id) {
+      // Si la plantilla tiene Id local válido (no vacío), lo usamos
+      if (selectedTemplate.id && selectedTemplate.id !== '00000000-0000-0000-0000-000000000000' && selectedTemplate.id.trim() !== '') {
         requestBody.templateId = selectedTemplate.id;
       }
-      // Si no tiene Id local, creamos el signing request sin templateId
-      // El backend puede manejar esto o podemos crear el template primero
+      // Si no tiene Id local válido, no enviamos templateId (el backend lo manejará como opcional)
+
+      console.log('Creating signing request with body:', requestBody);
+      console.log('Selected template:', selectedTemplate);
 
       // Crear el signing request
       const signingRequest = await firmaApi.createSigningRequest(requestBody);

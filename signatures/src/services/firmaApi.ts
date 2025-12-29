@@ -240,14 +240,41 @@ class FirmaApiService {
 
   async createSigningRequest(request: CreateSigningRequestRequest): Promise<SigningRequest> {
     const headers = await this.getAuthHeaders();
+    
+    // Filtrar campos undefined para evitar enviar valores vacíos
+    const cleanRequest: any = {
+      sendEmail: request.sendEmail ?? false,
+    };
+    
+    // Solo incluir templateId si tiene un valor válido
+    if (request.templateId && 
+        typeof request.templateId === 'string' && 
+        request.templateId !== '00000000-0000-0000-0000-000000000000' && 
+        request.templateId.trim() !== '') {
+      cleanRequest.templateId = request.templateId;
+    }
+    
+    if (request.message) {
+      cleanRequest.message = request.message;
+    }
+    
+    if (request.expirationDate) {
+      cleanRequest.expirationDate = request.expirationDate;
+    }
+    
+    if (request.signers && request.signers.length > 0) {
+      cleanRequest.signers = request.signers;
+    }
+    
     const response = await fetch(`${this.baseUrl}/signing-requests`, {
       method: 'POST',
       headers,
-      body: JSON.stringify(request),
+      body: JSON.stringify(cleanRequest),
     });
 
     if (!response.ok) {
-      throw new Error(`Error al crear signing request: ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`Error al crear signing request: ${response.statusText} - ${errorText}`);
     }
 
     return await response.json();
