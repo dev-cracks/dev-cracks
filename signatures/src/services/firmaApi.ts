@@ -8,6 +8,8 @@ export interface Workspace {
 }
 
 export interface Template {
+  id: string;
+  tenantId: string;
   firmaTemplateId: string;
   name: string;
   documentUrl?: string;
@@ -41,6 +43,23 @@ export interface SigningRequest {
   signedDocumentUrl?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface SignerDto {
+  name: string;
+  email: string;
+  role: string;
+}
+
+export interface CreateSigningRequestRequest {
+  templateId?: string;
+  documentUrl?: string;
+  documentFile?: string;
+  fileName?: string;
+  signers?: SignerDto[];
+  message?: string;
+  expirationDate?: string;
+  sendEmail?: boolean;
 }
 
 export interface TemplateField {
@@ -146,6 +165,20 @@ class FirmaApiService {
     return await response.json();
   }
 
+  async listTemplates(): Promise<Template[]> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${this.baseUrl}/templates`, {
+      method: 'GET',
+      headers,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al listar plantillas: ${response.statusText}`);
+    }
+
+    return await response.json();
+  }
+
   async getTemplateFields(templateId: string): Promise<TemplateField[]> {
     const headers = await this.getAuthHeaders();
     const response = await fetch(`${this.baseUrl}/templates/${templateId}/fields`, {
@@ -200,6 +233,21 @@ class FirmaApiService {
 
     if (!response.ok) {
       throw new Error(`Error al obtener signing request: ${response.statusText}`);
+    }
+
+    return await response.json();
+  }
+
+  async createSigningRequest(request: CreateSigningRequestRequest): Promise<SigningRequest> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${this.baseUrl}/signing-requests`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al crear signing request: ${response.statusText}`);
     }
 
     return await response.json();
