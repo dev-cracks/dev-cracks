@@ -23,6 +23,34 @@ export interface JwtToken {
   jwtId: string;
 }
 
+export interface TemplateField {
+  id: string;
+  fieldName: string;
+  fieldType: string;
+  required: boolean;
+  positionX?: number;
+  positionY?: number;
+  pageNumber: number;
+  width?: number;
+  height?: number;
+  variableName?: string;
+  dropdownOptions?: string[];
+  dateDefault?: string;
+  dateSigningDefault: boolean;
+  multiGroupId?: string;
+  formatRules?: Record<string, any>;
+  validationRules?: Record<string, any>;
+  recipientId?: string;
+  readOnly: boolean;
+  readOnlyValue?: string;
+  prefilledData?: string;
+}
+
+// Helper para obtener el nombre del campo
+export function getFieldDisplayName(field: TemplateField): string {
+  return field.fieldName || field.variableName || field.id;
+}
+
 class FirmaApiService {
   private baseUrl: string;
   private getAccessToken: (() => Promise<string | undefined>) | null = null;
@@ -93,6 +121,20 @@ class FirmaApiService {
 
     if (!response.ok) {
       throw new Error(`Error al listar todas las plantillas: ${response.statusText}`);
+    }
+
+    return await response.json();
+  }
+
+  async getTemplateFields(templateId: string): Promise<TemplateField[]> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${this.baseUrl}/templates/${templateId}/fields`, {
+      method: 'GET',
+      headers,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al obtener campos de la plantilla: ${response.statusText}`);
     }
 
     return await response.json();
