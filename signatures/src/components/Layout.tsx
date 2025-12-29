@@ -3,12 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
   Drawer,
-  AppBar,
   Toolbar,
   List,
   Typography,
   Divider,
-  IconButton,
   ListItem,
   ListItemButton,
   ListItemIcon,
@@ -16,12 +14,12 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import DescriptionIcon from '@mui/icons-material/Description';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import BugReportIcon from '@mui/icons-material/BugReport';
+import TopAppBar from './TopAppBar';
 
 const drawerWidth = 240;
 
@@ -38,14 +36,14 @@ const menuItems = [
 ];
 
 export default function Layout({ children }: LayoutProps) {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
+    setDrawerOpen(!drawerOpen);
   };
 
   const handleNavigation = (path: string) => {
@@ -102,37 +100,23 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <AppBar
-        position="fixed"
-        sx={{
-          width: { md: `calc(100% - ${drawerWidth}px)` },
-          ml: { md: `${drawerWidth}px` },
-        }}
-      >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { md: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Sistema de Firma Digital
-          </Typography>
-        </Toolbar>
-      </AppBar>
+      <TopAppBar onMenuClick={handleDrawerToggle} drawerWidth={drawerWidth} />
       <Box
         component="nav"
-        sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
+        sx={{
+          width: { md: drawerOpen ? drawerWidth : 0 },
+          flexShrink: 0,
+          transition: theme.transitions.create('width', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
+        }}
         aria-label="navigation menu"
       >
         {/* Drawer móvil */}
         <Drawer
           variant="temporary"
-          open={mobileOpen}
+          open={drawerOpen && isMobile}
           onClose={handleDrawerToggle}
           ModalProps={{
             keepMounted: true, // Mejor rendimiento en móvil
@@ -149,15 +133,19 @@ export default function Layout({ children }: LayoutProps) {
         </Drawer>
         {/* Drawer desktop */}
         <Drawer
-          variant="permanent"
+          variant="persistent"
+          open={drawerOpen && !isMobile}
           sx={{
             display: { xs: 'none', md: 'block' },
             '& .MuiDrawer-paper': {
               boxSizing: 'border-box',
               width: drawerWidth,
+              transition: theme.transitions.create('width', {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.enteringScreen,
+              }),
             },
           }}
-          open
         >
           {drawer}
         </Drawer>
@@ -167,7 +155,14 @@ export default function Layout({ children }: LayoutProps) {
         sx={{
           flexGrow: 1,
           p: 3,
-          width: { md: `calc(100% - ${drawerWidth}px)` },
+          width: {
+            xs: '100%',
+            md: drawerOpen ? `calc(100% - ${drawerWidth}px)` : '100%',
+          },
+          transition: theme.transitions.create(['width', 'margin'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
           minHeight: '100vh',
           backgroundColor: theme.palette.background.default,
         }}

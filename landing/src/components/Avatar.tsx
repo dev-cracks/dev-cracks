@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { getCachedUserImage, cacheUserImage } from '../services/imageCache';
+import { getCachedUserImage, cacheUserImage } from '@common/auth/services/imageCache';
 import { getGravatarAvatarUrl, getGravatarAvatarUrlSync, cacheGravatarHash, getGravatarHash } from '../utils/gravatarUtils';
 
 interface AvatarProps {

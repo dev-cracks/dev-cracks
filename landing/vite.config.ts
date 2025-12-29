@@ -13,14 +13,27 @@ export default defineConfig({
   },
   build: {
     outDir: resolve(__dirname, '../dist-landing'),
-    emptyOutDir: true
+    emptyOutDir: true,
+    commonjsOptions: {
+      include: [/node_modules/],
+    },
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
   },
   plugins: [react()],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
+      '@common/auth': resolve(__dirname, '../common/auth'),
     },
-    dedupe: ['react', 'react-dom', 'react-i18next'],
+    preserveSymlinks: false,
+    dedupe: ['react', 'react-dom', 'react-i18next', '@auth0/auth0-react'],
+  },
+  optimizeDeps: {
+    include: ['@auth0/auth0-react', 'react', 'react-dom'],
   },
 });
 

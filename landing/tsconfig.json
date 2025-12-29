@@ -14,7 +14,12 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@common/auth": ["../common/auth"],
+      "@common/auth/*": ["../common/auth/*"]
+    }
   },
   "include": ["./src"],
   "references": [
