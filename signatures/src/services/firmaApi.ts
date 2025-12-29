@@ -51,6 +51,25 @@ export interface SignerDto {
   role: string;
 }
 
+// Recipient interface para el nuevo formato de firma.dev
+export interface Recipient {
+  id?: string; // Para actualizaciones
+  first_name: string;
+  last_name: string;
+  email: string;
+  designation: 'Signer' | 'CC' | 'Approver';
+  order?: number;
+  phone_number?: string;
+  street_address?: string;
+  city?: string;
+  state_province?: string;
+  postal_code?: string;
+  country?: string;
+  title?: string;
+  company?: string;
+  custom_fields?: Record<string, any>;
+}
+
 export interface CreateSigningRequestRequest {
   templateId?: string;
   documentUrl?: string;
@@ -60,6 +79,57 @@ export interface CreateSigningRequestRequest {
   message?: string;
   expirationDate?: string;
   sendEmail?: boolean;
+}
+
+// Request para crear signing request directamente en firma.dev
+export interface CreateFirmaSigningRequestRequest {
+  template_id: string;
+  name: string;
+  recipients: Recipient[];
+}
+
+// Response de firma.dev al crear signing request
+export interface FirmaSigningRequestResponse {
+  id: string;
+  document_url?: string;
+  name: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  recipients?: Recipient[];
+}
+
+// Field interface para actualizar campos
+export interface SigningRequestField {
+  id?: string; // Para actualizaciones
+  type: string;
+  position: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  page_number: number;
+  required: boolean;
+  recipient_id: string;
+  value?: string; // Valor del campo (para campos de texto, etc.)
+}
+
+// Request para actualizar signing request
+export interface UpdateSigningRequestRequest {
+  signing_request_properties?: {
+    name?: string;
+    expiration_hours?: number;
+  };
+  recipients?: Recipient[];
+  deleted_recipients?: string[];
+  fields?: SigningRequestField[];
+  reminders?: any[];
+}
+
+// Request para enviar signing request
+export interface SendSigningRequestRequest {
+  custom_message?: string;
 }
 
 export interface TemplateField {
@@ -300,6 +370,96 @@ class FirmaApiService {
       signing_request_id: signingRequestId,
       created_at: new Date().toISOString(),
     };
+  }
+
+  // Crear signing request directamente en firma.dev (a través del backend)
+  async createFirmaSigningRequest(
+    workspaceId: string,
+    request: CreateFirmaSigningRequestRequest
+  ): Promise<FirmaSigningRequestResponse> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(
+      `${this.baseUrl}/workspaces/${workspaceId}/signing-requests/firma`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(request),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error al crear signing request en firma.dev: ${response.statusText} - ${errorText}`);
+    }
+
+    return await response.json();
+  }
+
+  // Actualizar signing request en firma.dev (a través del backend)
+  async updateFirmaSigningRequest(
+    workspaceId: string,
+    signingRequestId: string,
+    request: UpdateSigningRequestRequest
+  ): Promise<FirmaSigningRequestResponse> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(
+      `${this.baseUrl}/workspaces/${workspaceId}/signing-requests/${signingRequestId}/firma`,
+      {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(request),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error al actualizar signing request: ${response.statusText} - ${errorText}`);
+    }
+
+    return await response.json();
+  }
+
+  // Enviar signing request en firma.dev (a través del backend)
+  async sendFirmaSigningRequest(
+    workspaceId: string,
+    signingRequestId: string,
+    request?: SendSigningRequestRequest
+  ): Promise<FirmaSigningRequestResponse> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(
+      `${this.baseUrl}/workspaces/${workspaceId}/signing-requests/${signingRequestId}/send`,
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(request || {}),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error al enviar signing request: ${response.statusText} - ${errorText}`);
+    }
+
+    return await response.json();
+  }
+
+  // Obtener campos de un template desde firma.dev (a través del backend)
+  async getFirmaTemplateFields(workspaceId: string, templateId: string): Promise<any[]> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(
+      `${this.baseUrl}/workspaces/${workspaceId}/templates/${templateId}/fields/firma`,
+      {
+        method: 'GET',
+        headers,
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error al obtener campos del template: ${response.statusText} - ${errorText}`);
+    }
+
+    return await response.json();
   }
 }
 

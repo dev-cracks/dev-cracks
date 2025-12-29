@@ -11,8 +11,16 @@ import {
   Alert,
   Grid,
   Button,
+  TextField,
+  IconButton,
+  Card,
+  CardContent,
+  Divider,
+  Chip,
 } from '@mui/material';
-import { firmaApi, Template, Workspace } from '../services/firmaApi';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { firmaApi, Template, Workspace, Recipient, CreateFirmaSigningRequestRequest, FirmaSigningRequestResponse, UpdateSigningRequestRequest, SigningRequestField } from '../services/firmaApi';
 import { useAuth } from '../hooks/useAuth';
 import SigningRequestEditor from '../components/SigningRequestEditor';
 
@@ -22,23 +30,39 @@ export default function RequestSignature() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>('');
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+  const [requestName, setRequestName] = useState<string>('');
+  const [recipients, setRecipients] = useState<Recipient[]>([]);
+  const [templateFields, setTemplateFields] = useState<any[]>([]);
+  const [fieldValues, setFieldValues] = useState<Record<string, any>>({});
+  const [createdSigningRequest, setCreatedSigningRequest] = useState<FirmaSigningRequestResponse | null>(null);
+  
   const [loadingWorkspaces, setLoadingWorkspaces] = useState(false);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
-  const [loadingEditor, setLoadingEditor] = useState(false);
+  const [creatingRequest, setCreatingRequest] = useState(false);
+  const [updatingRequest, setUpdatingRequest] = useState(false);
+  const [sendingRequest, setSendingRequest] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [editorJwtToken, setEditorJwtToken] = useState<string | null>(null);
   const [firmaSigningRequestId, setFirmaSigningRequestId] = useState<string>('');
 
   // Configurar el proveedor de tokens y cargar workspaces y plantillas cuando el usuario esté autenticado
   useEffect(() => {
     if (isAuthenticated && getAccessToken) {
-      // Configurar el provider (esto es síncrono)
       firmaApi.setAccessTokenProvider(getAccessToken);
-      // Cargar workspaces y plantillas inmediatamente después de configurar el provider
       loadWorkspaces();
       loadAllTemplates();
     }
   }, [isAuthenticated, getAccessToken]);
+
+  // Cargar campos del template cuando se selecciona un template
+  useEffect(() => {
+    if (selectedWorkspaceId && selectedTemplateId) {
+      loadTemplateFields();
+    } else {
+      setTemplateFields([]);
+    }
+  }, [selectedWorkspaceId, selectedTemplateId]);
 
   const loadWorkspaces = async () => {
     setLoadingWorkspaces(true);
@@ -58,25 +82,18 @@ export default function RequestSignature() {
     setLoadingTemplates(true);
     setError(null);
     try {
-      // Obtener todas las plantillas de Firma.dev
       const allTemplates = await firmaApi.listAllTemplates();
-      
-      // Obtener plantillas con Id local del tenant
       let templatesWithId: Template[] = [];
       try {
         templatesWithId = await firmaApi.listTemplates();
       } catch (err) {
-        // Si falla, continuar sin templates con Id local
         console.warn('No se pudieron cargar templates con Id local:', err);
       }
 
-      // Combinar: usar templates con Id local si existen, sino usar todos
-      // Mapear templates con Id local por firmaTemplateId para fácil búsqueda
       const templatesWithIdMap = new Map(
         templatesWithId.map(t => [t.firmaTemplateId, t])
       );
 
-      // Enriquecer todas las plantillas con Id local si existe
       const enrichedTemplates = allTemplates.map(template => {
         const templateWithId = templatesWithIdMap.get(template.firmaTemplateId);
         return templateWithId ? { ...template, id: templateWithId.id } : template;
@@ -91,52 +108,238 @@ export default function RequestSignature() {
     }
   };
 
-  const handleLoadTemplate = async () => {
+  const loadTemplateFields = async () => {
+    if (!selectedWorkspaceId || !selectedTemplateId) return;
+    
+    setError(null);
+    try {
+      const fields = await firmaApi.getFirmaTemplateFields(selectedWorkspaceId, selectedTemplateId);
+      setTemplateFields(fields);
+      // Inicializar valores de campos vacíos
+      const initialValues: Record<string, any> = {};
+      fields.forEach((field: any) => {
+        initialValues[field.id || field.Id] = field.prefilledData || field.readOnlyValue || '';
+      });
+      setFieldValues(initialValues);
+    } catch (err: any) {
+      console.warn('Error al cargar campos del template:', err);
+      setTemplateFields([]);
+      setFieldValues({});
+    }
+  };
+
+  const handleFieldValueChange = (fieldId: string, value: any) => {
+    setFieldValues(prev => ({
+      ...prev,
+      [fieldId]: value,
+    }));
+  };
+
+  const handleAddRecipient = () => {
+    setRecipients([
+      ...recipients,
+      {
+        first_name: '',
+        last_name: '',
+        email: '',
+        designation: 'Signer',
+        order: recipients.length + 1,
+      },
+    ]);
+  };
+
+  const handleRemoveRecipient = (index: number) => {
+    setRecipients(recipients.filter((_, i) => i !== index));
+  };
+
+  const handleRecipientChange = (index: number, field: keyof Recipient, value: any) => {
+    const updated = [...recipients];
+    updated[index] = { ...updated[index], [field]: value };
+    setRecipients(updated);
+  };
+
+  const validateRecipients = (): boolean => {
+    for (const recipient of recipients) {
+      if (!recipient.first_name.trim() || !recipient.last_name.trim() || !recipient.email.trim()) {
+        setError('Todos los recipients deben tener first_name, last_name y email');
+        return false;
+      }
+      // Validar email básico
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(recipient.email)) {
+        setError(`El email ${recipient.email} no es válido`);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const handleCreateSigningRequest = async () => {
     if (!selectedWorkspaceId || !selectedTemplateId) {
       setError('Por favor selecciona un workspace y una plantilla');
       return;
     }
 
-    setLoadingEditor(true);
+    if (!requestName.trim()) {
+      setError('Por favor ingresa un nombre para la solicitud');
+      return;
+    }
+
+    if (recipients.length === 0) {
+      setError('Por favor agrega al menos un recipient');
+      return;
+    }
+
+    if (!validateRecipients()) {
+      return;
+    }
+
+    setCreatingRequest(true);
     setError(null);
-    setEditorJwtToken(null);
-    setFirmaSigningRequestId('');
 
     try {
-      // Buscar el template para obtener el ID local (Guid)
-      const selectedTemplate = templates.find((t) => t.firmaTemplateId === selectedTemplateId);
-      if (!selectedTemplate) {
-        throw new Error('Plantilla no encontrada');
-      }
-
-      // El templateId es opcional, pero si existe el Id local, lo usamos
-      const requestBody: any = {
-        sendEmail: false, // No enviar email automáticamente
+      const request: CreateFirmaSigningRequestRequest = {
+        template_id: selectedTemplateId,
+        name: requestName,
+        recipients: recipients.map((r, index) => ({
+          ...r,
+          order: r.order || index + 1,
+        })),
       };
 
-      // Si la plantilla tiene Id local válido (no vacío), lo usamos
-      if (selectedTemplate.id && selectedTemplate.id !== '00000000-0000-0000-0000-000000000000' && selectedTemplate.id.trim() !== '') {
-        requestBody.templateId = selectedTemplate.id;
+      const response = await firmaApi.createFirmaSigningRequest(selectedWorkspaceId, request);
+      setCreatedSigningRequest(response);
+      setFirmaSigningRequestId(response.id);
+
+      // Actualizar recipients con los IDs de la respuesta si están disponibles
+      if (response.recipients && Array.isArray(response.recipients)) {
+        const updatedRecipients = recipients.map((recipient, index) => {
+          const responseRecipient = response.recipients![index];
+          return {
+            ...recipient,
+            id: responseRecipient?.id || recipient.id,
+          };
+        });
+        setRecipients(updatedRecipients);
       }
-      // Si no tiene Id local válido, no enviamos templateId (el backend lo manejará como opcional)
 
-      console.log('Creating signing request with body:', requestBody);
-      console.log('Selected template:', selectedTemplate);
-
-      // Crear el signing request
-      const signingRequest = await firmaApi.createSigningRequest(requestBody);
-
-      setFirmaSigningRequestId(signingRequest.firmaSigningRequestId);
-
-      // Generar JWT para el editor de signing request
-      const jwtData = await firmaApi.generateSigningRequestJwt(signingRequest.id);
-      setEditorJwtToken(jwtData.jwt);
+      // Generar JWT para el editor
+      try {
+        // Buscar el template para obtener el ID local
+      const selectedTemplate = templates.find((t) => t.firmaTemplateId === selectedTemplateId);
+        if (selectedTemplate?.id) {
+          // Crear signing request local para obtener el ID
+          const localRequest = await firmaApi.createSigningRequest({
+            templateId: selectedTemplate.id,
+            sendEmail: false,
+          });
+          const jwtData = await firmaApi.generateSigningRequestJwt(localRequest.id);
+          setEditorJwtToken(jwtData.jwt);
+        }
+      } catch (err) {
+        console.warn('No se pudo generar JWT para el editor:', err);
+      }
     } catch (err: any) {
-      setError(`Error al cargar la plantilla: ${err.message}`);
-      setEditorJwtToken(null);
-      setFirmaSigningRequestId('');
+      setError(`Error al crear signing request: ${err.message}`);
     } finally {
-      setLoadingEditor(false);
+      setCreatingRequest(false);
+    }
+  };
+
+  const handleUpdateFields = async () => {
+    if (!selectedWorkspaceId || !firmaSigningRequestId) {
+      setError('No hay signing request creada');
+      return;
+    }
+
+    setUpdatingRequest(true);
+    setError(null);
+    setSuccessMessage(null);
+
+    try {
+      // Obtener recipients de la signing request creada si están disponibles
+      const requestRecipients = (createdSigningRequest as any)?.recipients || recipients;
+      
+      // Convertir templateFields a SigningRequestField con los valores editados
+      const fields: SigningRequestField[] = templateFields
+        .filter((field) => {
+          const fieldId = field.id || field.Id;
+          // Solo incluir campos que tienen valores o son requeridos
+          return fieldValues[fieldId] || field.required || field.Required;
+        })
+        .map((field, index) => {
+          const fieldId = field.id || field.Id || `field-${index}`;
+          // Asignar campos a recipients según el orden
+          const recipientIndex = index % requestRecipients.length;
+          const recipient = requestRecipients[recipientIndex];
+          
+          // Obtener el valor del campo desde fieldValues
+          const fieldValue = fieldValues[fieldId];
+          
+          // Usar el recipient_id del campo original si existe, sino usar el del recipient asignado
+          const recipientId = field.recipientId || field.RecipientId || recipient?.id || '';
+          
+          return {
+            id: fieldId, // Incluir ID si existe para actualizar campos existentes
+            type: field.type || field.fieldType || field.FieldType || 'text',
+            position: {
+              x: field.position?.x || field.positionX || field.PositionX || 15,
+              y: field.position?.y || field.positionY || field.PositionY || 85,
+              width: field.position?.width || field.width || field.Width || 30,
+              height: field.position?.height || field.height || field.Height || 10,
+            },
+            page_number: field.page_number || field.pageNumber || field.PageNumber || 1,
+            required: field.required ?? field.Required ?? true,
+            recipient_id: recipientId,
+            // Agregar valor si existe (para campos de texto, etc.)
+            ...(fieldValue && { value: fieldValue }),
+          };
+        });
+
+      const updateRequest: UpdateSigningRequestRequest = {
+        fields: fields,
+      };
+
+      await firmaApi.updateFirmaSigningRequest(selectedWorkspaceId, firmaSigningRequestId, updateRequest);
+
+      setSuccessMessage('Campos actualizados exitosamente');
+      setError(null);
+    } catch (err: any) {
+      setError(`Error al actualizar campos: ${err.message}`);
+    } finally {
+      setUpdatingRequest(false);
+    }
+  };
+
+  const handleSendRequest = async () => {
+    if (!selectedWorkspaceId || !firmaSigningRequestId) {
+      setError('No hay signing request creada');
+      return;
+    }
+
+    setSendingRequest(true);
+    setError(null);
+    setSuccessMessage(null);
+
+    try {
+      await firmaApi.sendFirmaSigningRequest(selectedWorkspaceId, firmaSigningRequestId, {
+        custom_message: 'Por favor firma este documento',
+      });
+
+      setSuccessMessage('Signing request enviada exitosamente');
+      setError(null);
+      
+      // Actualizar el estado de la signing request
+      if (createdSigningRequest) {
+        setCreatedSigningRequest({
+          ...createdSigningRequest,
+          status: 'sent',
+        });
+      }
+    } catch (err: any) {
+      setError(`Error al enviar signing request: ${err.message}`);
+    } finally {
+      setSendingRequest(false);
     }
   };
 
@@ -146,36 +349,40 @@ export default function RequestSignature() {
         Solicitar Firma de Documentos
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Selecciona un workspace y una plantilla para crear una solicitud de firma
+        Crea y envía solicitudes de firma a recipients
       </Typography>
 
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
+
+      {successMessage && (
+        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccessMessage(null)}>
+          {successMessage}
+        </Alert>
+      )}
+
       <Grid container spacing={3}>
-        {/* Formulario de selección */}
-        <Grid item xs={12} md={4}>
+        {/* Paso 1: Selección de Workspace y Template */}
+        <Grid item xs={12} md={6}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Configuración
+              1. Selecciona Workspace y Template
             </Typography>
 
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-                {error}
-              </Alert>
-            )}
-
-            <FormControl
-              fullWidth
-              sx={{ mb: 2 }}
-              disabled={loadingWorkspaces}
-            >
+            <FormControl fullWidth sx={{ mb: 2 }} disabled={loadingWorkspaces}>
               <InputLabel>Workspace</InputLabel>
               <Select
                 value={selectedWorkspaceId}
                 label="Workspace"
                 onChange={(e) => {
                   setSelectedWorkspaceId(e.target.value);
-                  setEditorJwtToken(null);
+                  setSelectedTemplateId('');
+                  setCreatedSigningRequest(null);
                   setFirmaSigningRequestId('');
+                  setEditorJwtToken(null);
                 }}
               >
                 {workspaces.map((workspace) => (
@@ -184,31 +391,18 @@ export default function RequestSignature() {
                   </MenuItem>
                 ))}
               </Select>
-              {loadingWorkspaces && (
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                  <CircularProgress size={24} />
-                </Box>
-              )}
-              {!loadingWorkspaces && workspaces.length === 0 && (
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  No hay workspaces disponibles
-                </Typography>
-              )}
             </FormControl>
 
-            <FormControl
-              fullWidth
-              sx={{ mb: 2 }}
-              disabled={loadingTemplates}
-            >
-              <InputLabel>Plantilla</InputLabel>
+            <FormControl fullWidth sx={{ mb: 2 }} disabled={loadingTemplates || !selectedWorkspaceId}>
+              <InputLabel>Template</InputLabel>
               <Select
                 value={selectedTemplateId}
-                label="Plantilla"
+                label="Template"
                 onChange={(e) => {
                   setSelectedTemplateId(e.target.value);
-                  setEditorJwtToken(null);
+                  setCreatedSigningRequest(null);
                   setFirmaSigningRequestId('');
+                  setEditorJwtToken(null);
                 }}
               >
                 {templates.map((template) => (
@@ -217,76 +411,264 @@ export default function RequestSignature() {
                   </MenuItem>
                 ))}
               </Select>
-              {loadingTemplates && (
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                  <CircularProgress size={24} />
+            </FormControl>
+          </Paper>
+        </Grid>
+
+        {/* Paso 2: Nombre de la solicitud y Recipients */}
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              2. Nombre de la Solicitud
+            </Typography>
+
+            <TextField
+              fullWidth
+              label="Nombre de la Solicitud"
+              value={requestName}
+              onChange={(e) => setRequestName(e.target.value)}
+              placeholder="Ej: NDA - Acme Corp"
+              sx={{ mb: 2 }}
+            />
+
+            <Divider sx={{ my: 2 }} />
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6">
+                3. Recipients
+              </Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<AddIcon />}
+                onClick={handleAddRecipient}
+              >
+                Agregar Recipient
+              </Button>
+            </Box>
+
+            {recipients.map((recipient, index) => (
+              <Card key={index} sx={{ mb: 2 }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="subtitle2">Recipient {index + 1}</Typography>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleRemoveRecipient(index)}
+                    color="error"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
                 </Box>
-              )}
-              {!loadingTemplates && templates.length === 0 && (
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  No hay plantillas disponibles
+
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <TextField
+                      fullWidth
+                      label="First Name *"
+                      value={recipient.first_name}
+                      onChange={(e) => handleRecipientChange(index, 'first_name', e.target.value)}
+                      size="small"
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      fullWidth
+                      label="Last Name *"
+                      value={recipient.last_name}
+                      onChange={(e) => handleRecipientChange(index, 'last_name', e.target.value)}
+                      size="small"
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Email *"
+                      type="email"
+                      value={recipient.email}
+                      onChange={(e) => handleRecipientChange(index, 'email', e.target.value)}
+                      size="small"
+                    />
+                  </Grid>
+                  <Grid item xs={8}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Designation</InputLabel>
+                      <Select
+                        value={recipient.designation}
+                        label="Designation"
+                        onChange={(e) => handleRecipientChange(index, 'designation', e.target.value)}
+                      >
+                        <MenuItem value="Signer">Signer</MenuItem>
+                        <MenuItem value="CC">CC</MenuItem>
+                        <MenuItem value="Approver">Approver</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <TextField
+                      fullWidth
+                      label="Order"
+                      type="number"
+                      value={recipient.order || index + 1}
+                      onChange={(e) => handleRecipientChange(index, 'order', parseInt(e.target.value) || index + 1)}
+                      size="small"
+                    />
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+            ))}
+
+            {recipients.length === 0 && (
+              <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+                No hay recipients agregados. Haz clic en "Agregar Recipient" para agregar uno.
                 </Typography>
               )}
-            </FormControl>
 
             <Button
               variant="contained"
               fullWidth
-              onClick={handleLoadTemplate}
-              disabled={!selectedWorkspaceId || !selectedTemplateId || loadingEditor}
+              onClick={handleCreateSigningRequest}
+              disabled={!selectedWorkspaceId || !selectedTemplateId || !requestName.trim() || recipients.length === 0 || creatingRequest}
               sx={{ mt: 2 }}
             >
-              {loadingEditor ? (
+              {creatingRequest ? (
                 <>
                   <CircularProgress size={20} sx={{ mr: 1 }} />
-                  Cargando...
+                  Creando...
                 </>
               ) : (
-                'Cargar Plantilla'
+                'Crear Signing Request'
               )}
             </Button>
           </Paper>
         </Grid>
 
-        {/* Editor de solicitudes de firma */}
-        <Grid item xs={12} md={8}>
+        {/* Signing Request Creada */}
+        {createdSigningRequest && (
+          <Grid item xs={12}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Editor de Solicitud de Firma
+                4. Signing Request Creada
             </Typography>
 
-            {!editorJwtToken || !firmaSigningRequestId ? (
-              <Box
-                sx={{
-                  minHeight: '600px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '1px dashed',
-                  borderColor: 'divider',
-                  borderRadius: 2,
-                }}
-              >
-                {loadingEditor ? (
-                  <>
-                <CircularProgress />
-                <Typography variant="body2" color="text.secondary" sx={{ ml: 2 }}>
-                  Cargando editor...
-                </Typography>
-                  </>
-                ) : (
-                  <Typography variant="body2" color="text.secondary">
-                    Selecciona un workspace y una plantilla, luego haz clic en "Cargar Plantilla"
+              <Box sx={{ mb: 2 }}>
+                <Box sx={{ mb: 1 }}>
+                  <Typography component="span" variant="body1">
+                    <strong>ID:</strong> {createdSigningRequest.id}
                   </Typography>
+                </Box>
+                <Box sx={{ mb: 1 }}>
+                  <Typography component="span" variant="body1">
+                    <strong>Nombre:</strong> {createdSigningRequest.name}
+                </Typography>
+                </Box>
+                <Box sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography component="span" variant="body1">
+                    <strong>Estado:</strong>
+                  </Typography>
+                  <Chip label={createdSigningRequest.status} size="small" />
+                </Box>
+                {createdSigningRequest.document_url && (
+                  <Box sx={{ mb: 1 }}>
+                    <Typography component="span" variant="body1">
+                      <strong>Documento:</strong>{' '}
+                      <a href={createdSigningRequest.document_url} target="_blank" rel="noopener noreferrer">
+                        Ver documento
+                      </a>
+                    </Typography>
+                  </Box>
                 )}
               </Box>
-            ) : (
+
+              {/* Campos del Template - Formulario Editable */}
+              {templateFields.length > 0 && (
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="subtitle1" gutterBottom>
+                    Campos del Template - Editar Valores:
+                  </Typography>
+                  <Grid container spacing={2} sx={{ mt: 1 }}>
+                    {templateFields.map((field, index) => {
+                      const fieldId = field.id || field.Id || `field-${index}`;
+                      const fieldType = field.type || field.fieldType || field.FieldType || 'text';
+                      const fieldName = field.fieldName || field.variableName || field.FieldName || field.VariableName || `Campo ${index + 1}`;
+                      const pageNumber = field.page_number || field.pageNumber || field.PageNumber || 1;
+                      const isRequired = field.required || field.Required || false;
+                      const isReadOnly = field.readOnly || field.ReadOnly || false;
+                      const currentValue = fieldValues[fieldId] || '';
+
+                      return (
+                        <Grid item xs={12} sm={6} md={4} key={fieldId}>
+                          <Card variant="outlined">
+                            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                              <Box sx={{ mb: 1 }}>
+                                <Typography variant="caption" color="text.secondary">
+                                  {fieldName} ({fieldType}) - Página {pageNumber}
+                                  {isRequired && <span style={{ color: 'red' }}> *</span>}
+                                </Typography>
+                              </Box>
+                              {fieldType === 'dropdown' && field.dropdownOptions ? (
+                                <FormControl fullWidth size="small">
+                                  <Select
+                                    value={currentValue}
+                                    onChange={(e) => handleFieldValueChange(fieldId, e.target.value)}
+                                    disabled={isReadOnly}
+                                  >
+                                    {field.dropdownOptions.map((option: string, optIndex: number) => (
+                                      <MenuItem key={optIndex} value={option}>
+                                        {option}
+                                      </MenuItem>
+                                    ))}
+                                  </Select>
+                                </FormControl>
+                              ) : fieldType === 'date' ? (
+                                <TextField
+                                  fullWidth
+                                  type="date"
+                                  size="small"
+                                  value={currentValue}
+                                  onChange={(e) => handleFieldValueChange(fieldId, e.target.value)}
+                                  disabled={isReadOnly}
+                                  InputLabelProps={{ shrink: true }}
+                                />
+                              ) : fieldType === 'signature' || fieldType === 'initial' ? (
+                                <TextField
+                                  fullWidth
+                                  size="small"
+                                  value={currentValue || '[Firma requerida]'}
+                                  disabled
+                                  helperText="Este campo se completará al firmar"
+                                />
+                              ) : (
+                                <TextField
+                                  fullWidth
+                                  size="small"
+                                  value={currentValue}
+                                  onChange={(e) => handleFieldValueChange(fieldId, e.target.value)}
+                                  disabled={isReadOnly}
+                                  placeholder={`Ingrese valor para ${fieldName}`}
+                                  multiline={fieldType === 'textarea' || fieldType === 'text'}
+                                  rows={fieldType === 'textarea' ? 3 : 1}
+                                />
+                              )}
+                            </CardContent>
+                          </Card>
+                        </Grid>
+                      );
+                    })}
+                  </Grid>
+                </Box>
+              )}
+
+              {/* Editor de Signing Request */}
+              {editorJwtToken && firmaSigningRequestId && (
+                <Box sx={{ mb: 2 }}>
               <SigningRequestEditor
                 signingRequestId={firmaSigningRequestId}
                 jwt={editorJwtToken}
                 theme="light"
                 readOnly={false}
-                height="600px"
+                    height="400px"
                 width="100%"
                 onSave={(data) => {
                   console.log('Signing request saved:', data);
@@ -302,9 +684,47 @@ export default function RequestSignature() {
                   console.log('Editor loaded successfully:', signingRequest);
                 }}
               />
-            )}
+                </Box>
+              )}
+
+              {/* Botones para actualizar y enviar */}
+              <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={handleUpdateFields}
+                  disabled={updatingRequest || sendingRequest}
+                  sx={{ flex: 1 }}
+                >
+                  {updatingRequest ? (
+                    <>
+                      <CircularProgress size={20} sx={{ mr: 1 }} />
+                      Actualizando...
+                    </>
+                  ) : (
+                    'Actualizar Campos'
+                  )}
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleSendRequest}
+                  disabled={sendingRequest || updatingRequest}
+                  sx={{ flex: 1 }}
+                >
+                  {sendingRequest ? (
+                    <>
+                      <CircularProgress size={20} sx={{ mr: 1 }} />
+                      Enviando...
+                    </>
+                  ) : (
+                    'Enviar Solicitud'
+                  )}
+                </Button>
+              </Box>
           </Paper>
         </Grid>
+        )}
       </Grid>
     </Box>
   );
