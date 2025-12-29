@@ -1,6 +1,12 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import Layout from './components/Layout';
 import SigningPage from './pages/SigningPage';
+import Dashboard from './pages/Dashboard';
+import RequestSignature from './pages/RequestSignature';
+import Documents from './pages/Documents';
+import Reports from './pages/Reports';
+import Incidents from './pages/Incidents';
 
 const theme = createTheme({
   palette: {
@@ -19,9 +25,25 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Routes>
-        <Route path="/" element={<SigningPage />} />
+        {/* Rutas públicas para firma (sin layout) */}
         <Route path="/sign" element={<SigningPage />} />
         <Route path="/sign/:token" element={<SigningPage />} />
+        
+        {/* Rutas de la aplicación (con layout) */}
+        <Route
+          element={
+            <Layout>
+              <Outlet />
+            </Layout>
+          }
+        >
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="request-signature" element={<RequestSignature />} />
+          <Route path="documents" element={<Documents />} />
+          <Route path="reports" element={<Reports />} />
+          <Route path="incidents" element={<Incidents />} />
+        </Route>
       </Routes>
     </ThemeProvider>
   );
