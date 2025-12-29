@@ -12,7 +12,7 @@ import {
   Alert,
   Grid,
 } from '@mui/material';
-import { firmaApi, Template } from '../services/firmaApi';
+import { firmaApi, Template, Workspace } from '../services/firmaApi';
 import { useAuth } from '../hooks/useAuth';
 
 declare global {
@@ -30,20 +30,24 @@ declare global {
 
 export default function RequestSignature() {
   const { isAuthenticated, getAccessToken } = useAuth();
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>('');
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+  const [loadingWorkspaces, setLoadingWorkspaces] = useState(false);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
   const [loadingJwt, setLoadingJwt] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [jwtToken, setJwtToken] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Configurar el proveedor de tokens y cargar todas las plantillas cuando el usuario esté autenticado
+  // Configurar el proveedor de tokens y cargar workspaces y plantillas cuando el usuario esté autenticado
   useEffect(() => {
     if (isAuthenticated && getAccessToken) {
       // Configurar el provider (esto es síncrono)
       firmaApi.setAccessTokenProvider(getAccessToken);
-      // Cargar todas las plantillas inmediatamente después de configurar el provider
+      // Cargar workspaces y plantillas inmediatamente después de configurar el provider
+      loadWorkspaces();
       loadAllTemplates();
     }
   }, [isAuthenticated, getAccessToken]);
@@ -54,6 +58,20 @@ export default function RequestSignature() {
       loadFirmaScript();
     }
   }, [jwtToken]);
+
+  const loadWorkspaces = async () => {
+    setLoadingWorkspaces(true);
+    setError(null);
+    try {
+      const data = await firmaApi.listWorkspaces();
+      setWorkspaces(data);
+    } catch (err: any) {
+      setError(`Error al cargar workspaces: ${err.message}`);
+      setWorkspaces([]);
+    } finally {
+      setLoadingWorkspaces(false);
+    }
+  };
 
   const loadAllTemplates = async () => {
     setLoadingTemplates(true);
@@ -75,17 +93,15 @@ export default function RequestSignature() {
       return;
     }
 
-    // Obtener el workspace de la plantilla seleccionada
-    const selectedTemplate = templates.find((t) => t.firmaTemplateId === selectedTemplateId);
-    if (!selectedTemplate || !selectedTemplate.workspaceId) {
-      setError('No se pudo determinar el workspace de la plantilla seleccionada');
+    if (!selectedWorkspaceId) {
+      setError('Por favor, selecciona un workspace');
       return;
     }
 
     setLoadingJwt(true);
     setError(null);
     try {
-      const jwt = await firmaApi.generateTemplateJwt(selectedTemplateId, selectedTemplate.workspaceId);
+      const jwt = await firmaApi.generateTemplateJwt(selectedTemplateId, selectedWorkspaceId);
       setJwtToken(jwt.jwt);
     } catch (err: any) {
       setError(`Error al generar token JWT: ${err.message}`);
@@ -149,7 +165,7 @@ export default function RequestSignature() {
         Solicitar Firma de Documentos
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Selecciona una plantilla para iniciar el proceso de firma
+        Selecciona un workspace y una plantilla para iniciar el proceso de firma
       </Typography>
 
       <Grid container spacing={3}>
@@ -169,7 +185,40 @@ export default function RequestSignature() {
             <FormControl
               fullWidth
               sx={{ mb: 2 }}
-              disabled={loadingTemplates}
+              disabled={loadingWorkspaces}
+            >
+              <InputLabel>Workspace</InputLabel>
+              <Select
+                value={selectedWorkspaceId}
+                label="Workspace"
+                onChange={(e) => {
+                  setSelectedWorkspaceId(e.target.value);
+                  setSelectedTemplateId(''); // Reset template selection
+                  setJwtToken(null); // Reset JWT token
+                }}
+              >
+                {workspaces.map((workspace) => (
+                  <MenuItem key={workspace.firmaWorkspaceId} value={workspace.firmaWorkspaceId}>
+                    {workspace.name}
+                  </MenuItem>
+                ))}
+              </Select>
+              {loadingWorkspaces && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                  <CircularProgress size={24} />
+                </Box>
+              )}
+              {!loadingWorkspaces && workspaces.length === 0 && (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  No hay workspaces disponibles
+                </Typography>
+              )}
+            </FormControl>
+
+            <FormControl
+              fullWidth
+              sx={{ mb: 2 }}
+              disabled={loadingTemplates || !selectedWorkspaceId}
             >
               <InputLabel>Plantilla</InputLabel>
               <Select
@@ -182,7 +231,7 @@ export default function RequestSignature() {
               >
                 {templates.map((template) => (
                   <MenuItem key={template.firmaTemplateId} value={template.firmaTemplateId}>
-                    {template.workspaceName ? `${template.name} (${template.workspaceName})` : template.name}
+                    {template.name}
                   </MenuItem>
                 ))}
               </Select>
@@ -202,7 +251,7 @@ export default function RequestSignature() {
               variant="contained"
               fullWidth
               onClick={handleGenerateJwt}
-              disabled={!selectedTemplateId || loadingJwt}
+              disabled={!selectedWorkspaceId || !selectedTemplateId || loadingJwt}
               sx={{ mb: 2 }}
             >
               {loadingJwt ? <CircularProgress size={24} /> : 'Cargar Plantilla para Firma'}
@@ -230,7 +279,7 @@ export default function RequestSignature() {
                 }}
               >
                 <Typography variant="body2" color="text.secondary">
-                  Selecciona una plantilla para comenzar
+                  Selecciona un workspace y una plantilla para comenzar
                 </Typography>
               </Box>
             ) : (

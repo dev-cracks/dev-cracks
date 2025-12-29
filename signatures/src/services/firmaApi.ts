@@ -85,29 +85,17 @@ class FirmaApiService {
   }
 
   async listAllTemplates(): Promise<Template[]> {
-    // Primero obtener todos los workspaces
-    const workspaces = await this.listWorkspaces();
-    
-    // Luego obtener todas las plantillas de cada workspace
-    const allTemplatesPromises = workspaces.map(async (workspace) => {
-      try {
-        const templates = await this.listTemplatesByWorkspace(workspace.firmaWorkspaceId);
-        // Agregar información del workspace a cada plantilla
-        return templates.map(template => ({
-          ...template,
-          workspaceId: workspace.firmaWorkspaceId,
-          workspaceName: workspace.name,
-        }));
-      } catch (error) {
-        // Si falla al obtener plantillas de un workspace, continuar con los demás
-        console.warn(`Error al obtener plantillas del workspace ${workspace.name}:`, error);
-        return [];
-      }
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${this.baseUrl}/templates/all`, {
+      method: 'GET',
+      headers,
     });
 
-    const allTemplatesArrays = await Promise.all(allTemplatesPromises);
-    // Aplanar el array de arrays en un solo array
-    return allTemplatesArrays.flat();
+    if (!response.ok) {
+      throw new Error(`Error al listar todas las plantillas: ${response.statusText}`);
+    }
+
+    return await response.json();
   }
 
   async generateTemplateJwt(firmaTemplateId: string, workspaceId: string): Promise<JwtToken> {
