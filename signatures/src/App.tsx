@@ -1,4 +1,3 @@
-import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import SigningPage from './pages/SigningPage';
@@ -15,7 +14,7 @@ const theme = createTheme({
   },
 });
 
-const App: React.FC = () => {
+function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -26,7 +25,6 @@ const App: React.FC = () => {
       </Routes>
     </ThemeProvider>
   );
-};
+}
 
 export default App;
-

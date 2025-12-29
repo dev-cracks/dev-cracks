@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, Container, Typography, CircularProgress, Alert } from '@mui/material';
 
@@ -15,7 +15,7 @@ declare global {
   }
 }
 
-const SigningPage: React.FC = () => {
+const SigningPage = () => {
   const { token } = useParams<{ token?: string }>();
   const containerRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
