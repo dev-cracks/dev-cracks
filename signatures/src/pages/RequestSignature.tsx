@@ -17,15 +17,34 @@ import {
   CardContent,
   Divider,
   Chip,
+  Stepper,
+  Step,
+  StepLabel,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { firmaApi, Template, Workspace, Recipient, CreateFirmaSigningRequestRequest, FirmaSigningRequestResponse, UpdateSigningRequestRequest, SigningRequestField } from '../services/firmaApi';
 import { useAuth } from '../hooks/useAuth';
 import SigningRequestEditor from '../components/SigningRequestEditor';
 
+const steps = [
+  'Identificador',
+  'Workspace y Template',
+  'Recipientes',
+  'Actualizar Campos',
+];
+
 export default function RequestSignature() {
   const { isAuthenticated, getAccessToken } = useAuth();
+  const [activeStep, setActiveStep] = useState(0);
+  const [identifier, setIdentifier] = useState<string>('');
+  const [identifierValidated, setIdentifierValidated] = useState(false);
+  const [validatingIdentifier, setValidatingIdentifier] = useState(false);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>('');
@@ -63,6 +82,39 @@ export default function RequestSignature() {
       setTemplateFields([]);
     }
   }, [selectedWorkspaceId, selectedTemplateId]);
+
+  const handleValidateIdentifier = async () => {
+    if (!identifier.trim()) {
+      setError('Por favor ingresa un código identificador');
+      return;
+    }
+
+    setValidatingIdentifier(true);
+    setError(null);
+    setIdentifierValidated(false);
+
+    try {
+      // TODO: Implementar validación real con el backend
+      // Por ahora, simulamos una validación básica
+      // En producción, esto debería llamar a una API que verifique si el identificador está disponible
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Simulación: considerar disponible si tiene al menos 3 caracteres
+      if (identifier.trim().length < 3) {
+        setError('El identificador debe tener al menos 3 caracteres');
+        setIdentifierValidated(false);
+      } else {
+        setIdentifierValidated(true);
+        setSuccessMessage('Identificador disponible');
+        setActiveStep(1);
+      }
+    } catch (err: any) {
+      setError(`Error al validar identificador: ${err.message}`);
+      setIdentifierValidated(false);
+    } finally {
+      setValidatingIdentifier(false);
+    }
+  };
 
   const loadWorkspaces = async () => {
     setLoadingWorkspaces(true);
@@ -239,6 +291,10 @@ export default function RequestSignature() {
       } catch (err) {
         console.warn('No se pudo generar JWT para el editor:', err);
       }
+
+      // Avanzar al paso 4 después de crear la solicitud
+      setActiveStep(3);
+      setSuccessMessage('Signing request creada exitosamente');
     } catch (err: any) {
       setError(`Error al crear signing request: ${err.message}`);
     } finally {
@@ -343,6 +399,27 @@ export default function RequestSignature() {
     }
   };
 
+  const handleContinueToStep2 = () => {
+    if (!selectedWorkspaceId || !selectedTemplateId) {
+      setError('Por favor selecciona un workspace y una plantilla');
+      return;
+    }
+    setActiveStep(2);
+  };
+
+  const handleStepChange = (step: number) => {
+    // Permitir retroceder siempre, avanzar solo si se cumplen las condiciones
+    if (step < activeStep) {
+      setActiveStep(step);
+    } else if (step === 1 && identifierValidated) {
+      setActiveStep(step);
+    } else if (step === 2 && selectedWorkspaceId && selectedTemplateId) {
+      setActiveStep(step);
+    } else if (step === 3 && createdSigningRequest) {
+      setActiveStep(step);
+    }
+  };
+
   return (
     <Box>
       <Typography variant="h4" component="h1" gutterBottom>
@@ -364,14 +441,75 @@ export default function RequestSignature() {
         </Alert>
       )}
 
-      <Grid container spacing={3}>
-        {/* Paso 1: Selección de Workspace y Template */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              1. Selecciona Workspace y Template
-            </Typography>
+      {/* Stepper */}
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Stepper activeStep={activeStep} alternativeLabel>
+          {steps.map((label, index) => (
+            <Step key={label}>
+              <StepLabel
+                onClick={() => handleStepChange(index)}
+                sx={{ cursor: 'pointer' }}
+              >
+                {label}
+              </StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+      </Paper>
 
+      {/* Accordion con los pasos */}
+      <Box>
+        {/* Paso 1: Identificador */}
+        <Accordion expanded={activeStep === 0} onChange={() => handleStepChange(0)} sx={{ mb: 2 }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+              <Typography variant="h6">1. Identificador</Typography>
+              {identifierValidated && <CheckCircleIcon color="success" />}
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+              <TextField
+                fullWidth
+                label="Código Identificador"
+                value={identifier}
+                onChange={(e) => {
+                  setIdentifier(e.target.value);
+                  setIdentifierValidated(false);
+                }}
+                placeholder="Ingresa el código identificador"
+                disabled={validatingIdentifier}
+                error={identifierValidated === false && identifier.trim() !== '' && !validatingIdentifier}
+                helperText={identifierValidated ? 'Identificador disponible' : identifier.trim() !== '' && !validatingIdentifier ? 'Debe validar el identificador' : ''}
+              />
+              <Button
+                variant="contained"
+                onClick={handleValidateIdentifier}
+                disabled={validatingIdentifier || !identifier.trim()}
+                sx={{ mt: 1 }}
+              >
+                {validatingIdentifier ? (
+                  <>
+                    <CircularProgress size={20} sx={{ mr: 1 }} />
+                    Validando...
+                  </>
+                ) : (
+                  'Validar'
+                )}
+              </Button>
+            </Box>
+          </AccordionDetails>
+        </Accordion>
+
+        {/* Paso 2: Workspace y Template */}
+        <Accordion expanded={activeStep === 1} onChange={() => handleStepChange(1)} sx={{ mb: 2 }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+              <Typography variant="h6">2. Workspace y Template</Typography>
+              {selectedWorkspaceId && selectedTemplateId && <CheckCircleIcon color="success" />}
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails>
             <FormControl fullWidth sx={{ mb: 2 }} disabled={loadingWorkspaces}>
               <InputLabel>Workspace</InputLabel>
               <Select
@@ -412,16 +550,27 @@ export default function RequestSignature() {
                 ))}
               </Select>
             </FormControl>
-          </Paper>
-        </Grid>
 
-        {/* Paso 2: Nombre de la solicitud y Recipients */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              2. Nombre de la Solicitud
-            </Typography>
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={handleContinueToStep2}
+              disabled={!selectedWorkspaceId || !selectedTemplateId}
+            >
+              Continuar
+            </Button>
+          </AccordionDetails>
+        </Accordion>
 
+        {/* Paso 3: Recipientes */}
+        <Accordion expanded={activeStep === 2} onChange={() => handleStepChange(2)} sx={{ mb: 2 }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+              <Typography variant="h6">3. Agregar Recipientes</Typography>
+              {createdSigningRequest && <CheckCircleIcon color="success" />}
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails>
             <TextField
               fullWidth
               label="Nombre de la Solicitud"
@@ -435,7 +584,7 @@ export default function RequestSignature() {
 
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6">
-                3. Recipients
+                Recipients
               </Typography>
               <Button
                 variant="outlined"
@@ -522,8 +671,8 @@ export default function RequestSignature() {
             {recipients.length === 0 && (
               <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
                 No hay recipients agregados. Haz clic en "Agregar Recipient" para agregar uno.
-                </Typography>
-              )}
+              </Typography>
+            )}
 
             <Button
               variant="contained"
@@ -538,20 +687,21 @@ export default function RequestSignature() {
                   Creando...
                 </>
               ) : (
-                'Crear Signing Request'
+                'Crear Request'
               )}
             </Button>
-          </Paper>
-        </Grid>
+          </AccordionDetails>
+        </Accordion>
 
-        {/* Signing Request Creada */}
+        {/* Paso 4: Actualizar Campos */}
         {createdSigningRequest && (
-          <Grid item xs={12}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-                4. Signing Request Creada
-            </Typography>
-
+          <Accordion expanded={activeStep === 3} onChange={() => handleStepChange(3)} sx={{ mb: 2 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                <Typography variant="h6">4. Actualizar los Campos</Typography>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails>
               <Box sx={{ mb: 2 }}>
                 <Box sx={{ mb: 1 }}>
                   <Typography component="span" variant="body1">
@@ -561,7 +711,7 @@ export default function RequestSignature() {
                 <Box sx={{ mb: 1 }}>
                   <Typography component="span" variant="body1">
                     <strong>Nombre:</strong> {createdSigningRequest.name}
-                </Typography>
+                  </Typography>
                 </Box>
                 <Box sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography component="span" variant="body1">
@@ -687,45 +837,51 @@ export default function RequestSignature() {
                 </Box>
               )}
 
-              {/* Botones para actualizar y enviar */}
-              <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  onClick={handleUpdateFields}
-                  disabled={updatingRequest || sendingRequest}
-                  sx={{ flex: 1 }}
-                >
-                  {updatingRequest ? (
-                    <>
-                      <CircularProgress size={20} sx={{ mr: 1 }} />
-                      Actualizando...
-                    </>
-                  ) : (
-                    'Actualizar Campos'
-                  )}
-                </Button>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleSendRequest}
-                  disabled={sendingRequest || updatingRequest}
-                  sx={{ flex: 1 }}
-                >
-                  {sendingRequest ? (
-                    <>
-                      <CircularProgress size={20} sx={{ mr: 1 }} />
-                      Enviando...
-                    </>
-                  ) : (
-                    'Enviar Solicitud'
-                  )}
-                </Button>
-              </Box>
-          </Paper>
-        </Grid>
+              {/* Botón para actualizar campos */}
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={handleUpdateFields}
+                disabled={updatingRequest || sendingRequest}
+                fullWidth
+                sx={{ mt: 2 }}
+              >
+                {updatingRequest ? (
+                  <>
+                    <CircularProgress size={20} sx={{ mr: 1 }} />
+                    Actualizando...
+                  </>
+                ) : (
+                  'Actualizar Campos'
+                )}
+              </Button>
+            </AccordionDetails>
+          </Accordion>
         )}
-      </Grid>
+
+        {/* Botón de enviar solicitud fuera del accordion */}
+        {createdSigningRequest && (
+          <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              onClick={handleSendRequest}
+              disabled={sendingRequest || updatingRequest}
+              sx={{ minWidth: 200 }}
+            >
+              {sendingRequest ? (
+                <>
+                  <CircularProgress size={20} sx={{ mr: 1 }} />
+                  Enviando...
+                </>
+              ) : (
+                'Enviar Solicitud'
+              )}
+            </Button>
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 }
