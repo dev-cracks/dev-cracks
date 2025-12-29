@@ -19,6 +19,7 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import BugReportIcon from '@mui/icons-material/BugReport';
+import ArticleIcon from '@mui/icons-material/Article';
 import TopAppBar from './TopAppBar';
 
 const drawerWidth = 240;
@@ -30,6 +31,7 @@ interface LayoutProps {
 const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
   { text: 'Solicitar Firma', icon: <DescriptionIcon />, path: '/request-signature' },
+  { text: 'Plantillas', icon: <ArticleIcon />, path: '/templates' },
   { text: 'Documentos', icon: <AssignmentIcon />, path: '/documents' },
   { text: 'Reportes', icon: <AssessmentIcon />, path: '/reports' },
   { text: 'Incidencias', icon: <BugReportIcon />, path: '/incidents' },
@@ -49,7 +51,7 @@ export default function Layout({ children }: LayoutProps) {
   const handleNavigation = (path: string) => {
     navigate(path);
     if (isMobile) {
-      setMobileOpen(false);
+      setDrawerOpen(false);
     }
   };
 

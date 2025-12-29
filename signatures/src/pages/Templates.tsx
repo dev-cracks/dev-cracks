@@ -11,69 +11,85 @@ import {
   Alert,
   Grid,
 } from '@mui/material';
-import { firmaApi, SigningRequest } from '../services/firmaApi';
+import { firmaApi, Template, Workspace } from '../services/firmaApi';
 import { useAuth } from '../hooks/useAuth';
-import SigningRequestEditor from '../components/SigningRequestEditor';
+import TemplateEditor from '../components/TemplateEditor';
 
-export default function RequestSignature() {
+export default function Templates() {
   const { isAuthenticated, getAccessToken } = useAuth();
-  const [signingRequests, setSigningRequests] = useState<SigningRequest[]>([]);
-  const [selectedSigningRequestId, setSelectedSigningRequestId] = useState<string>('');
-  const [loadingSigningRequests, setLoadingSigningRequests] = useState(false);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+  const [loadingWorkspaces, setLoadingWorkspaces] = useState(false);
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
   const [loadingEditorJwt, setLoadingEditorJwt] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editorJwtToken, setEditorJwtToken] = useState<string | null>(null);
-  const [firmaSigningRequestId, setFirmaSigningRequestId] = useState<string>('');
 
-  // Configurar el proveedor de tokens y cargar signing requests cuando el usuario esté autenticado
+  // Configurar el proveedor de tokens y cargar workspaces y plantillas cuando el usuario esté autenticado
   useEffect(() => {
     if (isAuthenticated && getAccessToken) {
       // Configurar el provider (esto es síncrono)
       firmaApi.setAccessTokenProvider(getAccessToken);
-      // Cargar signing requests inmediatamente después de configurar el provider
-      loadSigningRequests();
+      // Cargar workspaces y plantillas inmediatamente después de configurar el provider
+      loadWorkspaces();
+      loadAllTemplates();
     }
   }, [isAuthenticated, getAccessToken]);
 
-  // Cargar JWT cuando se selecciona un signing request
+  // Cargar JWT cuando se selecciona una plantilla
   useEffect(() => {
-    if (selectedSigningRequestId) {
-      loadSigningRequestEditor(selectedSigningRequestId);
+    if (selectedTemplateId) {
+      const selectedTemplate = templates.find((t) => t.firmaTemplateId === selectedTemplateId);
+      if (selectedTemplate && selectedTemplate.workspaceId) {
+        loadTemplateEditor(selectedTemplateId, selectedTemplate.workspaceId);
+      } else {
+        setError('La plantilla seleccionada no tiene un workspace asociado');
+        setEditorJwtToken(null);
+      }
     } else {
       setEditorJwtToken(null);
-      setFirmaSigningRequestId('');
     }
-  }, [selectedSigningRequestId]);
+  }, [selectedTemplateId, templates]);
 
-  const loadSigningRequests = async () => {
-    setLoadingSigningRequests(true);
+  const loadWorkspaces = async () => {
+    setLoadingWorkspaces(true);
     setError(null);
     try {
-      const data = await firmaApi.listSigningRequests();
-      setSigningRequests(data);
+      const data = await firmaApi.listWorkspaces();
+      setWorkspaces(data);
     } catch (err: any) {
-      setError(`Error al cargar solicitudes de firma: ${err.message}`);
-      setSigningRequests([]);
+      setError(`Error al cargar workspaces: ${err.message}`);
+      setWorkspaces([]);
     } finally {
-      setLoadingSigningRequests(false);
+      setLoadingWorkspaces(false);
     }
   };
 
-  const loadSigningRequestEditor = async (signingRequestId: string) => {
+  const loadAllTemplates = async () => {
+    setLoadingTemplates(true);
+    setError(null);
+    try {
+      const data = await firmaApi.listAllTemplates();
+      setTemplates(data);
+    } catch (err: any) {
+      setError(`Error al cargar plantillas: ${err.message}`);
+      setTemplates([]);
+    } finally {
+      setLoadingTemplates(false);
+    }
+  };
+
+  const loadTemplateEditor = async (templateId: string, workspaceId: string) => {
     setLoadingEditorJwt(true);
     setError(null);
     try {
-      // Obtener el signing request para obtener el firmaSigningRequestId
-      const signingRequest = await firmaApi.getSigningRequest(signingRequestId);
-      setFirmaSigningRequestId(signingRequest.firmaSigningRequestId);
-
-      // Generar JWT para el editor de signing request
-      const jwtData = await firmaApi.generateSigningRequestJwt(signingRequestId);
-      setEditorJwtToken(jwtData.jwt);
+      // Generar JWT para el editor de template
+      const jwt = await firmaApi.generateTemplateJwt(templateId, workspaceId);
+      setEditorJwtToken(jwt.jwt);
     } catch (err: any) {
       setError(`Error al generar token para el editor: ${err.message}`);
       setEditorJwtToken(null);
-      setFirmaSigningRequestId('');
     } finally {
       setLoadingEditorJwt(false);
     }
@@ -82,10 +98,10 @@ export default function RequestSignature() {
   return (
     <Box>
       <Typography variant="h4" component="h1" gutterBottom>
-        Editor de Solicitudes de Firma
+        Editor de Plantillas
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Selecciona una solicitud de firma para editarla
+        Selecciona una plantilla para editarla
       </Typography>
 
       <Grid container spacing={3}>
@@ -105,46 +121,45 @@ export default function RequestSignature() {
             <FormControl
               fullWidth
               sx={{ mb: 2 }}
-              disabled={loadingSigningRequests}
+              disabled={loadingTemplates}
             >
-              <InputLabel>Solicitud de Firma</InputLabel>
+              <InputLabel>Plantilla</InputLabel>
               <Select
-                value={selectedSigningRequestId}
-                label="Solicitud de Firma"
+                value={selectedTemplateId}
+                label="Plantilla"
                 onChange={(e) => {
-                  setSelectedSigningRequestId(e.target.value);
+                  setSelectedTemplateId(e.target.value);
                   setEditorJwtToken(null);
-                  setFirmaSigningRequestId('');
                 }}
               >
-                {signingRequests.map((sr) => (
-                  <MenuItem key={sr.id} value={sr.id}>
-                    {sr.firmaSigningRequestId} - {sr.status}
+                {templates.map((template) => (
+                  <MenuItem key={template.firmaTemplateId} value={template.firmaTemplateId}>
+                    {template.name} {template.workspaceName && `(${template.workspaceName})`}
                   </MenuItem>
                 ))}
               </Select>
-              {loadingSigningRequests && (
+              {loadingTemplates && (
                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
                   <CircularProgress size={24} />
                 </Box>
               )}
-              {!loadingSigningRequests && signingRequests.length === 0 && (
+              {!loadingTemplates && templates.length === 0 && (
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  No hay solicitudes de firma disponibles
+                  No hay plantillas disponibles
                 </Typography>
               )}
             </FormControl>
           </Paper>
         </Grid>
 
-        {/* Editor de solicitudes de firma */}
+        {/* Editor de plantillas */}
         <Grid item xs={12} md={8}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Editor de Solicitud de Firma
+              Editor de Plantilla
             </Typography>
 
-            {!selectedSigningRequestId ? (
+            {!selectedTemplateId ? (
               <Box
                 sx={{
                   minHeight: '600px',
@@ -157,10 +172,10 @@ export default function RequestSignature() {
                 }}
               >
                 <Typography variant="body2" color="text.secondary">
-                  Selecciona una solicitud de firma para editar
+                  Selecciona una plantilla para editar
                 </Typography>
               </Box>
-            ) : !editorJwtToken || !firmaSigningRequestId ? (
+            ) : !editorJwtToken ? (
               <Box
                 sx={{
                   minHeight: '600px',
@@ -186,29 +201,22 @@ export default function RequestSignature() {
                 )}
               </Box>
             ) : (
-              <SigningRequestEditor
-                signingRequestId={firmaSigningRequestId}
+              <TemplateEditor
+                templateId={selectedTemplateId}
                 jwt={editorJwtToken}
                 theme="light"
                 readOnly={false}
                 height="600px"
                 width="100%"
                 onSave={(data) => {
-                  console.log('Signing request saved:', data);
-                  // Recargar la lista de signing requests después de guardar
-                  loadSigningRequests();
-                }}
-                onSend={(data) => {
-                  console.log('Signing request sent:', data);
-                  // Recargar la lista de signing requests después de enviar
-                  loadSigningRequests();
+                  console.log('Template saved:', data);
                 }}
                 onError={(error) => {
                   console.error('Editor error:', error);
                   setError(`Error en el editor: ${error?.message || 'Error desconocido'}`);
                 }}
-                onLoad={(signingRequest) => {
-                  console.log('Editor loaded successfully:', signingRequest);
+                onLoad={(template) => {
+                  console.log('Editor loaded successfully:', template);
                 }}
               />
             )}
@@ -218,3 +226,4 @@ export default function RequestSignature() {
     </Box>
   );
 }
+

@@ -23,6 +23,26 @@ export interface JwtToken {
   jwtId: string;
 }
 
+export interface SigningRequestJwtToken {
+  jwt: string;
+  jwt_id: string;
+  expires_at: string;
+  signing_request_id: string;
+  created_at: string;
+}
+
+export interface SigningRequest {
+  id: string;
+  tenantId: string;
+  firmaSigningRequestId: string;
+  templateId?: string;
+  status: string;
+  envelopeId?: string;
+  signedDocumentUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface TemplateField {
   id: string;
   fieldName: string;
@@ -155,6 +175,56 @@ class FirmaApiService {
     }
 
     return await response.json();
+  }
+
+  async listSigningRequests(): Promise<SigningRequest[]> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${this.baseUrl}/signing-requests`, {
+      method: 'GET',
+      headers,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al listar signing requests: ${response.statusText}`);
+    }
+
+    return await response.json();
+  }
+
+  async getSigningRequest(signingRequestId: string): Promise<SigningRequest> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${this.baseUrl}/signing-requests/${signingRequestId}`, {
+      method: 'GET',
+      headers,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al obtener signing request: ${response.statusText}`);
+    }
+
+    return await response.json();
+  }
+
+  async generateSigningRequestJwt(signingRequestId: string): Promise<SigningRequestJwtToken> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${this.baseUrl}/signing-requests/${signingRequestId}/jwt/editor`, {
+      method: 'POST',
+      headers,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al generar JWT para signing request: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    // Convertir la respuesta del backend al formato esperado
+    return {
+      jwt: data.jwt,
+      jwt_id: data.jwtId || '',
+      expires_at: data.expiresAt || new Date().toISOString(),
+      signing_request_id: signingRequestId,
+      created_at: new Date().toISOString(),
+    };
   }
 }
 

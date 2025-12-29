@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import SigningPage from './pages/SigningPage';
 import Dashboard from './pages/Dashboard';
 import RequestSignature from './pages/RequestSignature';
+import Templates from './pages/Templates';
 import Documents from './pages/Documents';
 import Reports from './pages/Reports';
 import Incidents from './pages/Incidents';
@@ -43,6 +44,7 @@ function App() {
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="request-signature" element={<RequestSignature />} />
+          <Route path="templates" element={<Templates />} />
           <Route path="documents" element={<Documents />} />
           <Route path="reports" element={<Reports />} />
           <Route path="incidents" element={<Incidents />} />
