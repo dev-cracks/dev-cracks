@@ -1,4 +1,4 @@
-import { apiService } from './apiService';
+import { apiService } from './apiService.js';
 
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';

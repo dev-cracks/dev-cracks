@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LiquidEther from '../components/LiquidEther';
+import LiquidEther from '../components/LiquidEther.js';
 import './GhostCursorPage.css';
 
 export const GhostCursorPage = () => {
@@ -222,7 +222,7 @@ export const GhostCursorPage = () => {
             <button
               key={item.path}
               className="ghost-cursor-page__nav-item"
-              onClick={() => handleNavClick(item.path, item.external || false, item.absolute || false)}
+              onClick={() => handleNavClick(item.path, (item as any).external || false, item.absolute || false)}
               title={item.label}
             >
               <span className="ghost-cursor-page__nav-icon">{item.icon}</span>
