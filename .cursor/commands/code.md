@@ -88,6 +88,9 @@ tipica historia de usuario.
 
 
 ## reglas backend a tener en cuenta
+- Implementar con TDD primero prueba unitaria y luego el código
+- Cada clase y metodo son su summary (en ingles)
+- Siempre qeu sea posible reutilizar el repositorio base y unidad de trabajo si no crear el repositorio extendido especializado
 - El código siempre en ingles
 - Las appsettings asociadas a ambientes se deben definir en appsetings.TodosLosAbientes.json
 - Las appsetings comunes deben ir en appsettings.json
