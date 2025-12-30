@@ -84,7 +84,8 @@ export interface CreateSigningRequestRequest {
 // Request para crear signing request directamente en firma.dev
 export interface CreateFirmaSigningRequestRequest {
   template_id: string;
-  name: string;
+  identificador: string;
+  creation_source?: string;
   recipients: Recipient[];
 }
 
@@ -463,6 +464,78 @@ class FirmaApiService {
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Error al obtener campos del template: ${response.statusText} - ${errorText}`);
+    }
+
+    return await response.json();
+  }
+
+  // Obtener historial de una solicitud de firma
+  async getSigningRequestHistory(signingRequestId: string): Promise<any[]> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(
+      `${this.baseUrl}/signing-requests/${signingRequestId}/history`,
+      {
+        method: 'GET',
+        headers,
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error al obtener historial: ${response.statusText} - ${errorText}`);
+    }
+
+    return await response.json();
+  }
+
+  // Listar transacciones con filtros y paginación
+  async listTransactions(params?: {
+    search?: string;
+    status?: string;
+    fromDate?: string;
+    toDate?: string;
+    page?: number;
+    pageSize?: number;
+  }): Promise<{ items: any[]; totalCount: number; page: number; pageSize: number; totalPages: number }> {
+    const headers = await this.getAuthHeaders();
+    const queryParams = new URLSearchParams();
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.fromDate) queryParams.append('fromDate', params.fromDate);
+    if (params?.toDate) queryParams.append('toDate', params.toDate);
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.pageSize) queryParams.append('pageSize', params.pageSize.toString());
+
+    const response = await fetch(
+      `${this.baseUrl}/signing-requests/transactions?${queryParams.toString()}`,
+      {
+        method: 'GET',
+        headers,
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error al listar transacciones: ${response.statusText} - ${errorText}`);
+    }
+
+    return await response.json();
+  }
+
+  // Validar identificador único por tenant
+  async validateIdentificador(identificador: string): Promise<{ isValid: boolean; message: string }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(
+      `${this.baseUrl}/signing-requests/validate-identificador?identificador=${encodeURIComponent(identificador)}`,
+      {
+        method: 'GET',
+        headers,
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error al validar identificador: ${response.statusText} - ${errorText}`);
     }
 
     return await response.json();

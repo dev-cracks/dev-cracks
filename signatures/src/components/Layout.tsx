@@ -20,6 +20,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import ArticleIcon from '@mui/icons-material/Article';
+import HistoryIcon from '@mui/icons-material/History';
 import TopAppBar from './TopAppBar';
 
 const drawerWidth = 240;
@@ -33,6 +34,7 @@ const menuItems = [
   { text: 'Solicitar Firma', icon: <DescriptionIcon />, path: '/request-signature' },
   { text: 'Plantillas', icon: <ArticleIcon />, path: '/templates' },
   { text: 'Documentos', icon: <AssignmentIcon />, path: '/documents' },
+  { text: 'Transacciones', icon: <HistoryIcon />, path: '/transactions' },
   { text: 'Reportes', icon: <AssessmentIcon />, path: '/reports' },
   { text: 'Incidencias', icon: <BugReportIcon />, path: '/incidents' },
 ];

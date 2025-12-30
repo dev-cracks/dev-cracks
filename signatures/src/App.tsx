@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import RequestSignature from './pages/RequestSignature';
 import Templates from './pages/Templates';
 import Documents from './pages/Documents';
+import Transactions from './pages/Transactions';
 import Reports from './pages/Reports';
 import Incidents from './pages/Incidents';
 
@@ -46,6 +47,7 @@ function App() {
           <Route path="request-signature" element={<RequestSignature />} />
           <Route path="templates" element={<Templates />} />
           <Route path="documents" element={<Documents />} />
+          <Route path="transactions" element={<Transactions />} />
           <Route path="reports" element={<Reports />} />
           <Route path="incidents" element={<Incidents />} />
         </Route>

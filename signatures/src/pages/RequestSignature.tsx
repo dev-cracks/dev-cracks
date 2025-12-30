@@ -42,14 +42,13 @@ const steps = [
 export default function RequestSignature() {
   const { isAuthenticated, getAccessToken } = useAuth();
   const [activeStep, setActiveStep] = useState(0);
-  const [identifier, setIdentifier] = useState<string>('');
-  const [identifierValidated, setIdentifierValidated] = useState(false);
-  const [validatingIdentifier, setValidatingIdentifier] = useState(false);
+  const [identificador, setIdentificador] = useState<string>('');
+  const [identificadorValidated, setIdentificadorValidated] = useState(false);
+  const [validatingIdentificador, setValidatingIdentificador] = useState(false);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>('');
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
-  const [requestName, setRequestName] = useState<string>('');
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [templateFields, setTemplateFields] = useState<any[]>([]);
   const [fieldValues, setFieldValues] = useState<Record<string, any>>({});
@@ -84,38 +83,6 @@ export default function RequestSignature() {
     }
   }, [selectedWorkspaceId, selectedTemplateId]);
 
-  const handleValidateIdentifier = async () => {
-    if (!identifier.trim()) {
-      setError('Por favor ingresa un código identificador');
-      return;
-    }
-
-    setValidatingIdentifier(true);
-    setError(null);
-    setIdentifierValidated(false);
-
-    try {
-      // TODO: Implementar validación real con el backend
-      // Por ahora, simulamos una validación básica
-      // En producción, esto debería llamar a una API que verifique si el identificador está disponible
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Simulación: considerar disponible si tiene al menos 3 caracteres
-      if (identifier.trim().length < 3) {
-        setError('El identificador debe tener al menos 3 caracteres');
-        setIdentifierValidated(false);
-      } else {
-        setIdentifierValidated(true);
-        setSuccessMessage('Identificador disponible');
-        setActiveStep(1);
-      }
-    } catch (err: any) {
-      setError(`Error al validar identificador: ${err.message}`);
-      setIdentifierValidated(false);
-    } finally {
-      setValidatingIdentifier(false);
-    }
-  };
 
   const loadWorkspaces = async () => {
     setLoadingWorkspaces(true);
@@ -233,8 +200,8 @@ export default function RequestSignature() {
       return;
     }
 
-    if (!requestName.trim()) {
-      setError('Por favor ingresa un nombre para la solicitud');
+    if (!identificador.trim() || !identificadorValidated) {
+      setError('Por favor valida el identificador primero');
       return;
     }
 
@@ -253,7 +220,8 @@ export default function RequestSignature() {
     try {
       const request: CreateFirmaSigningRequestRequest = {
         template_id: selectedTemplateId,
-        name: requestName,
+        identificador: identificador.trim(),
+        creation_source: 'Manual',
         recipients: recipients.map((r, index) => ({
           ...r,
           order: r.order || index + 1,
@@ -450,11 +418,10 @@ export default function RequestSignature() {
   const handleNewRequest = () => {
     // Limpiar todos los estados para un nuevo envío
     setActiveStep(0);
-    setIdentifier('');
-    setIdentifierValidated(false);
+    setIdentificador('');
+    setIdentificadorValidated(false);
     setSelectedWorkspaceId('');
     setSelectedTemplateId('');
-    setRequestName('');
     setRecipients([]);
     setTemplateFields([]);
     setFieldValues({});
@@ -466,7 +433,35 @@ export default function RequestSignature() {
     setSuccessMessage(null);
   };
 
-  const handleContinueToStep2 = () => {
+  const handleValidateIdentificador = async () => {
+    if (!identificador.trim()) {
+      setError('Por favor ingresa un identificador');
+      return;
+    }
+
+    setValidatingIdentificador(true);
+    setError(null);
+    setIdentificadorValidated(false);
+
+    try {
+      const result = await firmaApi.validateIdentificador(identificador.trim());
+      if (result.isValid) {
+        setIdentificadorValidated(true);
+        setSuccessMessage('Identificador disponible');
+        setActiveStep(1);
+      } else {
+        setError('Este identificador ya existe para tu tenant. Por favor usa otro.');
+        setIdentificadorValidated(false);
+      }
+    } catch (err: any) {
+      setError(`Error al validar identificador: ${err.message}`);
+      setIdentificadorValidated(false);
+    } finally {
+      setValidatingIdentificador(false);
+    }
+  };
+
+  const handleContinueToStep3 = () => {
     if (!selectedWorkspaceId || !selectedTemplateId) {
       setError('Por favor selecciona un workspace y una plantilla');
       return;
@@ -482,7 +477,9 @@ export default function RequestSignature() {
     // Permitir retroceder siempre, avanzar solo si se cumplen las condiciones
     if (step < activeStep) {
       setActiveStep(step);
-    } else if (step === 1 && identifierValidated) {
+    } else if (step === 0 && identificadorValidated) {
+      setActiveStep(step);
+    } else if (step === 1 && identificadorValidated && selectedWorkspaceId && selectedTemplateId) {
       setActiveStep(step);
     } else if (step === 2 && selectedWorkspaceId && selectedTemplateId) {
       setActiveStep(step);
@@ -540,31 +537,31 @@ export default function RequestSignature() {
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
               <Typography variant="h6">1. Identificador</Typography>
-              {identifierValidated && <CheckCircleIcon color="success" />}
+              {identificadorValidated && <CheckCircleIcon color="success" />}
             </Box>
           </AccordionSummary>
           <AccordionDetails>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
               <TextField
                 fullWidth
-                label="Código Identificador"
-                value={identifier}
+                label="Identificador"
+                value={identificador}
                 onChange={(e) => {
-                  setIdentifier(e.target.value);
-                  setIdentifierValidated(false);
+                  setIdentificador(e.target.value);
+                  setIdentificadorValidated(false);
                 }}
-                placeholder="Ingresa el código identificador"
-                disabled={validatingIdentifier || requestSent}
-                error={identifierValidated === false && identifier.trim() !== '' && !validatingIdentifier}
-                helperText={identifierValidated ? 'Identificador disponible' : identifier.trim() !== '' && !validatingIdentifier ? 'Debe validar el identificador' : ''}
+                placeholder="Ingresa el identificador único"
+                disabled={validatingIdentificador || requestSent}
+                error={identificadorValidated === false && identificador.trim() !== '' && !validatingIdentificador}
+                helperText={identificadorValidated ? 'Identificador disponible' : identificador.trim() !== '' && !validatingIdentificador ? 'Debe validar el identificador' : ''}
               />
               <Button
                 variant="contained"
-                onClick={handleValidateIdentifier}
-                disabled={validatingIdentifier || !identifier.trim() || requestSent}
+                onClick={handleValidateIdentificador}
+                disabled={validatingIdentificador || !identificador.trim() || requestSent}
                 sx={{ mt: 1 }}
               >
-                {validatingIdentifier ? (
+                {validatingIdentificador ? (
                   <>
                     <CircularProgress size={20} sx={{ mr: 1 }} />
                     Validando...
@@ -581,7 +578,7 @@ export default function RequestSignature() {
         <Accordion 
           expanded={activeStep === 1 && !requestSent} 
           onChange={() => handleStepChange(1)} 
-          disabled={requestSent}
+          disabled={requestSent || !identificadorValidated}
           sx={{ mb: 2 }}
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -635,7 +632,7 @@ export default function RequestSignature() {
             <Button
               variant="contained"
               fullWidth
-              onClick={handleContinueToStep2}
+              onClick={handleContinueToStep3}
               disabled={!selectedWorkspaceId || !selectedTemplateId || requestSent}
             >
               Continuar
@@ -657,15 +654,6 @@ export default function RequestSignature() {
             </Box>
           </AccordionSummary>
           <AccordionDetails>
-            <TextField
-              fullWidth
-              label="Nombre de la Solicitud"
-              value={requestName}
-              onChange={(e) => setRequestName(e.target.value)}
-              placeholder="Ej: NDA - Acme Corp"
-              disabled={requestSent}
-              sx={{ mb: 2 }}
-            />
 
             <Divider sx={{ my: 2 }} />
 
@@ -771,7 +759,7 @@ export default function RequestSignature() {
               variant="contained"
               fullWidth
               onClick={handleCreateSigningRequest}
-              disabled={!selectedWorkspaceId || !selectedTemplateId || !requestName.trim() || recipients.length === 0 || creatingRequest || requestSent}
+              disabled={!selectedWorkspaceId || !selectedTemplateId || !identificadorValidated || recipients.length === 0 || creatingRequest || requestSent}
               sx={{ mt: 2 }}
             >
               {creatingRequest ? (
