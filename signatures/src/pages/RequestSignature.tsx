@@ -64,6 +64,7 @@ export default function RequestSignature() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [editorJwtToken, setEditorJwtToken] = useState<string | null>(null);
   const [firmaSigningRequestId, setFirmaSigningRequestId] = useState<string>('');
+  const [requestSent, setRequestSent] = useState(false);
 
   // Configurar el proveedor de tokens y cargar workspaces y plantillas cuando el usuario esté autenticado
   useEffect(() => {
@@ -318,11 +319,6 @@ export default function RequestSignature() {
       
       // Convertir templateFields a SigningRequestField con los valores editados
       const fields: SigningRequestField[] = templateFields
-        .filter((field) => {
-          const fieldId = field.id || field.Id;
-          // Solo incluir campos que tienen valores o son requeridos
-          return fieldValues[fieldId] || field.required || field.Required;
-        })
         .map((field, index) => {
           const fieldId = field.id || field.Id || `field-${index}`;
           // Asignar campos a recipients según el orden
@@ -331,13 +327,21 @@ export default function RequestSignature() {
           
           // Obtener el valor del campo desde fieldValues
           const fieldValue = fieldValues[fieldId];
+          let fieldType = field.type || field.fieldType || field.FieldType || 'text';
+          
+          // Mapear tipos no válidos a tipos válidos para firma.dev
+          // firma.dev no acepta "number", se mapea a "text"
+          if (fieldType === 'number') {
+            fieldType = 'text';
+          }
           
           // Usar el recipient_id del campo original si existe, sino usar el del recipient asignado
           const recipientId = field.recipientId || field.RecipientId || recipient?.id || '';
           
-          return {
+          // Construir el objeto del campo
+          const fieldObj: SigningRequestField = {
             id: fieldId, // Incluir ID si existe para actualizar campos existentes
-            type: field.type || field.fieldType || field.FieldType || 'text',
+            type: fieldType,
             position: {
               x: field.position?.x || field.positionX || field.PositionX || 15,
               y: field.position?.y || field.positionY || field.PositionY || 85,
@@ -347,21 +351,64 @@ export default function RequestSignature() {
             page_number: field.page_number || field.pageNumber || field.PageNumber || 1,
             required: field.required ?? field.Required ?? true,
             recipient_id: recipientId,
-            // Agregar valor si existe (para campos de texto, etc.)
-            ...(fieldValue && { value: fieldValue }),
           };
+
+          // Solo agregar value para campos que no son signature o initial, y que tienen un valor
+          if (fieldType !== 'signature' && fieldType !== 'initial') {
+            if (fieldValue !== undefined && fieldValue !== null && fieldValue !== '') {
+              let processedValue = String(fieldValue);
+              
+              // Validar y corregir formato de fechas
+              if (fieldType === 'date') {
+                // Verificar que la fecha tenga un formato válido (YYYY-MM-DD)
+                const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+                if (!dateRegex.test(processedValue)) {
+                  // Intentar parsear la fecha y reformatearla
+                  const date = new Date(processedValue);
+                  if (!isNaN(date.getTime())) {
+                    // Formatear como YYYY-MM-DD
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    processedValue = `${year}-${month}-${day}`;
+                  } else {
+                    // Si no se puede parsear, usar la fecha actual
+                    const today = new Date();
+                    const year = today.getFullYear();
+                    const month = String(today.getMonth() + 1).padStart(2, '0');
+                    const day = String(today.getDate()).padStart(2, '0');
+                    processedValue = `${year}-${month}-${day}`;
+                  }
+                }
+              }
+              
+              fieldObj.value = processedValue;
+            }
+          }
+
+          return fieldObj;
         });
 
       const updateRequest: UpdateSigningRequestRequest = {
         fields: fields,
       };
 
+      // Log para depuración
+      console.log('Actualizando campos:', {
+        workspaceId: selectedWorkspaceId,
+        signingRequestId: firmaSigningRequestId,
+        fieldsCount: fields.length,
+        request: updateRequest,
+      });
+
       await firmaApi.updateFirmaSigningRequest(selectedWorkspaceId, firmaSigningRequestId, updateRequest);
 
       setSuccessMessage('Campos actualizados exitosamente');
       setError(null);
     } catch (err: any) {
-      setError(`Error al actualizar campos: ${err.message}`);
+      console.error('Error al actualizar campos:', err);
+      const errorMessage = err.message || 'Error desconocido al actualizar campos';
+      setError(`Error al actualizar campos: ${errorMessage}`);
     } finally {
       setUpdatingRequest(false);
     }
@@ -384,6 +431,7 @@ export default function RequestSignature() {
 
       setSuccessMessage('Signing request enviada exitosamente');
       setError(null);
+      setRequestSent(true);
       
       // Actualizar el estado de la signing request
       if (createdSigningRequest) {
@@ -399,6 +447,25 @@ export default function RequestSignature() {
     }
   };
 
+  const handleNewRequest = () => {
+    // Limpiar todos los estados para un nuevo envío
+    setActiveStep(0);
+    setIdentifier('');
+    setIdentifierValidated(false);
+    setSelectedWorkspaceId('');
+    setSelectedTemplateId('');
+    setRequestName('');
+    setRecipients([]);
+    setTemplateFields([]);
+    setFieldValues({});
+    setCreatedSigningRequest(null);
+    setEditorJwtToken(null);
+    setFirmaSigningRequestId('');
+    setRequestSent(false);
+    setError(null);
+    setSuccessMessage(null);
+  };
+
   const handleContinueToStep2 = () => {
     if (!selectedWorkspaceId || !selectedTemplateId) {
       setError('Por favor selecciona un workspace y una plantilla');
@@ -408,6 +475,10 @@ export default function RequestSignature() {
   };
 
   const handleStepChange = (step: number) => {
+    // Bloquear cambios si la solicitud ya fue enviada
+    if (requestSent) {
+      return;
+    }
     // Permitir retroceder siempre, avanzar solo si se cumplen las condiciones
     if (step < activeStep) {
       setActiveStep(step);
@@ -443,12 +514,12 @@ export default function RequestSignature() {
 
       {/* Stepper */}
       <Paper sx={{ p: 3, mb: 3 }}>
-        <Stepper activeStep={activeStep} alternativeLabel>
+        <Stepper activeStep={requestSent ? steps.length : activeStep} alternativeLabel>
           {steps.map((label, index) => (
-            <Step key={label}>
+            <Step key={label} completed={requestSent ? index < steps.length : false}>
               <StepLabel
                 onClick={() => handleStepChange(index)}
-                sx={{ cursor: 'pointer' }}
+                sx={{ cursor: requestSent ? 'default' : 'pointer' }}
               >
                 {label}
               </StepLabel>
@@ -460,7 +531,12 @@ export default function RequestSignature() {
       {/* Accordion con los pasos */}
       <Box>
         {/* Paso 1: Identificador */}
-        <Accordion expanded={activeStep === 0} onChange={() => handleStepChange(0)} sx={{ mb: 2 }}>
+        <Accordion 
+          expanded={activeStep === 0 && !requestSent} 
+          onChange={() => handleStepChange(0)} 
+          disabled={requestSent}
+          sx={{ mb: 2 }}
+        >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
               <Typography variant="h6">1. Identificador</Typography>
@@ -478,14 +554,14 @@ export default function RequestSignature() {
                   setIdentifierValidated(false);
                 }}
                 placeholder="Ingresa el código identificador"
-                disabled={validatingIdentifier}
+                disabled={validatingIdentifier || requestSent}
                 error={identifierValidated === false && identifier.trim() !== '' && !validatingIdentifier}
                 helperText={identifierValidated ? 'Identificador disponible' : identifier.trim() !== '' && !validatingIdentifier ? 'Debe validar el identificador' : ''}
               />
               <Button
                 variant="contained"
                 onClick={handleValidateIdentifier}
-                disabled={validatingIdentifier || !identifier.trim()}
+                disabled={validatingIdentifier || !identifier.trim() || requestSent}
                 sx={{ mt: 1 }}
               >
                 {validatingIdentifier ? (
@@ -502,7 +578,12 @@ export default function RequestSignature() {
         </Accordion>
 
         {/* Paso 2: Workspace y Template */}
-        <Accordion expanded={activeStep === 1} onChange={() => handleStepChange(1)} sx={{ mb: 2 }}>
+        <Accordion 
+          expanded={activeStep === 1 && !requestSent} 
+          onChange={() => handleStepChange(1)} 
+          disabled={requestSent}
+          sx={{ mb: 2 }}
+        >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
               <Typography variant="h6">2. Workspace y Template</Typography>
@@ -510,7 +591,7 @@ export default function RequestSignature() {
             </Box>
           </AccordionSummary>
           <AccordionDetails>
-            <FormControl fullWidth sx={{ mb: 2 }} disabled={loadingWorkspaces}>
+            <FormControl fullWidth sx={{ mb: 2 }} disabled={loadingWorkspaces || requestSent}>
               <InputLabel>Workspace</InputLabel>
               <Select
                 value={selectedWorkspaceId}
@@ -531,7 +612,7 @@ export default function RequestSignature() {
               </Select>
             </FormControl>
 
-            <FormControl fullWidth sx={{ mb: 2 }} disabled={loadingTemplates || !selectedWorkspaceId}>
+            <FormControl fullWidth sx={{ mb: 2 }} disabled={loadingTemplates || !selectedWorkspaceId || requestSent}>
               <InputLabel>Template</InputLabel>
               <Select
                 value={selectedTemplateId}
@@ -555,7 +636,7 @@ export default function RequestSignature() {
               variant="contained"
               fullWidth
               onClick={handleContinueToStep2}
-              disabled={!selectedWorkspaceId || !selectedTemplateId}
+              disabled={!selectedWorkspaceId || !selectedTemplateId || requestSent}
             >
               Continuar
             </Button>
@@ -563,7 +644,12 @@ export default function RequestSignature() {
         </Accordion>
 
         {/* Paso 3: Recipientes */}
-        <Accordion expanded={activeStep === 2} onChange={() => handleStepChange(2)} sx={{ mb: 2 }}>
+        <Accordion 
+          expanded={activeStep === 2 && !requestSent} 
+          onChange={() => handleStepChange(2)} 
+          disabled={requestSent}
+          sx={{ mb: 2 }}
+        >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
               <Typography variant="h6">3. Agregar Recipientes</Typography>
@@ -577,6 +663,7 @@ export default function RequestSignature() {
               value={requestName}
               onChange={(e) => setRequestName(e.target.value)}
               placeholder="Ej: NDA - Acme Corp"
+              disabled={requestSent}
               sx={{ mb: 2 }}
             />
 
@@ -591,6 +678,7 @@ export default function RequestSignature() {
                 size="small"
                 startIcon={<AddIcon />}
                 onClick={handleAddRecipient}
+                disabled={requestSent}
               >
                 Agregar Recipient
               </Button>
@@ -605,6 +693,7 @@ export default function RequestSignature() {
                     size="small"
                     onClick={() => handleRemoveRecipient(index)}
                     color="error"
+                    disabled={requestSent}
                   >
                     <DeleteIcon />
                   </IconButton>
@@ -618,6 +707,7 @@ export default function RequestSignature() {
                       value={recipient.first_name}
                       onChange={(e) => handleRecipientChange(index, 'first_name', e.target.value)}
                       size="small"
+                      disabled={requestSent}
                     />
                   </Grid>
                   <Grid item xs={6}>
@@ -627,6 +717,7 @@ export default function RequestSignature() {
                       value={recipient.last_name}
                       onChange={(e) => handleRecipientChange(index, 'last_name', e.target.value)}
                       size="small"
+                      disabled={requestSent}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -637,10 +728,11 @@ export default function RequestSignature() {
                       value={recipient.email}
                       onChange={(e) => handleRecipientChange(index, 'email', e.target.value)}
                       size="small"
+                      disabled={requestSent}
                     />
                   </Grid>
                   <Grid item xs={8}>
-                    <FormControl fullWidth size="small">
+                    <FormControl fullWidth size="small" disabled={requestSent}>
                       <InputLabel>Designation</InputLabel>
                       <Select
                         value={recipient.designation}
@@ -661,6 +753,7 @@ export default function RequestSignature() {
                       value={recipient.order || index + 1}
                       onChange={(e) => handleRecipientChange(index, 'order', parseInt(e.target.value) || index + 1)}
                       size="small"
+                      disabled={requestSent}
                     />
                   </Grid>
                 </Grid>
@@ -671,14 +764,14 @@ export default function RequestSignature() {
             {recipients.length === 0 && (
               <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
                 No hay recipients agregados. Haz clic en "Agregar Recipient" para agregar uno.
-              </Typography>
-            )}
+                </Typography>
+              )}
 
             <Button
               variant="contained"
               fullWidth
               onClick={handleCreateSigningRequest}
-              disabled={!selectedWorkspaceId || !selectedTemplateId || !requestName.trim() || recipients.length === 0 || creatingRequest}
+              disabled={!selectedWorkspaceId || !selectedTemplateId || !requestName.trim() || recipients.length === 0 || creatingRequest || requestSent}
               sx={{ mt: 2 }}
             >
               {creatingRequest ? (
@@ -695,10 +788,16 @@ export default function RequestSignature() {
 
         {/* Paso 4: Actualizar Campos */}
         {createdSigningRequest && (
-          <Accordion expanded={activeStep === 3} onChange={() => handleStepChange(3)} sx={{ mb: 2 }}>
+          <Accordion 
+            expanded={activeStep === 3 && !requestSent} 
+            onChange={() => handleStepChange(3)} 
+            disabled={requestSent}
+            sx={{ mb: 2 }}
+          >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
                 <Typography variant="h6">4. Actualizar los Campos</Typography>
+                {requestSent && <CheckCircleIcon color="success" />}
               </Box>
             </AccordionSummary>
             <AccordionDetails>
@@ -711,7 +810,7 @@ export default function RequestSignature() {
                 <Box sx={{ mb: 1 }}>
                   <Typography component="span" variant="body1">
                     <strong>Nombre:</strong> {createdSigningRequest.name}
-                  </Typography>
+                </Typography>
                 </Box>
                 <Box sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography component="span" variant="body1">
@@ -762,7 +861,7 @@ export default function RequestSignature() {
                                   <Select
                                     value={currentValue}
                                     onChange={(e) => handleFieldValueChange(fieldId, e.target.value)}
-                                    disabled={isReadOnly}
+                                    disabled={isReadOnly || requestSent}
                                   >
                                     {field.dropdownOptions.map((option: string, optIndex: number) => (
                                       <MenuItem key={optIndex} value={option}>
@@ -778,7 +877,7 @@ export default function RequestSignature() {
                                   size="small"
                                   value={currentValue}
                                   onChange={(e) => handleFieldValueChange(fieldId, e.target.value)}
-                                  disabled={isReadOnly}
+                                  disabled={isReadOnly || requestSent}
                                   InputLabelProps={{ shrink: true }}
                                 />
                               ) : fieldType === 'signature' || fieldType === 'initial' ? (
@@ -795,7 +894,7 @@ export default function RequestSignature() {
                                   size="small"
                                   value={currentValue}
                                   onChange={(e) => handleFieldValueChange(fieldId, e.target.value)}
-                                  disabled={isReadOnly}
+                                  disabled={isReadOnly || requestSent}
                                   placeholder={`Ingrese valor para ${fieldName}`}
                                   multiline={fieldType === 'textarea' || fieldType === 'text'}
                                   rows={fieldType === 'textarea' ? 3 : 1}
@@ -817,7 +916,7 @@ export default function RequestSignature() {
                 signingRequestId={firmaSigningRequestId}
                 jwt={editorJwtToken}
                 theme="light"
-                readOnly={false}
+                readOnly={requestSent}
                     height="400px"
                 width="100%"
                 onSave={(data) => {
@@ -838,11 +937,11 @@ export default function RequestSignature() {
               )}
 
               {/* Botón para actualizar campos */}
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={handleUpdateFields}
-                disabled={updatingRequest || sendingRequest}
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={handleUpdateFields}
+                  disabled={updatingRequest || sendingRequest || requestSent}
                 fullWidth
                 sx={{ mt: 2 }}
               >
@@ -860,7 +959,7 @@ export default function RequestSignature() {
         )}
 
         {/* Botón de enviar solicitud fuera del accordion */}
-        {createdSigningRequest && (
+        {createdSigningRequest && !requestSent && (
           <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
             <Button
               variant="contained"
@@ -878,6 +977,21 @@ export default function RequestSignature() {
               ) : (
                 'Enviar Solicitud'
               )}
+            </Button>
+          </Box>
+        )}
+
+        {/* Botón para enviar otra solicitud cuando se envía exitosamente */}
+        {requestSent && (
+          <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+            <Button
+              variant="contained"
+              color="success"
+              size="large"
+              onClick={handleNewRequest}
+              sx={{ minWidth: 200 }}
+            >
+              Enviar Otra Solicitud
             </Button>
           </Box>
         )}

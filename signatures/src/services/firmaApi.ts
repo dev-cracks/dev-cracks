@@ -412,8 +412,14 @@ class FirmaApiService {
     );
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Error al actualizar signing request: ${response.statusText} - ${errorText}`);
+      let errorText = '';
+      try {
+        const errorJson = await response.json();
+        errorText = typeof errorJson === 'string' ? errorJson : JSON.stringify(errorJson);
+      } catch {
+        errorText = await response.text();
+      }
+      throw new Error(`Error al actualizar signing request (${response.status}): ${errorText}`);
     }
 
     return await response.json();
