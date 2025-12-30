@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Typography,
@@ -16,6 +17,7 @@ import { useAuth } from '../hooks/useAuth';
 import TemplateEditor from '../components/TemplateEditor';
 
 export default function Templates() {
+  const { t } = useTranslation();
   const { isAuthenticated, getAccessToken } = useAuth();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -44,7 +46,7 @@ export default function Templates() {
       if (selectedTemplate && selectedTemplate.workspaceId) {
         loadTemplateEditor(selectedTemplateId, selectedTemplate.workspaceId);
       } else {
-        setError('La plantilla seleccionada no tiene un workspace asociado');
+        setError(t('templates.templateNoWorkspace'));
         setEditorJwtToken(null);
       }
     } else {
@@ -59,7 +61,7 @@ export default function Templates() {
       const data = await firmaApi.listWorkspaces();
       setWorkspaces(data);
     } catch (err: any) {
-      setError(`Error al cargar workspaces: ${err.message}`);
+      setError(`${t('templates.loadWorkspacesError')}: ${err.message}`);
       setWorkspaces([]);
     } finally {
       setLoadingWorkspaces(false);
@@ -73,7 +75,7 @@ export default function Templates() {
       const data = await firmaApi.listAllTemplates();
       setTemplates(data);
     } catch (err: any) {
-      setError(`Error al cargar plantillas: ${err.message}`);
+      setError(`${t('templates.loadTemplatesError')}: ${err.message}`);
       setTemplates([]);
     } finally {
       setLoadingTemplates(false);
@@ -88,7 +90,7 @@ export default function Templates() {
       const jwt = await firmaApi.generateTemplateJwt(templateId, workspaceId);
       setEditorJwtToken(jwt.jwt);
     } catch (err: any) {
-      setError(`Error al generar token para el editor: ${err.message}`);
+      setError(`${t('templates.generateTokenError')}: ${err.message}`);
       setEditorJwtToken(null);
     } finally {
       setLoadingEditorJwt(false);
@@ -98,10 +100,10 @@ export default function Templates() {
   return (
     <Box>
       <Typography variant="h4" component="h1" gutterBottom>
-        Editor de Plantillas
+        {t('templates.title')}
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Selecciona una plantilla para editarla
+        {t('templates.subtitle')}
       </Typography>
 
       <Grid container spacing={3}>
@@ -109,7 +111,7 @@ export default function Templates() {
         <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Configuración
+              {t('templates.configuration')}
             </Typography>
 
             {error && (
@@ -123,10 +125,10 @@ export default function Templates() {
               sx={{ mb: 2 }}
               disabled={loadingTemplates}
             >
-              <InputLabel>Plantilla</InputLabel>
+              <InputLabel>{t('templates.template')}</InputLabel>
               <Select
                 value={selectedTemplateId}
-                label="Plantilla"
+                label={t('templates.template')}
                 onChange={(e) => {
                   setSelectedTemplateId(e.target.value);
                   setEditorJwtToken(null);
@@ -145,7 +147,7 @@ export default function Templates() {
               )}
               {!loadingTemplates && templates.length === 0 && (
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  No hay plantillas disponibles
+                  {t('templates.noTemplates')}
                 </Typography>
               )}
             </FormControl>
@@ -156,7 +158,7 @@ export default function Templates() {
         <Grid item xs={12} md={8}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Editor de Plantilla
+              {t('templates.editor')}
             </Typography>
 
             {!selectedTemplateId ? (
@@ -172,7 +174,7 @@ export default function Templates() {
                 }}
               >
                 <Typography variant="body2" color="text.secondary">
-                  Selecciona una plantilla para editar
+                  {t('templates.selectTemplate')}
                 </Typography>
               </Box>
             ) : !editorJwtToken ? (
@@ -191,12 +193,12 @@ export default function Templates() {
                   <>
                     <CircularProgress />
                     <Typography variant="body2" color="text.secondary" sx={{ ml: 2 }}>
-                      Cargando editor...
+                      {t('templates.loadingEditor')}
                     </Typography>
                   </>
                 ) : (
                   <Typography variant="body2" color="text.secondary">
-                    Error al cargar el editor
+                    {t('templates.editorError')}
                   </Typography>
                 )}
               </Box>
@@ -213,7 +215,7 @@ export default function Templates() {
                 }}
                 onError={(error) => {
                   console.error('Editor error:', error);
-                  setError(`Error en el editor: ${error?.message || 'Error desconocido'}`);
+                  setError(`${t('templates.editorError')}: ${error?.message || t('requestSignature.step4.editorError')}`);
                 }}
                 onLoad={(template) => {
                   console.log('Editor loaded successfully:', template);

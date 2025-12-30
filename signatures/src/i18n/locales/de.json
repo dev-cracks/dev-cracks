@@ -4,7 +4,194 @@
     "subtitle": "Bitte überprüfen und unterzeichnen Sie das folgende Dokument",
     "loading": "Dokument wird geladen...",
     "error": "Fehler beim Laden des Dokuments",
-    "complete": "Dokument erfolgreich unterzeichnet"
+    "complete": "Dokument erfolgreich unterzeichnet",
+    "needToken": "Um auf die Unterschriftsseite zuzugreifen, benötigen Sie ein gültiges JWT-Token.",
+    "urlFormat": "Erwartetes URL-Format:",
+    "urlFormat1": "/signatures/sign/[token-jwt]",
+    "urlFormat2": "/signatures/sign?token=[token-jwt]",
+    "linkInstructions": "Wenn Sie einen Link per E-Mail erhalten haben, stellen Sie sicher, dass Sie den vollständigen Link verwenden, der das Token enthält. Wenn Sie ein neues Token benötigen, wenden Sie sich an den Absender des Dokuments."
+  },
+  "layout": {
+    "title": "Digitale Signatur",
+    "dashboard": "Dashboard",
+    "requestSignature": "Signatur anfordern",
+    "templates": "Vorlagen",
+    "documents": "Dokumente",
+    "transactions": "Transaktionen",
+    "reports": "Berichte",
+    "incidents": "Vorfälle"
+  },
+  "topAppBar": {
+    "search": "Suchen…",
+    "searchAria": "suchen",
+    "messages": "Nachrichten",
+    "notifications": "Benachrichtigungen",
+    "profile": "Profil",
+    "myAccount": "Mein Konto"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Aktivitätszusammenfassung und Statistiken des digitalen Signatursystems",
+    "totalDocuments": "Gesamtdokumente",
+    "signedDocuments": "Unterzeichnete Dokumente",
+    "pending": "Ausstehend",
+    "activeRequests": "Aktive Anfragen",
+    "trends": "Unterschriftstrends",
+    "recentDocuments": "Aktuelle Dokumente",
+    "document": "Dokument",
+    "signer": "Unterzeichner",
+    "date": "Datum",
+    "status": "Status",
+    "noRecentDocuments": "Keine aktuellen Dokumente",
+    "signed": "Unterzeichnet",
+    "pendingStatus": "Ausstehend",
+    "rejected": "Abgelehnt",
+    "changeFromLastMonth": "vom letzten Monat"
+  },
+  "requestSignature": {
+    "title": "Dokumentsignatur anfordern",
+    "subtitle": "Erstellen und senden Sie Signaturanfragen an Empfänger",
+    "steps": {
+      "identifier": "Kennung",
+      "workspaceTemplate": "Arbeitsbereich und Vorlage",
+      "recipients": "Empfänger",
+      "updateFields": "Felder aktualisieren"
+    },
+    "step1": {
+      "title": "1. Kennung",
+      "label": "Kennung",
+      "placeholder": "Eindeutige Kennung eingeben",
+      "validate": "Validieren",
+      "validating": "Wird validiert...",
+      "available": "Kennung verfügbar",
+      "mustValidate": "Kennung muss validiert werden",
+      "enterIdentifier": "Bitte geben Sie eine Kennung ein",
+      "identifierExists": "Diese Kennung existiert bereits für Ihren Mandanten. Bitte verwenden Sie eine andere.",
+      "validateError": "Fehler beim Validieren der Kennung"
+    },
+    "step2": {
+      "title": "2. Arbeitsbereich und Vorlage",
+      "workspace": "Arbeitsbereich",
+      "template": "Vorlage",
+      "continue": "Weiter",
+      "selectWorkspaceTemplate": "Bitte wählen Sie einen Arbeitsbereich und eine Vorlage aus"
+    },
+    "step3": {
+      "title": "3. Empfänger hinzufügen",
+      "recipients": "Empfänger",
+      "addRecipient": "Empfänger hinzufügen",
+      "recipient": "Empfänger",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "email": "E-Mail",
+      "designation": "Bezeichnung",
+      "order": "Reihenfolge",
+      "designationSigner": "Unterzeichner",
+      "designationCC": "CC",
+      "designationApprover": "Genehmiger",
+      "noRecipients": "Keine Empfänger hinzugefügt. Klicken Sie auf \"Empfänger hinzufügen\", um einen hinzuzufügen.",
+      "createRequest": "Anfrage erstellen",
+      "creating": "Wird erstellt...",
+      "allRecipientsRequired": "Alle Empfänger müssen first_name, last_name und email haben",
+      "addAtLeastOne": "Bitte fügen Sie mindestens einen Empfänger hinzu",
+      "validateIdentifierFirst": "Bitte validieren Sie zuerst die Kennung"
+    },
+    "step4": {
+      "title": "4. Felder aktualisieren",
+      "id": "ID",
+      "name": "Name",
+      "status": "Status",
+      "document": "Dokument",
+      "viewDocument": "Dokument anzeigen",
+      "templateFields": "Vorlagenfelder - Werte bearbeiten:",
+      "fieldName": "Feld",
+      "page": "Seite",
+      "required": "erforderlich",
+      "signatureRequired": "Dieses Feld wird beim Unterzeichnen ausgefüllt",
+      "enterValue": "Wert eingeben für",
+      "updateFields": "Felder aktualisieren",
+      "updating": "Wird aktualisiert...",
+      "sendRequest": "Anfrage senden",
+      "sending": "Wird gesendet...",
+      "newRequest": "Neue Anfrage",
+      "fieldsUpdated": "Felder erfolgreich aktualisiert",
+      "requestCreated": "Signaturanfrage erfolgreich erstellt",
+      "requestSent": "Signaturanfrage erfolgreich gesendet",
+      "updateError": "Fehler beim Aktualisieren der Felder",
+      "createError": "Fehler beim Erstellen der Signaturanfrage",
+      "sendError": "Fehler beim Senden der Signaturanfrage",
+      "noRequestCreated": "Keine Signaturanfrage erstellt",
+      "editorError": "Fehler im Editor"
+    },
+    "errors": {
+      "loadWorkspaces": "Fehler beim Laden der Arbeitsbereiche",
+      "loadTemplates": "Fehler beim Laden der Vorlagen",
+      "loadTemplateFields": "Fehler beim Laden der Vorlagenfelder",
+      "generateJwt": "JWT für Editor konnte nicht generiert werden"
+    }
+  },
+  "templates": {
+    "title": "Vorlageneditor",
+    "subtitle": "Wählen Sie eine Vorlage zum Bearbeiten aus",
+    "configuration": "Konfiguration",
+    "template": "Vorlage",
+    "editor": "Vorlageneditor",
+    "selectTemplate": "Wählen Sie eine Vorlage zum Bearbeiten aus",
+    "loadingEditor": "Editor wird geladen...",
+    "editorError": "Fehler beim Laden des Editors",
+    "noTemplates": "Keine Vorlagen verfügbar",
+    "templateNoWorkspace": "Die ausgewählte Vorlage hat keinen zugeordneten Arbeitsbereich",
+    "loadWorkspacesError": "Fehler beim Laden der Arbeitsbereiche",
+    "loadTemplatesError": "Fehler beim Laden der Vorlagen",
+    "generateTokenError": "Fehler beim Generieren des Tokens für den Editor"
+  },
+  "documents": {
+    "title": "Dokumente",
+    "subtitle": "Liste der zur Signatur angeforderten Dokumente - In Kürze"
+  },
+  "transactions": {
+    "title": "Transaktionen",
+    "subtitle": "Alle Transaktionen von Signaturanfragen anzeigen und verwalten",
+    "search": "Suchen",
+    "status": "Status",
+    "all": "Alle",
+    "draft": "Entwurf",
+    "sent": "Gesendet",
+    "completed": "Abgeschlossen",
+    "declined": "Abgelehnt",
+    "expired": "Abgelaufen",
+    "viewed": "Angesehen",
+    "signed": "Unterzeichnet",
+    "from": "Von",
+    "to": "Bis",
+    "exportExcel": "Excel exportieren",
+    "id": "ID",
+    "firmaSigningRequestId": "Firma Signing Request ID",
+    "eventType": "Ereignistyp",
+    "date": "Datum",
+    "actions": "Aktionen",
+    "noTransactions": "Keine Transaktionen verfügbar",
+    "loadError": "Fehler beim Laden der Transaktionen",
+    "exportError": "Fehler beim Exportieren",
+    "csvHeaders": {
+      "id": "ID",
+      "firmaSigningRequestId": "Firma Signing Request ID",
+      "status": "Status",
+      "eventType": "Ereignistyp",
+      "date": "Datum",
+      "changedFields": "Geänderte Felder",
+      "metadata": "Metadaten"
+    }
+  },
+  "reports": {
+    "title": "Berichte",
+    "subtitle": "Berichte und Statistiken - In Kürze"
+  },
+  "incidents": {
+    "title": "Vorfälle",
+    "subtitle": "Vorfallverwaltung - In Kürze"
+  },
+  "language": {
+    "label": "Sprache"
   }
 }
-

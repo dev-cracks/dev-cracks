@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
@@ -29,22 +30,23 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-const menuItems = [
-  { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-  { text: 'Solicitar Firma', icon: <DescriptionIcon />, path: '/request-signature' },
-  { text: 'Plantillas', icon: <ArticleIcon />, path: '/templates' },
-  { text: 'Documentos', icon: <AssignmentIcon />, path: '/documents' },
-  { text: 'Transacciones', icon: <HistoryIcon />, path: '/transactions' },
-  { text: 'Reportes', icon: <AssessmentIcon />, path: '/reports' },
-  { text: 'Incidencias', icon: <BugReportIcon />, path: '/incidents' },
-];
-
 export default function Layout({ children }: LayoutProps) {
+  const { t } = useTranslation();
   const [drawerOpen, setDrawerOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  const menuItems = [
+    { text: t('layout.dashboard'), icon: <DashboardIcon />, path: '/dashboard' },
+    { text: t('layout.requestSignature'), icon: <DescriptionIcon />, path: '/request-signature' },
+    { text: t('layout.templates'), icon: <ArticleIcon />, path: '/templates' },
+    { text: t('layout.documents'), icon: <AssignmentIcon />, path: '/documents' },
+    { text: t('layout.transactions'), icon: <HistoryIcon />, path: '/transactions' },
+    { text: t('layout.reports'), icon: <AssessmentIcon />, path: '/reports' },
+    { text: t('layout.incidents'), icon: <BugReportIcon />, path: '/incidents' },
+  ];
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -68,7 +70,7 @@ export default function Layout({ children }: LayoutProps) {
         }}
       >
         <Typography variant="h6" noWrap component="div" color="primary">
-          Firma Digital
+          {t('layout.title')}
         </Typography>
       </Toolbar>
       <Divider />

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { styled, alpha } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -63,6 +64,7 @@ interface TopAppBarProps {
 }
 
 export default function TopAppBar({ onMenuClick, drawerWidth = 240 }: TopAppBarProps) {
+  const { t } = useTranslation();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
     React.useState<null | HTMLElement>(null);
@@ -104,8 +106,8 @@ export default function TopAppBar({ onMenuClick, drawerWidth = 240 }: TopAppBarP
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Perfil</MenuItem>
-      <MenuItem onClick={handleMenuClose}>Mi cuenta</MenuItem>
+      <MenuItem onClick={handleMenuClose}>{t('topAppBar.profile')}</MenuItem>
+      <MenuItem onClick={handleMenuClose}>{t('topAppBar.myAccount')}</MenuItem>
     </Menu>
   );
 
@@ -132,7 +134,7 @@ export default function TopAppBar({ onMenuClick, drawerWidth = 240 }: TopAppBarP
             <MailIcon />
           </Badge>
         </IconButton>
-        <p>Mensajes</p>
+        <p>{t('topAppBar.messages')}</p>
       </MenuItem>
       <MenuItem>
         <IconButton
@@ -144,7 +146,7 @@ export default function TopAppBar({ onMenuClick, drawerWidth = 240 }: TopAppBarP
             <NotificationsIcon />
           </Badge>
         </IconButton>
-        <p>Notificaciones</p>
+        <p>{t('topAppBar.notifications')}</p>
       </MenuItem>
       <MenuItem onClick={handleProfileMenuOpen}>
         <IconButton
@@ -156,7 +158,7 @@ export default function TopAppBar({ onMenuClick, drawerWidth = 240 }: TopAppBarP
         >
           <AccountCircle />
         </IconButton>
-        <p>Perfil</p>
+        <p>{t('topAppBar.profile')}</p>
       </MenuItem>
     </Menu>
   );
@@ -187,8 +189,8 @@ export default function TopAppBar({ onMenuClick, drawerWidth = 240 }: TopAppBarP
               <SearchIcon />
             </SearchIconWrapper>
             <StyledInputBase
-              placeholder="Buscar…"
-              inputProps={{ 'aria-label': 'buscar' }}
+              placeholder={t('topAppBar.search')}
+              inputProps={{ 'aria-label': t('topAppBar.searchAria') }}
             />
           </Search>
           <Box sx={{ flexGrow: 1 }} />

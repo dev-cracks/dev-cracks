@@ -4,7 +4,194 @@
     "subtitle": "请查看并签署以下文档",
     "loading": "正在加载文档...",
     "error": "加载文档时出错",
-    "complete": "文档已成功签署"
+    "complete": "文档已成功签署",
+    "needToken": "要访问签名页面，您需要一个有效的 JWT 令牌。",
+    "urlFormat": "预期的 URL 格式：",
+    "urlFormat1": "/signatures/sign/[token-jwt]",
+    "urlFormat2": "/signatures/sign?token=[token-jwt]",
+    "linkInstructions": "如果您通过电子邮件收到了链接，请确保使用包含令牌的完整链接。如果您需要新令牌，请联系文档发送者。"
+  },
+  "layout": {
+    "title": "数字签名",
+    "dashboard": "仪表板",
+    "requestSignature": "请求签名",
+    "templates": "模板",
+    "documents": "文档",
+    "transactions": "交易",
+    "reports": "报告",
+    "incidents": "事件"
+  },
+  "topAppBar": {
+    "search": "搜索…",
+    "searchAria": "搜索",
+    "messages": "消息",
+    "notifications": "通知",
+    "profile": "个人资料",
+    "myAccount": "我的账户"
+  },
+  "dashboard": {
+    "title": "仪表板",
+    "subtitle": "数字签名系统的活动摘要和统计信息",
+    "totalDocuments": "文档总数",
+    "signedDocuments": "已签名文档",
+    "pending": "待处理",
+    "activeRequests": "活动请求",
+    "trends": "签名趋势",
+    "recentDocuments": "最近文档",
+    "document": "文档",
+    "signer": "签署人",
+    "date": "日期",
+    "status": "状态",
+    "noRecentDocuments": "没有最近的文档",
+    "signed": "已签名",
+    "pendingStatus": "待处理",
+    "rejected": "已拒绝",
+    "changeFromLastMonth": "与上个月相比"
+  },
+  "requestSignature": {
+    "title": "请求文档签名",
+    "subtitle": "创建并向收件人发送签名请求",
+    "steps": {
+      "identifier": "标识符",
+      "workspaceTemplate": "工作区和模板",
+      "recipients": "收件人",
+      "updateFields": "更新字段"
+    },
+    "step1": {
+      "title": "1. 标识符",
+      "label": "标识符",
+      "placeholder": "输入唯一标识符",
+      "validate": "验证",
+      "validating": "正在验证...",
+      "available": "标识符可用",
+      "mustValidate": "必须验证标识符",
+      "enterIdentifier": "请输入标识符",
+      "identifierExists": "此标识符已存在于您的租户中。请使用另一个。",
+      "validateError": "验证标识符时出错"
+    },
+    "step2": {
+      "title": "2. 工作区和模板",
+      "workspace": "工作区",
+      "template": "模板",
+      "continue": "继续",
+      "selectWorkspaceTemplate": "请选择一个工作区和一个模板"
+    },
+    "step3": {
+      "title": "3. 添加收件人",
+      "recipients": "收件人",
+      "addRecipient": "添加收件人",
+      "recipient": "收件人",
+      "firstName": "名字",
+      "lastName": "姓氏",
+      "email": "电子邮件",
+      "designation": "指定",
+      "order": "顺序",
+      "designationSigner": "签署人",
+      "designationCC": "抄送",
+      "designationApprover": "审批人",
+      "noRecipients": "未添加收件人。点击\"添加收件人\"以添加一个。",
+      "createRequest": "创建请求",
+      "creating": "正在创建...",
+      "allRecipientsRequired": "所有收件人必须具有 first_name、last_name 和 email",
+      "addAtLeastOne": "请至少添加一个收件人",
+      "validateIdentifierFirst": "请先验证标识符"
+    },
+    "step4": {
+      "title": "4. 更新字段",
+      "id": "ID",
+      "name": "名称",
+      "status": "状态",
+      "document": "文档",
+      "viewDocument": "查看文档",
+      "templateFields": "模板字段 - 编辑值：",
+      "fieldName": "字段",
+      "page": "页面",
+      "required": "必需",
+      "signatureRequired": "此字段将在签名时完成",
+      "enterValue": "输入值",
+      "updateFields": "更新字段",
+      "updating": "正在更新...",
+      "sendRequest": "发送请求",
+      "sending": "正在发送...",
+      "newRequest": "新请求",
+      "fieldsUpdated": "字段已成功更新",
+      "requestCreated": "签名请求已成功创建",
+      "requestSent": "签名请求已成功发送",
+      "updateError": "更新字段时出错",
+      "createError": "创建签名请求时出错",
+      "sendError": "发送签名请求时出错",
+      "noRequestCreated": "未创建签名请求",
+      "editorError": "编辑器错误"
+    },
+    "errors": {
+      "loadWorkspaces": "加载工作区时出错",
+      "loadTemplates": "加载模板时出错",
+      "loadTemplateFields": "加载模板字段时出错",
+      "generateJwt": "无法为编辑器生成 JWT"
+    }
+  },
+  "templates": {
+    "title": "模板编辑器",
+    "subtitle": "选择一个模板进行编辑",
+    "configuration": "配置",
+    "template": "模板",
+    "editor": "模板编辑器",
+    "selectTemplate": "选择一个模板进行编辑",
+    "loadingEditor": "正在加载编辑器...",
+    "editorError": "加载编辑器时出错",
+    "noTemplates": "没有可用的模板",
+    "templateNoWorkspace": "所选模板没有关联的工作区",
+    "loadWorkspacesError": "加载工作区时出错",
+    "loadTemplatesError": "加载模板时出错",
+    "generateTokenError": "为编辑器生成令牌时出错"
+  },
+  "documents": {
+    "title": "文档",
+    "subtitle": "请求签名的文档列表 - 即将推出"
+  },
+  "transactions": {
+    "title": "交易",
+    "subtitle": "查看和管理所有签名请求交易",
+    "search": "搜索",
+    "status": "状态",
+    "all": "全部",
+    "draft": "草稿",
+    "sent": "已发送",
+    "completed": "已完成",
+    "declined": "已拒绝",
+    "expired": "已过期",
+    "viewed": "已查看",
+    "signed": "已签名",
+    "from": "从",
+    "to": "到",
+    "exportExcel": "导出 Excel",
+    "id": "ID",
+    "firmaSigningRequestId": "Firma Signing Request ID",
+    "eventType": "事件类型",
+    "date": "日期",
+    "actions": "操作",
+    "noTransactions": "没有可用的交易",
+    "loadError": "加载交易时出错",
+    "exportError": "导出时出错",
+    "csvHeaders": {
+      "id": "ID",
+      "firmaSigningRequestId": "Firma Signing Request ID",
+      "status": "状态",
+      "eventType": "事件类型",
+      "date": "日期",
+      "changedFields": "已更改的字段",
+      "metadata": "元数据"
+    }
+  },
+  "reports": {
+    "title": "报告",
+    "subtitle": "报告和统计 - 即将推出"
+  },
+  "incidents": {
+    "title": "事件",
+    "subtitle": "事件管理 - 即将推出"
+  },
+  "language": {
+    "label": "语言"
   }
 }
-

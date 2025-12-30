@@ -4,7 +4,194 @@
     "subtitle": "Veuillez examiner et signer le document ci-dessous",
     "loading": "Chargement du document...",
     "error": "Erreur lors du chargement du document",
-    "complete": "Document signé avec succès"
+    "complete": "Document signé avec succès",
+    "needToken": "Pour accéder à la page de signature, vous avez besoin d'un jeton JWT valide.",
+    "urlFormat": "Format d'URL attendu :",
+    "urlFormat1": "/signatures/sign/[token-jwt]",
+    "urlFormat2": "/signatures/sign?token=[token-jwt]",
+    "linkInstructions": "Si vous avez reçu un lien par e-mail, assurez-vous d'utiliser le lien complet qui inclut le jeton. Si vous avez besoin d'un nouveau jeton, contactez l'expéditeur du document."
+  },
+  "layout": {
+    "title": "Signature numérique",
+    "dashboard": "Tableau de bord",
+    "requestSignature": "Demander une signature",
+    "templates": "Modèles",
+    "documents": "Documents",
+    "transactions": "Transactions",
+    "reports": "Rapports",
+    "incidents": "Incidents"
+  },
+  "topAppBar": {
+    "search": "Rechercher…",
+    "searchAria": "rechercher",
+    "messages": "Messages",
+    "notifications": "Notifications",
+    "profile": "Profil",
+    "myAccount": "Mon compte"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "subtitle": "Résumé de l'activité et statistiques du système de signature numérique",
+    "totalDocuments": "Total des documents",
+    "signedDocuments": "Documents signés",
+    "pending": "En attente",
+    "activeRequests": "Demandes actives",
+    "trends": "Tendances de signature",
+    "recentDocuments": "Documents récents",
+    "document": "Document",
+    "signer": "Signataire",
+    "date": "Date",
+    "status": "Statut",
+    "noRecentDocuments": "Aucun document récent",
+    "signed": "Signé",
+    "pendingStatus": "En attente",
+    "rejected": "Rejeté",
+    "changeFromLastMonth": "par rapport au mois dernier"
+  },
+  "requestSignature": {
+    "title": "Demander une signature de document",
+    "subtitle": "Créer et envoyer des demandes de signature aux destinataires",
+    "steps": {
+      "identifier": "Identifiant",
+      "workspaceTemplate": "Espace de travail et modèle",
+      "recipients": "Destinataires",
+      "updateFields": "Mettre à jour les champs"
+    },
+    "step1": {
+      "title": "1. Identifiant",
+      "label": "Identifiant",
+      "placeholder": "Entrer un identifiant unique",
+      "validate": "Valider",
+      "validating": "Validation en cours...",
+      "available": "Identifiant disponible",
+      "mustValidate": "L'identifiant doit être validé",
+      "enterIdentifier": "Veuillez entrer un identifiant",
+      "identifierExists": "Cet identifiant existe déjà pour votre locataire. Veuillez en utiliser un autre.",
+      "validateError": "Erreur lors de la validation de l'identifiant"
+    },
+    "step2": {
+      "title": "2. Espace de travail et modèle",
+      "workspace": "Espace de travail",
+      "template": "Modèle",
+      "continue": "Continuer",
+      "selectWorkspaceTemplate": "Veuillez sélectionner un espace de travail et un modèle"
+    },
+    "step3": {
+      "title": "3. Ajouter des destinataires",
+      "recipients": "Destinataires",
+      "addRecipient": "Ajouter un destinataire",
+      "recipient": "Destinataire",
+      "firstName": "Prénom",
+      "lastName": "Nom de famille",
+      "email": "E-mail",
+      "designation": "Désignation",
+      "order": "Ordre",
+      "designationSigner": "Signataire",
+      "designationCC": "CC",
+      "designationApprover": "Approbateur",
+      "noRecipients": "Aucun destinataire ajouté. Cliquez sur \"Ajouter un destinataire\" pour en ajouter un.",
+      "createRequest": "Créer une demande",
+      "creating": "Création en cours...",
+      "allRecipientsRequired": "Tous les destinataires doivent avoir first_name, last_name et email",
+      "addAtLeastOne": "Veuillez ajouter au moins un destinataire",
+      "validateIdentifierFirst": "Veuillez d'abord valider l'identifiant"
+    },
+    "step4": {
+      "title": "4. Mettre à jour les champs",
+      "id": "ID",
+      "name": "Nom",
+      "status": "Statut",
+      "document": "Document",
+      "viewDocument": "Voir le document",
+      "templateFields": "Champs du modèle - Modifier les valeurs :",
+      "fieldName": "Champ",
+      "page": "Page",
+      "required": "requis",
+      "signatureRequired": "Ce champ sera complété lors de la signature",
+      "enterValue": "Entrer une valeur pour",
+      "updateFields": "Mettre à jour les champs",
+      "updating": "Mise à jour en cours...",
+      "sendRequest": "Envoyer la demande",
+      "sending": "Envoi en cours...",
+      "newRequest": "Nouvelle demande",
+      "fieldsUpdated": "Champs mis à jour avec succès",
+      "requestCreated": "Demande de signature créée avec succès",
+      "requestSent": "Demande de signature envoyée avec succès",
+      "updateError": "Erreur lors de la mise à jour des champs",
+      "createError": "Erreur lors de la création de la demande de signature",
+      "sendError": "Erreur lors de l'envoi de la demande de signature",
+      "noRequestCreated": "Aucune demande de signature créée",
+      "editorError": "Erreur dans l'éditeur"
+    },
+    "errors": {
+      "loadWorkspaces": "Erreur lors du chargement des espaces de travail",
+      "loadTemplates": "Erreur lors du chargement des modèles",
+      "loadTemplateFields": "Erreur lors du chargement des champs du modèle",
+      "generateJwt": "Impossible de générer le JWT pour l'éditeur"
+    }
+  },
+  "templates": {
+    "title": "Éditeur de modèles",
+    "subtitle": "Sélectionnez un modèle à modifier",
+    "configuration": "Configuration",
+    "template": "Modèle",
+    "editor": "Éditeur de modèle",
+    "selectTemplate": "Sélectionnez un modèle à modifier",
+    "loadingEditor": "Chargement de l'éditeur...",
+    "editorError": "Erreur lors du chargement de l'éditeur",
+    "noTemplates": "Aucun modèle disponible",
+    "templateNoWorkspace": "Le modèle sélectionné n'a pas d'espace de travail associé",
+    "loadWorkspacesError": "Erreur lors du chargement des espaces de travail",
+    "loadTemplatesError": "Erreur lors du chargement des modèles",
+    "generateTokenError": "Erreur lors de la génération du jeton pour l'éditeur"
+  },
+  "documents": {
+    "title": "Documents",
+    "subtitle": "Liste des documents demandés pour signature - Bientôt disponible"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "subtitle": "Afficher et gérer toutes les transactions de demandes de signature",
+    "search": "Rechercher",
+    "status": "Statut",
+    "all": "Tous",
+    "draft": "Brouillon",
+    "sent": "Envoyé",
+    "completed": "Terminé",
+    "declined": "Refusé",
+    "expired": "Expiré",
+    "viewed": "Consulté",
+    "signed": "Signé",
+    "from": "De",
+    "to": "À",
+    "exportExcel": "Exporter Excel",
+    "id": "ID",
+    "firmaSigningRequestId": "Firma Signing Request ID",
+    "eventType": "Type d'événement",
+    "date": "Date",
+    "actions": "Actions",
+    "noTransactions": "Aucune transaction disponible",
+    "loadError": "Erreur lors du chargement des transactions",
+    "exportError": "Erreur lors de l'exportation",
+    "csvHeaders": {
+      "id": "ID",
+      "firmaSigningRequestId": "Firma Signing Request ID",
+      "status": "Statut",
+      "eventType": "Type d'événement",
+      "date": "Date",
+      "changedFields": "Champs modifiés",
+      "metadata": "Métadonnées"
+    }
+  },
+  "reports": {
+    "title": "Rapports",
+    "subtitle": "Rapports et statistiques - Bientôt disponible"
+  },
+  "incidents": {
+    "title": "Incidents",
+    "subtitle": "Gestion des incidents - Bientôt disponible"
+  },
+  "language": {
+    "label": "Langue"
   }
 }
-

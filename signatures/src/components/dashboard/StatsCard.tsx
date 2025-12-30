@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, Typography, Box } from '@mui/material';
 import { ReactNode } from 'react';
 
@@ -13,6 +14,7 @@ interface StatsCardProps {
 }
 
 export default function StatsCard({ title, value, icon, color, change }: StatsCardProps) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardContent>
@@ -33,7 +35,7 @@ export default function StatsCard({ title, value, icon, color, change }: StatsCa
                 }}
               >
                 {change.isPositive ? '+' : ''}
-                {change.value}% desde el mes pasado
+                {change.value}% {t('dashboard.changeFromLastMonth')}
               </Typography>
             )}
           </Box>

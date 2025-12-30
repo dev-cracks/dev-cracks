@@ -4,7 +4,194 @@
     "subtitle": "Por favor, revisa y firma el documento a continuación",
     "loading": "Cargando documento...",
     "error": "Error al cargar el documento",
-    "complete": "Documento firmado exitosamente"
+    "complete": "Documento firmado exitosamente",
+    "needToken": "Para acceder a la página de firma, necesitas un token JWT válido.",
+    "urlFormat": "Formato de URL esperado:",
+    "urlFormat1": "/signatures/sign/[token-jwt]",
+    "urlFormat2": "/signatures/sign?token=[token-jwt]",
+    "linkInstructions": "Si recibiste un enlace por email, asegúrate de usar el enlace completo que incluye el token. Si necesitas un nuevo token, contacta al remitente del documento."
+  },
+  "layout": {
+    "title": "Firma Digital",
+    "dashboard": "Dashboard",
+    "requestSignature": "Solicitar Firma",
+    "templates": "Plantillas",
+    "documents": "Documentos",
+    "transactions": "Transacciones",
+    "reports": "Reportes",
+    "incidents": "Incidencias"
+  },
+  "topAppBar": {
+    "search": "Buscar…",
+    "searchAria": "buscar",
+    "messages": "Mensajes",
+    "notifications": "Notificaciones",
+    "profile": "Perfil",
+    "myAccount": "Mi cuenta"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Resumen de actividad y estadísticas del sistema de firma digital",
+    "totalDocuments": "Total Documentos",
+    "signedDocuments": "Documentos Firmados",
+    "pending": "Pendientes",
+    "activeRequests": "Solicitudes Activas",
+    "trends": "Tendencias de Firma",
+    "recentDocuments": "Documentos Recientes",
+    "document": "Documento",
+    "signer": "Firmante",
+    "date": "Fecha",
+    "status": "Estado",
+    "noRecentDocuments": "No hay documentos recientes",
+    "signed": "Firmado",
+    "pendingStatus": "Pendiente",
+    "rejected": "Rechazado",
+    "changeFromLastMonth": "desde el mes pasado"
+  },
+  "requestSignature": {
+    "title": "Solicitar Firma de Documentos",
+    "subtitle": "Crea y envía solicitudes de firma a recipients",
+    "steps": {
+      "identifier": "Identificador",
+      "workspaceTemplate": "Workspace y Template",
+      "recipients": "Recipientes",
+      "updateFields": "Actualizar Campos"
+    },
+    "step1": {
+      "title": "1. Identificador",
+      "label": "Identificador",
+      "placeholder": "Ingresa el identificador único",
+      "validate": "Validar",
+      "validating": "Validando...",
+      "available": "Identificador disponible",
+      "mustValidate": "Debe validar el identificador",
+      "enterIdentifier": "Por favor ingresa un identificador",
+      "identifierExists": "Este identificador ya existe para tu tenant. Por favor usa otro.",
+      "validateError": "Error al validar identificador"
+    },
+    "step2": {
+      "title": "2. Workspace y Template",
+      "workspace": "Workspace",
+      "template": "Template",
+      "continue": "Continuar",
+      "selectWorkspaceTemplate": "Por favor selecciona un workspace y una plantilla"
+    },
+    "step3": {
+      "title": "3. Agregar Recipientes",
+      "recipients": "Recipients",
+      "addRecipient": "Agregar Recipient",
+      "recipient": "Recipient",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "designation": "Designation",
+      "order": "Order",
+      "designationSigner": "Signer",
+      "designationCC": "CC",
+      "designationApprover": "Approver",
+      "noRecipients": "No hay recipients agregados. Haz clic en \"Agregar Recipient\" para agregar uno.",
+      "createRequest": "Crear Request",
+      "creating": "Creando...",
+      "allRecipientsRequired": "Todos los recipients deben tener first_name, last_name y email",
+      "addAtLeastOne": "Por favor agrega al menos un recipient",
+      "validateIdentifierFirst": "Por favor valida el identificador primero"
+    },
+    "step4": {
+      "title": "4. Actualizar los Campos",
+      "id": "ID",
+      "name": "Nombre",
+      "status": "Estado",
+      "document": "Documento",
+      "viewDocument": "Ver documento",
+      "templateFields": "Campos del Template - Editar Valores:",
+      "fieldName": "Campo",
+      "page": "Página",
+      "required": "requerido",
+      "signatureRequired": "Este campo se completará al firmar",
+      "enterValue": "Ingrese valor para",
+      "updateFields": "Actualizar Campos",
+      "updating": "Actualizando...",
+      "sendRequest": "Enviar Solicitud",
+      "sending": "Enviando...",
+      "newRequest": "Nueva Solicitud",
+      "fieldsUpdated": "Campos actualizados exitosamente",
+      "requestCreated": "Signing request creada exitosamente",
+      "requestSent": "Signing request enviada exitosamente",
+      "updateError": "Error al actualizar campos",
+      "createError": "Error al crear signing request",
+      "sendError": "Error al enviar signing request",
+      "noRequestCreated": "No hay signing request creada",
+      "editorError": "Error en el editor"
+    },
+    "errors": {
+      "loadWorkspaces": "Error al cargar workspaces",
+      "loadTemplates": "Error al cargar plantillas",
+      "loadTemplateFields": "Error al cargar campos del template",
+      "generateJwt": "No se pudo generar JWT para el editor"
+    }
+  },
+  "templates": {
+    "title": "Editor de Plantillas",
+    "subtitle": "Selecciona una plantilla para editarla",
+    "configuration": "Configuración",
+    "template": "Plantilla",
+    "editor": "Editor de Plantilla",
+    "selectTemplate": "Selecciona una plantilla para editar",
+    "loadingEditor": "Cargando editor...",
+    "editorError": "Error al cargar el editor",
+    "noTemplates": "No hay plantillas disponibles",
+    "templateNoWorkspace": "La plantilla seleccionada no tiene un workspace asociado",
+    "loadWorkspacesError": "Error al cargar workspaces",
+    "loadTemplatesError": "Error al cargar plantillas",
+    "generateTokenError": "Error al generar token para el editor"
+  },
+  "documents": {
+    "title": "Documentos",
+    "subtitle": "Lista de documentos solicitados para firma - Próximamente"
+  },
+  "transactions": {
+    "title": "Transacciones",
+    "subtitle": "Visualiza y gestiona todas las transacciones de solicitudes de firma",
+    "search": "Buscar",
+    "status": "Estado",
+    "all": "Todos",
+    "draft": "Borrador",
+    "sent": "Enviado",
+    "completed": "Completado",
+    "declined": "Rechazado",
+    "expired": "Expirado",
+    "viewed": "Visto",
+    "signed": "Firmado",
+    "from": "Desde",
+    "to": "Hasta",
+    "exportExcel": "Exportar Excel",
+    "id": "ID",
+    "firmaSigningRequestId": "Firma Signing Request ID",
+    "eventType": "Tipo de Evento",
+    "date": "Fecha",
+    "actions": "Acciones",
+    "noTransactions": "No hay transacciones disponibles",
+    "loadError": "Error al cargar transacciones",
+    "exportError": "Error al exportar",
+    "csvHeaders": {
+      "id": "ID",
+      "firmaSigningRequestId": "Firma Signing Request ID",
+      "status": "Estado",
+      "eventType": "Tipo de Evento",
+      "date": "Fecha",
+      "changedFields": "Campos Modificados",
+      "metadata": "Metadata"
+    }
+  },
+  "reports": {
+    "title": "Reportes",
+    "subtitle": "Reportes y estadísticas - Próximamente"
+  },
+  "incidents": {
+    "title": "Incidencias",
+    "subtitle": "Gestión de incidencias - Próximamente"
+  },
+  "language": {
+    "label": "Idioma"
   }
 }
-

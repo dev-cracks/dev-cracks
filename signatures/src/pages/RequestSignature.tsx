@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Typography,
@@ -32,15 +33,16 @@ import { firmaApi, Template, Workspace, Recipient, CreateFirmaSigningRequestRequ
 import { useAuth } from '../hooks/useAuth';
 import SigningRequestEditor from '../components/SigningRequestEditor';
 
-const steps = [
-  'Identificador',
-  'Workspace y Template',
-  'Recipientes',
-  'Actualizar Campos',
-];
-
 export default function RequestSignature() {
+  const { t } = useTranslation();
   const { isAuthenticated, getAccessToken } = useAuth();
+  
+  const steps = [
+    t('requestSignature.steps.identifier'),
+    t('requestSignature.steps.workspaceTemplate'),
+    t('requestSignature.steps.recipients'),
+    t('requestSignature.steps.updateFields'),
+  ];
   const [activeStep, setActiveStep] = useState(0);
   const [identificador, setIdentificador] = useState<string>('');
   const [identificadorValidated, setIdentificadorValidated] = useState(false);
@@ -91,7 +93,7 @@ export default function RequestSignature() {
       const data = await firmaApi.listWorkspaces();
       setWorkspaces(data);
     } catch (err: any) {
-      setError(`Error al cargar workspaces: ${err.message}`);
+      setError(`${t('requestSignature.errors.loadWorkspaces')}: ${err.message}`);
       setWorkspaces([]);
     } finally {
       setLoadingWorkspaces(false);
@@ -107,7 +109,7 @@ export default function RequestSignature() {
       try {
         templatesWithId = await firmaApi.listTemplates();
       } catch (err) {
-        console.warn('No se pudieron cargar templates con Id local:', err);
+        console.warn(t('requestSignature.errors.loadTemplates'), err);
       }
 
       const templatesWithIdMap = new Map(
@@ -142,7 +144,7 @@ export default function RequestSignature() {
       });
       setFieldValues(initialValues);
     } catch (err: any) {
-      console.warn('Error al cargar campos del template:', err);
+      console.warn(t('requestSignature.errors.loadTemplateFields'), err);
       setTemplateFields([]);
       setFieldValues({});
     }
@@ -162,7 +164,7 @@ export default function RequestSignature() {
         first_name: '',
         last_name: '',
         email: '',
-        designation: 'Signer',
+        designation: t('requestSignature.step3.designationSigner'),
         order: recipients.length + 1,
       },
     ]);
@@ -252,14 +254,14 @@ export default function RequestSignature() {
           setEditorJwtToken(jwtData.jwt);
         }
       } catch (err) {
-        console.warn('No se pudo generar JWT para el editor:', err);
+        console.warn(t('requestSignature.errors.generateJwt'), err);
       }
 
       // Avanzar al paso 4 después de crear la solicitud
       setActiveStep(3);
-      setSuccessMessage('Signing request creada exitosamente');
+      setSuccessMessage(t('requestSignature.step4.requestCreated'));
     } catch (err: any) {
-      setError(`Error al crear signing request: ${err.message}`);
+      setError(`${t('requestSignature.step4.createError')}: ${err.message}`);
     } finally {
       setCreatingRequest(false);
     }
@@ -267,7 +269,7 @@ export default function RequestSignature() {
 
   const handleUpdateFields = async () => {
     if (!selectedWorkspaceId || !firmaSigningRequestId) {
-      setError('No hay signing request creada');
+      setError(t('requestSignature.step4.noRequestCreated'));
       return;
     }
 
@@ -365,12 +367,12 @@ export default function RequestSignature() {
 
       await firmaApi.updateFirmaSigningRequest(selectedWorkspaceId, firmaSigningRequestId, updateRequest);
 
-      setSuccessMessage('Campos actualizados exitosamente');
+      setSuccessMessage(t('requestSignature.step4.fieldsUpdated'));
       setError(null);
     } catch (err: any) {
       console.error('Error al actualizar campos:', err);
-      const errorMessage = err.message || 'Error desconocido al actualizar campos';
-      setError(`Error al actualizar campos: ${errorMessage}`);
+      const errorMessage = err.message || t('requestSignature.step4.updateError');
+      setError(`${t('requestSignature.step4.updateError')}: ${errorMessage}`);
     } finally {
       setUpdatingRequest(false);
     }
@@ -378,7 +380,7 @@ export default function RequestSignature() {
 
   const handleSendRequest = async () => {
     if (!selectedWorkspaceId || !firmaSigningRequestId) {
-      setError('No hay signing request creada');
+      setError(t('requestSignature.step4.noRequestCreated'));
       return;
     }
 
@@ -388,10 +390,10 @@ export default function RequestSignature() {
 
     try {
       await firmaApi.sendFirmaSigningRequest(selectedWorkspaceId, firmaSigningRequestId, {
-        custom_message: 'Por favor firma este documento',
+        custom_message: t('requestSignature.step4.sendRequest'),
       });
 
-      setSuccessMessage('Signing request enviada exitosamente');
+      setSuccessMessage(t('requestSignature.step4.requestSent'));
       setError(null);
       setRequestSent(true);
       
@@ -403,7 +405,7 @@ export default function RequestSignature() {
         });
       }
     } catch (err: any) {
-      setError(`Error al enviar signing request: ${err.message}`);
+      setError(`${t('requestSignature.step4.sendError')}: ${err.message}`);
     } finally {
       setSendingRequest(false);
     }
@@ -429,7 +431,7 @@ export default function RequestSignature() {
 
   const handleValidateIdentificador = async () => {
     if (!identificador.trim()) {
-      setError('Por favor ingresa un identificador');
+      setError(t('requestSignature.step1.enterIdentifier'));
       return;
     }
 
@@ -441,14 +443,14 @@ export default function RequestSignature() {
       const result = await firmaApi.validateIdentificador(identificador.trim());
       if (result.isValid) {
         setIdentificadorValidated(true);
-        setSuccessMessage('Identificador disponible');
+        setSuccessMessage(t('requestSignature.step1.available'));
         setActiveStep(1);
       } else {
-        setError('Este identificador ya existe para tu tenant. Por favor usa otro.');
+        setError(t('requestSignature.step1.identifierExists'));
         setIdentificadorValidated(false);
       }
     } catch (err: any) {
-      setError(`Error al validar identificador: ${err.message}`);
+      setError(`${t('requestSignature.step1.validateError')}: ${err.message}`);
       setIdentificadorValidated(false);
     } finally {
       setValidatingIdentificador(false);
@@ -457,7 +459,7 @@ export default function RequestSignature() {
 
   const handleContinueToStep3 = () => {
     if (!selectedWorkspaceId || !selectedTemplateId) {
-      setError('Por favor selecciona un workspace y una plantilla');
+      setError(t('requestSignature.step2.selectWorkspaceTemplate'));
       return;
     }
     setActiveStep(2);
@@ -485,10 +487,10 @@ export default function RequestSignature() {
   return (
     <Box>
       <Typography variant="h4" component="h1" gutterBottom>
-        Solicitar Firma de Documentos
+        {t('requestSignature.title')}
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Crea y envía solicitudes de firma a recipients
+        {t('requestSignature.subtitle')}
       </Typography>
 
       {error && (
@@ -530,7 +532,7 @@ export default function RequestSignature() {
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
-              <Typography variant="h6">1. Identificador</Typography>
+              <Typography variant="h6">{t('requestSignature.step1.title')}</Typography>
               {identificadorValidated && <CheckCircleIcon color="success" />}
             </Box>
           </AccordionSummary>
@@ -538,16 +540,16 @@ export default function RequestSignature() {
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
               <TextField
                 fullWidth
-                label="Identificador"
+                label={t('requestSignature.step1.label')}
                 value={identificador}
                 onChange={(e) => {
                   setIdentificador(e.target.value);
                   setIdentificadorValidated(false);
                 }}
-                placeholder="Ingresa el identificador único"
+                placeholder={t('requestSignature.step1.placeholder')}
                 disabled={validatingIdentificador || requestSent}
                 error={identificadorValidated === false && identificador.trim() !== '' && !validatingIdentificador}
-                helperText={identificadorValidated ? 'Identificador disponible' : identificador.trim() !== '' && !validatingIdentificador ? 'Debe validar el identificador' : ''}
+                helperText={identificadorValidated ? t('requestSignature.step1.available') : identificador.trim() !== '' && !validatingIdentificador ? t('requestSignature.step1.mustValidate') : ''}
               />
               <Button
                 variant="contained"
@@ -558,10 +560,10 @@ export default function RequestSignature() {
                 {validatingIdentificador ? (
                   <>
                     <CircularProgress size={20} sx={{ mr: 1 }} />
-                    Validando...
+                    {t('requestSignature.step1.validating')}
                   </>
                 ) : (
-                  'Validar'
+                  t('requestSignature.step1.validate')
                 )}
               </Button>
             </Box>
@@ -577,16 +579,16 @@ export default function RequestSignature() {
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
-              <Typography variant="h6">2. Workspace y Template</Typography>
+              <Typography variant="h6">{t('requestSignature.step2.title')}</Typography>
               {selectedWorkspaceId && selectedTemplateId && <CheckCircleIcon color="success" />}
             </Box>
           </AccordionSummary>
           <AccordionDetails>
             <FormControl fullWidth sx={{ mb: 2 }} disabled={loadingWorkspaces || requestSent}>
-              <InputLabel>Workspace</InputLabel>
+              <InputLabel>{t('requestSignature.step2.workspace')}</InputLabel>
               <Select
                 value={selectedWorkspaceId}
-                label="Workspace"
+                label={t('requestSignature.step2.workspace')}
                 onChange={(e) => {
                   setSelectedWorkspaceId(e.target.value);
                   setSelectedTemplateId('');
@@ -604,10 +606,10 @@ export default function RequestSignature() {
             </FormControl>
 
             <FormControl fullWidth sx={{ mb: 2 }} disabled={loadingTemplates || !selectedWorkspaceId || requestSent}>
-              <InputLabel>Template</InputLabel>
+              <InputLabel>{t('requestSignature.step2.template')}</InputLabel>
               <Select
                 value={selectedTemplateId}
-                label="Template"
+                label={t('requestSignature.step2.template')}
                 onChange={(e) => {
                   setSelectedTemplateId(e.target.value);
                   setCreatedSigningRequest(null);
@@ -629,7 +631,7 @@ export default function RequestSignature() {
               onClick={handleContinueToStep3}
               disabled={!selectedWorkspaceId || !selectedTemplateId || requestSent}
             >
-              Continuar
+              {t('requestSignature.step2.continue')}
             </Button>
           </AccordionDetails>
         </Accordion>
@@ -643,7 +645,7 @@ export default function RequestSignature() {
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
-              <Typography variant="h6">3. Agregar Recipientes</Typography>
+              <Typography variant="h6">{t('requestSignature.step3.title')}</Typography>
               {createdSigningRequest && <CheckCircleIcon color="success" />}
             </Box>
           </AccordionSummary>
@@ -653,7 +655,7 @@ export default function RequestSignature() {
 
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6">
-                Recipients
+                {t('requestSignature.step3.recipients')}
               </Typography>
               <Button
                 variant="outlined"
@@ -662,7 +664,7 @@ export default function RequestSignature() {
                 onClick={handleAddRecipient}
                 disabled={requestSent}
               >
-                Agregar Recipient
+                {t('requestSignature.step3.addRecipient')}
               </Button>
             </Box>
 
@@ -670,7 +672,7 @@ export default function RequestSignature() {
               <Card key={index} sx={{ mb: 2 }}>
                 <CardContent>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="subtitle2">Recipient {index + 1}</Typography>
+                  <Typography variant="subtitle2">{t('requestSignature.step3.recipient')} {index + 1}</Typography>
                   <IconButton
                     size="small"
                     onClick={() => handleRemoveRecipient(index)}
@@ -685,7 +687,7 @@ export default function RequestSignature() {
                   <Grid item xs={6}>
                     <TextField
                       fullWidth
-                      label="First Name *"
+                      label={`${t('requestSignature.step3.firstName')} *`}
                       value={recipient.first_name}
                       onChange={(e) => handleRecipientChange(index, 'first_name', e.target.value)}
                       size="small"
@@ -695,7 +697,7 @@ export default function RequestSignature() {
                   <Grid item xs={6}>
                     <TextField
                       fullWidth
-                      label="Last Name *"
+                      label={`${t('requestSignature.step3.lastName')} *`}
                       value={recipient.last_name}
                       onChange={(e) => handleRecipientChange(index, 'last_name', e.target.value)}
                       size="small"
@@ -705,7 +707,7 @@ export default function RequestSignature() {
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      label="Email *"
+                      label={`${t('requestSignature.step3.email')} *`}
                       type="email"
                       value={recipient.email}
                       onChange={(e) => handleRecipientChange(index, 'email', e.target.value)}
@@ -715,22 +717,22 @@ export default function RequestSignature() {
                   </Grid>
                   <Grid item xs={8}>
                     <FormControl fullWidth size="small" disabled={requestSent}>
-                      <InputLabel>Designation</InputLabel>
+                      <InputLabel>{t('requestSignature.step3.designation')}</InputLabel>
                       <Select
                         value={recipient.designation}
-                        label="Designation"
+                        label={t('requestSignature.step3.designation')}
                         onChange={(e) => handleRecipientChange(index, 'designation', e.target.value)}
                       >
-                        <MenuItem value="Signer">Signer</MenuItem>
-                        <MenuItem value="CC">CC</MenuItem>
-                        <MenuItem value="Approver">Approver</MenuItem>
+                        <MenuItem value="Signer">{t('requestSignature.step3.designationSigner')}</MenuItem>
+                        <MenuItem value="CC">{t('requestSignature.step3.designationCC')}</MenuItem>
+                        <MenuItem value="Approver">{t('requestSignature.step3.designationApprover')}</MenuItem>
                       </Select>
                     </FormControl>
                   </Grid>
                   <Grid item xs={4}>
                     <TextField
                       fullWidth
-                      label="Order"
+                      label={t('requestSignature.step3.order')}
                       type="number"
                       value={recipient.order || index + 1}
                       onChange={(e) => handleRecipientChange(index, 'order', parseInt(e.target.value) || index + 1)}
@@ -745,7 +747,7 @@ export default function RequestSignature() {
 
             {recipients.length === 0 && (
               <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
-                No hay recipients agregados. Haz clic en "Agregar Recipient" para agregar uno.
+                {t('requestSignature.step3.noRecipients')}
                 </Typography>
               )}
 
@@ -759,10 +761,10 @@ export default function RequestSignature() {
               {creatingRequest ? (
                 <>
                   <CircularProgress size={20} sx={{ mr: 1 }} />
-                  Creando...
+                  {t('requestSignature.step3.creating')}
                 </>
               ) : (
-                'Crear Request'
+                t('requestSignature.step3.createRequest')
               )}
             </Button>
           </AccordionDetails>
@@ -778,7 +780,7 @@ export default function RequestSignature() {
           >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
-                <Typography variant="h6">4. Actualizar los Campos</Typography>
+                <Typography variant="h6">{t('requestSignature.step4.title')}</Typography>
                 {requestSent && <CheckCircleIcon color="success" />}
               </Box>
             </AccordionSummary>
@@ -786,26 +788,26 @@ export default function RequestSignature() {
               <Box sx={{ mb: 2 }}>
                 <Box sx={{ mb: 1 }}>
                   <Typography component="span" variant="body1">
-                    <strong>ID:</strong> {createdSigningRequest.id}
+                    <strong>{t('requestSignature.step4.id')}:</strong> {createdSigningRequest.id}
                   </Typography>
                 </Box>
                 <Box sx={{ mb: 1 }}>
                   <Typography component="span" variant="body1">
-                    <strong>Nombre:</strong> {createdSigningRequest.name}
+                    <strong>{t('requestSignature.step4.name')}:</strong> {createdSigningRequest.name}
                 </Typography>
                 </Box>
                 <Box sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography component="span" variant="body1">
-                    <strong>Estado:</strong>
+                    <strong>{t('requestSignature.step4.status')}:</strong>
                   </Typography>
                   <Chip label={createdSigningRequest.status} size="small" />
                 </Box>
                 {createdSigningRequest.document_url && (
                   <Box sx={{ mb: 1 }}>
                     <Typography component="span" variant="body1">
-                      <strong>Documento:</strong>{' '}
+                      <strong>{t('requestSignature.step4.document')}:</strong>{' '}
                       <a href={createdSigningRequest.document_url} target="_blank" rel="noopener noreferrer">
-                        Ver documento
+                        {t('requestSignature.step4.viewDocument')}
                       </a>
                     </Typography>
                   </Box>
@@ -828,7 +830,7 @@ export default function RequestSignature() {
                     }}
                   >
                     <Typography variant="h6" gutterBottom sx={{ color: 'primary.dark', fontWeight: 'bold' }}>
-                      Campos del Template - Editar Valores:
+                      {t('requestSignature.step4.templateFields')}
                     </Typography>
                   </Paper>
                   <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -858,8 +860,8 @@ export default function RequestSignature() {
                             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                               <Box sx={{ mb: 1 }}>
                                 <Typography variant="caption" color="text.secondary">
-                                  {fieldName} ({fieldType}) - Página {pageNumber}
-                                  {isRequired && <span style={{ color: 'red' }}> *</span>}
+                                  {fieldName} ({fieldType}) - {t('requestSignature.step4.page')} {pageNumber}
+                                  {isRequired && <span style={{ color: 'red' }}> {t('requestSignature.step4.required')}</span>}
                                 </Typography>
                               </Box>
                               {fieldType === 'dropdown' && field.dropdownOptions ? (
@@ -890,9 +892,9 @@ export default function RequestSignature() {
                                 <TextField
                                   fullWidth
                                   size="small"
-                                  value={currentValue || '[Firma requerida]'}
+                                  value={currentValue || `[${t('requestSignature.step4.signatureRequired')}]`}
                                   disabled
-                                  helperText="Este campo se completará al firmar"
+                                  helperText={t('requestSignature.step4.signatureRequired')}
                                 />
                               ) : (
                                 <TextField
@@ -901,7 +903,7 @@ export default function RequestSignature() {
                                   value={currentValue}
                                   onChange={(e) => handleFieldValueChange(fieldId, e.target.value)}
                                   disabled={isReadOnly || requestSent}
-                                  placeholder={`Ingrese valor para ${fieldName}`}
+                                  placeholder={`${t('requestSignature.step4.enterValue')} ${fieldName}`}
                                   multiline={fieldType === 'textarea' || fieldType === 'text'}
                                   rows={fieldType === 'textarea' ? 3 : 1}
                                 />
@@ -933,7 +935,7 @@ export default function RequestSignature() {
                 }}
                 onError={(error) => {
                   console.error('Editor error:', error);
-                  setError(`Error en el editor: ${error?.message || 'Error desconocido'}`);
+                  setError(`${t('requestSignature.step4.editorError')}: ${error?.message || t('requestSignature.step4.editorError')}`);
                 }}
                 onLoad={(signingRequest) => {
                   console.log('Editor loaded successfully:', signingRequest);
@@ -954,10 +956,10 @@ export default function RequestSignature() {
                 {updatingRequest ? (
                   <>
                     <CircularProgress size={20} sx={{ mr: 1 }} />
-                    Actualizando...
+                    {t('requestSignature.step4.updating')}
                   </>
                 ) : (
-                  'Actualizar Campos'
+                  t('requestSignature.step4.updateFields')
                 )}
               </Button>
             </AccordionDetails>
@@ -978,10 +980,10 @@ export default function RequestSignature() {
               {sendingRequest ? (
                 <>
                   <CircularProgress size={20} sx={{ mr: 1 }} />
-                  Enviando...
+                  {t('requestSignature.step4.sending')}
                 </>
               ) : (
-                'Enviar Solicitud'
+                t('requestSignature.step4.sendRequest')
               )}
             </Button>
           </Box>
@@ -997,7 +999,7 @@ export default function RequestSignature() {
               onClick={handleNewRequest}
               sx={{ minWidth: 200 }}
             >
-              Enviar Otra Solicitud
+              {t('requestSignature.step4.newRequest')}
             </Button>
           </Box>
         )}

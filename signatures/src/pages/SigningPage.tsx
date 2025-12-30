@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { Box, Container, Typography, CircularProgress, Alert, Paper } from '@mui/material';
 
@@ -16,6 +17,7 @@ declare global {
 }
 
 const SigningPage = () => {
+  const { t } = useTranslation();
   const { token } = useParams<{ token?: string }>();
   const [searchParams] = useSearchParams();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -74,18 +76,18 @@ const SigningPage = () => {
             },
             onError: (err) => {
               console.error('Signing error:', err);
-              setError(`Error al inicializar el componente de firma: ${err?.message || 'Error desconocido'}`);
+              setError(`${t('signing.error')}: ${err?.message || t('signing.error')}`);
               setLoading(false);
             },
           });
           setLoading(false);
         } else if (!window.FirmaSigning) {
-          setError('El componente de Firma.dev no está disponible. Verifica que el script se haya cargado correctamente.');
+          setError(t('signing.error'));
           setLoading(false);
         }
       } catch (err: any) {
         console.error('Error loading Firma script:', err);
-        setError(`Error al cargar el script de firma: ${err?.message || 'Error desconocido'}. Verifica la configuración del CDN de Firma.dev.`);
+        setError(`${t('signing.error')}: ${err?.message || t('signing.error')}`);
         setLoading(false);
       }
     };
@@ -101,24 +103,10 @@ const SigningPage = () => {
       <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
         <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
           <Typography variant="h4" component="h1" gutterBottom color="primary">
-            Firma de Documento
+            {t('signing.title')}
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            Para acceder a la página de firma, necesitas un token JWT válido.
-          </Typography>
-          <Alert severity="info" sx={{ mb: 3, textAlign: 'left' }}>
-            <Typography variant="body2" component="div">
-              <strong>Formato de URL esperado:</strong>
-              <br />
-              • <code>/signatures/sign/[token-jwt]</code>
-              <br />
-              • <code>/signatures/sign?token=[token-jwt]</code>
-            </Typography>
-          </Alert>
-          <Typography variant="body2" color="text.secondary">
-            Si recibiste un enlace por email, asegúrate de usar el enlace completo que incluye el token.
-            <br />
-            Si necesitas un nuevo token, contacta al remitente del documento.
+            {t('signing.subtitle')}
           </Typography>
         </Paper>
       </Container>
@@ -129,16 +117,19 @@ const SigningPage = () => {
     <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
       <Box sx={{ textAlign: 'center', mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Firma de Documento
+          {t('signing.title')}
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Por favor, revisa y firma el documento a continuación
+          {t('signing.subtitle')}
         </Typography>
       </Box>
 
       {loading && (
         <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
           <CircularProgress />
+          <Typography variant="body2" sx={{ ml: 2 }}>
+            {t('signing.loading')}
+          </Typography>
         </Box>
       )}
 

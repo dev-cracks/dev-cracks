@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Typography,
@@ -52,6 +53,7 @@ const statusColors: Record<string, 'default' | 'primary' | 'success' | 'warning'
 };
 
 export default function Transactions() {
+  const { t } = useTranslation();
   const { isAuthenticated, getAccessToken } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
@@ -89,7 +91,7 @@ export default function Transactions() {
       setTransactions(result.items);
       setTotalCount(result.totalCount);
     } catch (err: any) {
-      setError(`Error al cargar transacciones: ${err.message}`);
+      setError(`${t('transactions.loadError')}: ${err.message}`);
       setTransactions([]);
     } finally {
       setLoading(false);
@@ -130,7 +132,15 @@ export default function Transactions() {
       }
 
       // Convertir a CSV
-      const headers = ['ID', 'Firma Signing Request ID', 'Estado', 'Tipo de Evento', 'Fecha', 'Campos Modificados', 'Metadata'];
+      const headers = [
+        t('transactions.csvHeaders.id'),
+        t('transactions.csvHeaders.firmaSigningRequestId'),
+        t('transactions.csvHeaders.status'),
+        t('transactions.csvHeaders.eventType'),
+        t('transactions.csvHeaders.date'),
+        t('transactions.csvHeaders.changedFields'),
+        t('transactions.csvHeaders.metadata')
+      ];
       const rows = allTransactions.map(t => [
         t.id,
         t.firmaSigningRequestId,
@@ -157,7 +167,7 @@ export default function Transactions() {
       link.click();
       document.body.removeChild(link);
     } catch (err: any) {
-      setError(`Error al exportar: ${err.message}`);
+      setError(`${t('transactions.exportError')}: ${err.message}`);
     } finally {
       setExporting(false);
     }
@@ -180,10 +190,10 @@ export default function Transactions() {
   return (
     <Box>
       <Typography variant="h4" component="h1" gutterBottom>
-        Transacciones
+        {t('transactions.title')}
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Visualiza y gestiona todas las transacciones de solicitudes de firma
+        {t('transactions.subtitle')}
       </Typography>
 
       {error && (
@@ -195,7 +205,7 @@ export default function Transactions() {
       <Paper sx={{ p: 3, mb: 3 }}>
         <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
           <TextField
-            label="Buscar"
+            label={t('transactions.search')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
@@ -203,24 +213,24 @@ export default function Transactions() {
             sx={{ minWidth: 200 }}
           />
           <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel>Estado</InputLabel>
+            <InputLabel>{t('transactions.status')}</InputLabel>
             <Select
               value={statusFilter}
-              label="Estado"
+              label={t('transactions.status')}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <MenuItem value="">Todos</MenuItem>
-              <MenuItem value="Draft">Borrador</MenuItem>
-              <MenuItem value="Sent">Enviado</MenuItem>
-              <MenuItem value="Completed">Completado</MenuItem>
-              <MenuItem value="Declined">Rechazado</MenuItem>
-              <MenuItem value="Expired">Expirado</MenuItem>
-              <MenuItem value="Viewed">Visto</MenuItem>
-              <MenuItem value="Signed">Firmado</MenuItem>
+              <MenuItem value="">{t('transactions.all')}</MenuItem>
+              <MenuItem value="Draft">{t('transactions.draft')}</MenuItem>
+              <MenuItem value="Sent">{t('transactions.sent')}</MenuItem>
+              <MenuItem value="Completed">{t('transactions.completed')}</MenuItem>
+              <MenuItem value="Declined">{t('transactions.declined')}</MenuItem>
+              <MenuItem value="Expired">{t('transactions.expired')}</MenuItem>
+              <MenuItem value="Viewed">{t('transactions.viewed')}</MenuItem>
+              <MenuItem value="Signed">{t('transactions.signed')}</MenuItem>
             </Select>
           </FormControl>
           <TextField
-            label="Desde"
+            label={t('transactions.from')}
             type="date"
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
@@ -228,7 +238,7 @@ export default function Transactions() {
             InputLabelProps={{ shrink: true }}
           />
           <TextField
-            label="Hasta"
+            label={t('transactions.to')}
             type="date"
             value={toDate}
             onChange={(e) => setToDate(e.target.value)}
@@ -236,7 +246,7 @@ export default function Transactions() {
             InputLabelProps={{ shrink: true }}
           />
           <Button variant="contained" onClick={handleSearch} disabled={loading}>
-            Buscar
+            {t('transactions.search')}
           </Button>
           <Button
             variant="outlined"
@@ -244,7 +254,7 @@ export default function Transactions() {
             onClick={handleExportToExcel}
             disabled={exporting || loading}
           >
-            Exportar Excel
+            {t('transactions.exportExcel')}
           </Button>
         </Box>
 
@@ -252,12 +262,12 @@ export default function Transactions() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>Firma Signing Request ID</TableCell>
-                <TableCell>Estado</TableCell>
-                <TableCell>Tipo de Evento</TableCell>
-                <TableCell>Fecha</TableCell>
-                <TableCell align="right">Acciones</TableCell>
+                <TableCell>{t('transactions.id')}</TableCell>
+                <TableCell>{t('transactions.firmaSigningRequestId')}</TableCell>
+                <TableCell>{t('transactions.status')}</TableCell>
+                <TableCell>{t('transactions.eventType')}</TableCell>
+                <TableCell>{t('transactions.date')}</TableCell>
+                <TableCell align="right">{t('transactions.actions')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -270,7 +280,7 @@ export default function Transactions() {
               ) : transactions.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} align="center">
-                    No hay transacciones disponibles
+                    {t('transactions.noTransactions')}
                   </TableCell>
                 </TableRow>
               ) : (

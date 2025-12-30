@@ -4,7 +4,194 @@
     "subtitle": "Please review and sign the document below",
     "loading": "Loading document...",
     "error": "Error loading document",
-    "complete": "Document signed successfully"
+    "complete": "Document signed successfully",
+    "needToken": "To access the signing page, you need a valid JWT token.",
+    "urlFormat": "Expected URL format:",
+    "urlFormat1": "/signatures/sign/[token-jwt]",
+    "urlFormat2": "/signatures/sign?token=[token-jwt]",
+    "linkInstructions": "If you received a link by email, make sure to use the complete link that includes the token. If you need a new token, contact the document sender."
+  },
+  "layout": {
+    "title": "Digital Signature",
+    "dashboard": "Dashboard",
+    "requestSignature": "Request Signature",
+    "templates": "Templates",
+    "documents": "Documents",
+    "transactions": "Transactions",
+    "reports": "Reports",
+    "incidents": "Incidents"
+  },
+  "topAppBar": {
+    "search": "Search…",
+    "searchAria": "search",
+    "messages": "Messages",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "myAccount": "My Account"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Activity summary and statistics of the digital signature system",
+    "totalDocuments": "Total Documents",
+    "signedDocuments": "Signed Documents",
+    "pending": "Pending",
+    "activeRequests": "Active Requests",
+    "trends": "Signing Trends",
+    "recentDocuments": "Recent Documents",
+    "document": "Document",
+    "signer": "Signer",
+    "date": "Date",
+    "status": "Status",
+    "noRecentDocuments": "No recent documents",
+    "signed": "Signed",
+    "pendingStatus": "Pending",
+    "rejected": "Rejected",
+    "changeFromLastMonth": "from last month"
+  },
+  "requestSignature": {
+    "title": "Request Document Signature",
+    "subtitle": "Create and send signature requests to recipients",
+    "steps": {
+      "identifier": "Identifier",
+      "workspaceTemplate": "Workspace and Template",
+      "recipients": "Recipients",
+      "updateFields": "Update Fields"
+    },
+    "step1": {
+      "title": "1. Identifier",
+      "label": "Identifier",
+      "placeholder": "Enter unique identifier",
+      "validate": "Validate",
+      "validating": "Validating...",
+      "available": "Identifier available",
+      "mustValidate": "Must validate identifier",
+      "enterIdentifier": "Please enter an identifier",
+      "identifierExists": "This identifier already exists for your tenant. Please use another one.",
+      "validateError": "Error validating identifier"
+    },
+    "step2": {
+      "title": "2. Workspace and Template",
+      "workspace": "Workspace",
+      "template": "Template",
+      "continue": "Continue",
+      "selectWorkspaceTemplate": "Please select a workspace and a template"
+    },
+    "step3": {
+      "title": "3. Add Recipients",
+      "recipients": "Recipients",
+      "addRecipient": "Add Recipient",
+      "recipient": "Recipient",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "designation": "Designation",
+      "order": "Order",
+      "designationSigner": "Signer",
+      "designationCC": "CC",
+      "designationApprover": "Approver",
+      "noRecipients": "No recipients added. Click \"Add Recipient\" to add one.",
+      "createRequest": "Create Request",
+      "creating": "Creating...",
+      "allRecipientsRequired": "All recipients must have first_name, last_name and email",
+      "addAtLeastOne": "Please add at least one recipient",
+      "validateIdentifierFirst": "Please validate identifier first"
+    },
+    "step4": {
+      "title": "4. Update Fields",
+      "id": "ID",
+      "name": "Name",
+      "status": "Status",
+      "document": "Document",
+      "viewDocument": "View document",
+      "templateFields": "Template Fields - Edit Values:",
+      "fieldName": "Field",
+      "page": "Page",
+      "required": "required",
+      "signatureRequired": "This field will be completed when signing",
+      "enterValue": "Enter value for",
+      "updateFields": "Update Fields",
+      "updating": "Updating...",
+      "sendRequest": "Send Request",
+      "sending": "Sending...",
+      "newRequest": "New Request",
+      "fieldsUpdated": "Fields updated successfully",
+      "requestCreated": "Signing request created successfully",
+      "requestSent": "Signing request sent successfully",
+      "updateError": "Error updating fields",
+      "createError": "Error creating signing request",
+      "sendError": "Error sending signing request",
+      "noRequestCreated": "No signing request created",
+      "editorError": "Error in editor"
+    },
+    "errors": {
+      "loadWorkspaces": "Error loading workspaces",
+      "loadTemplates": "Error loading templates",
+      "loadTemplateFields": "Error loading template fields",
+      "generateJwt": "Could not generate JWT for editor"
+    }
+  },
+  "templates": {
+    "title": "Template Editor",
+    "subtitle": "Select a template to edit",
+    "configuration": "Configuration",
+    "template": "Template",
+    "editor": "Template Editor",
+    "selectTemplate": "Select a template to edit",
+    "loadingEditor": "Loading editor...",
+    "editorError": "Error loading editor",
+    "noTemplates": "No templates available",
+    "templateNoWorkspace": "Selected template does not have an associated workspace",
+    "loadWorkspacesError": "Error loading workspaces",
+    "loadTemplatesError": "Error loading templates",
+    "generateTokenError": "Error generating token for editor"
+  },
+  "documents": {
+    "title": "Documents",
+    "subtitle": "List of documents requested for signature - Coming soon"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "subtitle": "View and manage all signature request transactions",
+    "search": "Search",
+    "status": "Status",
+    "all": "All",
+    "draft": "Draft",
+    "sent": "Sent",
+    "completed": "Completed",
+    "declined": "Declined",
+    "expired": "Expired",
+    "viewed": "Viewed",
+    "signed": "Signed",
+    "from": "From",
+    "to": "To",
+    "exportExcel": "Export Excel",
+    "id": "ID",
+    "firmaSigningRequestId": "Firma Signing Request ID",
+    "eventType": "Event Type",
+    "date": "Date",
+    "actions": "Actions",
+    "noTransactions": "No transactions available",
+    "loadError": "Error loading transactions",
+    "exportError": "Error exporting",
+    "csvHeaders": {
+      "id": "ID",
+      "firmaSigningRequestId": "Firma Signing Request ID",
+      "status": "Status",
+      "eventType": "Event Type",
+      "date": "Date",
+      "changedFields": "Changed Fields",
+      "metadata": "Metadata"
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Reports and statistics - Coming soon"
+  },
+  "incidents": {
+    "title": "Incidents",
+    "subtitle": "Incident management - Coming soon"
+  },
+  "language": {
+    "label": "Language"
   }
 }
-

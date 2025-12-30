@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Box, Grid, Paper, Typography } from '@mui/material';
 import StatsCard from '../components/dashboard/StatsCard';
 import LineChartComponent from '../components/dashboard/LineChart';
@@ -57,20 +58,21 @@ const recentDocuments = [
 ];
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   return (
     <Box>
       <Typography variant="h4" component="h1" gutterBottom>
-        Dashboard
+        {t('dashboard.title')}
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Resumen de actividad y estadísticas del sistema de firma digital
+        {t('dashboard.subtitle')}
       </Typography>
 
       {/* Tarjetas de estadísticas */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
           <StatsCard
-            title="Total Documentos"
+            title={t('dashboard.totalDocuments')}
             value="156"
             icon={<DescriptionIcon sx={{ fontSize: 40 }} />}
             color="#58a6ff"
@@ -79,7 +81,7 @@ export default function Dashboard() {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatsCard
-            title="Documentos Firmados"
+            title={t('dashboard.signedDocuments')}
             value="124"
             icon={<CheckCircleIcon sx={{ fontSize: 40 }} />}
             color="#28a745"
@@ -88,7 +90,7 @@ export default function Dashboard() {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatsCard
-            title="Pendientes"
+            title={t('dashboard.pending')}
             value="28"
             icon={<PendingIcon sx={{ fontSize: 40 }} />}
             color="#ffc107"
@@ -97,7 +99,7 @@ export default function Dashboard() {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatsCard
-            title="Solicitudes Activas"
+            title={t('dashboard.activeRequests')}
             value="15"
             icon={<AssignmentIcon sx={{ fontSize: 40 }} />}
             color="#f0883e"
@@ -110,11 +112,11 @@ export default function Dashboard() {
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
           <LineChartComponent
-            title="Tendencias de Firma"
+            title={t('dashboard.trends')}
             data={chartData}
             dataKeys={[
-              { key: 'firmados', name: 'Documentos Firmados', color: '#28a745' },
-              { key: 'pendientes', name: 'Pendientes', color: '#ffc107' },
+              { key: 'firmados', name: t('dashboard.signedDocuments'), color: '#28a745' },
+              { key: 'pendientes', name: t('dashboard.pending'), color: '#ffc107' },
             ]}
           />
         </Grid>

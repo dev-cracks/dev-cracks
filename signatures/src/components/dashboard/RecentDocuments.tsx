@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   Card,
   CardContent,
@@ -24,6 +25,7 @@ interface RecentDocumentsProps {
 }
 
 export default function RecentDocuments({ documents }: RecentDocumentsProps) {
+  const { t } = useTranslation();
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'signed':
@@ -40,11 +42,11 @@ export default function RecentDocuments({ documents }: RecentDocumentsProps) {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'signed':
-        return 'Firmado';
+        return t('dashboard.signed');
       case 'pending':
-        return 'Pendiente';
+        return t('dashboard.pendingStatus');
       case 'rejected':
-        return 'Rechazado';
+        return t('dashboard.rejected');
       default:
         return status;
     }
@@ -54,16 +56,16 @@ export default function RecentDocuments({ documents }: RecentDocumentsProps) {
     <Card>
       <CardContent>
         <Typography variant="h6" gutterBottom>
-          Documentos Recientes
+          {t('dashboard.recentDocuments')}
         </Typography>
         <Box sx={{ overflowX: 'auto', mt: 2 }}>
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Documento</TableCell>
-                <TableCell>Firmante</TableCell>
-                <TableCell>Fecha</TableCell>
-                <TableCell align="right">Estado</TableCell>
+                <TableCell>{t('dashboard.document')}</TableCell>
+                <TableCell>{t('dashboard.signer')}</TableCell>
+                <TableCell>{t('dashboard.date')}</TableCell>
+                <TableCell align="right">{t('dashboard.status')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -71,7 +73,7 @@ export default function RecentDocuments({ documents }: RecentDocumentsProps) {
                 <TableRow>
                   <TableCell colSpan={4} align="center">
                     <Typography variant="body2" color="text.secondary">
-                      No hay documentos recientes
+                      {t('dashboard.noRecentDocuments')}
                     </Typography>
                   </TableCell>
                 </TableRow>

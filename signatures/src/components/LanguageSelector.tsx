@@ -3,7 +3,7 @@ import { supportedLanguages, type SupportedLanguage } from '../../../i18n/index.
 import { Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 
 export const LanguageSelector = () => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
 
   const handleLanguageChange = (lang: SupportedLanguage) => {
     i18n.changeLanguage(lang);
@@ -13,7 +13,7 @@ export const LanguageSelector = () => {
 
   return (
     <FormControl size="small" sx={{ minWidth: 120, mr: 2 }}>
-      <InputLabel id="language-select-label" sx={{ color: 'white' }}>Idioma</InputLabel>
+      <InputLabel id="language-select-label" sx={{ color: 'white' }}>{t('language.label')}</InputLabel>
       <Select
         labelId="language-select-label"
         id="language-select"
