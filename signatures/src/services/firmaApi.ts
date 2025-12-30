@@ -353,10 +353,19 @@ class FirmaApiService {
 
   async generateSigningRequestJwt(signingRequestId: string): Promise<SigningRequestJwtToken> {
     const headers = await this.getAuthHeaders();
-    const response = await fetch(`${this.baseUrl}/signing-requests/${signingRequestId}/jwt/editor`, {
+    // Intentar primero con el endpoint que acepta ID de Firma.dev directamente
+    let response = await fetch(`${this.baseUrl}/signing-requests/firma/${signingRequestId}/jwt/editor`, {
       method: 'POST',
       headers,
     });
+
+    // Si falla, intentar con el endpoint que espera Guid de nuestra BD
+    if (!response.ok) {
+      response = await fetch(`${this.baseUrl}/signing-requests/${signingRequestId}/jwt/editor`, {
+        method: 'POST',
+        headers,
+      });
+    }
 
     if (!response.ok) {
       throw new Error(`Error al generar JWT para signing request: ${response.statusText}`);

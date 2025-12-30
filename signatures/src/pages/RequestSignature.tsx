@@ -244,17 +244,11 @@ export default function RequestSignature() {
         setRecipients(updatedRecipients);
       }
 
-      // Generar JWT para el editor
+      // Generar JWT para el editor usando el ID de Firma.dev directamente
       try {
-        // Buscar el template para obtener el ID local
-      const selectedTemplate = templates.find((t) => t.firmaTemplateId === selectedTemplateId);
-        if (selectedTemplate?.id) {
-          // Crear signing request local para obtener el ID
-          const localRequest = await firmaApi.createSigningRequest({
-            templateId: selectedTemplate.id,
-            sendEmail: false,
-          });
-          const jwtData = await firmaApi.generateSigningRequestJwt(localRequest.id);
+        // Usar el ID de la respuesta de Firma.dev para generar el JWT
+        if (response.id) {
+          const jwtData = await firmaApi.generateSigningRequestJwt(response.id);
           setEditorJwtToken(jwtData.jwt);
         }
       } catch (err) {
@@ -821,11 +815,35 @@ export default function RequestSignature() {
               {/* Campos del Template - Formulario Editable */}
               {templateFields.length > 0 && (
                 <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle1" gutterBottom>
-                    Campos del Template - Editar Valores:
-                  </Typography>
+                  <Paper 
+                    elevation={2} 
+                    sx={{ 
+                      p: 2, 
+                      mb: 2, 
+                      bgcolor: 'primary.light', 
+                      background: 'linear-gradient(135deg, rgba(25, 118, 210, 0.1) 0%, rgba(25, 118, 210, 0.05) 100%)',
+                      border: '2px solid',
+                      borderColor: 'primary.main',
+                      borderRadius: 2
+                    }}
+                  >
+                    <Typography variant="h6" gutterBottom sx={{ color: 'primary.dark', fontWeight: 'bold' }}>
+                      Campos del Template - Editar Valores:
+                    </Typography>
+                  </Paper>
                   <Grid container spacing={2} sx={{ mt: 1 }}>
-                    {templateFields.map((field, index) => {
+                    {templateFields
+                      .sort((a, b) => {
+                        // Ordenar: campos signature/initial al final
+                        const aType = (a.type || a.fieldType || a.FieldType || 'text').toLowerCase();
+                        const bType = (b.type || b.fieldType || b.FieldType || 'text').toLowerCase();
+                        const aIsSignature = aType === 'signature' || aType === 'initial';
+                        const bIsSignature = bType === 'signature' || bType === 'initial';
+                        if (aIsSignature && !bIsSignature) return 1;
+                        if (!aIsSignature && bIsSignature) return -1;
+                        return 0;
+                      })
+                      .map((field, index) => {
                       const fieldId = field.id || field.Id || `field-${index}`;
                       const fieldType = field.type || field.fieldType || field.FieldType || 'text';
                       const fieldName = field.fieldName || field.variableName || field.FieldName || field.VariableName || `Campo ${index + 1}`;
