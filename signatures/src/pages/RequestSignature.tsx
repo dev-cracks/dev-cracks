@@ -231,7 +231,7 @@ export default function RequestSignature() {
       const response = await firmaApi.createFirmaSigningRequest(selectedWorkspaceId, request);
       setCreatedSigningRequest(response);
       setFirmaSigningRequestId(response.id);
-
+      
       // Actualizar recipients con los IDs de la respuesta si están disponibles
       if (response.recipients && Array.isArray(response.recipients)) {
         const updatedRecipients = recipients.map((recipient, index) => {
