@@ -85,3 +85,30 @@ tipica historia de usuario.
 - Scope: área afectada (ej: crm, client, etc.)
 - Mensaje: descripción breve (en ingles)
 - Body: lista de cambios
+
+
+## reglas backend a tener en cuenta
+- El código siempre en ingles
+- Las appsettings asociadas a ambientes se deben definir en appsetings.TodosLosAbientes.json
+- Las appsetings comunes deben ir en appsettings.json
+- No debe haber en los archivos .cs referencias a using que no se esten utilizando
+- Siempre se debe usar file scoped namespace
+- Para los constructores de las clases utilizar siempre que se pueda constructor principal
+- Cada clase, interfaz, record, struct en un archivo aparte
+- Utilizar cancelation token siempre qeu se pueda
+- Usar Expresion body for method siando los metodos lo permitan por ser de una sola linea
+- tener en cuenta:  
+   IDE0290 // Use primary constructor
+   IDE0300 // Simplify collection initialization 
+   IDE0305 // Simplify collection initialization
+   IDE0037 // Use inferred member name
+- **Siempre usar constantes para media types HTTP**: Nunca usar strings literales como "application/json" directamente. Usar la constante `HttpMediaTypes.ApplicationJson` de `Fractalize.EmailService.Infrastructure.Constants.HttpMediaTypes`. Esto aplica tanto para `StringContent` como para `MediaTypeWithQualityHeaderValue`.
+
+
+## Code Review
+For the code present, we get this error:
+```
+Redundant explicit property name
+Field  is never used
+```
+Fix it, verify, and then give a concise explanation. 
