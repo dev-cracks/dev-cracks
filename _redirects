@@ -8,6 +8,9 @@
 # Manejar rutas SPA de route-on
 /route-on/* /route-on/index.html 200
 
+# Manejar rutas SPA de signatures
+/signatures/* /signatures/index.html 200
+
 # Manejar rutas SPA de la web principal
 /* /index.html 200
 

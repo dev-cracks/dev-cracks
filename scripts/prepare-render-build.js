@@ -78,6 +78,20 @@ if (existsSync(routeOnDistDir)) {
   console.warn('⚠️  dist-route-on no existe. Asegúrate de ejecutar npm run build:route-on primero.');
 }
 
+// Copiar archivos de signatures a /signatures dentro de dist
+const signaturesDistDir = resolve(rootDir, 'signatures/dist');
+if (existsSync(signaturesDistDir)) {
+  console.log('📦 Copiando archivos de signatures a dist/signatures...');
+  const signaturesTargetDir = resolve(renderDistDir, 'signatures');
+  if (!existsSync(signaturesTargetDir)) {
+    mkdirSync(signaturesTargetDir, { recursive: true });
+  }
+  cpSync(signaturesDistDir, signaturesTargetDir, { recursive: true });
+  console.log('✅ Signatures copiado correctamente');
+} else {
+  console.warn('⚠️  signatures/dist no existe. Asegúrate de ejecutar npm run build:signatures primero.');
+}
+
 // Copiar archivo _redirects a dist
 const redirectsFile = resolve(rootDir, '_redirects');
 if (existsSync(redirectsFile)) {

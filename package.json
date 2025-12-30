@@ -10,15 +10,16 @@
     "dev:backoffice": "npm --prefix backoffice run dev",
     "dev:portal": "npm --prefix portal run dev",
     "dev:landing": "npm --prefix landing run dev",
-    "build": "npm run install:all && npm run build:web && npm run build:landing && npm run build:portal && npm run build:backoffice && npm run build:dev-coach && npm run build:route-on && npm run build:render",
+    "build": "npm run install:all && npm run build:web && npm run build:landing && npm run build:portal && npm run build:backoffice && npm run build:dev-coach && npm run build:route-on && npm run build:signatures && npm run build:render",
     "build:web": "npm --prefix web run build",
     "build:landing": "npm --prefix landing run build",
     "build:portal": "npm --prefix portal run build",
     "build:backoffice": "npm --prefix backoffice run build",
     "build:dev-coach": "npm --prefix dev-coach run build",
     "build:route-on": "npm --prefix route-on run build",
+    "build:signatures": "npm --prefix signatures run build",
     "build:render": "node scripts/prepare-render-build.js",
-    "install:all": "npm install && npm --prefix web install && npm --prefix landing install && npm --prefix portal install && npm --prefix backoffice install && npm --prefix dev-coach install && npm --prefix route-on install"
+    "install:all": "npm install && npm --prefix web install && npm --prefix landing install && npm --prefix portal install && npm --prefix backoffice install && npm --prefix dev-coach install && npm --prefix route-on install && npm --prefix signatures install"
   },
   "dependencies": {
     "i18next": "^23.7.6",
