@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PillNav } from '../components/PillNav';
 import DarkVeil from '../components/DarkVeil';
 import MagicBento from '../components/MagicBento';
@@ -7,6 +8,7 @@ import { getDashboardData, ClickUpDashboardData, ClickUpTask, ClickUpStatus } fr
 import './DashboardPage.css';
 
 export const DashboardPage = () => {
+  const { t } = useTranslation('portal');
   const { getAccessToken, isAuthenticated, isLoading: authLoading } = useAuth();
   const [dashboardData, setDashboardData] = useState<ClickUpDashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,7 +28,7 @@ export const DashboardPage = () => {
         setDashboardData(data);
       } catch (err) {
         console.error('Error loading dashboard data:', err);
-        setError(err instanceof Error ? err.message : 'Error al cargar los datos del dashboard');
+        setError(err instanceof Error ? err.message : t('dashboard.error'));
       } finally {
         setIsLoading(false);
       }
@@ -40,12 +42,12 @@ export const DashboardPage = () => {
   };
 
   const getPriorityLabel = (priority: string | null) => {
-    if (!priority) return 'Normal';
+    if (!priority) return t('dashboard.normal');
     const priorityMap: Record<string, string> = {
-      '1': 'Urgente',
-      '2': 'Alta',
-      '3': 'Normal',
-      '4': 'Baja'
+      '1': t('dashboard.urgent'),
+      '2': t('dashboard.high'),
+      '3': t('dashboard.normal'),
+      '4': t('dashboard.low')
     };
     return priorityMap[priority] || priority;
   };
@@ -58,18 +60,18 @@ export const DashboardPage = () => {
       <PillNav />
       <main className="dashboard-page__content">
         <div className="dashboard-page__container">
-          <h1 className="dashboard-page__title">Dashboard</h1>
-          <p className="dashboard-page__subtitle">Bienvenido al portal del cliente</p>
+          <h1 className="dashboard-page__title">{t('dashboard.title')}</h1>
+          <p className="dashboard-page__subtitle">{t('dashboard.subtitle')}</p>
           
           {isLoading && (
             <div className="dashboard-page__loading">
-              <p>Cargando datos de ClickUp...</p>
+              <p>{t('dashboard.loading')}</p>
             </div>
           )}
 
           {error && (
             <div className="dashboard-page__error">
-              <p>Error: {error}</p>
+              <p>{t('dashboard.error')}: {error}</p>
             </div>
           )}
 
@@ -77,40 +79,40 @@ export const DashboardPage = () => {
             <>
               <div className="dashboard-page__grid">
                 <div className="dashboard-page__card">
-                  <h2>Resumen</h2>
+                  <h2>{t('dashboard.summary')}</h2>
                   <div className="dashboard-page__stats">
                     <div className="dashboard-page__stat-item">
-                      <span className="dashboard-page__stat-label">Equipos:</span>
+                      <span className="dashboard-page__stat-label">{t('dashboard.teams')}:</span>
                       <span className="dashboard-page__stat-value">{dashboardData.teamCount}</span>
                     </div>
                     <div className="dashboard-page__stat-item">
-                      <span className="dashboard-page__stat-label">Espacios:</span>
+                      <span className="dashboard-page__stat-label">{t('dashboard.spaces')}:</span>
                       <span className="dashboard-page__stat-value">{dashboardData.spaceCount}</span>
                     </div>
                     <div className="dashboard-page__stat-item">
-                      <span className="dashboard-page__stat-label">Folders:</span>
+                      <span className="dashboard-page__stat-label">{t('dashboard.folders')}:</span>
                       <span className="dashboard-page__stat-value">{dashboardData.folderCount}</span>
                     </div>
                   </div>
                 </div>
                 <div className="dashboard-page__card">
-                  <h2>Tareas Totales</h2>
+                  <h2>{t('dashboard.totalTasks')}</h2>
                   <div className="dashboard-page__stat-item">
                     <span className="dashboard-page__stat-value dashboard-page__stat-value--large">
                       {dashboardData.totalTasks}
                     </span>
                   </div>
-                  <p>Tareas en ClickUp</p>
+                  <p>{t('dashboard.tasksInClickUp')}</p>
                 </div>
                 <div className="dashboard-page__card">
-                  <h2>Estadísticas</h2>
+                  <h2>{t('dashboard.statistics')}</h2>
                   <div className="dashboard-page__stats">
                     <div className="dashboard-page__stat-item">
-                      <span className="dashboard-page__stat-label">Espacios activos:</span>
+                      <span className="dashboard-page__stat-label">{t('dashboard.activeSpaces')}:</span>
                       <span className="dashboard-page__stat-value">{dashboardData.spaceCount}</span>
                     </div>
                     <div className="dashboard-page__stat-item">
-                      <span className="dashboard-page__stat-label">Folders activos:</span>
+                      <span className="dashboard-page__stat-label">{t('dashboard.activeFolders')}:</span>
                       <span className="dashboard-page__stat-value">{dashboardData.folderCount}</span>
                     </div>
                   </div>
@@ -118,9 +120,9 @@ export const DashboardPage = () => {
               </div>
 
               <div className="dashboard-page__tasks-section">
-                <h2 className="dashboard-page__tasks-title">Tareas</h2>
+                <h2 className="dashboard-page__tasks-title">{t('dashboard.tasks')}</h2>
                 {dashboardData.tasks.length === 0 ? (
-                  <p className="dashboard-page__no-tasks">No hay tareas disponibles</p>
+                  <p className="dashboard-page__no-tasks">{t('dashboard.noTasks')}</p>
                 ) : (
                   <div className="dashboard-page__tasks-list">
                     {dashboardData.tasks.map((task) => (
@@ -147,7 +149,7 @@ export const DashboardPage = () => {
                               fontWeight: '500'
                             }}
                           >
-                            {task.status?.status || 'Sin estado'}
+                            {task.status?.status || t('dashboard.noStatus')}
                           </span>
                         </div>
                         {task.description && (
@@ -156,28 +158,28 @@ export const DashboardPage = () => {
                         <div className="dashboard-page__task-meta">
                           {task.priority && (
                             <span className="dashboard-page__task-priority">
-                              Prioridad: {getPriorityLabel(task.priority)}
+                              {t('dashboard.priority')}: {getPriorityLabel(task.priority)}
                             </span>
                           )}
                           {task.listName && (
                             <span className="dashboard-page__task-list">
-                              Lista: {task.listName}
+                              {t('dashboard.list')}: {task.listName}
                             </span>
                           )}
                           {task.folderName && (
                             <span className="dashboard-page__task-folder">
-                              Folder: {task.folderName}
+                              {t('dashboard.folder')}: {task.folderName}
                             </span>
                           )}
                           {task.spaceName && (
                             <span className="dashboard-page__task-space">
-                              Espacio: {task.spaceName}
+                              {t('dashboard.space')}: {task.spaceName}
                             </span>
                           )}
                         </div>
                         {task.assignees.length > 0 && (
                           <div className="dashboard-page__task-assignees">
-                            <span className="dashboard-page__task-assignees-label">Asignados:</span>
+                            <span className="dashboard-page__task-assignees-label">{t('dashboard.assigned')}:</span>
                             {task.assignees.map((assignee) => (
                               <span key={assignee.id} className="dashboard-page__task-assignee">
                                 {assignee.username}

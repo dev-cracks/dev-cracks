@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getChangeHistory, ChangeHistoryEntry } from '../services/userDataApiService';
 import { useAuth } from '../hooks/useAuth';
 import './ChangeHistory.css';
@@ -11,6 +12,7 @@ interface ChangeHistoryProps {
 const MAX_RETRY_ATTEMPTS = 5;
 
 export const ChangeHistory = ({ userId, refreshTrigger }: ChangeHistoryProps) => {
+  const { t } = useTranslation('portal');
   const { getAccessToken } = useAuth();
   const [history, setHistory] = useState<ChangeHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,7 +43,7 @@ export const ChangeHistory = ({ userId, refreshTrigger }: ChangeHistoryProps) =>
           failedAttemptsRef.current += 1;
           
           if (failedAttemptsRef.current >= MAX_RETRY_ATTEMPTS) {
-            setError('No se pudo cargar el historial de cambios después de varios intentos. Por favor, recarga la página.');
+            setError(t('changeHistory.error'));
           } else {
             setHistory([]);
           }
@@ -73,10 +75,10 @@ export const ChangeHistory = ({ userId, refreshTrigger }: ChangeHistoryProps) =>
 
   const getFieldLabel = (field: string): string => {
     if (field === 'contact_email') {
-      return 'Correo Electrónico';
+      return t('changeHistory.email');
     }
     if (field === 'phone') {
-      return 'Número de Móvil';
+      return t('changeHistory.phone');
     }
     return field;
   };
@@ -84,7 +86,7 @@ export const ChangeHistory = ({ userId, refreshTrigger }: ChangeHistoryProps) =>
   if (isLoading) {
     return (
       <div className="change-history">
-        <p>Cargando historial...</p>
+        <p>{t('changeHistory.loading')}</p>
       </div>
     );
   }
@@ -103,7 +105,7 @@ export const ChangeHistory = ({ userId, refreshTrigger }: ChangeHistoryProps) =>
     return (
       <div className="change-history">
         <div className="change-history__empty">
-          <p>No hay cambios registrados aún.</p>
+          <p>{t('changeHistory.empty')}</p>
         </div>
       </div>
     );
@@ -124,16 +126,16 @@ export const ChangeHistory = ({ userId, refreshTrigger }: ChangeHistoryProps) =>
             </div>
             <div className="change-history__entry-content">
               <div className="change-history__change">
-                <span className="change-history__change-label">Valor anterior:</span>
+                <span className="change-history__change-label">{t('changeHistory.oldValue')}</span>
                 <span className="change-history__change-value change-history__change-value--old">
-                  {entry.oldValue || '(vacío)'}
+                  {entry.oldValue || t('changeHistory.emptyValue')}
                 </span>
               </div>
               <div className="change-history__arrow">→</div>
               <div className="change-history__change">
-                <span className="change-history__change-label">Nuevo valor:</span>
+                <span className="change-history__change-label">{t('changeHistory.newValue')}</span>
                 <span className="change-history__change-value change-history__change-value--new">
-                  {entry.newValue || '(vacío)'}
+                  {entry.newValue || t('changeHistory.emptyValue')}
                 </span>
               </div>
             </div>

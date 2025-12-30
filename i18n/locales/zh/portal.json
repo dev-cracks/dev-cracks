@@ -1,4 +1,79 @@
 {
-  "welcome": "欢迎来到门户"
+  "welcome": "欢迎来到门户",
+  "dashboard": {
+    "title": "仪表板",
+    "subtitle": "欢迎来到客户门户",
+    "loading": "正在加载 ClickUp 数据...",
+    "error": "错误",
+    "summary": "摘要",
+    "teams": "团队",
+    "spaces": "空间",
+    "folders": "文件夹",
+    "totalTasks": "总任务",
+    "tasksInClickUp": "ClickUp 中的任务",
+    "statistics": "统计",
+    "activeSpaces": "活动空间",
+    "activeFolders": "活动文件夹",
+    "tasks": "任务",
+    "noTasks": "没有可用任务",
+    "noStatus": "无状态",
+    "priority": "优先级",
+    "list": "列表",
+    "folder": "文件夹",
+    "space": "空间",
+    "assigned": "已分配",
+    "urgent": "紧急",
+    "high": "高",
+    "normal": "正常",
+    "low": "低"
+  },
+  "navigation": {
+    "dashboard": "仪表板",
+    "backoffice": "后台",
+    "devCoach": "开发教练",
+    "devPool": "开发池",
+    "routeOn": "路由开启",
+    "fractalize": "分形化",
+    "signatures": "签名",
+    "landing": "着陆页",
+    "account": "账户",
+    "support": "支持"
+  },
+  "orbModal": {
+    "title": "Jarvis - AI 助手",
+    "close": "关闭窗口",
+    "placeholder": "输入您的消息...",
+    "send": "发送消息",
+    "welcome": "你好 {{name}}，我是 Jarvis，您的 AI 代理，今天我能为您做些什么？",
+    "greeting": "你好！今天我能为您做些什么？",
+    "farewell": "再见！祝您有美好的一天。",
+    "thanks": "不客气！我在这里帮助您。",
+    "capabilities": "我可以帮助您处理各种查询、回答问题，并协助您完成所需的工作。您想了解什么？",
+    "defaultResponse": "我理解您提到了 \"{{message}}\"。我在这里帮助您。您能否给我更多关于您需要的详细信息？"
+  },
+  "changeHistory": {
+    "loading": "正在加载历史记录...",
+    "error": "多次尝试后无法加载更改历史记录。请重新加载页面。",
+    "empty": "尚未记录任何更改。",
+    "email": "电子邮件",
+    "phone": "手机号码",
+    "oldValue": "先前值：",
+    "newValue": "新值：",
+    "emptyValue": "（空）"
+  },
+  "userDataEditor": {
+    "email": "电子邮件",
+    "phone": "手机号码",
+    "notSpecified": "未指定",
+    "edit": "编辑数据",
+    "cancel": "取消",
+    "save": "保存更改",
+    "saving": "正在保存...",
+    "emailRequired": "需要电子邮件",
+    "emailInvalid": "电子邮件无效",
+    "phoneInvalid": "电话号码无效",
+    "saveError": "保存数据时出错。请重试。",
+    "emailPlaceholder": "email@example.com",
+    "phonePlaceholder": "+86 138 0000 0000"
+  }
 }
-

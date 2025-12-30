@@ -3,6 +3,7 @@ import { HomePage } from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
 import Threads from './components/Threads';
 import GooeyNav from './components/GooeyNav';
+import { LanguageSelector } from './components/LanguageSelector';
 
 // Fixed base path for dev-pool when accessed through unified server
 const DEV_POOL_BASE = '/dev-pool';
@@ -32,6 +33,7 @@ const App = () => (
       }}
     />
     <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh' }}>
+      <LanguageSelector />
       <div style={{
         position: 'fixed',
         top: '2rem',

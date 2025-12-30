@@ -1,4 +1,79 @@
 {
-  "welcome": "Bienvenido al Portal"
+  "welcome": "Bienvenido al Portal",
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Bienvenido al portal del cliente",
+    "loading": "Cargando datos de ClickUp...",
+    "error": "Error",
+    "summary": "Resumen",
+    "teams": "Equipos",
+    "spaces": "Espacios",
+    "folders": "Folders",
+    "totalTasks": "Tareas Totales",
+    "tasksInClickUp": "Tareas en ClickUp",
+    "statistics": "Estadísticas",
+    "activeSpaces": "Espacios activos",
+    "activeFolders": "Folders activos",
+    "tasks": "Tareas",
+    "noTasks": "No hay tareas disponibles",
+    "noStatus": "Sin estado",
+    "priority": "Prioridad",
+    "list": "Lista",
+    "folder": "Folder",
+    "space": "Espacio",
+    "assigned": "Asignados",
+    "urgent": "Urgente",
+    "high": "Alta",
+    "normal": "Normal",
+    "low": "Baja"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "backoffice": "Backoffice",
+    "devCoach": "Dev-coach",
+    "devPool": "Dev-pool",
+    "routeOn": "Route-On",
+    "fractalize": "Fractalize",
+    "signatures": "Signatures",
+    "landing": "Landing",
+    "account": "Account",
+    "support": "Support"
+  },
+  "orbModal": {
+    "title": "Jarvis - Asistente de IA",
+    "close": "Cerrar modal",
+    "placeholder": "Escribe tu mensaje...",
+    "send": "Enviar mensaje",
+    "welcome": "Hola {{name}}, soy Jarvis, tu agente de IA, ¿cómo te puedo ayudar el día de hoy?",
+    "greeting": "¡Hola! ¿En qué puedo ayudarte hoy?",
+    "farewell": "¡Hasta luego! Que tengas un excelente día.",
+    "thanks": "¡De nada! Estoy aquí para ayudarte.",
+    "capabilities": "Puedo ayudarte con diversas consultas, responder preguntas, y asistirte en lo que necesites. ¿Qué te gustaría saber?",
+    "defaultResponse": "Entiendo que mencionaste \"{{message}}\". Estoy aquí para ayudarte. ¿Podrías darme más detalles sobre lo que necesitas?"
+  },
+  "changeHistory": {
+    "loading": "Cargando historial...",
+    "error": "No se pudo cargar el historial de cambios después de varios intentos. Por favor, recarga la página.",
+    "empty": "No hay cambios registrados aún.",
+    "email": "Correo Electrónico",
+    "phone": "Número de Móvil",
+    "oldValue": "Valor anterior:",
+    "newValue": "Nuevo valor:",
+    "emptyValue": "(vacío)"
+  },
+  "userDataEditor": {
+    "email": "Correo Electrónico",
+    "phone": "Número de Móvil",
+    "notSpecified": "No especificado",
+    "edit": "Editar Datos",
+    "cancel": "Cancelar",
+    "save": "Guardar Cambios",
+    "saving": "Guardando...",
+    "emailRequired": "El correo electrónico es requerido",
+    "emailInvalid": "El correo electrónico no es válido",
+    "phoneInvalid": "El número de teléfono no es válido",
+    "saveError": "Error al guardar los datos. Por favor, intenta de nuevo.",
+    "emailPlaceholder": "correo@ejemplo.com",
+    "phonePlaceholder": "+34 600 000 000"
+  }
 }
-

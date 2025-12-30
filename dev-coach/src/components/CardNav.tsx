@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { GoArrowUpRight } from 'react-icons/go';
+import { LanguageSelector } from './LanguageSelector';
 import './CardNav.css';
 
 interface CardNavItem {
@@ -174,6 +175,7 @@ const CardNav = ({
           <div className="logo-container">
             <img src={logo} alt={logoAlt} className="logo" />
           </div>
+          <LanguageSelector />
           <button type="button" className="card-nav-cta-button" style={{ backgroundColor: buttonBgColor, color: buttonTextColor }}>
             Get Started
           </button>

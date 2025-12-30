@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import LiquidEther from '../components/LiquidEther.js';
 import './GhostCursorPage.css';
 
 export const GhostCursorPage = () => {
+  const { t } = useTranslation('portal');
   const navigate = useNavigate();
   const [ghostActive, setGhostActive] = useState(true);
 
@@ -88,14 +90,14 @@ export const GhostCursorPage = () => {
   );
 
   const navItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
-    { path: '/backoffice', label: 'Backoffice', icon: <BackofficeIcon />, absolute: true },
-    { path: '/dev-coach', label: 'Dev-coach', icon: <DevCoachIcon />, absolute: true },
-    { path: '/dev-pool', label: 'Dev-pool', icon: <DevPoolIcon />, absolute: true },
-    { path: '/route-on', label: 'Route-On', icon: <RouteOnIcon />, absolute: true },
-    { path: '/fractalize', label: 'Fractalize', icon: <FractalizeIcon />, absolute: true },
-    { path: '/signatures', label: 'Signatures', icon: <SignaturesIcon />, absolute: true },
-    { path: '/landing', label: 'Landing', icon: <LandingIcon />, absolute: true }
+    { path: '/dashboard', label: t('navigation.dashboard'), icon: <DashboardIcon /> },
+    { path: '/backoffice', label: t('navigation.backoffice'), icon: <BackofficeIcon />, absolute: true },
+    { path: '/dev-coach', label: t('navigation.devCoach'), icon: <DevCoachIcon />, absolute: true },
+    { path: '/dev-pool', label: t('navigation.devPool'), icon: <DevPoolIcon />, absolute: true },
+    { path: '/route-on', label: t('navigation.routeOn'), icon: <RouteOnIcon />, absolute: true },
+    { path: '/fractalize', label: t('navigation.fractalize'), icon: <FractalizeIcon />, absolute: true },
+    { path: '/signatures', label: t('navigation.signatures'), icon: <SignaturesIcon />, absolute: true },
+    { path: '/landing', label: t('navigation.landing'), icon: <LandingIcon />, absolute: true }
   ];
 
   return (

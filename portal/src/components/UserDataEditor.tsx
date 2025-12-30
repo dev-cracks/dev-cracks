@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getUserContactData, updateUserContactData, UserData } from '../services/userDataApiService';
 import { useAuth } from '../hooks/useAuth';
 import './UserDataEditor.css';
@@ -10,6 +11,7 @@ interface UserDataEditorProps {
 }
 
 export const UserDataEditor = ({ userId, initialEmail, onUpdate }: UserDataEditorProps) => {
+  const { t } = useTranslation('portal');
   const { getAccessToken } = useAuth();
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -55,17 +57,17 @@ export const UserDataEditor = ({ userId, initialEmail, onUpdate }: UserDataEdito
     setError(null);
 
     if (!email.trim()) {
-      setError('El correo electrónico es requerido');
+      setError(t('userDataEditor.emailRequired'));
       return;
     }
 
     if (!validateEmail(email)) {
-      setError('El correo electrónico no es válido');
+      setError(t('userDataEditor.emailInvalid'));
       return;
     }
 
     if (phone && !validatePhone(phone)) {
-      setError('El número de teléfono no es válido');
+      setError(t('userDataEditor.phoneInvalid'));
       return;
     }
 
@@ -84,7 +86,7 @@ export const UserDataEditor = ({ userId, initialEmail, onUpdate }: UserDataEdito
       setIsEditing(false);
       setError(null);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al guardar los datos. Por favor, intenta de nuevo.';
+      const errorMessage = err instanceof Error ? err.message : t('userDataEditor.saveError');
       setError(errorMessage);
       console.error('Error al guardar datos:', err);
     } finally {
@@ -118,19 +120,19 @@ export const UserDataEditor = ({ userId, initialEmail, onUpdate }: UserDataEdito
       <div className="user-data-editor">
         <div className="user-data-editor__fields">
           <div className="user-data-editor__field">
-            <label className="user-data-editor__label">Correo Electrónico</label>
-            <div className="user-data-editor__value">{email || 'No especificado'}</div>
+            <label className="user-data-editor__label">{t('userDataEditor.email')}</label>
+            <div className="user-data-editor__value">{email || t('userDataEditor.notSpecified')}</div>
           </div>
           <div className="user-data-editor__field">
-            <label className="user-data-editor__label">Número de Móvil</label>
-            <div className="user-data-editor__value">{phone || 'No especificado'}</div>
+            <label className="user-data-editor__label">{t('userDataEditor.phone')}</label>
+            <div className="user-data-editor__value">{phone || t('userDataEditor.notSpecified')}</div>
           </div>
         </div>
         <button
           className="user-data-editor__edit-btn"
           onClick={() => setIsEditing(true)}
         >
-          Editar Datos
+          {t('userDataEditor.edit')}
         </button>
       </div>
     );
@@ -146,7 +148,7 @@ export const UserDataEditor = ({ userId, initialEmail, onUpdate }: UserDataEdito
       <div className="user-data-editor__fields">
         <div className="user-data-editor__field">
           <label className="user-data-editor__label" htmlFor="email">
-            Correo Electrónico *
+            {t('userDataEditor.email')} *
           </label>
           <input
             id="email"
@@ -154,13 +156,13 @@ export const UserDataEditor = ({ userId, initialEmail, onUpdate }: UserDataEdito
             className="user-data-editor__input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="correo@ejemplo.com"
+            placeholder={t('userDataEditor.emailPlaceholder')}
             disabled={isSaving}
           />
         </div>
         <div className="user-data-editor__field">
           <label className="user-data-editor__label" htmlFor="phone">
-            Número de Móvil
+            {t('userDataEditor.phone')}
           </label>
           <input
             id="phone"
@@ -168,7 +170,7 @@ export const UserDataEditor = ({ userId, initialEmail, onUpdate }: UserDataEdito
             className="user-data-editor__input"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            placeholder="+34 600 000 000"
+            placeholder={t('userDataEditor.phonePlaceholder')}
             disabled={isSaving}
           />
         </div>
@@ -179,14 +181,14 @@ export const UserDataEditor = ({ userId, initialEmail, onUpdate }: UserDataEdito
           onClick={handleCancel}
           disabled={isSaving}
         >
-          Cancelar
+          {t('userDataEditor.cancel')}
         </button>
         <button
           className="user-data-editor__btn user-data-editor__btn--save"
           onClick={handleSave}
           disabled={isSaving}
         >
-          {isSaving ? 'Guardando...' : 'Guardar Cambios'}
+          {isSaving ? t('userDataEditor.saving') : t('userDataEditor.save')}
         </button>
       </div>
     </div>

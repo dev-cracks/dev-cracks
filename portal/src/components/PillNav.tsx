@@ -1,5 +1,7 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { LanguageSelector } from './LanguageSelector';
 import './PillNav.css';
 
 interface PillNavProps {
@@ -7,14 +9,15 @@ interface PillNavProps {
 }
 
 export const PillNav: React.FC<PillNavProps> = ({ className = '' }) => {
+  const { t } = useTranslation('portal');
   const navigate = useNavigate();
   const location = useLocation();
 
   const menuItems = [
-    { path: '/dashboard', label: 'Dashboard' },
-    { path: '/account', label: 'Account' },
-    { path: '/support', label: 'Support' },
-    { path: '/backoffice', label: 'Backoffice', external: true }
+    { path: '/dashboard', label: t('navigation.dashboard') },
+    { path: '/account', label: t('navigation.account') },
+    { path: '/support', label: t('navigation.support') },
+    { path: '/backoffice', label: t('navigation.backoffice'), external: true }
   ];
 
   const handleNavClick = (item: typeof menuItems[0], e: React.MouseEvent) => {
@@ -69,6 +72,7 @@ export const PillNav: React.FC<PillNavProps> = ({ className = '' }) => {
               {item.label}
             </button>
           ))}
+          <LanguageSelector />
         </div>
       </div>
     </nav>
