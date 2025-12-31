@@ -14,14 +14,14 @@ export default defineConfig({
     strictPort: false,
   },
   build: {
-    outDir: resolve(__dirname, '../dist'),
+    outDir: resolve(__dirname, 'dist'),
     emptyOutDir: true
   },
   plugins: [react()],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
-      '@common/not-found': resolve(__dirname, '../common/not-found'),
+      '@common/not-found': resolve(__dirname, 'common/not-found/index.ts'),
     },
     dedupe: ['react', 'react-dom', 'react-i18next'],
   }

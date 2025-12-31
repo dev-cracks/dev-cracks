@@ -19,9 +19,13 @@ npm run install:all
 ```
 
 Esto instalará las dependencias en:
-- Raíz del proyecto
-- `web/`
+- Raíz del proyecto (aplicación principal)
 - `backoffice/`
+- `landing/`
+- `portal/`
+- `dev-coach/`
+- `route-on/`
+- `signatures/`
 
 ### Instalación manual
 
@@ -29,8 +33,8 @@ Si prefieres instalar manualmente:
 
 ```bash
 npm install
-cd web && npm install && cd ..
-cd backoffice && npm install && cd ..
+## Desarrollo
+
 ```
 
 ## Desarrollo
@@ -42,10 +46,6 @@ npm run dev
 ```
 
 Esto iniciará:
-- **Web** en `http://localhost:5173`
-- **Backoffice** en `http://localhost:5174`
-
-### Ejecutar aplicaciones individualmente
 
 ```bash
 # Solo Web
@@ -109,6 +109,10 @@ dev-cracks/
 │   ├── public/
 │   └── package.json
 └── package.json      # Scripts para ejecutar ambas apps
+```
+
+## Backend
+
 ```
 
 ## Backend

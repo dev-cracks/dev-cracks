@@ -1,4 +1,4 @@
-import { createI18nInstance } from '../../../i18n/index.ts';
+import { createI18nInstance } from '../../i18n/index.ts';
 import enCommon from './locales/en/common.json';
 import esCommon from './locales/es/common.json';
 import deCommon from './locales/de/common.json';

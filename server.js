@@ -18,6 +18,7 @@ async function createServer() {
   try {
     // Crear servidor Vite para la web principal con HMR habilitado
     const webVite = await createViteServer({
+      configFile: resolve(__dirname, 'vite.config.ts'),
       server: { 
         middlewareMode: true,
         hmr: {
@@ -25,8 +26,6 @@ async function createServer() {
         },
       },
       appType: 'spa',
-      root: resolve(__dirname, 'web'),
-      publicDir: resolve(__dirname, 'web/public'),
     });
 
     // Crear servidor Vite para el backoffice con base path y HMR habilitado
@@ -551,7 +550,7 @@ async function createServer() {
 
     // Fallback para la web principal - servir index.html para rutas SPA
     app.use('*', async (req, res, next) => {
-      // Si la ruta es de landing, portal, backoffice, route-on, dev-coach, dev-pool o fractalize, ya fue manejada arriba
+      // Si la ruta es de landing, portal, backoffice, route-on, dev-coach, dev-pool, fractalize o signatures, ya fue manejada arriba
       if (req.originalUrl.startsWith('/landing') || 
           req.originalUrl.startsWith('/portal') || 
           req.originalUrl.startsWith('/backoffice') ||
@@ -565,7 +564,7 @@ async function createServer() {
       }
       
       try {
-        const template = readFileSync(resolve(__dirname, 'web/index.html'), 'utf-8');
+        const template = readFileSync(resolve(__dirname, 'index.html'), 'utf-8');
         const html = await webVite.transformIndexHtml(req.originalUrl, template);
         res.setHeader('Content-Type', 'text/html');
         return res.send(html);

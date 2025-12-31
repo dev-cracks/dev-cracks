@@ -17,7 +17,7 @@
     "jsx": "react-jsx",
     "paths": {
       "@/*": ["./src/*"],
-      "@common/not-found": ["../common/not-found/index.ts"]
+      "@common/not-found": ["./common/not-found/index.ts"]
     }
   },
   "include": ["./src"],

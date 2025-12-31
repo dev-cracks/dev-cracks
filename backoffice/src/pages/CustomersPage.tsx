@@ -3784,7 +3784,7 @@ export const CustomersPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Cerrar"
+                aria-label={t('common.close')}
                 icon={<DismissRegular />}
                 onClick={() => {
                   handleDrawerOpenChange({} as any, { open: false });
@@ -3804,13 +3804,13 @@ export const CustomersPage = () => {
             {skipDefaultStructure ? (
               <MessageBar intent="warning" style={{ marginTop: 0, marginBottom: tokens.spacingVerticalM }}>
                 <MessageBarBody>
-                  No se creará el tenant sede ni usuario por defecto.
+                  {t('customers.skipDefaultStructureMessage')}
                 </MessageBarBody>
               </MessageBar>
             ) : (
               <MessageBar intent="info" style={{ marginTop: 0, marginBottom: tokens.spacingVerticalM }}>
                 <MessageBarBody>
-                  Se creará automáticamente un tenant para este cliente.
+                  {t('customers.createDefaultTenantMessage')}
                 </MessageBarBody>
               </MessageBar>
             )}
@@ -3820,7 +3820,7 @@ export const CustomersPage = () => {
                 onChange={(_, data) => {
                   setSkipDefaultStructure(data.checked);
                 }}
-                label="Omitir creación de estructura por defecto"
+                label={t('customers.skipDefaultStructure')}
               />
             </div>
             <div className={styles.formField} style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS }}>
@@ -3832,11 +3832,11 @@ export const CustomersPage = () => {
                     setCreateParentId('');
                   }
                 }}
-                label="El nuevo cliente será hijo de otro cliente"
+                label={t('customers.hasParent')}
               />
             </div>
             {hasParent && (
-              <Field label="Cliente Padre" required className={styles.formField}>
+              <Field label={t('customers.parentCustomer')} required className={styles.formField}>
                 <Combobox
                   value={parentCustomerSearchText || (createParentId ? customers.find((c) => c.id === createParentId)?.name || '' : '')}
                   onOptionSelect={(_, data) => {
@@ -3865,19 +3865,19 @@ export const CustomersPage = () => {
                 </Combobox>
               </Field>
             )}
-            <Field label="Nombre" required className={styles.formField}>
+            <Field label={t('customers.name')} required className={styles.formField}>
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               />
             </Field>
-            <Field label="Identificación" required className={styles.formField}>
+            <Field label={t('customers.identification')} required className={styles.formField}>
               <Input
                 value={formData.identification}
                 onChange={(e) => setFormData({ ...formData, identification: e.target.value })}
               />
             </Field>
-            <Field label="País" required className={styles.formField}>
+            <Field label={t('customers.country')} required className={styles.formField}>
               <Combobox
                 value={countrySearchText || countries.find((c) => c.id === formData.countryId)?.name || ''}
                 onOptionSelect={(_, data) => {
@@ -3899,25 +3899,25 @@ export const CustomersPage = () => {
                 ))}
               </Combobox>
             </Field>
-            <Field label="Estado/Provincia" className={styles.formField}>
+            <Field label={t('common.stateProvince')} className={styles.formField}>
               <Input
                 value={formData.stateProvince}
                 onChange={(e) => setFormData({ ...formData, stateProvince: e.target.value })}
               />
             </Field>
-            <Field label="Ciudad" className={styles.formField}>
+            <Field label={t('common.city')} className={styles.formField}>
               <Input
                 value={formData.city}
                 onChange={(e) => setFormData({ ...formData, city: e.target.value })}
               />
             </Field>
-            <Field label="Teléfono" className={styles.formField}>
+            <Field label={t('common.phone')} className={styles.formField}>
               <Input
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               />
             </Field>
-            <Field label="Correo electrónico" className={styles.formField}>
+            <Field label={t('common.email')} className={styles.formField}>
               <Input
                 type="email"
                 value={formData.email}
@@ -3966,10 +3966,10 @@ export const CustomersPage = () => {
                 }}
                 disabled={isCreating}
               >
-                Cancelar
+                {t('common.cancel')}
               </Button>
               <Button appearance="primary" onClick={handleCreate} disabled={isCreating} loading={isCreating}>
-                {isCreating ? 'Creando...' : 'Crear'}
+                {isCreating ? t('common.creating') : t('common.create')}
               </Button>
             </div>
               </>
@@ -3992,7 +3992,7 @@ export const CustomersPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Cerrar"
+                aria-label={t('common.close')}
                 icon={<DismissRegular />}
                 onClick={() => {
                   handleEditDrawerOpenChange({} as any, { open: false });
@@ -4000,7 +4000,7 @@ export const CustomersPage = () => {
               />
             }
           >
-            Editar Cliente
+            {t('customers.edit')}
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
@@ -4030,7 +4030,7 @@ export const CustomersPage = () => {
                 {/* Tab de Detalles */}
                 {editActiveTab === 'details' && (
                   <div style={{ marginTop: tokens.spacingVerticalL }}>
-                    <Field label="Nombre" required className={styles.formField}>
+                    <Field label={t('customers.name')} required className={styles.formField}>
                       <Input
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -4064,25 +4064,25 @@ export const CustomersPage = () => {
                         ))}
                       </Combobox>
                     </Field>
-                    <Field label="Estado/Provincia" className={styles.formField}>
+                    <Field label={t('common.stateProvince')} className={styles.formField}>
                       <Input
                         value={formData.stateProvince}
                         onChange={(e) => setFormData({ ...formData, stateProvince: e.target.value })}
                       />
                     </Field>
-                    <Field label="Ciudad" className={styles.formField}>
+                    <Field label={t('common.city')} className={styles.formField}>
                       <Input
                         value={formData.city}
                         onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                       />
                     </Field>
-                    <Field label="Teléfono" className={styles.formField}>
+                    <Field label={t('common.phone')} className={styles.formField}>
                       <Input
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       />
                     </Field>
-                    <Field label="Correo electrónico" className={styles.formField}>
+                    <Field label={t('common.email')} className={styles.formField}>
                       <Input
                         type="email"
                         value={formData.email}
@@ -4120,7 +4120,7 @@ export const CustomersPage = () => {
                             formData.email !== (selectedCustomer.email || '');
                           
                           if (hasChanges) {
-                            if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los cambios no guardados.')) {
+                            if (window.confirm(t('common.confirmCancelChanges'))) {
                               setIsEditDialogOpen(false);
                               setCustomerTenants([]);
                               setSelectedCustomer(null);
@@ -4304,7 +4304,7 @@ export const CustomersPage = () => {
                       <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, alignItems: 'center', flexWrap: 'wrap', padding: tokens.spacingVerticalM, backgroundColor: tokens.colorNeutralBackground2, borderRadius: tokens.borderRadiusMedium }}>
                         <Text weight="semibold" style={{ width: '100%' }}>Crear Nueva Sede</Text>
                         <Combobox
-                          placeholder="Seleccionar tenant"
+                          placeholder={t('customers.selectTenantPlaceholder')}
                           value={
                             selectedTenantForOffice
                               ? customerTenants.find((t) => t.id === selectedTenantForOffice)?.name || ''
@@ -4399,7 +4399,7 @@ export const CustomersPage = () => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: tokens.spacingVerticalM }}>
                       <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, alignItems: 'center', flexWrap: 'wrap' }}>
                         <Combobox
-                          placeholder="Seleccionar tenant"
+                          placeholder={t('customers.selectTenantPlaceholder')}
                           value={
                             selectedTenantToAdd
                               ? customerTenants.find((t) => t.id === selectedTenantToAdd)?.name || ''
@@ -4421,7 +4421,7 @@ export const CustomersPage = () => {
                           ))}
                         </Combobox>
                         <Combobox
-                          placeholder="Seleccionar usuario para asignar"
+                          placeholder={t('users.selectUserToAssign')}
                           value={
                             selectedUserToAdd
                               ? allUsersForAssign.find((u) => u.id === selectedUserToAdd)?.name || allUsersForAssign.find((u) => u.id === selectedUserToAdd)?.email || ''
@@ -4978,7 +4978,7 @@ export const CustomersPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Cerrar"
+                aria-label={t('common.close')}
                 icon={<DismissRegular />}
                 onClick={() => {
                   handleDetailsDrawerOpenChange({} as any, { open: false });
@@ -4986,7 +4986,7 @@ export const CustomersPage = () => {
               />
             }
           >
-            Detalles del Cliente
+            {t('customers.details')}
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
@@ -5014,28 +5014,28 @@ export const CustomersPage = () => {
                 {/* Tab de Detalles */}
                 {detailsActiveTab === 'details' && (
                   <div style={{ marginTop: tokens.spacingVerticalL }}>
-                    <Field label="Nombre" className={styles.formField}>
+                    <Field label={t('customers.name')} className={styles.formField}>
                       <Input value={selectedCustomer.name} readOnly />
                     </Field>
-                    <Field label="Identificación" className={styles.formField}>
+                    <Field label={t('customers.identification')} className={styles.formField}>
                       <Input value={selectedCustomer.identification} readOnly />
                     </Field>
-                    <Field label="País" className={styles.formField}>
+                    <Field label={t('customers.country')} className={styles.formField}>
                       <Input value={selectedCustomer.countryName || 'N/A'} readOnly />
                     </Field>
-                    <Field label="Estado/Provincia" className={styles.formField}>
+                    <Field label={t('common.stateProvince')} className={styles.formField}>
                       <Input value={selectedCustomer.stateProvince || 'N/A'} readOnly />
                     </Field>
-                    <Field label="Ciudad" className={styles.formField}>
+                    <Field label={t('common.city')} className={styles.formField}>
                       <Input value={selectedCustomer.city || 'N/A'} readOnly />
                     </Field>
-                    <Field label="Teléfono" className={styles.formField}>
+                    <Field label={t('common.phone')} className={styles.formField}>
                       <Input value={selectedCustomer.phone || 'N/A'} readOnly />
                     </Field>
-                    <Field label="Correo electrónico" className={styles.formField}>
+                    <Field label={t('common.email')} className={styles.formField}>
                       <Input value={selectedCustomer.email || 'N/A'} readOnly />
                     </Field>
-                    <Field label="Estado" className={styles.formField}>
+                    <Field label={t('customers.status')} className={styles.formField}>
                       <div>
                         {selectedCustomer.isSuspended ? (
                           <Badge appearance="filled" color="danger">Suspendido</Badge>
@@ -5046,24 +5046,24 @@ export const CustomersPage = () => {
                         )}
                       </div>
                     </Field>
-                    <Field label="Tenants" className={styles.formField}>
+                    <Field label={t('customers.tenants')} className={styles.formField}>
                       <Input value={String(selectedCustomer.tenantCount || 0)} readOnly />
                     </Field>
-                    <Field label="Sedes" className={styles.formField}>
+                    <Field label={t('customers.offices')} className={styles.formField}>
                       <Input value={String(selectedCustomer.officeCount || 0)} readOnly />
                     </Field>
-                    <Field label="Usuarios" className={styles.formField}>
+                    <Field label={t('customers.users')} className={styles.formField}>
                       <Input value={String(selectedCustomer.userCount || 0)} readOnly />
                     </Field>
-                    <Field label="Creado" className={styles.formField}>
+                    <Field label={t('common.created')} className={styles.formField}>
                       <Input value={new Date(selectedCustomer.createdAt).toLocaleString()} readOnly />
                     </Field>
-                    <Field label="Actualizado" className={styles.formField}>
+                    <Field label={t('common.updated')} className={styles.formField}>
                       <Input value={new Date(selectedCustomer.updatedAt).toLocaleString()} readOnly />
                     </Field>
                     <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
                       <Button appearance="primary" onClick={() => setIsDetailsDialogOpen(false)}>
-                        Cerrar
+                        {t('common.close')}
                       </Button>
                     </div>
                   </div>
@@ -5209,7 +5209,7 @@ export const CustomersPage = () => {
                       <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, alignItems: 'center', flexWrap: 'wrap', padding: tokens.spacingVerticalM, backgroundColor: tokens.colorNeutralBackground2, borderRadius: tokens.borderRadiusMedium }}>
                         <Text weight="semibold" style={{ width: '100%' }}>Crear Nueva Sede</Text>
                         <Combobox
-                          placeholder="Seleccionar tenant"
+                          placeholder={t('customers.selectTenantPlaceholder')}
                           value={
                             selectedTenantForOffice
                               ? customerTenants.find((t) => t.id === selectedTenantForOffice)?.name || ''
@@ -5304,7 +5304,7 @@ export const CustomersPage = () => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: tokens.spacingVerticalM }}>
                       <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, alignItems: 'center', flexWrap: 'wrap' }}>
                         <Combobox
-                          placeholder="Seleccionar tenant"
+                          placeholder={t('customers.selectTenantPlaceholder')}
                           value={
                             selectedTenantToAdd
                               ? customerTenants.find((t) => t.id === selectedTenantToAdd)?.name || ''
@@ -5326,7 +5326,7 @@ export const CustomersPage = () => {
                           ))}
                         </Combobox>
                         <Combobox
-                          placeholder="Seleccionar usuario para asignar"
+                          placeholder={t('users.selectUserToAssign')}
                           value={
                             selectedUserToAdd
                               ? allUsersForAssign.find((u) => u.id === selectedUserToAdd)?.name || allUsersForAssign.find((u) => u.id === selectedUserToAdd)?.email || ''
@@ -5526,10 +5526,10 @@ export const CustomersPage = () => {
                 <DetailsSkeleton rows={8} />
               ) : selectedTenant ? (
                 <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
-                  <Field label="Nombre" className={styles.formField}>
+                  <Field label={t('customers.name')} className={styles.formField}>
                     <Input value={selectedTenant.name} readOnly />
                   </Field>
-                  <Field label="Cliente" className={styles.formField}>
+                  <Field label={t('customers.title')} className={styles.formField}>
                     <Input value={selectedTenant.customerName || 'N/A'} readOnly />
                   </Field>
                   {selectedTenant.officeName && (
@@ -5537,7 +5537,7 @@ export const CustomersPage = () => {
                       <Input value={selectedTenant.officeName} readOnly />
                     </Field>
                   )}
-                  <Field label="Estado" className={styles.formField}>
+                  <Field label={t('customers.status')} className={styles.formField}>
                     <div>
                       {selectedTenant.isSuspended ? (
                         <Badge appearance="filled" color="danger">Suspendido</Badge>
@@ -5894,7 +5894,7 @@ export const CustomersPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Cerrar"
+                aria-label={t('common.close')}
                 icon={<DismissRegular />}
                 onClick={() => {
                   if (isCreatingOffice) {
@@ -5908,7 +5908,7 @@ export const CustomersPage = () => {
                                   officeFormData.phone.trim() || 
                                   officeFormData.email.trim();
                   if (hasData) {
-                    if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
+                    if (window.confirm(t('common.confirmClose'))) {
                       setIsCreateOfficeDialogOpen(false);
                       setOfficeFormData({
                         tenantId: '',
@@ -5931,7 +5931,7 @@ export const CustomersPage = () => {
               />
             }
           >
-            Nueva Sede
+            {t('customers.newOffice')}
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
@@ -5940,13 +5940,13 @@ export const CustomersPage = () => {
               <DetailsSkeleton rows={8} />
             ) : (
               <>
-                <Field label="Cliente" className={styles.formField}>
+                <Field label={t('customers.title')} className={styles.formField}>
                   <Input
                     value={selectedCustomer?.name || ''}
                     readOnly
                   />
                 </Field>
-                <Field label="Tenant" required className={styles.formField}>
+                <Field label={t('tenants.tenant')} required className={styles.formField}>
                   {customerTenants.length === 0 ? (
                     <Input
                       value=""
@@ -5983,47 +5983,47 @@ export const CustomersPage = () => {
                     placeholder="Nombre de la sede"
                   />
                 </Field>
-                <Field label="Dirección" className={styles.formField}>
+                <Field label={t('common.address')} className={styles.formField}>
                   <Input
                     value={officeFormData.address}
                     onChange={(e) => setOfficeFormData({ ...officeFormData, address: e.target.value })}
-                    placeholder="Dirección"
+                    placeholder={t('customers.addressPlaceholder')}
                   />
                 </Field>
-                <Field label="Ciudad" className={styles.formField}>
+                <Field label={t('common.city')} className={styles.formField}>
                   <Input
                     value={officeFormData.city}
                     onChange={(e) => setOfficeFormData({ ...officeFormData, city: e.target.value })}
-                    placeholder="Ciudad"
+                    placeholder={t('common.city')}
                   />
                 </Field>
-                <Field label="Estado/Provincia" className={styles.formField}>
+                <Field label={t('common.stateProvince')} className={styles.formField}>
                   <Input
                     value={officeFormData.stateProvince}
                     onChange={(e) => setOfficeFormData({ ...officeFormData, stateProvince: e.target.value })}
-                    placeholder="Estado/Provincia"
+                    placeholder={t('common.stateProvince')}
                   />
                 </Field>
-                <Field label="Código Postal" className={styles.formField}>
+                <Field label={t('common.postalCode')} className={styles.formField}>
                   <Input
                     value={officeFormData.postalCode}
                     onChange={(e) => setOfficeFormData({ ...officeFormData, postalCode: e.target.value })}
-                    placeholder="Código Postal"
+                    placeholder={t('customers.postalCodePlaceholder')}
                   />
                 </Field>
-                <Field label="Teléfono" className={styles.formField}>
+                <Field label={t('common.phone')} className={styles.formField}>
                   <Input
                     value={officeFormData.phone}
                     onChange={(e) => setOfficeFormData({ ...officeFormData, phone: e.target.value })}
-                    placeholder="Teléfono"
+                    placeholder={t('common.phone')}
                   />
                 </Field>
-                <Field label="Email" className={styles.formField}>
+                <Field label={t('common.email')} className={styles.formField}>
                   <Input
                     type="email"
                     value={officeFormData.email}
                     onChange={(e) => setOfficeFormData({ ...officeFormData, email: e.target.value })}
-                    placeholder="Email"
+                    placeholder={t('common.email')}
                   />
                 </Field>
                 {createOfficeError && (
@@ -6065,10 +6065,10 @@ export const CustomersPage = () => {
                     }}
                     disabled={isCreatingOffice}
                   >
-                    Cancelar
+                    {t('common.cancel')}
                   </Button>
                   <Button appearance="primary" onClick={handleCreateOffice} disabled={isCreatingOffice} loading={isCreatingOffice}>
-                    {isCreatingOffice ? 'Creando...' : 'Crear'}
+                    {isCreatingOffice ? t('common.creating') : t('common.create')}
                   </Button>
                 </div>
               </>
@@ -6119,7 +6119,7 @@ export const CustomersPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Cerrar"
+                aria-label={t('common.close')}
                 icon={<DismissRegular />}
                 onClick={() => {
                   if (isCreatingTenant) {
@@ -6130,7 +6130,7 @@ export const CustomersPage = () => {
                     ? selectedTenantToAdd.trim() 
                     : tenantFormData.name.trim();
                   if (hasData) {
-                    if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
+                    if (window.confirm(t('common.confirmClose'))) {
                       setIsCreateTenantDialogOpen(false);
                       setTenantFormData({
                         name: '',
@@ -6150,7 +6150,7 @@ export const CustomersPage = () => {
           >
             {(() => {
               const tenantCount = selectedCustomer?.tenantCount ?? 0;
-              return tenantCount === 0 ? 'Asignar Tenant' : 'Nuevo Tenant';
+              return tenantCount === 0 ? t('customers.assignTenant') : t('customers.newTenant');
             })()}
           </DrawerHeaderTitle>
         </DrawerHeader>
@@ -6160,7 +6160,7 @@ export const CustomersPage = () => {
               <DetailsSkeleton rows={3} />
             ) : (
               <>
-                <Field label="Cliente" className={styles.formField}>
+                <Field label={t('customers.title')} className={styles.formField}>
                   <Input
                     value={selectedCustomer?.name || ''}
                     readOnly
@@ -6212,11 +6212,11 @@ export const CustomersPage = () => {
                   
                   // Si el cliente ya tiene tenants, mostrar Input para crear uno nuevo
                   return (
-                    <Field label="Nombre" required className={styles.formField}>
+                    <Field label={t('customers.name')} required className={styles.formField}>
                       <Input
                         value={tenantFormData.name}
                         onChange={(e) => setTenantFormData({ ...tenantFormData, name: e.target.value })}
-                        placeholder="Nombre del tenant"
+                        placeholder={t('customers.tenantNamePlaceholder')}
                       />
                     </Field>
                   );
@@ -6235,7 +6235,7 @@ export const CustomersPage = () => {
                         ? selectedTenantToAdd.trim() 
                         : tenantFormData.name.trim();
                       if (hasData) {
-                        if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los datos no guardados.')) {
+                        if (window.confirm(t('common.confirmCancel'))) {
                           setIsCreateTenantDialogOpen(false);
                           setTenantFormData({
                             name: '',
@@ -6252,7 +6252,7 @@ export const CustomersPage = () => {
                     }}
                     disabled={isCreatingTenant}
                   >
-                    Cancelar
+                    {t('common.cancel')}
                   </Button>
                   {(() => {
                     const tenantCount = selectedCustomer?.tenantCount ?? 0;
@@ -6264,7 +6264,7 @@ export const CustomersPage = () => {
                           disabled={isCreatingTenant || !selectedTenantToAdd || isLoadingAllTenants || allTenantsForAssign.length === 0} 
                           loading={isCreatingTenant}
                         >
-                          {isCreatingTenant ? 'Asignando...' : 'Asignar'}
+                          {isCreatingTenant ? t('tenants.assigning') : t('tenants.assign')}
                         </Button>
                       );
                     }
@@ -6338,7 +6338,7 @@ export const CustomersPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Cerrar"
+                aria-label={t('common.close')}
                 icon={<DismissRegular />}
                 onClick={() => {
                   if (isCreatingUser) {
@@ -6351,7 +6351,7 @@ export const CustomersPage = () => {
                                   userFormData.phone.trim() || 
                                   userFormData.auth0Id.trim();
                   if (hasData) {
-                    if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
+                    if (window.confirm(t('common.confirmClose'))) {
                       setIsCreateUserDrawerOpen(false);
                       setUserFormData({
                         email: '',
@@ -6382,13 +6382,13 @@ export const CustomersPage = () => {
               <DetailsSkeleton rows={8} />
             ) : (
               <>
-                <Field label="Cliente" className={styles.formField}>
+                <Field label={t('customers.title')} className={styles.formField}>
                   <Input
                     value={selectedCustomer?.name || ''}
                     readOnly
                   />
                 </Field>
-                <Field label="Tenant" required className={styles.formField}>
+                <Field label={t('tenants.tenant')} required className={styles.formField}>
                   {customerTenants.length === 0 ? (
                     <Input
                       value=""
@@ -6458,7 +6458,7 @@ export const CustomersPage = () => {
                     </Combobox>
                   )}
                 </Field>
-                <Field label="Email" required className={styles.formField}>
+                <Field label={t('users.email')} required className={styles.formField}>
                   <Input
                     type="email"
                     value={userFormData.email}
@@ -6470,19 +6470,19 @@ export const CustomersPage = () => {
                         contactEmail: emailValue // Actualizar contactEmail automáticamente con el mismo valor
                       });
                     }}
-                    placeholder="Email del usuario"
+                    placeholder={t('customers.userEmailPlaceholder')}
                   />
                 </Field>
-                <Field label="Nombre" className={styles.formField}>
+                <Field label={t('customers.name')} className={styles.formField}>
                   <Input
                     value={userFormData.name}
                     onChange={(e) => setUserFormData({ ...userFormData, name: e.target.value })}
-                    placeholder="Nombre del usuario"
+                    placeholder={t('customers.userNamePlaceholder')}
                   />
                 </Field>
-                <Field label="Rol" className={styles.formField}>
+                <Field label={t('users.role')} className={styles.formField}>
                   <Combobox
-                    value={roleSearchText || (userFormData.role === 'Admin' ? 'Administrador' : 'Usuario')}
+                    value={roleSearchText || (userFormData.role === 'Admin' ? t('users.administrator') : t('users.user'))}
                     onOptionSelect={(_, data) => {
                       if (data.optionValue) {
                         setUserFormData({ ...userFormData, role: data.optionValue as 'Admin' | 'User' });
@@ -6501,26 +6501,26 @@ export const CustomersPage = () => {
                     ))}
                   </Combobox>
                 </Field>
-                <Field label="Email de Contacto" className={styles.formField}>
+                <Field label={t('users.contactEmail')} className={styles.formField}>
                   <Input
                     type="email"
                     value={userFormData.contactEmail}
                     onChange={(e) => setUserFormData({ ...userFormData, contactEmail: e.target.value })}
-                    placeholder="Email de contacto"
+                    placeholder={t('customers.contactEmailPlaceholder')}
                   />
                 </Field>
-                <Field label="Teléfono" className={styles.formField}>
+                <Field label={t('common.phone')} className={styles.formField}>
                   <Input
                     value={userFormData.phone}
                     onChange={(e) => setUserFormData({ ...userFormData, phone: e.target.value })}
-                    placeholder="Teléfono"
+                    placeholder={t('common.phone')}
                   />
                 </Field>
-                <Field label="Auth0 ID (opcional)" className={styles.formField}>
+                <Field label={t('customers.auth0IdOptional')} className={styles.formField}>
                   <Input
                     value={userFormData.auth0Id}
                     onChange={(e) => setUserFormData({ ...userFormData, auth0Id: e.target.value })}
-                    placeholder="Se generará automáticamente si se deja vacío"
+                    placeholder={t('customers.auth0IdPlaceholder')}
                   />
                 </Field>
                 {createUserError && (

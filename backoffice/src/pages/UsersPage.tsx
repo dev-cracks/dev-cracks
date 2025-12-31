@@ -1071,7 +1071,7 @@ export const UsersPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Close"
+                aria-label={t('common.close')}
                 icon={<DismissRegular />}
                 onClick={() => setIsCreateDialogOpen(false)}
               />
@@ -1086,29 +1086,29 @@ export const UsersPage = () => {
               <DetailsSkeleton rows={8} />
             ) : (
               <>
-                <Field label="Email" required className={styles.formField}>
+                <Field label={t('users.email')} required className={styles.formField}>
                   <Input
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
                 </Field>
-                <Field label="Name" className={styles.formField}>
+                <Field label={t('users.name')} className={styles.formField}>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   />
                 </Field>
-                <Field label="Role" className={styles.formField}>
+                <Field label={t('users.role')} className={styles.formField}>
                   <Select
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value as 'Admin' | 'User' })}
                   >
-                    <option value="User">User</option>
-                    <option value="Admin">Administrator</option>
+                    <option value="User">{t('users.user')}</option>
+                    <option value="Admin">{t('users.administrator')}</option>
                   </Select>
                 </Field>
-                <Field label="Tenant" className={styles.formField}>
+                <Field label={t('users.tenants')} className={styles.formField}>
                   <Combobox
                     value={formData.tenantId ? tenants.find((t) => t.id === formData.tenantId)?.name || '' : ''}
                     onOptionSelect={async (_, data) => {
@@ -1134,7 +1134,7 @@ export const UsersPage = () => {
                   </Combobox>
                 </Field>
                 {formData.tenantId && (
-                  <Field label="Office" className={styles.formField}>
+                  <Field label={t('users.offices')} className={styles.formField}>
                     <Combobox
                       value={formData.officeId ? createAvailableOffices.find((o) => o.id === formData.officeId)?.name || '' : ''}
                       onOptionSelect={(_, data) => {
@@ -1152,27 +1152,27 @@ export const UsersPage = () => {
                         ))
                       ) : (
                         <Option value="" disabled>
-                          No offices available for this tenant
+                          {t('users.noOfficesForTenant')}
                         </Option>
                       )}
                     </Combobox>
                   </Field>
                 )}
-                <Field label="Contact Email" className={styles.formField}>
+                <Field label={t('users.contactEmail')} className={styles.formField}>
                   <Input
                     type="email"
                     value={formData.contactEmail}
                     onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
                   />
                 </Field>
-                <Field label="Auth0 ID (optional)" className={styles.formField}>
+                <Field label={t('users.auth0IdOptional')} className={styles.formField}>
                   <Input
                     value={formData.auth0Id}
                     onChange={(e) => setFormData({ ...formData, auth0Id: e.target.value })}
-                    placeholder="Will be generated automatically if left empty"
+                    placeholder={t('users.auth0IdPlaceholder')}
                   />
                 </Field>
-                <Field label="Phone" className={styles.formField}>
+                <Field label={t('users.phone')} className={styles.formField}>
                   <Input
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -1184,10 +1184,10 @@ export const UsersPage = () => {
                     onClick={() => setIsCreateDialogOpen(false)}
                     disabled={isCreating}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button appearance="primary" onClick={handleCreate} disabled={isCreating}>
-                    {isCreating ? 'Creating...' : 'Create'}
+                    {isCreating ? t('common.creating') : t('common.create')}
                   </Button>
                 </div>
               </>
@@ -1215,13 +1215,13 @@ export const UsersPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Close"
+                aria-label={t('common.close')}
                 icon={<DismissRegular />}
                 onClick={() => setIsEditDialogOpen(false)}
               />
             }
           >
-            Edit User
+            {t('common.editUser')}
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
@@ -1230,29 +1230,29 @@ export const UsersPage = () => {
               <DetailsSkeleton rows={8} />
             ) : (
               <>
-                <Field label="Email" required className={styles.formField}>
+                <Field label={t('users.email')} required className={styles.formField}>
                   <Input
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
                 </Field>
-                <Field label="Name" className={styles.formField}>
+                <Field label={t('users.name')} className={styles.formField}>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   />
                 </Field>
-                <Field label="Role" className={styles.formField}>
+                <Field label={t('users.role')} className={styles.formField}>
                   <Select
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value as 'Admin' | 'User' })}
                   >
-                    <option value="User">User</option>
-                    <option value="Admin">Administrator</option>
+                    <option value="User">{t('users.user')}</option>
+                    <option value="Admin">{t('users.administrator')}</option>
                   </Select>
                 </Field>
-                <Field label="Tenant" className={styles.formField}>
+                <Field label={t('users.tenants')} className={styles.formField}>
                   <Combobox
                     value={formData.tenantId ? tenants.find((t) => t.id === formData.tenantId)?.name || '' : ''}
                     onOptionSelect={async (_, data) => {
@@ -1282,7 +1282,7 @@ export const UsersPage = () => {
                   </Combobox>
                 </Field>
                 {formData.tenantId && (
-                  <Field label="Office" className={styles.formField}>
+                  <Field label={t('users.offices')} className={styles.formField}>
                     <Combobox
                       value={formData.officeId ? editAvailableOffices.find((o) => o.id === formData.officeId)?.name || '' : ''}
                       onOptionSelect={(_, data) => {
@@ -1300,27 +1300,27 @@ export const UsersPage = () => {
                         ))
                       ) : (
                         <Option value="" disabled>
-                          No offices available for this tenant
+                          {t('users.noOfficesForTenant')}
                         </Option>
                       )}
                     </Combobox>
                   </Field>
                 )}
-                <Field label="Contact Email" className={styles.formField}>
+                <Field label={t('users.contactEmail')} className={styles.formField}>
                   <Input
                     type="email"
                     value={formData.contactEmail}
                     onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
                   />
                 </Field>
-                <Field label="Auth0 ID" className={styles.formField}>
+                <Field label={t('users.auth0Id')} className={styles.formField}>
                   <Input
                     value={formData.auth0Id}
                     readOnly
                     placeholder="auth0|..."
                   />
                 </Field>
-                <Field label="Phone" className={styles.formField}>
+                <Field label={t('users.phone')} className={styles.formField}>
                   <Input
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -1332,10 +1332,10 @@ export const UsersPage = () => {
                     onClick={() => setIsEditDialogOpen(false)}
                     disabled={isSaving}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button appearance="primary" onClick={handleSave} disabled={isSaving}>
-                    {isSaving ? 'Saving...' : 'Save'}
+                    {isSaving ? t('common.saving') : t('common.save')}
                   </Button>
                 </div>
               </>
@@ -1465,7 +1465,7 @@ export const UsersPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Close"
+                aria-label={t('common.close')}
                 icon={<DismissRegular />}
                 onClick={() => {
                   setIsCustomerDetailsDialogOpen(false);
@@ -1474,60 +1474,60 @@ export const UsersPage = () => {
               />
             }
           >
-            Customer Details
+            {t('customers.details')}
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
           <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
             {selectedCustomer && (
               <>
-                <Field label="Name" className={styles.formField}>
+                <Field label={t('customers.name')} className={styles.formField}>
                   <Input value={selectedCustomer.name} readOnly />
                 </Field>
-                <Field label="Identification" className={styles.formField}>
+                <Field label={t('customers.identification')} className={styles.formField}>
                   <Input value={selectedCustomer.identification} readOnly />
                 </Field>
-                <Field label="Country" className={styles.formField}>
-                  <Input value={selectedCustomer.countryName || 'N/A'} readOnly />
+                <Field label={t('customers.country')} className={styles.formField}>
+                  <Input value={selectedCustomer.countryName || t('common.notAvailable')} readOnly />
                 </Field>
-                <Field label="State/Province" className={styles.formField}>
-                  <Input value={selectedCustomer.stateProvince || 'N/A'} readOnly />
+                <Field label={t('common.stateProvince')} className={styles.formField}>
+                  <Input value={selectedCustomer.stateProvince || t('common.notAvailable')} readOnly />
                 </Field>
-                <Field label="City" className={styles.formField}>
-                  <Input value={selectedCustomer.city || 'N/A'} readOnly />
+                <Field label={t('common.city')} className={styles.formField}>
+                  <Input value={selectedCustomer.city || t('common.notAvailable')} readOnly />
                 </Field>
-                <Field label="Phone" className={styles.formField}>
-                  <Input value={selectedCustomer.phone || 'N/A'} readOnly />
+                <Field label={t('common.phone')} className={styles.formField}>
+                  <Input value={selectedCustomer.phone || t('common.notAvailable')} readOnly />
                 </Field>
-                <Field label="Email" className={styles.formField}>
-                  <Input value={selectedCustomer.email || 'N/A'} readOnly />
+                <Field label={t('common.email')} className={styles.formField}>
+                  <Input value={selectedCustomer.email || t('common.notAvailable')} readOnly />
                 </Field>
-                <Field label="Status" className={styles.formField}>
+                <Field label={t('customers.status')} className={styles.formField}>
                   <div>
                     {selectedCustomer.isSuspended ? (
-                      <Badge appearance="filled" color="danger">Suspended</Badge>
+                      <Badge appearance="filled" color="danger">{t('common.suspended')}</Badge>
                     ) : selectedCustomer.isActive ? (
-                      <Badge appearance="filled" color="success">Active</Badge>
+                      <Badge appearance="filled" color="success">{t('common.active')}</Badge>
                     ) : (
-                      <Badge appearance="outline">Inactive</Badge>
+                      <Badge appearance="outline">{t('common.inactive')}</Badge>
                     )}
                   </div>
                 </Field>
-                <Field label="Tenants" className={styles.formField}>
+                <Field label={t('customers.tenants')} className={styles.formField}>
                   <Input value={String(selectedCustomer.tenantCount || 0)} readOnly />
                 </Field>
-                <Field label="Users" className={styles.formField}>
+                <Field label={t('customers.users')} className={styles.formField}>
                   <Input value={String(selectedCustomer.userCount || 0)} readOnly />
                 </Field>
-                <Field label="Created" className={styles.formField}>
+                <Field label={t('common.created')} className={styles.formField}>
                   <Input value={new Date(selectedCustomer.createdAt).toLocaleString()} readOnly />
                 </Field>
-                <Field label="Updated" className={styles.formField}>
+                <Field label={t('common.updated')} className={styles.formField}>
                   <Input value={new Date(selectedCustomer.updatedAt).toLocaleString()} readOnly />
                 </Field>
                 <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
                   <Button appearance="primary" onClick={() => setIsCustomerDetailsDialogOpen(false)}>
-                    Close
+                    {t('common.close')}
                   </Button>
                 </div>
               </>
@@ -1614,13 +1614,13 @@ export const UsersPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Close"
+                aria-label={t('common.close')}
                 icon={<DismissRegular />}
                 onClick={() => setIsAssignDrawerOpen(false)}
               />
             }
           >
-            Assign Tenant and Office
+            {t('users.assignTenantAndOffice')}
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
@@ -1632,7 +1632,7 @@ export const UsersPage = () => {
             )}
             {selectedUserForAssign && (
               <>
-                <Field label="User" className={styles.formField}>
+                <Field label={t('users.user')} className={styles.formField}>
                   <Input 
                     value={selectedUserForAssign.name || selectedUserForAssign.email} 
                     readOnly 
@@ -1646,13 +1646,13 @@ export const UsersPage = () => {
                     disabled={isInitializing || isAssigning}
                     style={{ width: '100%' }}
                   >
-                    {isInitializing ? 'Initializing...' : 'Initialize Default'}
+                    {isInitializing ? t('users.initializing') : t('users.initializeDefault')}
                   </Button>
                   <Text size={300} style={{ marginTop: tokens.spacingVerticalS, color: tokens.colorNeutralForeground3, display: 'block' }}>
-                    Creates a default customer, tenant and office and assigns them to this user
+                    {t('users.initializeDefaultDescription')}
                   </Text>
                 </div>
-                <Field label="Tenant" required className={styles.formField}>
+                <Field label={t('users.tenants')} required className={styles.formField}>
                   <Combobox
                     value={selectedTenantId ? tenants.find((t) => t.id === selectedTenantId)?.name || '' : ''}
                     onOptionSelect={(_, data) => {
@@ -1670,7 +1670,7 @@ export const UsersPage = () => {
                   </Combobox>
                 </Field>
                 {selectedTenantId && (
-                  <Field label="Office" className={styles.formField}>
+                  <Field label={t('users.offices')} className={styles.formField}>
                     <Combobox
                       value={selectedOfficeId ? availableOffices.find((o) => o.id === selectedOfficeId)?.name || '' : ''}
                       onOptionSelect={(_, data) => {
@@ -1688,7 +1688,7 @@ export const UsersPage = () => {
                         ))
                       ) : (
                         <Option value="" disabled>
-                          No offices available for this tenant
+                          {t('users.noOfficesForTenant')}
                         </Option>
                       )}
                     </Combobox>
@@ -1700,14 +1700,14 @@ export const UsersPage = () => {
                     onClick={() => setIsAssignDrawerOpen(false)}
                     disabled={isAssigning || isInitializing}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button 
                     appearance="primary" 
                     onClick={handleAssignTenantAndOffice}
                     disabled={isAssigning || isInitializing || !selectedTenantId}
                   >
-                    {isAssigning ? 'Assigning...' : 'Assign'}
+                    {isAssigning ? t('users.assigning') : t('users.assign')}
                   </Button>
                 </div>
               </>

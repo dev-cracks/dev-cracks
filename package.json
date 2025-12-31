@@ -6,12 +6,11 @@
   "scripts": {
     "dev": "node server.js",
     "dev:main": "vite",
-    "dev:web": "npm --prefix web run dev",
     "dev:backoffice": "npm --prefix backoffice run dev",
     "dev:portal": "npm --prefix portal run dev",
     "dev:landing": "npm --prefix landing run dev",
-    "build": "npm run install:all && npm run build:web && npm run build:landing && npm run build:portal && npm run build:backoffice && npm run build:dev-coach && npm run build:route-on && npm run build:signatures && npm run build:render",
-    "build:web": "npm --prefix web run build",
+    "build": "npm run install:all && npm run build:main && npm run build:landing && npm run build:portal && npm run build:backoffice && npm run build:dev-coach && npm run build:route-on && npm run build:signatures && npm run build:render",
+    "build:main": "vite build",
     "build:landing": "npm --prefix landing run build",
     "build:portal": "npm --prefix portal run build",
     "build:backoffice": "npm --prefix backoffice run build",
@@ -19,21 +18,32 @@
     "build:route-on": "npm --prefix route-on run build",
     "build:signatures": "npm --prefix signatures run build",
     "build:render": "node scripts/prepare-render-build.js",
-    "install:all": "npm install && npm --prefix web install && npm --prefix landing install && npm --prefix portal install && npm --prefix backoffice install && npm --prefix dev-coach install && npm --prefix route-on install && npm --prefix signatures install"
+    "install:all": "npm install && npm --prefix landing install && npm --prefix portal install && npm --prefix backoffice install && npm --prefix dev-coach install && npm --prefix route-on install && npm --prefix signatures install"
   },
   "dependencies": {
+    "@auth0/auth0-react": "^2.11.0",
+    "@walletpass/pass-js": "^6.9.1",
+    "framer-motion": "^12.23.26",
     "i18next": "^23.7.6",
     "i18next-browser-languagedetector": "^7.2.0",
+    "jszip": "^3.10.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-i18next": "^13.5.0",
+    "react-router-dom": "^7.10.1",
     "three": "^0.160.0",
-    "postprocessing": "^6.38.2"
+    "postprocessing": "^6.38.2",
+    "zustand": "^4.5.2"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
+    "@types/jszip": "^3.4.0",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@types/three": "^0.160.0",
     "@vitejs/plugin-react-swc": "^3.5.0",
-    "vite": "^5.0.0",
+    "concurrently": "^8.2.2",
     "express": "^4.18.2",
-    "@walletpass/pass-js": "^6.9.1",
-    "@types/three": "^0.160.0"
+    "typescript": "^5.3.2",
+    "vite": "^5.0.0"
   }
 }

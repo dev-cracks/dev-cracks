@@ -1600,12 +1600,12 @@ export const TenantsPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Cerrar"
+                aria-label={t('common.close')}
                 icon={<DismissRegular />}
                 onClick={() => {
                   const hasData = formData.name.trim() || formData.customerId;
                   if (hasData) {
-                    if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
+                    if (window.confirm(t('common.confirmClose'))) {
                       setIsCreateDialogOpen(false);
                       setFormData({ name: '', customerId: '' });
                       setError(null);
@@ -1626,13 +1626,13 @@ export const TenantsPage = () => {
               <DetailsSkeleton rows={3} />
             ) : (
               <>
-                <Field label="Nombre" required className={styles.formField}>
+                <Field label={t('tenants.name')} required className={styles.formField}>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   />
                 </Field>
-                <Field label="Cliente" required className={styles.formField}>
+                <Field label={t('tenants.customer')} required className={styles.formField}>
                   <Combobox
                     value={customers.find((c) => c.id === formData.customerId)?.name || ''}
                     onOptionSelect={(_, data) => {
@@ -1655,7 +1655,7 @@ export const TenantsPage = () => {
                     onClick={() => {
                       const hasData = formData.name.trim() || formData.customerId;
                       if (hasData) {
-                        if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los datos no guardados.')) {
+                        if (window.confirm(t('common.confirmCancel'))) {
                           setIsCreateDialogOpen(false);
                           setFormData({ name: '', customerId: '' });
                           setError(null);
@@ -1666,10 +1666,10 @@ export const TenantsPage = () => {
                     }}
                     disabled={isCreating}
                   >
-                    Cancelar
+                    {t('common.cancel')}
                   </Button>
                   <Button appearance="primary" onClick={handleCreate} disabled={isCreating}>
-                    {isCreating ? 'Creando...' : 'Crear'}
+                    {isCreating ? t('common.creating') : t('common.create')}
                   </Button>
                 </div>
               </>
@@ -1753,7 +1753,7 @@ export const TenantsPage = () => {
               />
             }
           >
-            Editar Tenant
+            {t('common.editTenant')}
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
@@ -1762,13 +1762,13 @@ export const TenantsPage = () => {
               <DetailsSkeleton rows={2} />
             ) : (
               <>
-                <Field label="Nombre" required className={styles.formField}>
+                <Field label={t('tenants.name')} required className={styles.formField}>
                   <Input
                     value={editFormData.name}
                     onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
                   />
                 </Field>
-                <Field label="Cliente" required className={styles.formField}>
+                <Field label={t('tenants.customer')} required className={styles.formField}>
                   <Combobox
                     value={customers.find((c) => c.id === editFormData.customerId)?.name || ''}
                     onOptionSelect={(_, data) => {
@@ -1800,7 +1800,7 @@ export const TenantsPage = () => {
                                         editFormData.customerId !== selectedTenant.customerId;
                       
                       if (hasChanges) {
-                        if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los cambios no guardados.')) {
+                        if (window.confirm(t('common.confirmCancelChanges'))) {
                           setIsEditDialogOpen(false);
                           setSelectedTenant(null);
                           setEditFormData({ name: '', customerId: '' });
@@ -1815,10 +1815,10 @@ export const TenantsPage = () => {
                     }}
                     disabled={isSaving}
                   >
-                    Cancelar
+                    {t('common.cancel')}
                   </Button>
                   <Button appearance="primary" onClick={handleSave} disabled={isSaving}>
-                    {isSaving ? 'Guardando...' : 'Guardar'}
+                    {isSaving ? t('common.saving') : t('common.save')}
                   </Button>
                 </div>
               </>
@@ -1870,7 +1870,7 @@ export const TenantsPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Cerrar"
+                aria-label={t('common.close')}
                 icon={<DismissRegular />}
                 onClick={() => {
                   setIsDetailsDialogOpen(false);
@@ -1879,7 +1879,7 @@ export const TenantsPage = () => {
               />
             }
           >
-            Detalles del Tenant
+            {t('tenants.details')}
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
@@ -1888,35 +1888,35 @@ export const TenantsPage = () => {
               <DetailsSkeleton rows={10} />
             ) : selectedTenant ? (
               <>
-                <Field label="Nombre" className={styles.formField}>
+                <Field label={t('tenants.name')} className={styles.formField}>
                   <Input value={selectedTenant.name} readOnly />
                 </Field>
                 <Field label="Cliente" className={styles.formField}>
                   <Input value={selectedTenant.customerName || 'N/A'} readOnly />
                 </Field>
-                <Field label="Estado" className={styles.formField}>
+                <Field label={t('tenants.status')} className={styles.formField}>
                   <div>
                     {selectedTenant.isSuspended ? (
-                      <Badge appearance="filled" color="danger">Suspendido</Badge>
+                      <Badge appearance="filled" color="danger">{t('common.suspended')}</Badge>
                     ) : selectedTenant.isActive ? (
-                      <Badge appearance="filled" color="success">Activo</Badge>
+                      <Badge appearance="filled" color="success">{t('common.active')}</Badge>
                     ) : (
-                      <Badge appearance="outline">Inactivo</Badge>
+                      <Badge appearance="outline">{t('common.inactive')}</Badge>
                     )}
                   </div>
                 </Field>
-                <Field label="Usuarios" className={styles.formField}>
+                <Field label={t('tenants.users')} className={styles.formField}>
                   <Input value={String(selectedTenant.userCount || 0)} readOnly />
                 </Field>
-                <Field label="Creado" className={styles.formField}>
+                <Field label={t('tenants.created')} className={styles.formField}>
                   <Input value={new Date(selectedTenant.createdAt).toLocaleString()} readOnly />
                 </Field>
-                <Field label="Actualizado" className={styles.formField}>
+                <Field label={t('tenants.updated')} className={styles.formField}>
                   <Input value={new Date(selectedTenant.updatedAt).toLocaleString()} readOnly />
                 </Field>
                 <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
                   <Button appearance="primary" onClick={() => setIsDetailsDialogOpen(false)}>
-                    Cerrar
+                    {t('common.close')}
                   </Button>
                 </div>
               </>
@@ -2074,60 +2074,60 @@ export const TenantsPage = () => {
               />
             }
           >
-            Detalles de la Sede
+            {t('common.officeDetails')}
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
           <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
             {selectedOffice && (
               <>
-                <Field label="Nombre" className={styles.formField}>
+                <Field label={t('tenants.name')} className={styles.formField}>
                   <Input value={selectedOffice.name} readOnly />
                 </Field>
-                <Field label="Dirección" className={styles.formField}>
-                  <Input value={selectedOffice.address || 'N/A'} readOnly />
+                <Field label={t('common.address')} className={styles.formField}>
+                  <Input value={selectedOffice.address || t('common.notAvailable')} readOnly />
                 </Field>
-                <Field label="Ciudad" className={styles.formField}>
-                  <Input value={selectedOffice.city || 'N/A'} readOnly />
+                <Field label={t('common.city')} className={styles.formField}>
+                  <Input value={selectedOffice.city || t('common.notAvailable')} readOnly />
                 </Field>
-                <Field label="Estado/Provincia" className={styles.formField}>
-                  <Input value={selectedOffice.stateProvince || 'N/A'} readOnly />
+                <Field label={t('common.stateProvince')} className={styles.formField}>
+                  <Input value={selectedOffice.stateProvince || t('common.notAvailable')} readOnly />
                 </Field>
-                <Field label="Código Postal" className={styles.formField}>
-                  <Input value={selectedOffice.postalCode || 'N/A'} readOnly />
+                <Field label={t('common.postalCode')} className={styles.formField}>
+                  <Input value={selectedOffice.postalCode || t('common.notAvailable')} readOnly />
                 </Field>
-                <Field label="Teléfono" className={styles.formField}>
-                  <Input value={selectedOffice.phone || 'N/A'} readOnly />
+                <Field label={t('common.phone')} className={styles.formField}>
+                  <Input value={selectedOffice.phone || t('common.notAvailable')} readOnly />
                 </Field>
-                <Field label="Correo electrónico" className={styles.formField}>
-                  <Input value={selectedOffice.email || 'N/A'} readOnly />
+                <Field label={t('common.email')} className={styles.formField}>
+                  <Input value={selectedOffice.email || t('common.notAvailable')} readOnly />
                 </Field>
-                <Field label="Estado" className={styles.formField}>
+                <Field label={t('tenants.status')} className={styles.formField}>
                   <div>
                     {selectedOffice.isSuspended ? (
-                      <Badge appearance="filled" color="danger">Suspendido</Badge>
+                      <Badge appearance="filled" color="danger">{t('common.suspended')}</Badge>
                     ) : selectedOffice.isActive ? (
-                      <Badge appearance="filled" color="success">Activo</Badge>
+                      <Badge appearance="filled" color="success">{t('common.active')}</Badge>
                     ) : (
-                      <Badge appearance="outline">Inactivo</Badge>
+                      <Badge appearance="outline">{t('common.inactive')}</Badge>
                     )}
                   </div>
                 </Field>
-                <Field label="Tenant" className={styles.formField}>
-                  <Input value={selectedOffice.tenantName || 'N/A'} readOnly />
+                <Field label={t('tenants.tenant')} className={styles.formField}>
+                  <Input value={selectedOffice.tenantName || t('common.notAvailable')} readOnly />
                 </Field>
-                <Field label="Cliente" className={styles.formField}>
-                  <Input value={selectedOffice.customerName || 'N/A'} readOnly />
+                <Field label={t('tenants.customer')} className={styles.formField}>
+                  <Input value={selectedOffice.customerName || t('common.notAvailable')} readOnly />
                 </Field>
-                <Field label="Creado" className={styles.formField}>
+                <Field label={t('common.created')} className={styles.formField}>
                   <Input value={new Date(selectedOffice.createdAt).toLocaleString()} readOnly />
                 </Field>
-                <Field label="Actualizado" className={styles.formField}>
+                <Field label={t('common.updated')} className={styles.formField}>
                   <Input value={new Date(selectedOffice.updatedAt).toLocaleString()} readOnly />
                 </Field>
                 <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
                   <Button appearance="primary" onClick={() => setIsOfficeDetailsDialogOpen(false)}>
-                    Cerrar
+                    {t('common.close')}
                   </Button>
                 </div>
               </>
@@ -2296,53 +2296,53 @@ export const TenantsPage = () => {
           <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
             {selectedCustomer && (
               <>
-                <Field label="Nombre" className={styles.formField}>
+                <Field label={t('tenants.name')} className={styles.formField}>
                   <Input value={selectedCustomer.name} readOnly />
                 </Field>
-                <Field label="Identificación" className={styles.formField}>
+                <Field label={t('customers.identification')} className={styles.formField}>
                   <Input value={selectedCustomer.identification} readOnly />
                 </Field>
-                <Field label="País" className={styles.formField}>
-                  <Input value={selectedCustomer.countryName || 'N/A'} readOnly />
+                <Field label={t('customers.country')} className={styles.formField}>
+                  <Input value={selectedCustomer.countryName || t('common.notAvailable')} readOnly />
                 </Field>
-                <Field label="Estado/Provincia" className={styles.formField}>
-                  <Input value={selectedCustomer.stateProvince || 'N/A'} readOnly />
+                <Field label={t('common.stateProvince')} className={styles.formField}>
+                  <Input value={selectedCustomer.stateProvince || t('common.notAvailable')} readOnly />
                 </Field>
-                <Field label="Ciudad" className={styles.formField}>
-                  <Input value={selectedCustomer.city || 'N/A'} readOnly />
+                <Field label={t('common.city')} className={styles.formField}>
+                  <Input value={selectedCustomer.city || t('common.notAvailable')} readOnly />
                 </Field>
-                <Field label="Teléfono" className={styles.formField}>
-                  <Input value={selectedCustomer.phone || 'N/A'} readOnly />
+                <Field label={t('common.phone')} className={styles.formField}>
+                  <Input value={selectedCustomer.phone || t('common.notAvailable')} readOnly />
                 </Field>
-                <Field label="Correo electrónico" className={styles.formField}>
-                  <Input value={selectedCustomer.email || 'N/A'} readOnly />
+                <Field label={t('common.email')} className={styles.formField}>
+                  <Input value={selectedCustomer.email || t('common.notAvailable')} readOnly />
                 </Field>
-                <Field label="Estado" className={styles.formField}>
+                <Field label={t('tenants.status')} className={styles.formField}>
                   <div>
                     {selectedCustomer.isSuspended ? (
-                      <Badge appearance="filled" color="danger">Suspendido</Badge>
+                      <Badge appearance="filled" color="danger">{t('common.suspended')}</Badge>
                     ) : selectedCustomer.isActive ? (
-                      <Badge appearance="filled" color="success">Activo</Badge>
+                      <Badge appearance="filled" color="success">{t('common.active')}</Badge>
                     ) : (
-                      <Badge appearance="outline">Inactivo</Badge>
+                      <Badge appearance="outline">{t('common.inactive')}</Badge>
                     )}
                   </div>
                 </Field>
-                <Field label="Tenants" className={styles.formField}>
+                <Field label={t('tenants.tenants')} className={styles.formField}>
                   <Input value={String(selectedCustomer.tenantCount || 0)} readOnly />
                 </Field>
-                <Field label="Usuarios" className={styles.formField}>
+                <Field label={t('tenants.users')} className={styles.formField}>
                   <Input value={String(selectedCustomer.userCount || 0)} readOnly />
                 </Field>
-                <Field label="Creado" className={styles.formField}>
+                <Field label={t('common.created')} className={styles.formField}>
                   <Input value={new Date(selectedCustomer.createdAt).toLocaleString()} readOnly />
                 </Field>
-                <Field label="Actualizado" className={styles.formField}>
+                <Field label={t('common.updated')} className={styles.formField}>
                   <Input value={new Date(selectedCustomer.updatedAt).toLocaleString()} readOnly />
                 </Field>
                 <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
                   <Button appearance="primary" onClick={() => setIsCustomerDetailsDialogOpen(false)}>
-                    Cerrar
+                    {t('common.close')}
                   </Button>
                 </div>
               </>

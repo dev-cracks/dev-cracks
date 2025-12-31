@@ -1633,7 +1633,7 @@ export const OfficesPage = () => {
                             formData.phone.trim() || 
                             formData.email.trim();
             if (hasData) {
-              if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
+              if (window.confirm(t('common.confirmClose'))) {
                 setIsCreateDialogOpen(false);
                 setFormData({
                   tenantId: '',
@@ -1661,7 +1661,7 @@ export const OfficesPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Cerrar"
+                aria-label={t('common.close')}
                 icon={<DismissRegular />}
                 onClick={() => {
                   if (isCreating) {
@@ -1676,7 +1676,7 @@ export const OfficesPage = () => {
                                   formData.phone.trim() || 
                                   formData.email.trim();
                   if (hasData) {
-                    if (window.confirm('¿Está seguro de que desea cerrar? Se perderán los datos no guardados.')) {
+                    if (window.confirm(t('common.confirmClose'))) {
                       setIsCreateDialogOpen(false);
                       setFormData({
                         tenantId: '',
@@ -1708,7 +1708,7 @@ export const OfficesPage = () => {
               <DetailsSkeleton rows={8} />
             ) : (
               <>
-              <Field label="Tenant" required className={styles.formField}>
+              <Field label={t('offices.tenants')} required className={styles.formField}>
                 <Combobox
                   value={allTenants.find(t => t.id === formData.tenantId)?.name || ''}
                   onOptionSelect={(_, data) => {
@@ -1724,14 +1724,14 @@ export const OfficesPage = () => {
                   ))}
                 </Combobox>
               </Field>
-              <Field label="Nombre" required className={styles.formField}>
+              <Field label={t('offices.name')} required className={styles.formField}>
                 <Input
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Nombre de la sede"
+                  placeholder={t('offices.namePlaceholder')}
                 />
               </Field>
-              <Field label="País" className={styles.formField}>
+              <Field label={t('offices.country')} className={styles.formField}>
                 <Combobox
                   value={countrySearchText || countries.find(c => c.id === formData.countryId)?.name || ''}
                   onOptionSelect={(_, data) => {
@@ -1745,7 +1745,7 @@ export const OfficesPage = () => {
                     const target = e.target as HTMLInputElement;
                     setCountrySearchText(target.value);
                   }}
-                  placeholder="Seleccionar país"
+                  placeholder={t('offices.selectCountry')}
                 >
                   {filteredCountries.map((country) => (
                     <Option key={country.id} value={country.name}>
@@ -1754,47 +1754,47 @@ export const OfficesPage = () => {
                   ))}
                 </Combobox>
               </Field>
-              <Field label="Dirección" className={styles.formField}>
+              <Field label={t('common.address')} className={styles.formField}>
                 <Input
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  placeholder="Dirección"
+                  placeholder={t('customers.addressPlaceholder')}
                 />
               </Field>
-              <Field label="Ciudad" className={styles.formField}>
+              <Field label={t('common.city')} className={styles.formField}>
                 <Input
                   value={formData.city}
                   onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  placeholder="Ciudad"
+                  placeholder={t('common.city')}
                 />
               </Field>
-              <Field label="Estado/Provincia" className={styles.formField}>
+              <Field label={t('common.stateProvince')} className={styles.formField}>
                 <Input
                   value={formData.stateProvince}
                   onChange={(e) => setFormData({ ...formData, stateProvince: e.target.value })}
-                  placeholder="Estado/Provincia"
+                  placeholder={t('common.stateProvince')}
                 />
               </Field>
-              <Field label="Código Postal" className={styles.formField}>
+              <Field label={t('common.postalCode')} className={styles.formField}>
                 <Input
                   value={formData.postalCode}
                   onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-                  placeholder="Código Postal"
+                  placeholder={t('customers.postalCodePlaceholder')}
                 />
               </Field>
-              <Field label="Teléfono" className={styles.formField}>
+              <Field label={t('common.phone')} className={styles.formField}>
                 <Input
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="Teléfono"
+                  placeholder={t('common.phone')}
                 />
               </Field>
-              <Field label="Email" className={styles.formField}>
+              <Field label={t('common.email')} className={styles.formField}>
                 <Input
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="Email"
+                  placeholder={t('common.email')}
                 />
               </Field>
               <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
@@ -1811,7 +1811,7 @@ export const OfficesPage = () => {
                                     formData.phone.trim() || 
                                     formData.email.trim();
                     if (hasData) {
-                      if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los datos no guardados.')) {
+                      if (window.confirm(t('common.confirmCancel'))) {
                         setIsCreateDialogOpen(false);
                         setFormData({
                           tenantId: '',
@@ -1832,10 +1832,10 @@ export const OfficesPage = () => {
                   }}
                   disabled={isCreating}
                 >
-                  Cancelar
+                  {t('common.cancel')}
                 </Button>
                 <Button appearance="primary" onClick={handleCreate} disabled={isCreating}>
-                  {isCreating ? 'Creando...' : 'Crear'}
+                  {isCreating ? t('common.creating') : t('common.create')}
                 </Button>
               </div>
               </>
@@ -1928,7 +1928,7 @@ export const OfficesPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Cerrar"
+                aria-label={t('common.close')}
                 icon={<DismissRegular />}
                 onClick={() => {
                   if (isSaving) {
@@ -1992,7 +1992,7 @@ export const OfficesPage = () => {
               />
             }
           >
-            Editar Sede
+            {t('offices.edit')}
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
@@ -2024,7 +2024,7 @@ export const OfficesPage = () => {
                         ))}
                       </Combobox>
                     </Field>
-                    <Field label="Nombre" required className={styles.formField}>
+                    <Field label={t('offices.name')} required className={styles.formField}>
                       <Input
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -2046,7 +2046,7 @@ export const OfficesPage = () => {
                           const target = e.target as HTMLInputElement;
                           setEditCountrySearchText(target.value);
                         }}
-                        placeholder="Seleccionar país"
+                        placeholder={t('offices.selectCountry')}
                         disabled={isSaving}
                       >
                         {filteredEditCountries.map((country) => (
@@ -2060,31 +2060,31 @@ export const OfficesPage = () => {
                       <Input
                         value={formData.address}
                         onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                        placeholder="Dirección"
+                        placeholder={t('customers.addressPlaceholder')}
                         disabled={isSaving}
                       />
                     </Field>
-                    <Field label="Ciudad" className={styles.formField}>
+                    <Field label={t('common.city')} className={styles.formField}>
                       <Input
                         value={formData.city}
                         onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                        placeholder="Ciudad"
+                        placeholder={t('common.city')}
                         disabled={isSaving}
                       />
                     </Field>
-                    <Field label="Estado/Provincia" className={styles.formField}>
+                    <Field label={t('common.stateProvince')} className={styles.formField}>
                       <Input
                         value={formData.stateProvince}
                         onChange={(e) => setFormData({ ...formData, stateProvince: e.target.value })}
-                        placeholder="Estado/Provincia"
+                        placeholder={t('common.stateProvince')}
                         disabled={isSaving}
                       />
                     </Field>
-                    <Field label="Código Postal" className={styles.formField}>
+                    <Field label={t('common.postalCode')} className={styles.formField}>
                       <Input
                         value={formData.postalCode}
                         onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-                        placeholder="Código Postal"
+                        placeholder={t('customers.postalCodePlaceholder')}
                         disabled={isSaving}
                       />
                     </Field>
@@ -2092,16 +2092,16 @@ export const OfficesPage = () => {
                       <Input
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        placeholder="Teléfono"
+                        placeholder={t('common.phone')}
                         disabled={isSaving}
                       />
                     </Field>
-                    <Field label="Email" className={styles.formField}>
+                    <Field label={t('common.email')} className={styles.formField}>
                       <Input
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        placeholder="Email"
+                        placeholder={t('common.email')}
                         disabled={isSaving}
                       />
                     </Field>
@@ -2139,7 +2139,7 @@ export const OfficesPage = () => {
                             formData.email !== (selectedOffice.email || '') ||
                             formData.countryId !== (selectedOffice.countryId || '');
                           if (hasChanges) {
-                            if (window.confirm('¿Está seguro de que desea cancelar? Se perderán los cambios no guardados.')) {
+                            if (window.confirm(t('common.confirmCancelChanges'))) {
                               setIsEditDialogOpen(false);
                               setSelectedOffice(null);
                               setFormData({
@@ -2172,10 +2172,10 @@ export const OfficesPage = () => {
                         }}
                         disabled={isSaving}
                       >
-                        Cancelar
+                        {t('common.cancel')}
                       </Button>
                       <Button appearance="primary" onClick={handleUpdate} disabled={isSaving}>
-                        {isSaving ? 'Guardando...' : 'Guardar'}
+                        {isSaving ? t('common.saving') : t('common.save')}
                       </Button>
                     </div>
                   </div>
@@ -2328,7 +2328,7 @@ export const OfficesPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Cerrar"
+                aria-label={t('common.close')}
                 icon={<DismissRegular />}
                 onClick={() => {
                   setIsDetailsDialogOpen(false);
@@ -2337,7 +2337,7 @@ export const OfficesPage = () => {
               />
             }
           >
-            Detalles de la Sede
+            {t('offices.details')}
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
@@ -2391,13 +2391,13 @@ export const OfficesPage = () => {
                     <Field label="Dirección" className={styles.formField}>
                       <Input value={selectedOffice.address || 'N/A'} readOnly />
                     </Field>
-                    <Field label="Ciudad" className={styles.formField}>
+                    <Field label={t('common.city')} className={styles.formField}>
                       <Input value={selectedOffice.city || 'N/A'} readOnly />
                     </Field>
-                    <Field label="Estado/Provincia" className={styles.formField}>
+                    <Field label={t('common.stateProvince')} className={styles.formField}>
                       <Input value={selectedOffice.stateProvince || 'N/A'} readOnly />
                     </Field>
-                    <Field label="Código Postal" className={styles.formField}>
+                    <Field label={t('common.postalCode')} className={styles.formField}>
                       <Input value={selectedOffice.postalCode || 'N/A'} readOnly />
                     </Field>
                     <Field label="Teléfono" className={styles.formField}>
@@ -2609,7 +2609,7 @@ export const OfficesPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Cerrar"
+                aria-label={t('common.close')}
                 icon={<DismissRegular />}
                 onClick={() => {
                   setIsTenantDetailsDialogOpen(false);
@@ -2618,42 +2618,42 @@ export const OfficesPage = () => {
               />
             }
           >
-            Detalles del Tenant
+            {t('offices.tenantDetails')}
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
           <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
             {selectedTenant ? (
               <>
-                <Field label="Nombre" className={styles.formField}>
+                <Field label={t('tenants.name')} className={styles.formField}>
                   <Input value={selectedTenant.name} readOnly />
                 </Field>
-                <Field label="Cliente" className={styles.formField}>
-                  <Input value={selectedTenant.customerName || 'N/A'} readOnly />
+                <Field label={t('tenants.customer')} className={styles.formField}>
+                  <Input value={selectedTenant.customerName || t('common.notAvailable')} readOnly />
                 </Field>
-                <Field label="Estado" className={styles.formField}>
+                <Field label={t('tenants.status')} className={styles.formField}>
                   <div>
                     {selectedTenant.isSuspended ? (
-                      <Badge appearance="filled" color="danger">Suspendido</Badge>
+                      <Badge appearance="filled" color="danger">{t('common.suspended')}</Badge>
                     ) : selectedTenant.isActive ? (
-                      <Badge appearance="filled" color="success">Activo</Badge>
+                      <Badge appearance="filled" color="success">{t('common.active')}</Badge>
                     ) : (
-                      <Badge appearance="outline">Inactivo</Badge>
+                      <Badge appearance="outline">{t('common.inactive')}</Badge>
                     )}
                   </div>
                 </Field>
-                <Field label="Usuarios" className={styles.formField}>
+                <Field label={t('tenants.users')} className={styles.formField}>
                   <Input value={String(selectedTenant.userCount || 0)} readOnly />
                 </Field>
-                <Field label="Creado" className={styles.formField}>
+                <Field label={t('common.created')} className={styles.formField}>
                   <Input value={new Date(selectedTenant.createdAt).toLocaleString()} readOnly />
                 </Field>
-                <Field label="Actualizado" className={styles.formField}>
+                <Field label={t('common.updated')} className={styles.formField}>
                   <Input value={new Date(selectedTenant.updatedAt).toLocaleString()} readOnly />
                 </Field>
                 <div style={{ display: 'flex', gap: tokens.spacingHorizontalM, marginTop: tokens.spacingVerticalXL, justifyContent: 'flex-end' }}>
                   <Button appearance="primary" onClick={() => setIsTenantDetailsDialogOpen(false)}>
-                    Cerrar
+                    {t('common.close')}
                   </Button>
                 </div>
               </>
@@ -2683,7 +2683,7 @@ export const OfficesPage = () => {
             action={
               <Button
                 appearance="subtle"
-                aria-label="Cerrar"
+                aria-label={t('common.close')}
                 icon={<DismissRegular />}
                 onClick={() => {
                   setIsCustomerDetailsDialogOpen(false);
