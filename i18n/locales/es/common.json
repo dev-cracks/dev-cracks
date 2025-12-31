@@ -28,6 +28,12 @@
   "description": "Descripción",
   "actions": "Acciones",
   "noData": "No hay datos disponibles",
-  "language": "Idioma"
+  "language": "Idioma",
+  "notFound": {
+    "title": "Página no encontrada",
+    "message": "La página que buscas no existe o ha sido movida.",
+    "goHome": "Volver al Dashboard",
+    "goBack": "Volver"
+  }
 }
 

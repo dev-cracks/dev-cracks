@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { HomePage } from './pages/HomePage';
-import NotFoundPage from './pages/NotFoundPage';
+import { NotFoundPage } from '@common/not-found';
 import Threads from './components/Threads';
 import GooeyNav from './components/GooeyNav';
 import { LanguageSelector } from './components/LanguageSelector';

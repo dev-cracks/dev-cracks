@@ -21,6 +21,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
+      '@common/not-found': resolve(__dirname, '../common/not-found'),
     },
     dedupe: ['react', 'react-dom', 'react-i18next'],
   }

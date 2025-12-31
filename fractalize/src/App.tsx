@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { HomePage } from './pages/HomePage';
-import NotFoundPage from './pages/NotFoundPage';
+import { NotFoundPage } from '@common/not-found';
 
 // Fixed base path for fractalize when accessed through unified server
 const FRACTALIZE_BASE = '/fractalize';

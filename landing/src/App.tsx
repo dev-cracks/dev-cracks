@@ -13,6 +13,7 @@ import { Footer } from './components/Footer';
 import LightPillar from './components/LightPillar';
 import SplashCursor from './components/SplashCursor';
 import { ServicesPage } from './pages/ServicesPage';
+import { NotFoundPage } from '@common/not-found';
 
 const HomePage = () => (
   <>
@@ -180,6 +181,7 @@ const AppContent = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/servicios" element={<ServicesPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>
   );

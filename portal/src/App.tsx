@@ -3,7 +3,7 @@ import { GhostCursorPage } from './pages/GhostCursorPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { AccountPage } from './pages/AccountPage';
 import { SupportPage } from './pages/SupportPage';
-import NotFoundPage from './pages/NotFoundPage';
+import { NotFoundPage } from '@common/not-found';
 import FloatingIcon from './components/FloatingIcon';
 
 // Fixed base path for portal when accessed through unified server

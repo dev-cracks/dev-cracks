@@ -3,7 +3,7 @@ import { HomePage } from './pages/HomePage';
 import { ChallengePage } from './pages/ChallengePage';
 import { CoursesPage } from './pages/CoursesPage';
 import { CoursePage } from './pages/CoursePage';
-import NotFoundPage from './pages/NotFoundPage';
+import { NotFoundPage } from '@common/not-found';
 import FloatingLines from './components/FloatingLines';
 
 // Fixed base path for dev-coach when accessed through unified server

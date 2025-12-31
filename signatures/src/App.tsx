@@ -10,6 +10,7 @@ import Documents from './pages/Documents';
 import Transactions from './pages/Transactions';
 import Reports from './pages/Reports';
 import Incidents from './pages/Incidents';
+import { NotFoundPage } from '@common/not-found';
 
 const theme = createTheme({
   palette: {
@@ -51,6 +52,7 @@ function App() {
           <Route path="reports" element={<Reports />} />
           <Route path="incidents" element={<Incidents />} />
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </ThemeProvider>
   );

@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { HomePage } from './pages/HomePage';
-import NotFoundPage from './pages/NotFoundPage';
+import { NotFoundPage } from '@common/not-found';
 import { LanguageSelector } from './components/LanguageSelector';
 
 // Fixed base path for route-on when accessed through unified server

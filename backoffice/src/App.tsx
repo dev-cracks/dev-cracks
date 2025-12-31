@@ -7,8 +7,11 @@ import { TenantsPage } from './pages/TenantsPage';
 import { CustomersPage } from './pages/CustomersPage';
 import { OfficesPage } from './pages/OfficesPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { ShipmentRequestsPage } from './pages/ShipmentRequestsPage';
+import { SubscriptionsPage } from './pages/SubscriptionsPage';
 import { LoginPage } from './pages/LoginPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { NotFoundPage } from '@common/not-found';
 
 // Fixed base path for backoffice when accessed through unified server
 const BACKOFFICE_BASE = '/backoffice';
@@ -88,6 +91,27 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/shipments"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ShipmentRequestsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/subscriptions"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <SubscriptionsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
     </>

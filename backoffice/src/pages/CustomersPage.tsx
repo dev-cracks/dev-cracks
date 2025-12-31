@@ -924,12 +924,12 @@ export const CustomersPage = () => {
   useEffect(() => {
     addGroup({
       id: 'customers',
-      label: 'Clientes',
+      label: t('customers.title'),
       icon: <BuildingRegular />,
       items: [
         {
           id: 'create',
-          label: 'Nuevo',
+          label: t('ribbonBar.new'),
           icon: <AddRegular />,
           action: () => {
             setFormData({

@@ -1030,7 +1030,7 @@ export const TenantsPage = () => {
           <div style={{ padding: tokens.spacingVerticalXL }}>
             {error && (
               <MessageBar intent="error" style={{ marginBottom: tokens.spacingVerticalM }}>
-                <MessageBarBody>{error}</MessageBarBody>
+                <MessageBarBody>{error.startsWith('common.') || error.startsWith('tenants.') || error.startsWith('customers.') || error.startsWith('offices.') || error.startsWith('subscriptions.') ? t(error as any) : error}</MessageBarBody>
               </MessageBar>
             )}
 
@@ -1053,12 +1053,12 @@ export const TenantsPage = () => {
                       ...shorthands.borderRadius(tokens.borderRadiusMedium),
                     }}
                   >
-                    <Spinner size="large" label="Cargando tenants..." />
+                    <Spinner size="large" label={t('tenants.loadingTenants')} />
                   </div>
                 )}
                 {filteredTenants.length === 0 ? (
                   <div style={{ padding: tokens.spacingVerticalXXL, textAlign: 'center' }}>
-                    <Text>No se encontraron tenants</Text>
+                    <Text>{t('tenants.noTenantsFound')}</Text>
                   </div>
                 ) : (
                   <Table style={{ tableLayout: 'auto', width: '100%' }}>

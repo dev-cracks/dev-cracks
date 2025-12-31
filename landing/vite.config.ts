@@ -28,6 +28,7 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'src'),
       '@common/auth': resolve(__dirname, '../common/auth'),
+      '@common/not-found': resolve(__dirname, '../common/not-found'),
     },
     preserveSymlinks: false,
     dedupe: ['react', 'react-dom', 'react-i18next', '@auth0/auth0-react'],

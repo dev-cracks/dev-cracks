@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useEffect } from 'react';
 import { GhostCursorPage } from './pages/GhostCursorPage';
+import { NotFoundPage } from '@common/not-found';
 
 const App = () => {
   // Verificar si ya se vio el splash screen y redirigir directamente a /landing
@@ -17,6 +18,7 @@ const App = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<GhostCursorPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );

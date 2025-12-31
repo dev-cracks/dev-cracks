@@ -24,7 +24,8 @@
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.10.1",
     "remark-gfm": "^4.0.1",
-    "three": "^0.182.0"
+    "three": "^0.182.0",
+    "postprocessing": "^6.38.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",
