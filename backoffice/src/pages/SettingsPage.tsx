@@ -702,7 +702,7 @@ export const SettingsPage = () => {
             <Label htmlFor="siteUrl">{t('settings.siteUrl')}</Label>
             <Input 
               id="siteUrl" 
-              placeholder="https://devcracks.com"
+              placeholder={t('settings.siteUrlPlaceholder')}
               value={siteUrl}
               onChange={(e) => setSiteUrl(e.target.value)}
             />
@@ -797,7 +797,7 @@ export const SettingsPage = () => {
                             icon={<EditRegular />}
                             onClick={() => handleOpenCategoryDialog(category)}
                           >
-                            Editar
+                            {t('settings.edit')}
                           </Button>
                           <Button
                             appearance="subtle"
@@ -921,7 +921,7 @@ export const SettingsPage = () => {
                 <Input
                   value={categoryForm.description}
                   onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
-                  placeholder={t('settings.categoryDescription')}
+                  placeholder={t('settings.categoryDescriptionPlaceholder')}
                 />
               </Field>
             </DialogContent>
@@ -954,7 +954,7 @@ export const SettingsPage = () => {
                   <Input
                     value={rateForm.name}
                     onChange={(e) => setRateForm({ ...rateForm, name: e.target.value })}
-                    placeholder="Ej: Estándar, Express, etc."
+                    placeholder={t('settings.rateNamePlaceholder')}
                   />
                 </Field>
                 <Field label={t('settings.slaDays')} required>
@@ -980,7 +980,7 @@ export const SettingsPage = () => {
                   <Input
                     value={rateForm.description}
                     onChange={(e) => setRateForm({ ...rateForm, description: e.target.value })}
-                    placeholder={t('settings.rateDescription')}
+                    placeholder={t('settings.rateDescriptionPlaceholder')}
                   />
                 </Field>
               </div>
@@ -1057,7 +1057,7 @@ export const SettingsPage = () => {
                         <Text>{type.maxTokensPerMessage.toLocaleString()}</Text>
                       </TableCell>
                       <TableCell>
-                        <Text>{type.pricePerMonth > 0 ? `${type.pricePerMonth.toFixed(2)} €` : 'Gratis'}</Text>
+                        <Text>{type.pricePerMonth > 0 ? `${type.pricePerMonth.toFixed(2)} €` : t('settings.free')}</Text>
                       </TableCell>
                       <TableCell>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: tokens.spacingHorizontalXS }}>

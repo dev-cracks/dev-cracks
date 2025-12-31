@@ -9,6 +9,29 @@ export const NotFoundPage = () => {
   const location = useLocation();
   const { t } = useTranslation('common');
 
+  // Valores por defecto en inglés
+  const defaultTranslations = {
+    title: 'Page not found',
+    message: 'The page you are looking for does not exist or has been moved.',
+    goHome: 'Go to Dashboard',
+    goBack: 'Go Back'
+  };
+
+  // Función helper para obtener traducciones con fallback
+  const getTranslation = (key: string, defaultValue: string): string => {
+    try {
+      const translation = t(key, { defaultValue, returnObjects: false });
+      // Si la traducción devuelve la clave (no encontrada) o es undefined/null, usar el valor por defecto
+      if (!translation || translation === key || translation.startsWith('notFound.')) {
+        return defaultValue;
+      }
+      return translation;
+    } catch (error) {
+      // Si hay algún error, devolver el valor por defecto
+      return defaultValue;
+    }
+  };
+
   // Determinar la ruta de retorno basada en la ruta actual
   const getHomePath = () => {
     const pathname = location.pathname;
@@ -31,6 +54,12 @@ export const NotFoundPage = () => {
     navigate(getHomePath());
   };
 
+  const title = getTranslation('notFound.title', defaultTranslations.title);
+  const message = getTranslation('notFound.message', defaultTranslations.message);
+  const buttonText = getHomePath() === '/dashboard' 
+    ? getTranslation('notFound.goHome', defaultTranslations.goHome)
+    : getTranslation('notFound.goBack', defaultTranslations.goBack);
+
   return (
     <div className="not-found-page">
       <div className="not-found-page__background">
@@ -51,12 +80,12 @@ export const NotFoundPage = () => {
         <div className="not-found-page__glitch" data-text="404">
           404
         </div>
-        <h2 className="not-found-page__title">{t('notFound.title')}</h2>
+        <h2 className="not-found-page__title">{title}</h2>
         <p className="not-found-page__message">
-          {t('notFound.message')}
+          {message}
         </p>
         <button className="not-found-page__button" onClick={handleGoHome}>
-          {getHomePath() === '/dashboard' ? t('notFound.goHome') : t('notFound.goBack')}
+          {buttonText}
         </button>
       </div>
     </div>

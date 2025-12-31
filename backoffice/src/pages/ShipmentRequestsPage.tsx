@@ -229,7 +229,7 @@ export const ShipmentRequestsPage = () => {
         <div className={styles.container}>
           <MessageBar intent="error">
             <MessageBarBody>
-              <Text>Error: {error}</Text>
+              <Text>{t('common.error')}: {error.startsWith('common.') || error.startsWith('shipments.') || error.startsWith('customers.') || error.startsWith('offices.') || error.startsWith('subscriptions.') ? t(error as any) : error}</Text>
               <Button
                 appearance="primary"
                 onClick={() => {
@@ -238,7 +238,7 @@ export const ShipmentRequestsPage = () => {
                 }}
                 style={{ marginTop: tokens.spacingVerticalM }}
               >
-                Reintentar
+                {t('shipments.reloadPage')}
               </Button>
             </MessageBarBody>
           </MessageBar>
