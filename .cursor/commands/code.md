@@ -107,6 +107,8 @@ tipica historia de usuario.
    IDE0037 // Use inferred member name
 - **Siempre usar constantes para media types HTTP**: Nunca usar strings literales como "application/json" directamente. Usar la constante `HttpMediaTypes.ApplicationJson` de `Fractalize.EmailService.Infrastructure.Constants.HttpMediaTypes`. Esto aplica tanto para `StringContent` como para `MediaTypeWithQualityHeaderValue`.
 
+## Reglas frontend
+- SIempre implementar lazy loading
 
 ## Code Review
 For the code present, we get this error:

@@ -53,3 +53,4 @@ export const auth0Config = {
 
 // Re-export para compatibilidad con el módulo común
 export type { Auth0Config } from '../../common/auth';
+
