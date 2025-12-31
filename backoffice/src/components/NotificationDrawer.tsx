@@ -18,6 +18,7 @@ import {
   WarningRegular,
   InfoRegular,
 } from '@fluentui/react-icons';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Notification } from '../hooks/useNotifications';
@@ -132,30 +133,30 @@ const getNotificationIcon = (type: Notification['type']) => {
   }
 };
 
-const formatTimeAgo = (date: Date): string => {
+const formatTimeAgo = (date: Date, t: any): string => {
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
   if (diffInSeconds < 60) {
-    return 'Hace unos momentos';
+    return t('notifications.timeAgo.justNow');
   }
 
   const diffInMinutes = Math.floor(diffInSeconds / 60);
   if (diffInMinutes < 60) {
-    return `Hace ${diffInMinutes} ${diffInMinutes === 1 ? 'minuto' : 'minutos'}`;
+    return t('notifications.timeAgo.minutesAgo', { count: diffInMinutes });
   }
 
   const diffInHours = Math.floor(diffInMinutes / 60);
   if (diffInHours < 24) {
-    return `Hace ${diffInHours} ${diffInHours === 1 ? 'hora' : 'horas'}`;
+    return t('notifications.timeAgo.hoursAgo', { count: diffInHours });
   }
 
   const diffInDays = Math.floor(diffInHours / 24);
   if (diffInDays < 7) {
-    return `Hace ${diffInDays} ${diffInDays === 1 ? 'día' : 'días'}`;
+    return t('notifications.timeAgo.daysAgo', { count: diffInDays });
   }
 
-  return date.toLocaleDateString('es-ES', {
+  return date.toLocaleDateString(t('common.locale') || 'en-US', {
     day: 'numeric',
     month: 'short',
   });
@@ -163,6 +164,7 @@ const formatTimeAgo = (date: Date): string => {
 
 export const NotificationDrawer = ({ open, onOpenChange }: NotificationDrawerProps) => {
   const styles = useStyles();
+  const { t } = useTranslation('backoffice');
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const {
@@ -220,12 +222,12 @@ export const NotificationDrawer = ({ open, onOpenChange }: NotificationDrawerPro
         <DrawerHeaderNavigation>
           <Button
             appearance="subtle"
-            aria-label="Cerrar"
+            aria-label={t('notifications.close')}
             icon={<DismissRegular />}
             onClick={() => onOpenChange(false)}
           />
         </DrawerHeaderNavigation>
-        <DrawerHeaderTitle>Todas las notificaciones</DrawerHeaderTitle>
+        <DrawerHeaderTitle>{t('notifications.allNotifications')}</DrawerHeaderTitle>
       </DrawerHeader>
 
       <DrawerBody className={styles.drawerBody}>
@@ -235,45 +237,45 @@ export const NotificationDrawer = ({ open, onOpenChange }: NotificationDrawerPro
           ) : notifications.length === 0 ? (
             <div className={styles.emptyState}>
               <Text className={styles.emptyStateText}>
-                No hay notificaciones
+                {t('notifications.noNotifications')}
               </Text>
             </div>
           ) : (
-            notifications.map((notification: Notification) => (
-              <div
-                key={notification.id}
-                className={`${styles.notificationItem} ${
-                  !notification.read ? styles.notificationItemUnread : ''
-                }`}
-                onClick={() => handleNotificationClick(notification)}
-              >
-                {!notification.read && (
-                  <div className={styles.unreadIndicator} />
-                )}
-                <div className={styles.notificationIcon}>
-                  {getNotificationIcon(notification.type)}
+              notifications.map((notification: Notification) => (
+                <div
+                  key={notification.id}
+                  className={`${styles.notificationItem} ${
+                    !notification.read ? styles.notificationItemUnread : ''
+                  }`}
+                  onClick={() => handleNotificationClick(notification)}
+                >
+                  {!notification.read && (
+                    <div className={styles.unreadIndicator} />
+                  )}
+                  <div className={styles.notificationIcon}>
+                    {getNotificationIcon(notification.type)}
+                  </div>
+                  <div className={styles.notificationContent}>
+                    <Text className={styles.notificationTitle}>
+                      {notification.title}
+                    </Text>
+                    <Text className={styles.notificationMessage}>
+                      {notification.message}
+                    </Text>
+                    <Text className={styles.notificationTime}>
+                      {formatTimeAgo(notification.timestamp, t)}
+                    </Text>
+                  </div>
+                  <Button
+                    appearance="subtle"
+                    icon={<DismissRegular />}
+                    className={styles.dismissButton}
+                    onClick={(e) => handleDismiss(e, notification.id)}
+                    title={t('notifications.dismiss')}
+                  />
                 </div>
-                <div className={styles.notificationContent}>
-                  <Text className={styles.notificationTitle}>
-                    {notification.title}
-                  </Text>
-                  <Text className={styles.notificationMessage}>
-                    {notification.message}
-                  </Text>
-                  <Text className={styles.notificationTime}>
-                    {formatTimeAgo(notification.timestamp)}
-                  </Text>
-                </div>
-                <Button
-                  appearance="subtle"
-                  icon={<DismissRegular />}
-                  className={styles.dismissButton}
-                  onClick={(e) => handleDismiss(e, notification.id)}
-                  title="Descartar"
-                />
-              </div>
-            ))
-          )}
+              ))
+            )}
         </div>
       </DrawerBody>
     </Drawer>

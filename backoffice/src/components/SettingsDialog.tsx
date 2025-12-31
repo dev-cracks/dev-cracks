@@ -30,6 +30,7 @@ import {
   LockClosedRegular,
 } from '@fluentui/react-icons';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { customerService, CustomerDto } from '../services/customerService';
 
@@ -276,51 +277,54 @@ const useStyles = makeStyles({
   },
 });
 
-const categories: Category[] = [
+const getCategories = (t: any): Category[] => [
   {
     id: 'account',
-    label: 'Account',
+    label: t('settingsDialog.account'),
     icon: <PersonRegular />,
   },
   {
     id: 'general',
-    label: 'General',
+    label: t('settingsDialog.general'),
     icon: <SettingsRegular />,
     subcategories: [
-      { id: 'language-time', label: 'Language and time' },
-      { id: 'appearance', label: 'Appearance' },
-      { id: 'notifications', label: 'Notifications' },
-      { id: 'accessibility', label: 'Accessibility' },
-      { id: 'distribution-groups', label: 'Distribution groups' },
-      { id: 'privacy-data', label: 'Privacy and data' },
-      { id: 'search', label: 'Search' },
+      { id: 'language-time', label: t('settingsDialog.languageAndTime') },
+      { id: 'appearance', label: t('settingsDialog.appearance') },
+      { id: 'notifications', label: t('settingsDialog.notifications') },
+      { id: 'accessibility', label: t('settingsDialog.accessibility') },
+      { id: 'distribution-groups', label: t('settingsDialog.distributionGroups') },
+      { id: 'privacy-data', label: t('settingsDialog.privacyAndData') },
+      { id: 'search', label: t('settingsDialog.search') },
     ],
   },
   {
     id: 'mail',
-    label: 'Mail',
+    label: t('settingsDialog.mail'),
     icon: <MailRegular />,
   },
   {
     id: 'calendar',
-    label: 'Calendar',
+    label: t('settingsDialog.calendar'),
     icon: <CalendarRegular />,
   },
   {
     id: 'people',
-    label: 'People',
+    label: t('settingsDialog.people'),
     icon: <PeopleRegular />,
   },
 ];
 
 export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
   const styles = useStyles();
+  const { t } = useTranslation('backoffice');
   const { userDetails } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState('general');
   const [selectedSubcategory, setSelectedSubcategory] = useState('language-time');
   const [searchQuery, setSearchQuery] = useState('');
   const [customerInfo, setCustomerInfo] = useState<CustomerDto | null>(null);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
+  
+  const categories = getCategories(t);
 
   const handleClose = () => {
     onOpenChange(false);
@@ -357,38 +361,38 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
       return (
         <>
           <div className={styles.infoBanner}>
-            Can't find some of your General settings? Categories, Mobile devices and Storage have moved to the new "Account" tab.{' '}
+            {t('settingsDialog.cantFindSettings')}{' '}
             <a href="#" className={styles.link} onClick={(e) => { e.preventDefault(); setSelectedCategory('account'); }}>
-              Click here
+              {t('settingsDialog.clickHere')}
             </a>{' '}
-            to view the new "Account" tab.
+            {t('settingsDialog.toViewAccountTab')}
           </div>
 
           <div className={styles.section}>
-            <Text className={styles.sectionTitle}>Sync across Microsoft 365</Text>
+            <Text className={styles.sectionTitle}>{t('settingsDialog.syncAcrossMicrosoft365')}</Text>
             <Text className={styles.sectionDescription}>
-              You can choose to use Outlook with the same settings used in your other Microsoft apps.
+              {t('settingsDialog.syncDescription')}
             </Text>
             <div className={styles.formGroup}>
               <div className={styles.formRow}>
                 <div className={styles.formLabel}>
-                  <Text className={styles.formLabelText}>Use my Microsoft 365 settings</Text>
+                  <Text className={styles.formLabelText}>{t('settingsDialog.useMicrosoft365Settings')}</Text>
                 </div>
                 <Switch />
               </div>
               <Text className={styles.sectionDescription}>
-                <a href="#" className={styles.link}>View and manage your Microsoft 365 settings</a>
+                <a href="#" className={styles.link}>{t('settingsDialog.viewManageMicrosoft365')}</a>
               </Text>
             </div>
           </div>
 
           <div className={styles.section}>
-            <Text className={styles.sectionTitle}>Outlook settings</Text>
+            <Text className={styles.sectionTitle}>{t('settingsDialog.outlookSettings')}</Text>
             <div className={styles.formGroup}>
               <div className={styles.formRow}>
                 <div className={styles.formLabel}>
                   <Label htmlFor="language" className={styles.formLabelText}>
-                    Language (Country/Region)
+                    {t('settingsDialog.languageCountryRegion')}
                   </Label>
                 </div>
                 <Select id="language" className={styles.formControl}>
@@ -401,10 +405,10 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
               <div className={styles.formRow}>
                 <div className={styles.formLabel}>
                   <Label htmlFor="dateFormat" className={styles.formLabelText}>
-                    Date format
+                    {t('settingsDialog.dateFormat')}
                   </Label>
                   <Text className={styles.formLabelDescription}>
-                    (for example, September 1, 2026 is displayed as follows)
+                    {t('settingsDialog.dateFormatExample')}
                   </Text>
                 </div>
                 <Select id="dateFormat" className={styles.formControl}>
@@ -417,7 +421,7 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
               <div className={styles.formRow}>
                 <div className={styles.formLabel}>
                   <Label htmlFor="timeFormat" className={styles.formLabelText}>
-                    Time format
+                    {t('settingsDialog.timeFormat')}
                   </Label>
                 </div>
                 <Select id="timeFormat" className={styles.formControl}>
@@ -429,14 +433,14 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
               <div className={styles.formRow}>
                 <div className={styles.formLabel}>
                   <Label className={styles.formLabelText}>
-                    Time zone
+                    {t('settingsDialog.timeZone')}
                   </Label>
                   <Text className={styles.formLabelDescription}>
                     (UTC+01:00) Brussels, Copenhagen, Madrid, Paris
                   </Text>
                 </div>
                 <Button appearance="subtle" className={styles.formControl}>
-                  Change
+                  {t('settingsDialog.change')}
                 </Button>
               </div>
             </div>
@@ -448,21 +452,21 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     if (selectedCategory === 'general' && selectedSubcategory === 'appearance') {
       return (
         <div className={styles.section}>
-          <Text className={styles.sectionTitle}>Appearance</Text>
+          <Text className={styles.sectionTitle}>{t('settingsDialog.appearance')}</Text>
           <div className={styles.formGroup}>
             <div className={styles.formRow}>
               <div className={styles.formLabel}>
                 <Label htmlFor="theme" className={styles.formLabelText}>
-                  Theme
+                  {t('settingsDialog.theme')}
                 </Label>
                 <Text className={styles.formLabelDescription}>
-                  Choose your preferred theme
+                  {t('settingsDialog.chooseTheme')}
                 </Text>
               </div>
               <Select id="theme" className={styles.formControl}>
-                <option>Light</option>
-                <option>Dark</option>
-                <option>System</option>
+                <option>{t('settingsDialog.light')}</option>
+                <option>{t('settingsDialog.dark')}</option>
+                <option>{t('settingsDialog.system')}</option>
               </Select>
             </div>
           </div>
@@ -473,15 +477,15 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     if (selectedCategory === 'general' && selectedSubcategory === 'notifications') {
       return (
         <div className={styles.section}>
-          <Text className={styles.sectionTitle}>Notifications</Text>
+          <Text className={styles.sectionTitle}>{t('settingsDialog.notifications')}</Text>
           <div className={styles.formGroup}>
             <div className={styles.formRow}>
               <div className={styles.formLabel}>
                 <Label htmlFor="emailNotifications" className={styles.formLabelText}>
-                  Email notifications
+                  {t('settingsDialog.emailNotifications')}
                 </Label>
                 <Text className={styles.formLabelDescription}>
-                  Receive email notifications for important updates
+                  {t('settingsDialog.emailNotificationsDescription')}
                 </Text>
               </div>
               <Switch id="emailNotifications" defaultChecked />
@@ -489,10 +493,10 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
             <div className={styles.formRow}>
               <div className={styles.formLabel}>
                 <Label htmlFor="browserNotifications" className={styles.formLabelText}>
-                  Browser notifications
+                  {t('settingsDialog.browserNotifications')}
                 </Label>
                 <Text className={styles.formLabelDescription}>
-                  Show notifications in your browser
+                  {t('settingsDialog.browserNotificationsDescription')}
                 </Text>
               </div>
               <Switch id="browserNotifications" defaultChecked />
@@ -509,49 +513,49 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
             {/* Card de información del usuario */}
             <Card>
               <CardHeader
-                header={<Text weight="semibold">Mi Información como Usuario</Text>}
-                description="Información de tu cuenta de usuario"
+                header={<Text weight="semibold">{t('settingsDialog.myUserInformation')}</Text>}
+                description={t('settingsDialog.myUserInformationDescription')}
               />
               <div style={{ padding: '20px' }}>
                 {userDetails ? (
                   <>
                     <div className={styles.infoRow}>
-                      <Text className={styles.infoLabel}>Nombre</Text>
-                      <Text className={styles.infoValue}>{userDetails.name || 'No especificado'}</Text>
+                      <Text className={styles.infoLabel}>{t('settingsDialog.name')}</Text>
+                      <Text className={styles.infoValue}>{userDetails.name || t('settingsDialog.notSpecified')}</Text>
                     </div>
                     <div className={styles.infoRow}>
-                      <Text className={styles.infoLabel}>Email</Text>
+                      <Text className={styles.infoLabel}>{t('settingsDialog.email')}</Text>
                       <Text className={styles.infoValue}>{userDetails.email}</Text>
                     </div>
                     {userDetails.contactEmail && (
                       <div className={styles.infoRow}>
-                        <Text className={styles.infoLabel}>Email de Contacto</Text>
+                        <Text className={styles.infoLabel}>{t('settingsDialog.contactEmail')}</Text>
                         <Text className={styles.infoValue}>{userDetails.contactEmail}</Text>
                       </div>
                     )}
                     {userDetails.phone && (
                       <div className={styles.infoRow}>
-                        <Text className={styles.infoLabel}>Teléfono</Text>
+                        <Text className={styles.infoLabel}>{t('settingsDialog.phone')}</Text>
                         <Text className={styles.infoValue}>{userDetails.phone}</Text>
                       </div>
                     )}
                     <div className={styles.infoRow}>
-                      <Text className={styles.infoLabel}>Rol</Text>
-                      <Text className={styles.infoValue}>{userDetails.role === 'Admin' ? 'Administrador' : 'Usuario'}</Text>
+                      <Text className={styles.infoLabel}>{t('settingsDialog.role')}</Text>
+                      <Text className={styles.infoValue}>{userDetails.role === 'Admin' ? t('settingsDialog.administrator') : t('settingsDialog.user')}</Text>
                     </div>
                     <div className={styles.infoRow}>
-                      <Text className={styles.infoLabel}>Estado</Text>
+                      <Text className={styles.infoLabel}>{t('settingsDialog.status')}</Text>
                       <Text className={styles.infoValue}>
-                        {userDetails.isSuspended ? 'Suspendido' : userDetails.isActive === false ? 'Inactivo' : 'Activo'}
+                        {userDetails.isSuspended ? t('settingsDialog.suspended') : userDetails.isActive === false ? t('settingsDialog.inactive') : t('settingsDialog.active')}
                       </Text>
                     </div>
                     <div className={`${styles.infoRow} ${styles.infoRowLast}`}>
-                      <Text className={styles.infoLabel}>ID de Usuario</Text>
+                      <Text className={styles.infoLabel}>{t('settingsDialog.userId')}</Text>
                       <Text className={styles.infoValue}>{userDetails.id}</Text>
                     </div>
                   </>
                 ) : (
-                  <Text>No se pudo cargar la información del usuario</Text>
+                  <Text>{t('settingsDialog.couldNotLoadUserInfo')}</Text>
                 )}
               </div>
             </Card>
@@ -560,71 +564,71 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
             {userDetails?.customerId && (
               <Card>
                 <CardHeader
-                  header={<Text weight="semibold">Mi Información como Cliente</Text>}
-                  description="Información de tu cuenta de cliente"
+                  header={<Text weight="semibold">{t('settingsDialog.myCustomerInformation')}</Text>}
+                  description={t('settingsDialog.myCustomerInformationDescription')}
                 />
                 <div style={{ padding: '20px' }}>
                   {isLoadingCustomer ? (
-                    <Text>Cargando información del cliente...</Text>
+                    <Text>{t('settingsDialog.loadingCustomerInfo')}</Text>
                   ) : customerInfo ? (
                     <>
                       <div className={styles.infoRow}>
-                        <Text className={styles.infoLabel}>Nombre</Text>
+                        <Text className={styles.infoLabel}>{t('settingsDialog.name')}</Text>
                         <Text className={styles.infoValue}>{customerInfo.name}</Text>
                       </div>
                       <div className={styles.infoRow}>
-                        <Text className={styles.infoLabel}>Identificación</Text>
+                        <Text className={styles.infoLabel}>{t('settingsDialog.identification')}</Text>
                         <Text className={styles.infoValue}>{customerInfo.identification}</Text>
                       </div>
                       {customerInfo.countryName && (
                         <div className={styles.infoRow}>
-                          <Text className={styles.infoLabel}>País</Text>
+                          <Text className={styles.infoLabel}>{t('settingsDialog.country')}</Text>
                           <Text className={styles.infoValue}>{customerInfo.countryName}</Text>
                         </div>
                       )}
                       {customerInfo.stateProvince && (
                         <div className={styles.infoRow}>
-                          <Text className={styles.infoLabel}>Estado/Provincia</Text>
+                          <Text className={styles.infoLabel}>{t('settingsDialog.stateProvince')}</Text>
                           <Text className={styles.infoValue}>{customerInfo.stateProvince}</Text>
                         </div>
                       )}
                       {customerInfo.city && (
                         <div className={styles.infoRow}>
-                          <Text className={styles.infoLabel}>Ciudad</Text>
+                          <Text className={styles.infoLabel}>{t('settingsDialog.city')}</Text>
                           <Text className={styles.infoValue}>{customerInfo.city}</Text>
                         </div>
                       )}
                       {customerInfo.phone && (
                         <div className={styles.infoRow}>
-                          <Text className={styles.infoLabel}>Teléfono</Text>
+                          <Text className={styles.infoLabel}>{t('settingsDialog.phone')}</Text>
                           <Text className={styles.infoValue}>{customerInfo.phone}</Text>
                         </div>
                       )}
                       {customerInfo.email && (
                         <div className={styles.infoRow}>
-                          <Text className={styles.infoLabel}>Email</Text>
+                          <Text className={styles.infoLabel}>{t('settingsDialog.email')}</Text>
                           <Text className={styles.infoValue}>{customerInfo.email}</Text>
                         </div>
                       )}
                       {customerInfo.parentName && (
                         <div className={styles.infoRow}>
-                          <Text className={styles.infoLabel}>Cliente Padre</Text>
+                          <Text className={styles.infoLabel}>{t('settingsDialog.parentCustomer')}</Text>
                           <Text className={styles.infoValue}>{customerInfo.parentName}</Text>
                         </div>
                       )}
                       <div className={styles.infoRow}>
-                        <Text className={styles.infoLabel}>Estado</Text>
+                        <Text className={styles.infoLabel}>{t('settingsDialog.status')}</Text>
                         <Text className={styles.infoValue}>
-                          {customerInfo.isSuspended ? 'Suspendido' : customerInfo.isActive === false ? 'Inactivo' : 'Activo'}
+                          {customerInfo.isSuspended ? t('settingsDialog.suspended') : customerInfo.isActive === false ? t('settingsDialog.inactive') : t('settingsDialog.active')}
                         </Text>
                       </div>
                       <div className={`${styles.infoRow} ${styles.infoRowLast}`}>
-                        <Text className={styles.infoLabel}>ID de Cliente</Text>
+                        <Text className={styles.infoLabel}>{t('settingsDialog.customerId')}</Text>
                         <Text className={styles.infoValue}>{customerInfo.id}</Text>
                       </div>
                     </>
                   ) : (
-                    <Text>No se pudo cargar la información del cliente</Text>
+                    <Text>{t('settingsDialog.couldNotLoadCustomerInfo')}</Text>
                   )}
                 </div>
               </Card>
@@ -636,9 +640,9 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
 
     return (
       <div className={styles.section}>
-        <Text className={styles.sectionTitle}>{currentCategory?.label || 'Settings'}</Text>
+        <Text className={styles.sectionTitle}>{currentCategory?.label || t('settingsDialog.title')}</Text>
         <Text className={styles.sectionDescription}>
-          Configuration options for {currentCategory?.label.toLowerCase() || 'this section'} will be available here.
+          {t('settingsDialog.configurationFor')} {currentCategory?.label.toLowerCase() || t('settingsDialog.title').toLowerCase()} {t('settingsDialog.willBeAvailable')}
         </Text>
       </div>
     );
@@ -650,10 +654,10 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
         <DialogBody className={styles.dialogBody}>
           <div className={styles.sidebar}>
             <div className={styles.sidebarHeader}>
-              <Text className={styles.sidebarTitle}>Settings</Text>
+              <Text className={styles.sidebarTitle}>{t('settingsDialog.title')}</Text>
               <div className={styles.searchContainer}>
                 <Input
-                  placeholder="Search settings"
+                  placeholder={t('settingsDialog.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   contentBefore={<SearchRegular />}
@@ -706,14 +710,14 @@ export const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
                 {hasSubcategories
                   ? currentCategory?.subcategories?.find((sub) => sub.id === selectedSubcategory)?.label ||
                     currentCategory?.label
-                  : currentCategory?.label || 'Settings'}
+                  : currentCategory?.label || t('settingsDialog.title')}
               </Text>
               <Button
                 appearance="subtle"
                 icon={<DismissRegular />}
                 className={styles.closeButton}
                 onClick={handleClose}
-                title="Close"
+                title={t('settingsDialog.close')}
               />
             </div>
             <div className={styles.contentBody}>{renderContent()}</div>

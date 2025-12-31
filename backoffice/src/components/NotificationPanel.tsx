@@ -17,6 +17,7 @@ import {
   DismissRegular,
 } from '@fluentui/react-icons';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Notification } from '../hooks/useNotifications';
 import { useNotificationContext } from '../contexts/NotificationContext';
@@ -186,30 +187,30 @@ const getNotificationIcon = (type: Notification['type']) => {
   }
 };
 
-const formatTimeAgo = (date: Date): string => {
+const formatTimeAgo = (date: Date, t: any): string => {
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
   if (diffInSeconds < 60) {
-    return 'Hace unos momentos';
+    return t('notifications.timeAgo.justNow');
   }
 
   const diffInMinutes = Math.floor(diffInSeconds / 60);
   if (diffInMinutes < 60) {
-    return `Hace ${diffInMinutes} ${diffInMinutes === 1 ? 'minuto' : 'minutos'}`;
+    return t('notifications.timeAgo.minutesAgo', { count: diffInMinutes });
   }
 
   const diffInHours = Math.floor(diffInMinutes / 60);
   if (diffInHours < 24) {
-    return `Hace ${diffInHours} ${diffInHours === 1 ? 'hora' : 'horas'}`;
+    return t('notifications.timeAgo.hoursAgo', { count: diffInHours });
   }
 
   const diffInDays = Math.floor(diffInHours / 24);
   if (diffInDays < 7) {
-    return `Hace ${diffInDays} ${diffInDays === 1 ? 'día' : 'días'}`;
+    return t('notifications.timeAgo.daysAgo', { count: diffInDays });
   }
 
-  return date.toLocaleDateString('es-ES', {
+  return date.toLocaleDateString(t('common.locale') || 'en-US', {
     day: 'numeric',
     month: 'short',
   });
@@ -217,6 +218,7 @@ const formatTimeAgo = (date: Date): string => {
 
 export const NotificationPanel = ({ trigger }: NotificationPanelProps) => {
   const styles = useStyles();
+  const { t } = useTranslation('backoffice');
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const {
@@ -248,7 +250,7 @@ export const NotificationPanel = ({ trigger }: NotificationPanelProps) => {
         <MenuPopover className={styles.menuPopover}>
           {/* Header */}
           <div className={styles.header}>
-            <Text className={styles.headerTitle}>Notificaciones</Text>
+            <Text className={styles.headerTitle}>{t('notifications.title')}</Text>
             {unreadCount > 0 && (
               <div className={styles.headerActions}>
                 <a
@@ -258,7 +260,7 @@ export const NotificationPanel = ({ trigger }: NotificationPanelProps) => {
                     markAllAsRead();
                   }}
                 >
-                  Marcar todas como leídas
+                  {t('notifications.markAllAsRead')}
                 </a>
               </div>
             )}
@@ -270,7 +272,7 @@ export const NotificationPanel = ({ trigger }: NotificationPanelProps) => {
               <div className={styles.emptyState}>
                 <AlertRegular className={styles.emptyStateIcon} />
                 <Text className={styles.emptyStateText}>
-                  No hay notificaciones
+                  {t('notifications.noNotifications')}
                 </Text>
               </div>
             ) : (
@@ -296,7 +298,7 @@ export const NotificationPanel = ({ trigger }: NotificationPanelProps) => {
                       {notification.message}
                     </Text>
                     <Text className={styles.notificationTime}>
-                      {formatTimeAgo(notification.timestamp)}
+                      {formatTimeAgo(notification.timestamp, t)}
                     </Text>
                   </div>
                   <div className={styles.notificationActions}>
@@ -305,7 +307,7 @@ export const NotificationPanel = ({ trigger }: NotificationPanelProps) => {
                       icon={<DismissRegular />}
                       className={styles.dismissButton}
                       onClick={(e) => handleDismiss(e, notification.id)}
-                      title="Descartar"
+                      title={t('notifications.dismiss')}
                     />
                   </div>
                 </div>
@@ -323,7 +325,7 @@ export const NotificationPanel = ({ trigger }: NotificationPanelProps) => {
                   setIsDrawerOpen(true);
                 }}
               >
-                Ver todas las notificaciones
+                {t('notifications.viewAllNotifications')}
               </a>
             </div>
           )}

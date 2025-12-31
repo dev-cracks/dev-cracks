@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { supportedLanguages, type SupportedLanguage } from '../../../i18n/index.ts';
 
 export const LanguageSelector = () => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation('backoffice');
 
   const handleLanguageChange = (lang: SupportedLanguage) => {
     i18n.changeLanguage(lang);
@@ -19,7 +19,7 @@ export const LanguageSelector = () => {
         <Button
           appearance="subtle"
           icon={<GlobeRegular />}
-          aria-label="Select language"
+          aria-label={t('languageSelector.selectLanguage')}
         >
           {currentLanguageName}
         </Button>
