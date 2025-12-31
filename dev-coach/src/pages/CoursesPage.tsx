@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import CardNav from '../components/CardNav';
 import ElectricBorder from '../components/ElectricBorder';
@@ -275,34 +276,36 @@ export const courses: Course[] = [
 ];
 
 export const CoursesPage = () => {
+  const { t } = useTranslation('dev-coach');
+  
   const items = [
     {
-      label: "Rutas",
+      label: t('navigation.routes'),
       bgColor: "#0D0716",
       textColor: "#fff",
       links: [
-        { label: "Junior a Mid", ariaLabel: "Ruta de formación Junior a Mid", href: "/challenge/1" },
-        { label: "Mid a Senior", ariaLabel: "Ruta de formación Mid a Senior", href: "/challenge/2" }
+        { label: t('navigation.juniorToMid'), ariaLabel: t('navigation.juniorToMidAria'), href: "/challenge/1" },
+        { label: t('navigation.midToSenior'), ariaLabel: t('navigation.midToSeniorAria'), href: "/challenge/2" }
       ]
     },
     {
-      label: "Cursos",
+      label: t('navigation.courses'),
       bgColor: "#170D27",
       textColor: "#fff",
       links: [
-        { label: "Todos los Cursos", ariaLabel: "Ver todos los cursos", href: "/courses" },
-        { label: "C# de cero a experto", ariaLabel: "Curso completo de C#", href: "/csharp-course" },
-        { label: "Arquitectura", ariaLabel: "Cursos de arquitectura", href: "/courses#arquitectura" },
-        { label: "Frontend", ariaLabel: "Cursos de frontend", href: "/courses#frontend" }
+        { label: t('navigation.allCourses'), ariaLabel: t('navigation.allCoursesAria'), href: "/courses" },
+        { label: t('navigation.csharpFromZero'), ariaLabel: t('navigation.csharpFromZeroAria'), href: "/csharp-course" },
+        { label: t('navigation.architecture'), ariaLabel: t('navigation.architectureAria'), href: "/courses#arquitectura" },
+        { label: t('navigation.frontend'), ariaLabel: t('navigation.frontendAria'), href: "/courses#frontend" }
       ]
     },
     {
-      label: "Recursos",
+      label: t('navigation.resources'),
       bgColor: "#271E37",
       textColor: "#fff",
       links: [
-        { label: "Documentación", ariaLabel: "Documentación técnica", href: "#" },
-        { label: "Comunidad", ariaLabel: "Comunidad de desarrolladores", href: "#" }
+        { label: t('navigation.documentation'), ariaLabel: t('navigation.documentationAria'), href: "#" },
+        { label: t('navigation.community'), ariaLabel: t('navigation.communityAria'), href: "#" }
       ]
     }
   ];
@@ -345,10 +348,10 @@ export const CoursesPage = () => {
       <div className="courses-container">
         <div className="courses-header">
           <h1 className="courses-title">
-            Cursos para Desarrolladores Fullstack .NET React
+            {t('page.title')}
           </h1>
           <p className="courses-subtitle">
-            Lleva tus habilidades al siguiente nivel. De Senior a Arquitecto
+            {t('page.subtitle')}
           </p>
         </div>
 

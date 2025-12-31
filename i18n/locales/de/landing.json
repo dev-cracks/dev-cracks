@@ -10,10 +10,196 @@
   "hero": {
     "title": "DEV CRACKS",
     "subtitle": "CODE // BREAKER",
-    "question": "Haben Sie Angst vor KI, Automatisierung und digitaler Transformation?"
+    "question": "Haben Sie Angst vor KI, Automatisierung und digitaler Transformation?",
+    "badge1": "Partner für digitale Transformation",
+    "badge2": "Experten für angewandte KI",
+    "titleLine1": "Digitale Transformation mit KI",
+    "titleLine2": "Von der Idee zur Geschäftswirkung",
+    "slides": {
+      "automation": {
+        "title": "Intelligente Automatisierung",
+        "benefit": "Reduziert Betriebskosten",
+        "percentage": "70%",
+        "description": "Unternehmen, die ihre Prozesse automatisieren, reduzieren die Ausführungszeit um 70% und steigern ihre Produktivität erheblich, was ab dem ersten Quartal messbare ROI generiert."
+      },
+      "ai": {
+        "title": "Angewandte künstliche Intelligenz",
+        "benefit": "Datenbasierte Entscheidungen",
+        "percentage": "85%",
+        "description": "KI ermöglicht präzisere Entscheidungen, reduziert Fehler um 85% und optimiert Geschäftsressourcen. Wir verwandeln Daten in Wettbewerbsvorteile."
+      },
+      "agents": {
+        "title": "Orchestrierte KI-Agenten",
+        "benefit": "Optimierung komplexer Abläufe",
+        "percentage": "60%",
+        "description": "Koordinierte Agentensysteme reduzieren Betriebskosten um bis zu 60% und verbessern gleichzeitig die Effizienz. Automatisierung, die mit Ihrem Geschäft skaliert."
+      },
+      "cloud": {
+        "title": "Cloud & DevOps Enterprise",
+        "benefit": "Beschleunigung des Time-to-Market",
+        "percentage": "50%",
+        "description": "Cloud-Implementierungen reduzieren Bereitstellungszeiten um 50% und verbessern die Skalierbarkeit. Infrastruktur, die mit Ihnen wächst."
+      },
+      "roi": {
+        "title": "Verifizierter durchschnittlicher ROI",
+        "benefit": "Bewährte Kapitalrendite",
+        "percentage": "300%",
+        "description": "Unternehmen, die unsere Lösungen implementieren, erzielen eine durchschnittliche Kapitalrendite von 300% im ersten Jahr. Messbare Ergebnisse, echte Wirkung."
+      }
+    },
+    "fears": {
+      "fear": "Angst",
+      "resistance": "Widerstand",
+      "obsolescence": "Veralterung",
+      "distrust": "Misstrauen",
+      "dread": "Furcht",
+      "manualProcesses": "Manuelle Prozesse",
+      "legacySystems": "Legacy-Systeme",
+      "lackOfVision": "Mangel an Vision",
+      "culturalResistance": "Kultureller Widerstand"
+    }
+  },
+  "contact": {
+    "title": "Kontakt",
+    "form": {
+      "name": "Vollständiger Name",
+      "namePlaceholder": "z.B.: Max Mustermann",
+      "email": "Geschäfts-E-Mail",
+      "emailPlaceholder": "z.B.: max.mustermann@unternehmen.com",
+      "company": "Unternehmen",
+      "companyPlaceholder": "z.B.: Meine Firma GmbH",
+      "position": "Position / Rolle",
+      "positionPlaceholder": "z.B.: CTO, Leiter Innovation",
+      "consultationType": "Beratungstyp",
+      "selectOption": "Wählen Sie eine Option",
+      "strategicConsulting": "Strategische KI-Beratung",
+      "customDevelopment": "Entwicklung maßgeschneiderter Lösungen",
+      "dataMl": "Data Engineering und ML",
+      "legacyIntegration": "Integration von Legacy-Systemen",
+      "automation": "Prozessautomatisierung",
+      "aiAgents": "Orchestrierte KI-Agenten",
+      "cloudDevops": "Cloud & DevOps",
+      "security": "Sicherheit und Audit",
+      "routeon": "Routeon Enterprise",
+      "devCoach": "Dev-Coach Pro",
+      "other": "Andere",
+      "message": "Nachricht",
+      "messagePlaceholder": "Erzählen Sie uns von Ihrem Projekt, Herausforderungen oder spezifischen Bedürfnissen...",
+      "submit": "Beratung anfordern",
+      "submitting": "Wird gesendet…",
+      "success": "Vielen Dank! Ein Senior-Berater wird sich innerhalb von 24 Stunden bei Ihnen melden."
+    },
+    "info": {
+      "title": "Kontaktinformationen",
+      "phone": "+34 647 007 280",
+      "email": "contacto@dev-cracks.com",
+      "website": "www.dev-cracks.com",
+      "downloadCard": "Kontaktkarte herunterladen",
+      "downloadWallet": "Zu Apple Wallet hinzufügen",
+      "downloadWalletAndroid": "Zu Google Wallet hinzufügen"
+    },
+    "wallet": {
+      "cardDescription": "Dev Cracks Visitenkarte",
+      "phoneLabel": "Telefon",
+      "descriptionLabel": "Beschreibung",
+      "descriptionValue": "Softwareentwicklung und Technologielösungen",
+      "certificatesNotConfigured": "Apple Wallet-Zertifikate sind nicht konfiguriert. Bitte kontaktieren Sie den Administrator, um die erforderlichen Zertifikate zu konfigurieren.",
+      "errorGenerating": "Fehler beim Generieren des Passes",
+      "unknownError": "Unbekannter Fehler"
+    }
+  },
+  "caseStudies": {
+    "title": "Anwendungsfälle und bewährte Ergebnisse",
+    "intro": "Wir transformieren Unternehmen aus verschiedenen Branchen mit KI- und Automatisierungslösungen. Dies sind echte Beispiele für messbare Auswirkungen auf Geschäftsabläufe.",
+    "challenge": "Herausforderung:",
+    "solution": "Lösung:",
+    "results": "Messbare Ergebnisse:",
+    "cta": "Möchten Sie ähnliche Ergebnisse für Ihr Unternehmen?",
+    "ctaButton": "Strategische Beratung anfordern",
+    "studies": {
+      "logistics": {
+        "industry": "Logistik",
+        "title": "Optimierung des Paket-Franchise-Netzwerks",
+        "challenge": "Franchise-Netzwerk mit manuellen Prozessen, hoher Fehlerrate und fehlender Echtzeit-Transparenz der Abläufe.",
+        "solution": "Implementierung von Routeon Enterprise mit ML für Nachfrageprognose, Workflow-Automatisierung und zentralisiertes Dashboard.",
+        "metrics": {
+          "operationalEfficiency": "Betriebseffizienz",
+          "manualErrors": "Manuelle Fehler",
+          "managementTime": "Management-Zeit",
+          "customerSatisfaction": "Kundenzufriedenheit",
+          "increase": "Steigerung",
+          "reduction": "Reduzierung"
+        }
+      },
+      "retail": {
+        "industry": "Einzelhandel",
+        "title": "Inventaroptimierung mit maschinellem Lernen",
+        "challenge": "Häufige Überbestände und Fehlbestände, Einkaufsentscheidungen basierend auf Intuition und Veralterungsverluste.",
+        "solution": "ML-Nachfrageprognosesystem, automatische Inventaroptimierung und proaktive Nachbestellungsbenachrichtigungen.",
+        "metrics": {
+          "costReduction": "Kostenreduzierung",
+          "availability": "Verfügbarkeit",
+          "obsolescenceLosses": "Veralterungsverluste",
+          "roi": "ROI",
+          "inventory": "Inventar",
+          "products": "Produkte",
+          "firstYear": "Erstes Jahr"
+        }
+      },
+      "financial": {
+        "industry": "Finanzdienstleistungen",
+        "title": "Automatisierung regulatorischer Prozesse",
+        "challenge": "Manuelle regulatorische Prozesse, verlängerte Compliance-Zeiten und hohes Fehlerrisiko in Berichten.",
+        "solution": "Intelligente Automatisierung regulatorischer Prozesse mit orchestrierten KI-Agenten und automatischer Compliance-Validierung.",
+        "metrics": {
+          "complianceTime": "Compliance-Zeit",
+          "reportErrors": "Berichtsfehler",
+          "operationalCosts": "Betriebskosten",
+          "compliance": "Compliance",
+          "rate": "Rate"
+        }
+      },
+      "manufacturing": {
+        "industry": "Fertigung",
+        "title": "Vorhersagende Wartung",
+        "challenge": "Reaktive Wartung verursacht unerwartete Ausfälle, hohe Reparaturkosten und Produktivitätsverlust.",
+        "solution": "ML-System zur Fehlerprognose, optimierte vorbeugende Wartung und Reduzierung ungeplanter Ausfallzeiten.",
+        "metrics": {
+          "downtime": "Ausfallzeit",
+          "maintenanceCosts": "Wartungskosten",
+          "availability": "Verfügbarkeit",
+          "productivity": "Produktivität",
+          "equipment": "Ausrüstung"
+        }
+      },
+      "ecommerce": {
+        "industry": "E-Commerce",
+        "title": "KI-Personalisierung und Empfehlungen",
+        "challenge": "Niedrige Konversionsraten, häufige verlassene Warenkörbe und mangelnde Personalisierung im Kundenerlebnis.",
+        "solution": "ML-Empfehlungssystem, dynamische Content-Personalisierung und Echtzeit-Preisoptimierung.",
+        "metrics": {
+          "conversionRate": "Konversionsrate",
+          "abandonedCarts": "Verlassene Warenkörbe",
+          "averageOrderValue": "Durchschnittlicher Bestellwert",
+          "roi": "ROI",
+          "firstYear": "Erstes Jahr"
+        }
+      },
+      "healthcare": {
+        "industry": "Gesundheitswesen",
+        "title": "Optimierung der Krankenhausressourcen",
+        "challenge": "Ineffizienz bei der Ressourcenallokation, verlängerte Wartezeiten und Schwierigkeiten bei der Vorhersage der Servicenachfrage.",
+        "solution": "ML-System zur Nachfrageprognose, Terminoptimierung und intelligente Zuteilung medizinischer Ressourcen.",
+        "metrics": {
+          "waitTimes": "Wartezeiten",
+          "resourceUtilization": "Ressourcennutzung",
+          "patientSatisfaction": "Patientenzufriedenheit",
+          "operationalCosts": "Betriebskosten"
+        }
+      }
+    }
   },
   "common": {
     "login": "Anmelden"
   }
 }
-

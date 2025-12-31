@@ -1,4 +1,44 @@
 {
-  "welcome": "Welcome to Route On"
+  "welcome": "Welcome to Route On",
+  "navigation": {
+    "home": "Home",
+    "reception": "Reception",
+    "shipments": "Shipments",
+    "distribution": "Distribution",
+    "tracking": "Tracking",
+    "map": "Map",
+    "incidents": "Incidents",
+    "aiRoutes": "AI Routes",
+    "homeAria": "Go to home page",
+    "receptionAria": "Manage package reception",
+    "shipmentsAria": "Manage package shipments",
+    "distributionAria": "Manage package distribution",
+    "trackingAria": "Package tracking",
+    "mapAria": "View points on map",
+    "incidentsAria": "Manage package incidents",
+    "aiRoutesAria": "Organize routes with artificial intelligence"
+  },
+  "dock": {
+    "home": "Home",
+    "archive": "Archive",
+    "profile": "Profile",
+    "settings": "Settings",
+    "applicationDock": "Application dock"
+  },
+  "orbModal": {
+    "title": "Jarvis - AI Assistant",
+    "close": "Close modal",
+    "placeholder": "Write your message...",
+    "send": "Send message",
+    "greeting": "Hello! How can I help you today?",
+    "farewell": "See you later! Have an excellent day.",
+    "thanks": "You're welcome! I'm here to help you.",
+    "capabilities": "I can help you with various queries, answer questions, and assist you with what you need. What would you like to know?",
+    "defaultResponse": "I understand you mentioned \"{{message}}\". I'm here to help you. Could you give me more details about what you need?"
+  },
+  "staggeredMenu": {
+    "closeMenu": "Close menu",
+    "openMenu": "Open menu",
+    "socialLinks": "Social links"
+  }
 }
-

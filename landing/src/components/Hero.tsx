@@ -1,64 +1,66 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import FallingText from './FallingText';
 import SplitText from './SplitText';
 
-// Slides del carousel con enfoque empresarial
-const carouselSlides = [
-  {
-    title: 'Automatización Inteligente',
-    benefit: 'Reduce costos operativos',
-    percentage: '70%',
-    description: 'Las empresas que automatizan sus procesos reducen el tiempo de ejecución en un 70% y aumentan su productividad significativamente, generando ROI medible desde el primer trimestre.',
-    icon: '⚡'
-  },
-  {
-    title: 'Inteligencia Artificial Aplicada',
-    benefit: 'Decisiones basadas en datos',
-    percentage: '85%',
-    description: 'La IA permite decisiones más precisas, reduciendo errores en un 85% y optimizando recursos empresariales. Transformamos datos en ventaja competitiva.',
-    icon: '🤖'
-  },
-  {
-    title: 'Agentes Orquestados de IA',
-    benefit: 'Optimización de flujos complejos',
-    percentage: '60%',
-    description: 'Los sistemas de agentes coordinados reducen costos operativos hasta en un 60% mientras mejoran la eficiencia. Automatización que escala con tu negocio.',
-    icon: '🎯'
-  },
-  {
-    title: 'Cloud & DevOps Enterprise',
-    benefit: 'Aceleración del time-to-market',
-    percentage: '50%',
-    description: 'Las implementaciones en la nube reducen tiempos de despliegue en un 50% y mejoran la escalabilidad. Infraestructura que crece contigo.',
-    icon: '☁️'
-  },
-  {
-    title: 'ROI Promedio Verificado',
-    benefit: 'Retorno de inversión comprobado',
-    percentage: '300%',
-    description: 'Las empresas que implementan nuestras soluciones obtienen un retorno de inversión promedio del 300% en el primer año. Resultados medibles, impacto real.',
-    icon: '💰'
-  }
-];
-
-// Lista de miedos y conceptos retrógrados sobre IA - palabras clave
-const miedosRetrogrados = [
-  'Miedo',
-  'Resistencia',
-  'Obsolescencia',
-  'Desconfianza',
-  'Temor',
-  'Procesos manuales',
-  'Sistemas legacy',
-  'Falta de visión',
-  'Resistencia cultural'
-];
-
 export const Hero = () => {
+  const { t } = useTranslation('landing');
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showFallingText, setShowFallingText] = useState(true);
   const [showMainContent, setShowMainContent] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
+
+  // Slides del carousel con enfoque empresarial
+  const carouselSlides = [
+    {
+      title: t('hero.slides.automation.title'),
+      benefit: t('hero.slides.automation.benefit'),
+      percentage: t('hero.slides.automation.percentage'),
+      description: t('hero.slides.automation.description'),
+      icon: '⚡'
+    },
+    {
+      title: t('hero.slides.ai.title'),
+      benefit: t('hero.slides.ai.benefit'),
+      percentage: t('hero.slides.ai.percentage'),
+      description: t('hero.slides.ai.description'),
+      icon: '🤖'
+    },
+    {
+      title: t('hero.slides.agents.title'),
+      benefit: t('hero.slides.agents.benefit'),
+      percentage: t('hero.slides.agents.percentage'),
+      description: t('hero.slides.agents.description'),
+      icon: '🎯'
+    },
+    {
+      title: t('hero.slides.cloud.title'),
+      benefit: t('hero.slides.cloud.benefit'),
+      percentage: t('hero.slides.cloud.percentage'),
+      description: t('hero.slides.cloud.description'),
+      icon: '☁️'
+    },
+    {
+      title: t('hero.slides.roi.title'),
+      benefit: t('hero.slides.roi.benefit'),
+      percentage: t('hero.slides.roi.percentage'),
+      description: t('hero.slides.roi.description'),
+      icon: '💰'
+    }
+  ];
+
+  // Lista de miedos y conceptos retrógrados sobre IA - palabras clave
+  const miedosRetrogrados = [
+    t('hero.fears.fear'),
+    t('hero.fears.resistance'),
+    t('hero.fears.obsolescence'),
+    t('hero.fears.distrust'),
+    t('hero.fears.dread'),
+    t('hero.fears.manualProcesses'),
+    t('hero.fears.legacySystems'),
+    t('hero.fears.lackOfVision'),
+    t('hero.fears.culturalResistance')
+  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -66,7 +68,7 @@ export const Hero = () => {
     }, 5000); // Cambia cada 5 segundos
 
     return () => clearInterval(interval);
-  }, []);
+  }, [carouselSlides.length]);
 
   useEffect(() => {
     // Iniciar fade out después de 6 segundos (triple del tiempo original)
@@ -100,8 +102,8 @@ export const Hero = () => {
       <div className="container hero__inner">
         {/* Badges de autoridad */}
         <div className="hero__badges">
-          <span className="hero__badge">Partner de Transformación Digital</span>
-          <span className="hero__badge">Expertos en IA Aplicada</span>
+          <span className="hero__badge">{t('hero.badge1')}</span>
+          <span className="hero__badge">{t('hero.badge2')}</span>
         </div>
 
         {/* Contenedor fijo para mantener el espacio */}
@@ -126,10 +128,10 @@ export const Hero = () => {
           {/* Contenido principal con SplitText */}
           <div className={`hero__title-wrapper ${showMainContent ? 'visible' : ''}`}>
             <h2 className="hero__title-line">
-              <SplitText text="Transformación Digital con IA" delay={300} />
+              <SplitText text={t('hero.titleLine1')} delay={300} />
             </h2>
             <h2 className="hero__title-line">
-              <SplitText text="De la Idea al Impacto Empresarial" delay={800} />
+              <SplitText text={t('hero.titleLine2')} delay={800} />
             </h2>
           </div>
         </div>

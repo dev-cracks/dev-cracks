@@ -1,4 +1,42 @@
 {
-  "welcome": "Bienvenue sur Dev Coach"
+  "welcome": "Bienvenue sur Dev Coach",
+  "navigation": {
+    "routes": "Parcours",
+    "courses": "Cours",
+    "resources": "Ressources",
+    "juniorToMid": "Junior à Mid",
+    "juniorToMidAria": "Parcours de formation Junior à Mid",
+    "midToSenior": "Mid à Senior",
+    "midToSeniorAria": "Parcours de formation Mid à Senior",
+    "allCourses": "Tous les cours",
+    "allCoursesAria": "Voir tous les cours",
+    "csharpFromZero": "C# de zéro à expert",
+    "csharpFromZeroAria": "Cours complet de C#",
+    "architecture": "Architecture",
+    "architectureAria": "Cours d'architecture",
+    "frontend": "Frontend",
+    "frontendAria": "Cours frontend",
+    "documentation": "Documentation",
+    "documentationAria": "Documentation technique",
+    "community": "Communauté",
+    "communityAria": "Communauté de développeurs"
+  },
+  "courses": {
+    "title": "Cours",
+    "category": "Catégorie",
+    "level": "Niveau",
+    "duration": "Durée",
+    "topics": "Sujets",
+    "viewCourse": "Voir le cours",
+    "noCourses": "Aucun cours disponible"
+  },
+  "levels": {
+    "senior": "Senior",
+    "architect": "Architecte",
+    "techLead": "Tech Lead"
+  },
+  "page": {
+    "title": "Cours pour développeurs Fullstack .NET React",
+    "subtitle": "Passez vos compétences au niveau supérieur. De Senior à Architecte"
+  }
 }
-

@@ -1,4 +1,44 @@
 {
-  "welcome": "Bienvenido a Route On"
+  "welcome": "Bienvenido a Route On",
+  "navigation": {
+    "home": "Inicio",
+    "reception": "Recepción",
+    "shipments": "Envíos",
+    "distribution": "Distribución",
+    "tracking": "Seguimiento",
+    "map": "Mapa",
+    "incidents": "Incidencias",
+    "aiRoutes": "Rutas IA",
+    "homeAria": "Ir a la página de inicio",
+    "receptionAria": "Gestionar recepción de paquetes",
+    "shipmentsAria": "Gestionar envíos de paquetes",
+    "distributionAria": "Gestionar distribución de paquetes",
+    "trackingAria": "Seguimiento de paquetes",
+    "mapAria": "Ver puntos en el mapa",
+    "incidentsAria": "Gestionar incidencias de paquetes",
+    "aiRoutesAria": "Organizar rutas con inteligencia artificial"
+  },
+  "dock": {
+    "home": "Home",
+    "archive": "Archive",
+    "profile": "Profile",
+    "settings": "Settings",
+    "applicationDock": "Application dock"
+  },
+  "orbModal": {
+    "title": "Jarvis - Asistente de IA",
+    "close": "Cerrar modal",
+    "placeholder": "Escribe tu mensaje...",
+    "send": "Enviar mensaje",
+    "greeting": "¡Hola! ¿En qué puedo ayudarte hoy?",
+    "farewell": "¡Hasta luego! Que tengas un excelente día.",
+    "thanks": "¡De nada! Estoy aquí para ayudarte.",
+    "capabilities": "Puedo ayudarte con diversas consultas, responder preguntas, y asistirte en lo que necesites. ¿Qué te gustaría saber?",
+    "defaultResponse": "Entiendo que mencionaste \"{{message}}\". Estoy aquí para ayudarte. ¿Podrías darme más detalles sobre lo que necesitas?"
+  },
+  "staggeredMenu": {
+    "closeMenu": "Cerrar menú",
+    "openMenu": "Abrir menú",
+    "socialLinks": "Enlaces sociales"
+  }
 }
-

@@ -1,4 +1,5 @@
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { gsap } from 'gsap';
 import './StaggeredMenu.css';
 
@@ -37,6 +38,7 @@ export const StaggeredMenu = ({
   onMenuOpen?: () => void;
   onMenuClose?: () => void;
 }) => {
+  const { t } = useTranslation('route-on');
   const [open, setOpen] = useState(false);
   const openRef = useRef(false);
   const panelRef = useRef<HTMLElement | null>(null);
@@ -474,7 +476,7 @@ export const StaggeredMenu = ({
           </ul>
 
           {displaySocials && socialItems && socialItems.length > 0 && (
-            <div className="sm-socials" aria-label="Social links">
+            <div className="sm-socials" aria-label={t('staggeredMenu.socialLinks')}>
               <h3 className="sm-socials-title">Socials</h3>
               <ul className="sm-socials-list" role="list">
                 {socialItems.map((s, i) => (

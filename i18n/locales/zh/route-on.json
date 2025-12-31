@@ -1,4 +1,44 @@
 {
-  "welcome": "欢迎来到 Route On"
+  "welcome": "欢迎来到 Route On",
+  "navigation": {
+    "home": "首页",
+    "reception": "接收",
+    "shipments": "发货",
+    "distribution": "配送",
+    "tracking": "跟踪",
+    "map": "地图",
+    "incidents": "事件",
+    "aiRoutes": "AI路线",
+    "homeAria": "转到首页",
+    "receptionAria": "管理包裹接收",
+    "shipmentsAria": "管理包裹发货",
+    "distributionAria": "管理包裹配送",
+    "trackingAria": "包裹跟踪",
+    "mapAria": "查看地图上的点",
+    "incidentsAria": "管理包裹事件",
+    "aiRoutesAria": "使用人工智能组织路线"
+  },
+  "dock": {
+    "home": "首页",
+    "archive": "归档",
+    "profile": "个人资料",
+    "settings": "设置",
+    "applicationDock": "应用程序停靠栏"
+  },
+  "orbModal": {
+    "title": "Jarvis - AI助手",
+    "close": "关闭模态框",
+    "placeholder": "写下您的消息...",
+    "send": "发送消息",
+    "greeting": "你好！今天我能为您做些什么？",
+    "farewell": "再见！祝您有美好的一天。",
+    "thanks": "不客气！我在这里帮助您。",
+    "capabilities": "我可以帮助您处理各种查询、回答问题，并协助您完成所需的工作。您想了解什么？",
+    "defaultResponse": "我理解您提到了\"{{message}}\"。我在这里帮助您。您能给我更多关于您需要的详细信息吗？"
+  },
+  "staggeredMenu": {
+    "closeMenu": "关闭菜单",
+    "openMenu": "打开菜单",
+    "socialLinks": "社交链接"
+  }
 }
-

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   Card,
@@ -70,6 +71,7 @@ const useStyles = makeStyles({
 });
 
 export const ShipmentRequestsPage = () => {
+  const { t } = useTranslation('backoffice');
   console.log('[ShipmentRequestsPage] Component rendering - START');
   const styles = useStyles();
   const navigate = useNavigate();
@@ -96,11 +98,11 @@ export const ShipmentRequestsPage = () => {
           try {
             addGroup({
               id: 'shipments-main',
-              label: 'Solicitudes',
+              label: t('shipments.title'),
               items: [
                 {
                   id: 'new-request',
-                  label: 'Nueva Solicitud',
+                  label: t('shipments.newRequest'),
                   icon: <AddRegular />,
                   action: () => navigate('/shipments/new'),
                 },
@@ -114,7 +116,7 @@ export const ShipmentRequestsPage = () => {
       } catch (err: any) {
         console.error('[ShipmentRequestsPage] Error initializing:', err);
         if (isMounted) {
-          setError(err.message || 'Error al inicializar la página');
+          setError(err.message || t('shipments.errorInitializing'));
         }
       }
     };
@@ -150,8 +152,8 @@ export const ShipmentRequestsPage = () => {
       setFilteredRequests(requestsData || []);
     } catch (error: any) {
       console.error('[ShipmentRequestsPage] Error loading shipment data:', error);
-      setError(error.message || 'Error desconocido');
-      notificationService.error('Error al cargar datos', error.message || 'Error desconocido');
+      setError(error.message || t('shipments.errorUnknown'));
+      notificationService.error(t('shipments.errorLoading'), error.message || t('shipments.errorUnknown'));
       // Asegurar que el estado se establece incluso si hay error
       setRequests([]);
       setFilteredRequests([]);
@@ -186,7 +188,7 @@ export const ShipmentRequestsPage = () => {
       const url = window.URL.createObjectURL(blob);
       window.open(url, '_blank');
     } catch (error: any) {
-      notificationService.error('Error al generar etiqueta', error.message);
+      notificationService.error(t('shipments.errorGeneratingLabel'), error.message);
     }
   };
 
@@ -252,12 +254,12 @@ export const ShipmentRequestsPage = () => {
         </div>
 
         <div className={styles.header}>
-          <Text className={styles.title}>Solicitudes de Recogida</Text>
+          <Text className={styles.title}>{t('shipments.title')}</Text>
         </div>
 
       <div className={styles.toolbar}>
         <SearchBox
-          placeholder="Buscar por número de guía, cliente, contacto o dirección..."
+          placeholder={t('shipments.searchPlaceholder')}
           value={searchQuery}
           onChange={(_, data) => setSearchQuery(data.value)}
           style={{ flex: 1 }}
@@ -267,7 +269,7 @@ export const ShipmentRequestsPage = () => {
           icon={<AddRegular />}
           onClick={() => navigate('/shipments/new')}
         >
-          Nueva Solicitud
+          {t('shipments.newRequest')}
         </Button>
       </div>
 
@@ -275,25 +277,25 @@ export const ShipmentRequestsPage = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHeaderCell>Número de Guía</TableHeaderCell>
-              <TableHeaderCell>Cliente</TableHeaderCell>
-              <TableHeaderCell>Origen</TableHeaderCell>
-              <TableHeaderCell>Destino</TableHeaderCell>
+              <TableHeaderCell>{t('shipments.guideNumber')}</TableHeaderCell>
+              <TableHeaderCell>{t('shipments.customer')}</TableHeaderCell>
+              <TableHeaderCell>{t('shipments.origin')}</TableHeaderCell>
+              <TableHeaderCell>{t('shipments.destination')}</TableHeaderCell>
               <TableHeaderCell>
                 <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS }}>
-                  <span>Contacto</span>
+                  <span>{t('shipments.contact')}</span>
                   <Button
                     appearance="subtle"
                     icon={showContactGlobal ? <EyeRegular /> : <EyeOffRegular />}
                     onClick={toggleContactGlobal}
                     size="small"
-                    title={showContactGlobal ? 'Ocultar todos los contactos' : 'Mostrar todos los contactos'}
+                    title={showContactGlobal ? t('shipments.hideAllContacts') : t('shipments.showAllContacts')}
                   />
                 </div>
               </TableHeaderCell>
-              <TableHeaderCell>Fecha de Solicitud</TableHeaderCell>
-              <TableHeaderCell>Fecha Estimada</TableHeaderCell>
-              <TableHeaderCell>Imprimir</TableHeaderCell>
+              <TableHeaderCell>{t('shipments.requestDate')}</TableHeaderCell>
+              <TableHeaderCell>{t('shipments.estimatedDate')}</TableHeaderCell>
+              <TableHeaderCell>{t('shipments.print')}</TableHeaderCell>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -301,7 +303,7 @@ export const ShipmentRequestsPage = () => {
               <TableRow>
                 <TableCell colSpan={8}>
                   <div style={{ textAlign: 'center', padding: tokens.spacingVerticalXL }}>
-                    <Text>No hay solicitudes registradas</Text>
+                    <Text>{t('shipments.noRequests')}</Text>
                   </div>
                 </TableCell>
               </TableRow>
@@ -311,7 +313,7 @@ export const ShipmentRequestsPage = () => {
                   <TableCell>
                     <Text weight="semibold">{request.guideNumber}</Text>
                   </TableCell>
-                  <TableCell>{request.customerName || 'N/A'}</TableCell>
+                  <TableCell>{request.customerName || t('shipments.notAvailable')}</TableCell>
                   <TableCell>
                     <Text>{request.originAddress}</Text>
                     {request.originCity && (
@@ -345,7 +347,7 @@ export const ShipmentRequestsPage = () => {
                             icon={<EyeRegular />}
                             onClick={() => toggleContactCell(request.id)}
                             size="small"
-                            title="Ocultar contacto"
+                            title={t('shipments.hideContact')}
                           />
                         </>
                       ) : (
@@ -354,7 +356,7 @@ export const ShipmentRequestsPage = () => {
                           icon={<EyeOffRegular />}
                           onClick={() => toggleContactCell(request.id)}
                           size="small"
-                          title="Mostrar contacto"
+                          title={t('shipments.showContact')}
                         />
                       )}
                     </div>
@@ -363,14 +365,14 @@ export const ShipmentRequestsPage = () => {
                     {request.requestDate ? (
                       <Text>{new Date(request.requestDate).toLocaleString()}</Text>
                     ) : (
-                      <Text>N/A</Text>
+                      <Text>{t('shipments.notAvailable')}</Text>
                     )}
                   </TableCell>
                   <TableCell>
                     {request.estimatedDeliveryDate ? (
                       <Text>{new Date(request.estimatedDeliveryDate).toLocaleString()}</Text>
                     ) : (
-                      <Text>N/A</Text>
+                      <Text>{t('shipments.notAvailable')}</Text>
                     )}
                   </TableCell>
                   <TableCell>
@@ -380,7 +382,7 @@ export const ShipmentRequestsPage = () => {
                       onClick={() => handleGenerateLabel(request.id)}
                       size="small"
                     >
-                      Etiqueta
+                      {t('shipments.label')}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -397,13 +399,13 @@ export const ShipmentRequestsPage = () => {
       <div style={{ padding: tokens.spacingVerticalXL }}>
         <MessageBar intent="error">
           <MessageBarBody>
-            <Text>Error al renderizar la página: {renderError?.message || 'Error desconocido'}</Text>
+            <Text>{t('shipments.errorRendering')}: {renderError?.message || t('shipments.errorUnknown')}</Text>
             <Button
               appearance="primary"
               onClick={() => window.location.reload()}
               style={{ marginTop: tokens.spacingVerticalM }}
             >
-              Recargar Página
+              {t('shipments.reloadPage')}
             </Button>
           </MessageBarBody>
         </MessageBar>

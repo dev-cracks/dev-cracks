@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { PillNav } from '../components/PillNav';
 import { useAuth } from '../hooks/useAuth';
@@ -10,6 +11,7 @@ import DarkVeil from '../components/DarkVeil';
 import './AccountPage.css';
 
 export const AccountPage = () => {
+  const { t } = useTranslation('portal');
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading } = useAuth();
   const { profile: gravatarProfile, isLoading: isLoadingGravatar } = useGravatarProfile();
@@ -81,7 +83,7 @@ export const AccountPage = () => {
                 <div className="account-page__info-item">
                   <label className="account-page__info-label">Nombre</label>
                   <div className="account-page__info-value">
-                    {user.name || 'No especificado'}
+                    {user.name || t('userDataEditor.notSpecified')}
                   </div>
                 </div>
 

@@ -3,7 +3,7 @@ import { supportedLanguages, type SupportedLanguage } from '../../../i18n/index.
 import './LanguageSelector.css';
 
 export const LanguageSelector = () => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation('common');
 
   const handleLanguageChange = (lang: SupportedLanguage) => {
     i18n.changeLanguage(lang);
@@ -18,7 +18,7 @@ export const LanguageSelector = () => {
         value={currentLanguage}
         onChange={(e) => handleLanguageChange(e.target.value as SupportedLanguage)}
         className="language-selector__select"
-        aria-label="Select language"
+        aria-label={t('common.language')}
       >
         {Object.entries(supportedLanguages).map(([code, name]) => (
           <option key={code} value={code}>

@@ -1,9 +1,11 @@
 import { FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import JSZip from 'jszip';
 import { useContactFormStore } from '../hooks/useContactFormStore';
 import { env } from '../config/env';
 
 export const ContactSection = () => {
+  const { t } = useTranslation('landing');
   const { name, email, company, position, consultationType, message, status, error, setField, submit } = useContactFormStore();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -24,7 +26,7 @@ export const ContactSection = () => {
       `TEL;TYPE=CELL:+34647007280`,
       `EMAIL:${env.contactRecipient}`,
       `URL:https://www.dev-cracks.com`,
-      `NOTE:Desarrollo de software y soluciones tecnológicas`,
+      `NOTE:${t('contact.wallet.descriptionValue')}`,
       'END:VCARD'
     ].join('\n');
 
@@ -48,7 +50,7 @@ export const ContactSection = () => {
       serialNumber: `dev-cracks-${Date.now()}`,
       teamIdentifier: 'DEVCracks',
       organizationName: 'Dev Cracks',
-      description: 'Tarjeta de presentación Dev Cracks',
+      description: t('contact.wallet.cardDescription'),
       logoText: 'Dev Cracks',
       foregroundColor: 'rgb(88, 166, 255)',
       backgroundColor: 'rgb(13, 17, 23)',
@@ -64,7 +66,7 @@ export const ContactSection = () => {
         secondaryFields: [
           {
             key: 'phone',
-            label: 'Teléfono',
+            label: t('contact.wallet.phoneLabel'),
             value: '+34 647 007 280'
           },
           {
@@ -83,8 +85,8 @@ export const ContactSection = () => {
         backFields: [
           {
             key: 'description',
-            label: 'Descripción',
-            value: 'Desarrollo de software y soluciones tecnológicas'
+            label: t('contact.wallet.descriptionLabel'),
+            value: t('contact.wallet.descriptionValue')
           },
           {
             key: 'contact',
@@ -141,16 +143,16 @@ export const ContactSection = () => {
           email: env.contactRecipient,
           phone: '+34 647 007 280',
           website: 'https://www.dev-cracks.com',
-          description: 'Desarrollo de software y soluciones tecnológicas'
+          description: t('contact.wallet.descriptionValue')
         })
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Error desconocido' }));
         if (response.status === 503) {
-          alert('Los certificados de Apple Wallet no están configurados. Por favor, contacta al administrador para configurar los certificados necesarios.');
+          alert(t('contact.wallet.certificatesNotConfigured'));
         } else {
-          alert(`Error al generar el pass: ${errorData.message || 'Error desconocido'}`);
+          alert(`${t('contact.wallet.errorGenerating')}: ${errorData.message || t('contact.wallet.unknownError')}`);
         }
         return;
       }
@@ -229,7 +231,7 @@ export const ContactSection = () => {
             <form onSubmit={handleSubmit} noValidate>
               <div className="contact-form__row">
                 <div className="contact-form__field">
-                  <label htmlFor="name">Nombre completo *</label>
+                  <label htmlFor="name">{t('contact.form.name')} *</label>
                   <input
                     id="name"
                     name="name"
@@ -239,12 +241,12 @@ export const ContactSection = () => {
                     onChange={(event) => setField('name', event.target.value)}
                     required
                     disabled={isSubmitting}
-                    placeholder="Ej: Juan Pérez"
+                    placeholder={t('contact.form.namePlaceholder')}
                   />
                 </div>
 
                 <div className="contact-form__field">
-                  <label htmlFor="email">Email corporativo *</label>
+                  <label htmlFor="email">{t('contact.form.email')} *</label>
                   <input
                     id="email"
                     name="email"
@@ -254,14 +256,14 @@ export const ContactSection = () => {
                     onChange={(event) => setField('email', event.target.value)}
                     required
                     disabled={isSubmitting}
-                    placeholder="Ej: juan.perez@empresa.com"
+                    placeholder={t('contact.form.emailPlaceholder')}
                   />
                 </div>
               </div>
 
               <div className="contact-form__row">
                 <div className="contact-form__field">
-                  <label htmlFor="company">Empresa</label>
+                  <label htmlFor="company">{t('contact.form.company')}</label>
                   <input
                     id="company"
                     name="company"
@@ -270,12 +272,12 @@ export const ContactSection = () => {
                     value={company}
                     onChange={(event) => setField('company', event.target.value)}
                     disabled={isSubmitting}
-                    placeholder="Ej: Mi Empresa S.A."
+                    placeholder={t('contact.form.companyPlaceholder')}
                   />
                 </div>
 
                 <div className="contact-form__field">
-                  <label htmlFor="position">Cargo / Posición</label>
+                  <label htmlFor="position">{t('contact.form.position')}</label>
                   <input
                     id="position"
                     name="position"
@@ -283,13 +285,13 @@ export const ContactSection = () => {
                     value={position}
                     onChange={(event) => setField('position', event.target.value)}
                     disabled={isSubmitting}
-                    placeholder="Ej: CTO, Head de Innovación"
+                    placeholder={t('contact.form.positionPlaceholder')}
                   />
                 </div>
               </div>
 
               <div className="contact-form__field">
-                <label htmlFor="consultationType">Tipo de Consultoría</label>
+                <label htmlFor="consultationType">{t('contact.form.consultationType')}</label>
                 <select
                   id="consultationType"
                   name="consultationType"
@@ -297,23 +299,23 @@ export const ContactSection = () => {
                   onChange={(event) => setField('consultationType', event.target.value)}
                   disabled={isSubmitting}
                 >
-                  <option value="">Selecciona una opción</option>
-                  <option value="consultoria-estrategica">Consultoría Estratégica en IA</option>
-                  <option value="desarrollo-medida">Desarrollo de Soluciones a Medida</option>
-                  <option value="data-ml">Data Engineering y ML</option>
-                  <option value="integracion-legacy">Integración de Sistemas Legacy</option>
-                  <option value="automatizacion">Automatización de Procesos</option>
-                  <option value="agentes-ia">Agentes Orquestados de IA</option>
-                  <option value="cloud-devops">Cloud & DevOps</option>
-                  <option value="seguridad">Seguridad y Auditoría</option>
-                  <option value="routeon">Routeon Enterprise</option>
-                  <option value="dev-coach">Dev-Coach Pro</option>
-                  <option value="otro">Otro</option>
+                  <option value="">{t('contact.form.selectOption')}</option>
+                  <option value="consultoria-estrategica">{t('contact.form.strategicConsulting')}</option>
+                  <option value="desarrollo-medida">{t('contact.form.customDevelopment')}</option>
+                  <option value="data-ml">{t('contact.form.dataMl')}</option>
+                  <option value="integracion-legacy">{t('contact.form.legacyIntegration')}</option>
+                  <option value="automatizacion">{t('contact.form.automation')}</option>
+                  <option value="agentes-ia">{t('contact.form.aiAgents')}</option>
+                  <option value="cloud-devops">{t('contact.form.cloudDevops')}</option>
+                  <option value="seguridad">{t('contact.form.security')}</option>
+                  <option value="routeon">{t('contact.form.routeon')}</option>
+                  <option value="dev-coach">{t('contact.form.devCoach')}</option>
+                  <option value="otro">{t('contact.form.other')}</option>
                 </select>
               </div>
 
               <div className="contact-form__field">
-                <label htmlFor="message">Mensaje *</label>
+                <label htmlFor="message">{t('contact.form.message')} *</label>
                 <textarea
                   id="message"
                   name="message"
@@ -322,19 +324,19 @@ export const ContactSection = () => {
                   onChange={(event) => setField('message', event.target.value)}
                   required
                   disabled={isSubmitting}
-                  placeholder="Cuéntanos sobre tu proyecto, desafíos o necesidades específicas..."
+                  placeholder={t('contact.form.messagePlaceholder')}
                 />
               </div>
 
               <button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Enviando…' : 'Solicitar Consultoría'}
+                {isSubmitting ? t('contact.form.submitting') : t('contact.form.submit')}
               </button>
             </form>
 
             <div className="contact-form__feedback" role="status" aria-live="polite">
               {isSuccess && (
                 <p className="contact-form__success">
-                  ¡Gracias! Un consultor senior se pondrá en contacto contigo en menos de 24 horas.
+                  {t('contact.form.success')}
                 </p>
               )}
               {status === 'error' && error && <p className="contact-form__error">{error}</p>}
@@ -342,7 +344,7 @@ export const ContactSection = () => {
           </div>
 
           <div className="contact-info">
-            <h3>Información de Contacto</h3>
+            <h3>{t('contact.info.title')}</h3>
             <div className="contact-info__item">
               <a href="tel:+34647007280" className="contact-info__link">
                 <span className="contact-info__icon">📞</span>
@@ -381,7 +383,7 @@ export const ContactSection = () => {
                     <path d="M11 12h5v1.5h-5V12z" fill="currentColor"/>
                   </svg>
                 </span>
-                <span className="contact-info__text">Tarjeta de Presentación</span>
+                <span className="contact-info__text">{t('contact.info.downloadCard')}</span>
               </a>
             </div>
             <div className="contact-info__item">
@@ -399,7 +401,7 @@ export const ContactSection = () => {
                     <path d="M8 11h8v2H8v-2zm0 4h5v2H8v-2z" fill="currentColor" opacity="0.6"/>
                   </svg>
                 </span>
-                <span className="contact-info__text">Pase para Wallet</span>
+                <span className="contact-info__text">{t('contact.info.downloadWallet')}</span>
               </a>
             </div>
             <div className="contact-info__item">
@@ -416,7 +418,7 @@ export const ContactSection = () => {
                     <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" fill="currentColor"/>
                   </svg>
                 </span>
-                <span className="contact-info__text">Apple Wallet (iPhone)</span>
+                <span className="contact-info__text">{t('contact.info.downloadWallet')}</span>
               </a>
             </div>
             <div className="contact-info__item">
@@ -427,7 +429,7 @@ export const ContactSection = () => {
                 className="contact-info__link"
               >
                 <span className="contact-info__icon">📅</span>
-                <span className="contact-info__text">Agendar una Cita</span>
+                <span className="contact-info__text">{t('contact.info.title')}</span>
               </a>
             </div>
           </div>

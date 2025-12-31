@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { FadeInSection } from './FadeInSection';
 
 interface CaseStudy {
@@ -13,95 +14,96 @@ interface CaseStudy {
   icon: string;
 }
 
-const caseStudies: CaseStudy[] = [
-  {
-    industry: 'Logística',
-    title: 'Optimización de Red de Franquicias de Paquetería',
-    challenge: 'Red de franquicias con procesos manuales, alta tasa de errores operativos y falta de visibilidad en tiempo real de la operación.',
-    solution: 'Implementación de Routeon Enterprise con ML para predicción de demanda, automatización de workflows y dashboard centralizado.',
-    metrics: [
-      { label: 'Eficiencia Operativa', value: '+30%', improvement: 'Aumento' },
-      { label: 'Errores Manuales', value: '-40%', improvement: 'Reducción' },
-      { label: 'Tiempo de Gestión', value: '-50%', improvement: 'Reducción' },
-      { label: 'Satisfacción Cliente', value: '+35%', improvement: 'Aumento' }
-    ],
-    icon: '📦'
-  },
-  {
-    industry: 'Retail',
-    title: 'Optimización de Inventario con Machine Learning',
-    challenge: 'Sobrestock y desabastecimiento frecuente, decisiones de compra basadas en intuición y pérdidas por obsolescencia.',
-    solution: 'Sistema de predicción de demanda con ML, optimización automática de inventario y alertas proactivas de reposición.',
-    metrics: [
-      { label: 'Reducción de Costos', value: '-25%', improvement: 'Inventario' },
-      { label: 'Disponibilidad', value: '+45%', improvement: 'Productos' },
-      { label: 'Pérdidas por Obsolescencia', value: '-60%', improvement: 'Reducción' },
-      { label: 'ROI', value: '280%', improvement: 'Primer año' }
-    ],
-    icon: '🛒'
-  },
-  {
-    industry: 'Servicios Financieros',
-    title: 'Automatización de Procesos Regulatorios',
-    challenge: 'Procesos regulatorios manuales, tiempos de cumplimiento prolongados y alto riesgo de errores en reportes.',
-    solution: 'Automatización inteligente de procesos regulatorios con agentes de IA orquestados y validación automática de compliance.',
-    metrics: [
-      { label: 'Tiempo de Cumplimiento', value: '-65%', improvement: 'Reducción' },
-      { label: 'Errores en Reportes', value: '-85%', improvement: 'Reducción' },
-      { label: 'Costos Operativos', value: '-40%', improvement: 'Reducción' },
-      { label: 'Compliance', value: '100%', improvement: 'Tasa' }
-    ],
-    icon: '💳'
-  },
-  {
-    industry: 'Manufacturing',
-    title: 'Predicción de Mantenimiento Preventivo',
-    challenge: 'Mantenimiento reactivo causando paradas inesperadas, altos costos de reparación y pérdida de productividad.',
-    solution: 'Sistema de ML para predicción de fallos, mantenimiento preventivo optimizado y reducción de downtime no planificado.',
-    metrics: [
-      { label: 'Downtime', value: '-55%', improvement: 'Reducción' },
-      { label: 'Costos de Mantenimiento', value: '-35%', improvement: 'Reducción' },
-      { label: 'Disponibilidad', value: '+42%', improvement: 'Equipos' },
-      { label: 'Productividad', value: '+38%', improvement: 'Aumento' }
-    ],
-    icon: '🏭'
-  },
-  {
-    industry: 'E-commerce',
-    title: 'Personalización y Recomendaciones con IA',
-    challenge: 'Bajas tasas de conversión, carritos abandonados frecuentes y falta de personalización en la experiencia del cliente.',
-    solution: 'Sistema de recomendaciones con ML, personalización dinámica de contenido y optimización de precios en tiempo real.',
-    metrics: [
-      { label: 'Tasa de Conversión', value: '+52%', improvement: 'Aumento' },
-      { label: 'Carritos Abandonados', value: '-38%', improvement: 'Reducción' },
-      { label: 'Valor Promedio Pedido', value: '+28%', improvement: 'Aumento' },
-      { label: 'ROI', value: '320%', improvement: 'Primer año' }
-    ],
-    icon: '🛍️'
-  },
-  {
-    industry: 'Healthcare',
-    title: 'Optimización de Recursos Hospitalarios',
-    challenge: 'Ineficiencia en asignación de recursos, tiempos de espera prolongados y dificultad para predecir demanda de servicios.',
-    solution: 'Sistema de ML para predicción de demanda, optimización de agendas y asignación inteligente de recursos médicos.',
-    metrics: [
-      { label: 'Tiempos de Espera', value: '-45%', improvement: 'Reducción' },
-      { label: 'Utilización de Recursos', value: '+35%', improvement: 'Aumento' },
-      { label: 'Satisfacción Paciente', value: '+48%', improvement: 'Aumento' },
-      { label: 'Costos Operativos', value: '-30%', improvement: 'Reducción' }
-    ],
-    icon: '🏥'
-  }
-];
-
 export const CaseStudies = () => {
+  const { t } = useTranslation('landing');
+  
+  const caseStudies: CaseStudy[] = [
+    {
+      industry: t('caseStudies.studies.logistics.industry'),
+      title: t('caseStudies.studies.logistics.title'),
+      challenge: t('caseStudies.studies.logistics.challenge'),
+      solution: t('caseStudies.studies.logistics.solution'),
+      metrics: [
+        { label: t('caseStudies.studies.logistics.metrics.operationalEfficiency'), value: '+30%', improvement: t('caseStudies.studies.logistics.metrics.increase') },
+        { label: t('caseStudies.studies.logistics.metrics.manualErrors'), value: '-40%', improvement: t('caseStudies.studies.logistics.metrics.reduction') },
+        { label: t('caseStudies.studies.logistics.metrics.managementTime'), value: '-50%', improvement: t('caseStudies.studies.logistics.metrics.reduction') },
+        { label: t('caseStudies.studies.logistics.metrics.customerSatisfaction'), value: '+35%', improvement: t('caseStudies.studies.logistics.metrics.increase') }
+      ],
+      icon: '📦'
+    },
+    {
+      industry: t('caseStudies.studies.retail.industry'),
+      title: t('caseStudies.studies.retail.title'),
+      challenge: t('caseStudies.studies.retail.challenge'),
+      solution: t('caseStudies.studies.retail.solution'),
+      metrics: [
+        { label: t('caseStudies.studies.retail.metrics.costReduction'), value: '-25%', improvement: t('caseStudies.studies.retail.metrics.inventory') },
+        { label: t('caseStudies.studies.retail.metrics.availability'), value: '+45%', improvement: t('caseStudies.studies.retail.metrics.products') },
+        { label: t('caseStudies.studies.retail.metrics.obsolescenceLosses'), value: '-60%', improvement: t('caseStudies.studies.retail.metrics.reduction') },
+        { label: t('caseStudies.studies.retail.metrics.roi'), value: '280%', improvement: t('caseStudies.studies.retail.metrics.firstYear') }
+      ],
+      icon: '🛒'
+    },
+    {
+      industry: t('caseStudies.studies.financial.industry'),
+      title: t('caseStudies.studies.financial.title'),
+      challenge: t('caseStudies.studies.financial.challenge'),
+      solution: t('caseStudies.studies.financial.solution'),
+      metrics: [
+        { label: t('caseStudies.studies.financial.metrics.complianceTime'), value: '-65%', improvement: t('caseStudies.studies.financial.metrics.reduction') },
+        { label: t('caseStudies.studies.financial.metrics.reportErrors'), value: '-85%', improvement: t('caseStudies.studies.financial.metrics.reduction') },
+        { label: t('caseStudies.studies.financial.metrics.operationalCosts'), value: '-40%', improvement: t('caseStudies.studies.financial.metrics.reduction') },
+        { label: t('caseStudies.studies.financial.metrics.compliance'), value: '100%', improvement: t('caseStudies.studies.financial.metrics.rate') }
+      ],
+      icon: '💳'
+    },
+    {
+      industry: t('caseStudies.studies.manufacturing.industry'),
+      title: t('caseStudies.studies.manufacturing.title'),
+      challenge: t('caseStudies.studies.manufacturing.challenge'),
+      solution: t('caseStudies.studies.manufacturing.solution'),
+      metrics: [
+        { label: t('caseStudies.studies.manufacturing.metrics.downtime'), value: '-55%', improvement: t('caseStudies.studies.manufacturing.metrics.reduction') },
+        { label: t('caseStudies.studies.manufacturing.metrics.maintenanceCosts'), value: '-35%', improvement: t('caseStudies.studies.manufacturing.metrics.reduction') },
+        { label: t('caseStudies.studies.manufacturing.metrics.availability'), value: '+42%', improvement: t('caseStudies.studies.manufacturing.metrics.equipment') },
+        { label: t('caseStudies.studies.manufacturing.metrics.productivity'), value: '+38%', improvement: t('caseStudies.studies.manufacturing.metrics.increase') }
+      ],
+      icon: '🏭'
+    },
+    {
+      industry: t('caseStudies.studies.ecommerce.industry'),
+      title: t('caseStudies.studies.ecommerce.title'),
+      challenge: t('caseStudies.studies.ecommerce.challenge'),
+      solution: t('caseStudies.studies.ecommerce.solution'),
+      metrics: [
+        { label: t('caseStudies.studies.ecommerce.metrics.conversionRate'), value: '+52%', improvement: t('caseStudies.studies.ecommerce.metrics.increase') },
+        { label: t('caseStudies.studies.ecommerce.metrics.abandonedCarts'), value: '-38%', improvement: t('caseStudies.studies.ecommerce.metrics.reduction') },
+        { label: t('caseStudies.studies.ecommerce.metrics.averageOrderValue'), value: '+28%', improvement: t('caseStudies.studies.ecommerce.metrics.increase') },
+        { label: t('caseStudies.studies.ecommerce.metrics.roi'), value: '320%', improvement: t('caseStudies.studies.ecommerce.metrics.firstYear') }
+      ],
+      icon: '🛍️'
+    },
+    {
+      industry: t('caseStudies.studies.healthcare.industry'),
+      title: t('caseStudies.studies.healthcare.title'),
+      challenge: t('caseStudies.studies.healthcare.challenge'),
+      solution: t('caseStudies.studies.healthcare.solution'),
+      metrics: [
+        { label: t('caseStudies.studies.healthcare.metrics.waitTimes'), value: '-45%', improvement: t('caseStudies.studies.healthcare.metrics.reduction') },
+        { label: t('caseStudies.studies.healthcare.metrics.resourceUtilization'), value: '+35%', improvement: t('caseStudies.studies.healthcare.metrics.increase') },
+        { label: t('caseStudies.studies.healthcare.metrics.patientSatisfaction'), value: '+48%', improvement: t('caseStudies.studies.healthcare.metrics.increase') },
+        { label: t('caseStudies.studies.healthcare.metrics.operationalCosts'), value: '-30%', improvement: t('caseStudies.studies.healthcare.metrics.reduction') }
+      ],
+      icon: '🏥'
+    }
+  ];
+
   return (
     <section id="casos-uso" className="case-studies">
       <div className="container">
-        <h2>Casos de Uso y Resultados Comprobados</h2>
+        <h2>{t('caseStudies.title')}</h2>
         <p className="case-studies__intro">
-          Transformamos empresas de diferentes industrias con soluciones de IA y automatización. 
-          Estos son ejemplos reales de impacto medible en operaciones empresariales.
+          {t('caseStudies.intro')}
         </p>
 
         <div className="case-studies-grid">
@@ -117,17 +119,17 @@ export const CaseStudies = () => {
 
               <div className="case-study-card__content">
                 <div className="case-study-card__section">
-                  <h4 className="case-study-card__section-title">Desafío:</h4>
+                  <h4 className="case-study-card__section-title">{t('caseStudies.challenge')}</h4>
                   <p>{study.challenge}</p>
                 </div>
 
                 <div className="case-study-card__section">
-                  <h4 className="case-study-card__section-title">Solución:</h4>
+                  <h4 className="case-study-card__section-title">{t('caseStudies.solution')}</h4>
                   <p>{study.solution}</p>
                 </div>
 
                 <div className="case-study-card__metrics">
-                  <h4 className="case-study-card__section-title">Resultados Medibles:</h4>
+                  <h4 className="case-study-card__section-title">{t('caseStudies.results')}</h4>
                   <div className="case-study-card__metrics-grid">
                     {study.metrics.map((metric, i) => (
                       <div key={i} className="case-study-metric">
@@ -144,9 +146,9 @@ export const CaseStudies = () => {
         </div>
 
         <div className="case-studies__cta">
-          <p>¿Quieres resultados similares en tu empresa?</p>
+          <p>{t('caseStudies.cta')}</p>
           <a className="btn-primary" href="#contacto">
-            Solicitar Consultoría Estratégica
+            {t('caseStudies.ctaButton')}
           </a>
         </div>
       </div>

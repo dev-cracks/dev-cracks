@@ -10,10 +10,196 @@
   "hero": {
     "title": "DEV CRACKS",
     "subtitle": "CODE // BREAKER",
-    "question": "您是否害怕AI、自动化和数字化转型？"
+    "question": "您是否害怕AI、自动化和数字化转型？",
+    "badge1": "数字化转型合作伙伴",
+    "badge2": "应用AI专家",
+    "titleLine1": "AI驱动的数字化转型",
+    "titleLine2": "从想法到商业影响",
+    "slides": {
+      "automation": {
+        "title": "智能自动化",
+        "benefit": "降低运营成本",
+        "percentage": "70%",
+        "description": "自动化流程的企业将执行时间减少70%，并显著提高生产力，从第一季度开始产生可衡量的投资回报率。"
+      },
+      "ai": {
+        "title": "应用人工智能",
+        "benefit": "数据驱动决策",
+        "percentage": "85%",
+        "description": "AI使决策更加精确，减少85%的错误并优化业务资源。我们将数据转化为竞争优势。"
+      },
+      "agents": {
+        "title": "编排AI代理",
+        "benefit": "复杂流程优化",
+        "percentage": "60%",
+        "description": "协调的代理系统将运营成本降低高达60%，同时提高效率。随业务扩展的自动化。"
+      },
+      "cloud": {
+        "title": "云和DevOps企业版",
+        "benefit": "加速上市时间",
+        "percentage": "50%",
+        "description": "云实施将部署时间减少50%并提高可扩展性。与您一起成长的基础设施。"
+      },
+      "roi": {
+        "title": "验证的平均投资回报率",
+        "benefit": "经过验证的投资回报",
+        "percentage": "300%",
+        "description": "实施我们解决方案的企业在第一年获得平均300%的投资回报率。可衡量的结果，真正的影响。"
+      }
+    },
+    "fears": {
+      "fear": "恐惧",
+      "resistance": "阻力",
+      "obsolescence": "过时",
+      "distrust": "不信任",
+      "dread": "恐惧",
+      "manualProcesses": "手动流程",
+      "legacySystems": "遗留系统",
+      "lackOfVision": "缺乏远见",
+      "culturalResistance": "文化阻力"
+    }
+  },
+  "contact": {
+    "title": "联系",
+    "form": {
+      "name": "全名",
+      "namePlaceholder": "例如：张三",
+      "email": "企业邮箱",
+      "emailPlaceholder": "例如：zhang.san@company.com",
+      "company": "公司",
+      "companyPlaceholder": "例如：我的公司有限公司",
+      "position": "职位/角色",
+      "positionPlaceholder": "例如：CTO，创新负责人",
+      "consultationType": "咨询类型",
+      "selectOption": "选择一个选项",
+      "strategicConsulting": "AI战略咨询",
+      "customDevelopment": "定制解决方案开发",
+      "dataMl": "数据工程和机器学习",
+      "legacyIntegration": "遗留系统集成",
+      "automation": "流程自动化",
+      "aiAgents": "编排AI代理",
+      "cloudDevops": "云和DevOps",
+      "security": "安全和审计",
+      "routeon": "Routeon企业版",
+      "devCoach": "Dev-Coach专业版",
+      "other": "其他",
+      "message": "消息",
+      "messagePlaceholder": "告诉我们您的项目、挑战或特定需求...",
+      "submit": "请求咨询",
+      "submitting": "发送中…",
+      "success": "谢谢！高级顾问将在24小时内与您联系。"
+    },
+    "info": {
+      "title": "联系信息",
+      "phone": "+34 647 007 280",
+      "email": "contacto@dev-cracks.com",
+      "website": "www.dev-cracks.com",
+      "downloadCard": "下载联系卡",
+      "downloadWallet": "添加到Apple Wallet",
+      "downloadWalletAndroid": "添加到Google Wallet"
+    },
+    "wallet": {
+      "cardDescription": "Dev Cracks名片",
+      "phoneLabel": "电话",
+      "descriptionLabel": "描述",
+      "descriptionValue": "软件开发和技术解决方案",
+      "certificatesNotConfigured": "Apple Wallet证书未配置。请联系管理员配置必要的证书。",
+      "errorGenerating": "生成通行证时出错",
+      "unknownError": "未知错误"
+    }
+  },
+  "caseStudies": {
+    "title": "用例和已验证结果",
+    "intro": "我们通过AI和自动化解决方案改造不同行业的公司。这些是对业务运营产生可衡量影响的真实例子。",
+    "challenge": "挑战：",
+    "solution": "解决方案：",
+    "results": "可衡量结果：",
+    "cta": "想为您的公司获得类似的结果吗？",
+    "ctaButton": "请求战略咨询",
+    "studies": {
+      "logistics": {
+        "industry": "物流",
+        "title": "包裹特许经营网络优化",
+        "challenge": "具有手动流程的特许经营网络，运营错误率高，缺乏实时运营可见性。",
+        "solution": "实施Routeon Enterprise，使用ML进行需求预测、工作流自动化和集中式仪表板。",
+        "metrics": {
+          "operationalEfficiency": "运营效率",
+          "manualErrors": "手动错误",
+          "managementTime": "管理时间",
+          "customerSatisfaction": "客户满意度",
+          "increase": "增加",
+          "reduction": "减少"
+        }
+      },
+      "retail": {
+        "industry": "零售",
+        "title": "使用机器学习的库存优化",
+        "challenge": "频繁的库存积压和缺货，基于直觉的采购决策和过时损失。",
+        "solution": "ML需求预测系统，自动库存优化和主动补货警报。",
+        "metrics": {
+          "costReduction": "成本降低",
+          "availability": "可用性",
+          "obsolescenceLosses": "过时损失",
+          "roi": "投资回报率",
+          "inventory": "库存",
+          "products": "产品",
+          "firstYear": "第一年"
+        }
+      },
+      "financial": {
+        "industry": "金融服务",
+        "title": "监管流程自动化",
+        "challenge": "手动监管流程，合规时间延长，报告错误风险高。",
+        "solution": "使用编排AI代理的智能监管流程自动化，以及自动合规验证。",
+        "metrics": {
+          "complianceTime": "合规时间",
+          "reportErrors": "报告错误",
+          "operationalCosts": "运营成本",
+          "compliance": "合规性",
+          "rate": "比率"
+        }
+      },
+      "manufacturing": {
+        "industry": "制造业",
+        "title": "预测性维护",
+        "challenge": "反应性维护导致意外停机，维修成本高，生产力损失。",
+        "solution": "用于故障预测的ML系统，优化的预防性维护和减少计划外停机时间。",
+        "metrics": {
+          "downtime": "停机时间",
+          "maintenanceCosts": "维护成本",
+          "availability": "可用性",
+          "productivity": "生产力",
+          "equipment": "设备"
+        }
+      },
+      "ecommerce": {
+        "industry": "电子商务",
+        "title": "AI个性化和推荐",
+        "challenge": "转化率低，频繁的废弃购物车，客户体验缺乏个性化。",
+        "solution": "ML推荐系统，动态内容个性化和实时价格优化。",
+        "metrics": {
+          "conversionRate": "转化率",
+          "abandonedCarts": "废弃购物车",
+          "averageOrderValue": "平均订单价值",
+          "roi": "投资回报率",
+          "firstYear": "第一年"
+        }
+      },
+      "healthcare": {
+        "industry": "医疗保健",
+        "title": "医院资源优化",
+        "challenge": "资源分配效率低下，等待时间长，难以预测服务需求。",
+        "solution": "用于需求预测的ML系统，时间表优化和智能医疗资源分配。",
+        "metrics": {
+          "waitTimes": "等待时间",
+          "resourceUtilization": "资源利用率",
+          "patientSatisfaction": "患者满意度",
+          "operationalCosts": "运营成本"
+        }
+      }
+    }
   },
   "common": {
     "login": "登录"
   }
 }
-

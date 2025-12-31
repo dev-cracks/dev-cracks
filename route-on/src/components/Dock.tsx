@@ -1,4 +1,5 @@
 import { motion, useMotionValue, useSpring, useTransform, AnimatePresence, MotionValue, SpringOptions } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { Children, cloneElement, ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import './Dock.css';
 
@@ -123,6 +124,7 @@ export default function Dock({
   dockHeight = 256,
   baseItemSize = 50
 }: DockProps) {
+  const { t } = useTranslation('route-on');
   const mouseX = useMotionValue(Infinity);
   const isHovered = useMotionValue(0);
 
@@ -148,7 +150,7 @@ export default function Dock({
         className={`dock-panel ${className}`}
         style={{ height: panelHeight }}
         role="toolbar"
-        aria-label="Application dock"
+        aria-label={t('dock.applicationDock')}
       >
         {items.map((item, index) => (
           <DockItem

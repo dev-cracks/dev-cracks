@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import StaggeredMenu from '../components/StaggeredMenu';
 import FloatingIcon from '../components/FloatingIcon';
 import Dock from '../components/Dock';
@@ -6,29 +7,31 @@ import { VscHome, VscArchive, VscAccount, VscSettingsGear } from 'react-icons/vs
 // Logo placeholder - deberías reemplazar esto con tu logo real
 const logoUrl = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="110" height="24"%3E%3Ctext x="0" y="18" font-family="Arial" font-size="16" fill="%23fff"%3ERoute On%3C/text%3E%3C/svg%3E';
 
-const menuItems = [
-  { label: 'Inicio', ariaLabel: 'Ir a la página de inicio', link: '/' },
-  { label: 'Recepción', ariaLabel: 'Gestionar recepción de paquetes', link: '/recepcion' },
-  { label: 'Envíos', ariaLabel: 'Gestionar envíos de paquetes', link: '/envios' },
-  { label: 'Distribución', ariaLabel: 'Gestionar distribución de paquetes', link: '/distribucion' },
-  { label: 'Seguimiento', ariaLabel: 'Seguimiento de paquetes', link: '/seguimiento' },
-  { label: 'Mapa', ariaLabel: 'Ver puntos en el mapa', link: '/mapa' },
-  { label: 'Incidencias', ariaLabel: 'Gestionar incidencias de paquetes', link: '/incidencias' },
-  { label: 'Rutas IA', ariaLabel: 'Organizar rutas con inteligencia artificial', link: '/rutas-ia' }
-];
-
-const socialItems = [
-  { label: 'Twitter', link: 'https://twitter.com' },
-  { label: 'GitHub', link: 'https://github.com' },
-  { label: 'LinkedIn', link: 'https://linkedin.com' }
-];
-
 export const HomePage = () => {
+  const { t } = useTranslation('route-on');
+  
+  const menuItems = [
+    { label: t('navigation.home'), ariaLabel: t('navigation.homeAria'), link: '/' },
+    { label: t('navigation.reception'), ariaLabel: t('navigation.receptionAria'), link: '/recepcion' },
+    { label: t('navigation.shipments'), ariaLabel: t('navigation.shipmentsAria'), link: '/envios' },
+    { label: t('navigation.distribution'), ariaLabel: t('navigation.distributionAria'), link: '/distribucion' },
+    { label: t('navigation.tracking'), ariaLabel: t('navigation.trackingAria'), link: '/seguimiento' },
+    { label: t('navigation.map'), ariaLabel: t('navigation.mapAria'), link: '/mapa' },
+    { label: t('navigation.incidents'), ariaLabel: t('navigation.incidentsAria'), link: '/incidencias' },
+    { label: t('navigation.aiRoutes'), ariaLabel: t('navigation.aiRoutesAria'), link: '/rutas-ia' }
+  ];
+
+  const socialItems = [
+    { label: 'Twitter', link: 'https://twitter.com' },
+    { label: 'GitHub', link: 'https://github.com' },
+    { label: 'LinkedIn', link: 'https://linkedin.com' }
+  ];
+
   const dockItems = [
-    { icon: <VscHome size={18} />, label: 'Home', onClick: () => alert('Home!') },
-    { icon: <VscArchive size={18} />, label: 'Archive', onClick: () => alert('Archive!') },
-    { icon: <VscAccount size={18} />, label: 'Profile', onClick: () => alert('Profile!') },
-    { icon: <VscSettingsGear size={18} />, label: 'Settings', onClick: () => alert('Settings!') },
+    { icon: <VscHome size={18} />, label: t('dock.home'), onClick: () => alert('Home!') },
+    { icon: <VscArchive size={18} />, label: t('dock.archive'), onClick: () => alert('Archive!') },
+    { icon: <VscAccount size={18} />, label: t('dock.profile'), onClick: () => alert('Profile!') },
+    { icon: <VscSettingsGear size={18} />, label: t('dock.settings'), onClick: () => alert('Settings!') },
   ];
 
   return (

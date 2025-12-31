@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import TextType from './TextType';
 import Orb from './Orb';
 import { useAuth } from '../hooks/useAuth';
@@ -19,6 +20,7 @@ namespace OrbModal {
 }
 
 const OrbModal: React.FC<OrbModal.Props> = ({ isOpen, onClose }) => {
+  const { t } = useTranslation('route-on');
   const [messages, setMessages] = useState<OrbModal.Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -151,19 +153,19 @@ const OrbModal: React.FC<OrbModal.Props> = ({ isOpen, onClose }) => {
     const lowerMessage = userMessage.toLowerCase();
     
     if (lowerMessage.includes('hola') || lowerMessage.includes('hi') || lowerMessage.includes('hello')) {
-      return '¡Hola! ¿En qué puedo ayudarte hoy?';
+      return t('orbModal.greeting');
     }
     if (lowerMessage.includes('adios') || lowerMessage.includes('bye') || lowerMessage.includes('chao')) {
-      return '¡Hasta luego! Que tengas un excelente día.';
+      return t('orbModal.farewell');
     }
     if (lowerMessage.includes('gracias') || lowerMessage.includes('thanks')) {
-      return '¡De nada! Estoy aquí para ayudarte.';
+      return t('orbModal.thanks');
     }
     if (lowerMessage.includes('que puedes hacer') || lowerMessage.includes('what can you do')) {
-      return 'Puedo ayudarte con diversas consultas, responder preguntas, y asistirte en lo que necesites. ¿Qué te gustaría saber?';
+      return t('orbModal.capabilities');
     }
     
-    return `Entiendo que mencionaste "${userMessage}". Estoy aquí para ayudarte. ¿Podrías darme más detalles sobre lo que necesitas?`;
+    return t('orbModal.defaultResponse', { message: userMessage });
   };
 
   const handleSendMessage = async () => {
@@ -227,14 +229,14 @@ const OrbModal: React.FC<OrbModal.Props> = ({ isOpen, onClose }) => {
         {/* Overlay para legibilidad */}
         <div className="orb-modal-overlay"></div>
 
-        <button className="orb-modal-close" onClick={onClose} aria-label="Cerrar modal">
+        <button className="orb-modal-close" onClick={onClose} aria-label={t('orbModal.close')}>
           ×
         </button>
         
         {/* Header con título */}
         <div className="orb-modal-header">
           <TextType 
-            text="Jarvis - Asistente de IA"
+            text={t('orbModal.title')}
             typingSpeed={75}
             pauseDuration={1500}
             showCursor={true}
@@ -281,7 +283,7 @@ const OrbModal: React.FC<OrbModal.Props> = ({ isOpen, onClose }) => {
             ref={inputRef}
             type="text"
             className="orb-modal-input"
-            placeholder="Escribe tu mensaje..."
+            placeholder={t('orbModal.placeholder')}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleInputKeyPress}
@@ -291,7 +293,7 @@ const OrbModal: React.FC<OrbModal.Props> = ({ isOpen, onClose }) => {
             className="orb-modal-send-button"
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || isTyping}
-            aria-label="Enviar mensaje"
+            aria-label={t('orbModal.send')}
           >
             <svg
               width="20"

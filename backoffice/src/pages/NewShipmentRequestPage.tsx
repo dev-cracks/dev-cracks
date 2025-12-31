@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   Card,
@@ -127,6 +128,7 @@ const useStyles = makeStyles({
 });
 
 export const NewShipmentRequestPage = () => {
+  const { t } = useTranslation('backoffice');
   const styles = useStyles();
   const navigate = useNavigate();
   const { addGroup, removeGroup } = useRibbonMenu();
@@ -184,7 +186,7 @@ export const NewShipmentRequestPage = () => {
       } catch (err: any) {
         console.error('[NewShipmentRequestPage] Error initializing:', err);
         if (isMounted) {
-          setError(err.message || 'Error al inicializar la página');
+          setError(err.message || t('newShipmentRequest.errorInitializing'));
         }
       }
     };
@@ -229,8 +231,8 @@ export const NewShipmentRequestPage = () => {
       setRates(ratesData || []);
     } catch (error: any) {
       console.error('[NewShipmentRequestPage] Error loading data:', error);
-      setError(error.message || 'Error desconocido');
-      notificationService.error('Error al cargar datos', error.message || 'Error desconocido');
+      setError(error.message || t('newShipmentRequest.errorUnknown'));
+      notificationService.error(t('newShipmentRequest.errorLoading'), error.message || t('newShipmentRequest.errorUnknown'));
       setCustomers([]);
       setCountries([]);
       setCategories([]);
@@ -302,7 +304,7 @@ export const NewShipmentRequestPage = () => {
       scrollToTop();
       setConfirmDialogOpen(true);
     } catch (error: any) {
-      setErrorMessage(error.message || 'Error desconocido al crear la solicitud');
+      setErrorMessage(error.message || t('newShipmentRequest.errorCreating'));
       setErrorDialogOpen(true);
     } finally {
       setIsSubmitting(false);
@@ -382,17 +384,17 @@ export const NewShipmentRequestPage = () => {
           icon={<ArrowLeftRegular />}
           onClick={handleCancel}
         >
-          Volver
+          {t('newShipmentRequest.back')}
         </Button>
-        <Text className={styles.title}>Nueva Solicitud de Recogida</Text>
+        <Text className={styles.title}>{t('newShipmentRequest.title')}</Text>
       </div>
 
       <Card className={styles.formContainer}>
         <div ref={formContentRef} className={styles.formContent}>
           <div className={styles.formSection}>
-            <Text className={styles.formSectionTitle}>Cliente y Direcciones</Text>
+            <Text className={styles.formSectionTitle}>{t('newShipmentRequest.customerData')}</Text>
             <div className={styles.formGrid}>
-              <Field label="Cliente" required className={styles.formFieldFull}>
+              <Field label={t('newShipmentRequest.customer')} required className={styles.formFieldFull}>
                 <Combobox
                   value={customers.find((c) => c.id === formData.customerId)?.name || ''}
                   onOptionSelect={(_, data) => {
@@ -407,35 +409,35 @@ export const NewShipmentRequestPage = () => {
                 </Combobox>
               </Field>
 
-              <Field label="Dirección Origen" required className={styles.formFieldFull}>
+              <Field label={t('newShipmentRequest.originAddress')} required className={styles.formFieldFull}>
                 <Input
                   value={formData.originAddress}
                   onChange={(_, data) => setFormData({ ...formData, originAddress: data.value })}
                 />
               </Field>
 
-              <Field label="Ciudad Origen">
+              <Field label={t('newShipmentRequest.originCity')}>
                 <Input
                   value={formData.originCity || ''}
                   onChange={(_, data) => setFormData({ ...formData, originCity: data.value })}
                 />
               </Field>
 
-              <Field label="Estado/Provincia Origen">
+              <Field label={t('newShipmentRequest.originStateProvince')}>
                 <Input
                   value={formData.originStateProvince || ''}
                   onChange={(_, data) => setFormData({ ...formData, originStateProvince: data.value })}
                 />
               </Field>
 
-              <Field label="Código Postal Origen">
+              <Field label={t('newShipmentRequest.originPostalCode')}>
                 <Input
                   value={formData.originPostalCode || ''}
                   onChange={(_, data) => setFormData({ ...formData, originPostalCode: data.value })}
                 />
               </Field>
 
-              <Field label="País Origen" required>
+              <Field label={t('newShipmentRequest.originCountry')} required>
                 <Combobox
                   value={countries.find((c) => c.id === formData.originCountryId)?.name || ''}
                   onOptionSelect={(_, data) => {
@@ -450,35 +452,35 @@ export const NewShipmentRequestPage = () => {
                 </Combobox>
               </Field>
 
-              <Field label="Dirección Destino" required className={styles.formFieldFull}>
+              <Field label={t('newShipmentRequest.destinationAddress')} required className={styles.formFieldFull}>
                 <Input
                   value={formData.destinationAddress}
                   onChange={(_, data) => setFormData({ ...formData, destinationAddress: data.value })}
                 />
               </Field>
 
-              <Field label="Ciudad Destino">
+              <Field label={t('newShipmentRequest.destinationCity')}>
                 <Input
                   value={formData.destinationCity || ''}
                   onChange={(_, data) => setFormData({ ...formData, destinationCity: data.value })}
                 />
               </Field>
 
-              <Field label="Estado/Provincia Destino">
+              <Field label={t('newShipmentRequest.destinationStateProvince')}>
                 <Input
                   value={formData.destinationStateProvince || ''}
                   onChange={(_, data) => setFormData({ ...formData, destinationStateProvince: data.value })}
                 />
               </Field>
 
-              <Field label="Código Postal Destino">
+              <Field label={t('newShipmentRequest.destinationPostalCode')}>
                 <Input
                   value={formData.destinationPostalCode || ''}
                   onChange={(_, data) => setFormData({ ...formData, destinationPostalCode: data.value })}
                 />
               </Field>
 
-              <Field label="País Destino" required>
+              <Field label={t('newShipmentRequest.destinationCountry')} required>
                 <Combobox
                   value={countries.find((c) => c.id === formData.destinationCountryId)?.name || ''}
                   onOptionSelect={(_, data) => {
@@ -496,23 +498,23 @@ export const NewShipmentRequestPage = () => {
           </div>
 
           <div className={styles.formSection}>
-            <Text className={styles.formSectionTitle}>Datos de Contacto</Text>
+            <Text className={styles.formSectionTitle}>{t('newShipmentRequest.contactData')}</Text>
             <div className={styles.formGrid}>
-              <Field label="Nombre de Contacto" required>
+              <Field label={t('newShipmentRequest.contactName')} required>
                 <Input
                   value={formData.contactName}
                   onChange={(_, data) => setFormData({ ...formData, contactName: data.value })}
                 />
               </Field>
 
-              <Field label="Teléfono">
+              <Field label={t('newShipmentRequest.phone')}>
                 <Input
                   value={formData.contactPhone || ''}
                   onChange={(_, data) => setFormData({ ...formData, contactPhone: data.value })}
                 />
               </Field>
 
-              <Field label="Email" className={styles.formFieldFull}>
+              <Field label={t('newShipmentRequest.email')} className={styles.formFieldFull}>
                 <Input
                   type="email"
                   value={formData.contactEmail || ''}
@@ -526,16 +528,16 @@ export const NewShipmentRequestPage = () => {
                   onClick={handleCopyFromCustomer}
                   disabled={!formData.customerId}
                 >
-                  Copiar Datos del Cliente
+                  {t('newShipmentRequest.copyFromCustomer')}
                 </Button>
               </div>
             </div>
           </div>
 
           <div className={styles.formSection}>
-            <Text className={styles.formSectionTitle}>Detalles del Envío</Text>
+            <Text className={styles.formSectionTitle}>{t('newShipmentRequest.shipmentDetails')}</Text>
             <div className={styles.formGrid}>
-              <Field label="Peso (kg)" required>
+              <Field label={t('newShipmentRequest.weight')} required>
                 <Input
                   type="number"
                   value={formData.weight.toString()}
@@ -543,7 +545,7 @@ export const NewShipmentRequestPage = () => {
                 />
               </Field>
 
-              <Field label="Ancho (cm)" required>
+              <Field label={t('newShipmentRequest.width')} required>
                 <Input
                   type="number"
                   value={formData.width.toString()}
@@ -551,7 +553,7 @@ export const NewShipmentRequestPage = () => {
                 />
               </Field>
 
-              <Field label="Alto (cm)" required>
+              <Field label={t('newShipmentRequest.height')} required>
                 <Input
                   type="number"
                   value={formData.height.toString()}
@@ -559,7 +561,7 @@ export const NewShipmentRequestPage = () => {
                 />
               </Field>
 
-              <Field label="Profundidad (cm)" required>
+              <Field label={t('newShipmentRequest.depth')} required>
                 <Input
                   type="number"
                   value={formData.depth.toString()}
@@ -567,7 +569,7 @@ export const NewShipmentRequestPage = () => {
                 />
               </Field>
 
-              <Field label="Categoría" required className={styles.formFieldFull}>
+              <Field label={t('newShipmentRequest.category')} required className={styles.formFieldFull}>
                 <Combobox
                   value={categories.find((c) => c.id === formData.categoryId)?.name || ''}
                   onOptionSelect={(_, data) => {
@@ -586,7 +588,7 @@ export const NewShipmentRequestPage = () => {
                 <Checkbox
                   checked={formData.isFragile}
                   onChange={(_, data) => setFormData({ ...formData, isFragile: data.checked })}
-                  label="Frágil"
+                  label={t('newShipmentRequest.fragile')}
                 />
                 <Checkbox
                   checked={formData.isInsured}
@@ -597,12 +599,12 @@ export const NewShipmentRequestPage = () => {
                       insuredValue: data.checked ? formData.insuredValue : undefined,
                     });
                   }}
-                  label="Asegurado"
+                  label={t('newShipmentRequest.insured')}
                 />
               </div>
 
               {formData.isInsured && (
-                <Field label="Valor Asegurado" required className={styles.formFieldFull}>
+                <Field label={t('newShipmentRequest.insuredValue')} required className={styles.formFieldFull}>
                   <Input
                     type="number"
                     value={formData.insuredValue?.toString() || ''}
@@ -616,8 +618,8 @@ export const NewShipmentRequestPage = () => {
           </div>
 
           <div className={styles.formSection}>
-            <Text className={styles.formSectionTitle}>Tarifa</Text>
-            <Field label="Seleccionar Tarifa" required className={styles.formFieldFull}>
+            <Text className={styles.formSectionTitle}>{t('newShipmentRequest.rate')}</Text>
+            <Field label={t('newShipmentRequest.selectRate')} required className={styles.formFieldFull}>
               <Combobox
                 value={selectedRate?.name || ''}
                 onOptionSelect={(_, data) => handleRateChange(data.optionValue || '')}
@@ -635,12 +637,12 @@ export const NewShipmentRequestPage = () => {
 
             {selectedRate && (
               <div className={styles.ratePreview}>
-                <Text weight="semibold">Vista Previa:</Text>
+                <Text weight="semibold">{t('newShipmentRequest.ratePreview')}</Text>
                 <Text style={{ display: 'block', marginTop: tokens.spacingVerticalS }}>
-                  Fecha estimada de entrega: {new Date(Date.now() + selectedRate.slaDays * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                  {t('newShipmentRequest.estimatedDeliveryDate')}: {new Date(Date.now() + selectedRate.slaDays * 24 * 60 * 60 * 1000).toLocaleDateString()}
                 </Text>
                 <Text style={{ display: 'block' }}>
-                  Costo estimado: {selectedRate.baseCost.toFixed(2)} €
+                  {t('newShipmentRequest.estimatedCost')}: {selectedRate.baseCost.toFixed(2)} €
                 </Text>
               </div>
             )}
@@ -653,14 +655,14 @@ export const NewShipmentRequestPage = () => {
             onClick={handleCancel}
             disabled={isSubmitting}
           >
-            Cancelar
+            {t('newShipmentRequest.cancel')}
           </Button>
           <Button
             appearance="primary"
             onClick={handleSubmit}
             disabled={isSubmitting || !formData.customerId || !formData.rateId}
           >
-            {isSubmitting ? <Spinner size="tiny" /> : 'Crear Solicitud'}
+            {isSubmitting ? <Spinner size="tiny" /> : t('newShipmentRequest.create')}
           </Button>
         </div>
       </Card>
@@ -672,7 +674,7 @@ export const NewShipmentRequestPage = () => {
         }
       }}>
         <DialogSurface>
-          <DialogTitle>Error al Crear Solicitud</DialogTitle>
+          <DialogTitle>{t('newShipmentRequest.errorCreating')}</DialogTitle>
           <DialogBody>
             <DialogContent>
               <Text>{errorMessage}</Text>
@@ -680,7 +682,7 @@ export const NewShipmentRequestPage = () => {
           </DialogBody>
           <DialogActions>
             <Button appearance="primary" onClick={handleCloseErrorDialog}>
-              Cerrar
+              {t('common.close')}
             </Button>
           </DialogActions>
         </DialogSurface>
@@ -693,23 +695,20 @@ export const NewShipmentRequestPage = () => {
         }
       }}>
         <DialogSurface>
-          <DialogTitle>Solicitud Creada Exitosamente</DialogTitle>
+          <DialogTitle>{t('newShipmentRequest.successCreating')}</DialogTitle>
           <DialogBody>
             <DialogContent>
               <Text>
-                La solicitud se ha creado correctamente con el número de guía: <strong>{createdGuideNumber}</strong>
-              </Text>
-              <Text style={{ display: 'block', marginTop: tokens.spacingVerticalM }}>
-                ¿Desea crear otra solicitud?
+                {t('newShipmentRequest.successCreating')}: <strong>{createdGuideNumber}</strong>
               </Text>
             </DialogContent>
           </DialogBody>
           <DialogActions>
             <Button appearance="secondary" onClick={handleConfirmGoToList}>
-              Ir a la Lista
+              {t('shipments.title')}
             </Button>
             <Button appearance="primary" onClick={handleConfirmCreateAnother}>
-              Crear Otra
+              {t('newShipmentRequest.create')}
             </Button>
           </DialogActions>
         </DialogSurface>
