@@ -37,33 +37,35 @@ export const HomePage = () => {
             <a href="/fractalize" className="fractalize-page__logo">
               <div className="fractalize-page__logo-icon">
                 <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
+                  width="40"
+                  height="40"
+                  viewBox="0 0 200 200"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path
-                    d="M12 2L2 7L12 12L22 7L12 2Z"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M2 17L12 22L22 17"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M2 12L12 17L22 12"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
+                  <defs>
+                    <linearGradient id="fractalNavGradient" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#00E5FF" />
+                      <stop offset="50%" stopColor="#2979FF" />
+                      <stop offset="100%" stopColor="#D500F9" />
+                    </linearGradient>
+                  </defs>
+                  <g transform="translate(20, 20)">
+                    <path d="M0 0 L100 0 L50 50 Z" fill="url(#fractalNavGradient)" opacity="0.9"/>
+                    <path d="M0 0 L50 50 L0 100 Z" fill="url(#fractalNavGradient)" opacity="0.8"/>
+                    <path d="M50 50 L100 0 L100 100 Z" fill="url(#fractalNavGradient)" opacity="0.6"/>
+                    <path d="M0 100 L100 100 L50 150 Z" fill="url(#fractalNavGradient)" opacity="0.9"/>
+                    <path d="M0 100 L50 150 L0 200 Z" fill="url(#fractalNavGradient)" opacity="0.7"/>
+                    <path d="M50 150 L100 100 L100 200 Z" fill="url(#fractalNavGradient)" opacity="0.5"/>
+                    <path d="M100 0 L200 0 L150 50 Z" fill="url(#fractalNavGradient)" opacity="0.85"/>
+                    <path d="M100 0 L150 50 L100 50 Z" fill="url(#fractalNavGradient)" opacity="0.6"/>
+                    <path d="M100 100 L180 100 L140 140 Z" fill="url(#fractalNavGradient)" opacity="0.8"/>
+                    <path d="M100 100 L140 140 L100 150 Z" fill="url(#fractalNavGradient)" opacity="0.6"/>
+                    <circle cx="50" cy="50" r="3" fill="white" opacity="0.6"/>
+                    <circle cx="100" cy="100" r="3" fill="white" opacity="0.6"/>
+                    <circle cx="150" cy="50" r="3" fill="white" opacity="0.6"/>
+                    <circle cx="50" cy="150" r="3" fill="white" opacity="0.6"/>
+                  </g>
                 </svg>
               </div>
               <span className="fractalize-page__logo-text">Fractalize</span>

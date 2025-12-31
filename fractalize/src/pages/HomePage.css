@@ -54,12 +54,9 @@
 .fractalize-page__logo-icon {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #6366f1, #d946ef);
-  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
 }
 
 .fractalize-page__logo-text {
