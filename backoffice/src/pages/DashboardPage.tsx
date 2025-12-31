@@ -593,7 +593,7 @@ export const DashboardPage = () => {
             {isLoading ? (
               <DetailsSkeleton rows={5} />
             ) : (
-              <Text>Recent activity will appear here...</Text>
+              <Text>{t('dashboard.recentActivityEmpty')}</Text>
             )}
           </div>
         </CardPreview>

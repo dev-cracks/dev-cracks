@@ -1,0 +1,42 @@
+{
+  "welcome": "Welcome to Dev Coach",
+  "navigation": {
+    "routes": "Routes",
+    "courses": "Courses",
+    "resources": "Resources",
+    "juniorToMid": "Junior to Mid",
+    "juniorToMidAria": "Junior to Mid training route",
+    "midToSenior": "Mid to Senior",
+    "midToSeniorAria": "Mid to Senior training route",
+    "allCourses": "All Courses",
+    "allCoursesAria": "View all courses",
+    "csharpFromZero": "C# from zero to expert",
+    "csharpFromZeroAria": "Complete C# course",
+    "architecture": "Architecture",
+    "architectureAria": "Architecture courses",
+    "frontend": "Frontend",
+    "frontendAria": "Frontend courses",
+    "documentation": "Documentation",
+    "documentationAria": "Technical documentation",
+    "community": "Community",
+    "communityAria": "Developer community"
+  },
+  "courses": {
+    "title": "Courses",
+    "category": "Category",
+    "level": "Level",
+    "duration": "Duration",
+    "topics": "Topics",
+    "viewCourse": "View Course",
+    "noCourses": "No courses available"
+  },
+  "levels": {
+    "senior": "Senior",
+    "architect": "Architect",
+    "techLead": "Tech Lead"
+  },
+  "page": {
+    "title": "Courses for Fullstack .NET React Developers",
+    "subtitle": "Take your skills to the next level. From Senior to Architect"
+  }
+}

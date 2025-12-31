@@ -22,6 +22,7 @@ import {
   WarningRegular,
 } from '@fluentui/react-icons';
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { chatService, ChatMessage, SubscriptionUsage } from '../services/chatService';
 
 const useStyles = makeStyles({
@@ -167,6 +168,7 @@ const useStyles = makeStyles({
 
 export const Jarvis = () => {
   const styles = useStyles();
+  const { t } = useTranslation('backoffice');
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -237,28 +239,28 @@ export const Jarvis = () => {
         const messagesPercentage = response.usage.usagePercentageMessages;
 
         if (tokensPercentage >= 95 || messagesPercentage >= 95) {
-          setError('Has alcanzado el 95% de tu límite mensual. Considera actualizar tu suscripción.');
+          setError(t('jarvis.limit95'));
         } else if (tokensPercentage >= 90 || messagesPercentage >= 90) {
-          setError('Has alcanzado el 90% de tu límite mensual.');
+          setError(t('jarvis.limit90'));
         } else if (tokensPercentage >= 80 || messagesPercentage >= 80) {
-          setError('Has alcanzado el 80% de tu límite mensual.');
+          setError(t('jarvis.limit80'));
         }
       }
     } catch (err: any) {
-      const errorMsg = err.message || 'Error al enviar el mensaje. Por favor, intenta nuevamente.';
+      const errorMsg = err.message || t('jarvis.errorSending');
       setError(errorMsg);
       
       // Si es un error de suscripción, mostrar mensaje más específico
       if (errorMsg.includes('suscripción') || errorMsg.includes('subscription') || err.statusCode === 400) {
         const errorMessage: ChatMessage = {
           role: 'assistant',
-          content: `⚠️ ${errorMsg}\n\nPor favor, contacta con soporte para activar o actualizar tu suscripción.`,
+          content: `⚠️ ${errorMsg}\n\n${t('jarvis.contactSupport')}`,
         };
         setMessages((prev) => [...prev, errorMessage]);
       } else {
         const errorMessage: ChatMessage = {
           role: 'assistant',
-          content: `Error: ${errorMsg}`,
+          content: `${t('common.error')}: ${errorMsg}`,
         };
         setMessages((prev) => [...prev, errorMessage]);
       }
@@ -291,7 +293,7 @@ export const Jarvis = () => {
       <button
         className={styles.floatingButton}
         onClick={() => setIsOpen(true)}
-        aria-label="Abrir chat de Jarvis"
+        aria-label={t('jarvis.openChat')}
       >
         <BotRegular fontSize={24} />
       </button>
@@ -302,20 +304,20 @@ export const Jarvis = () => {
             <div className={styles.dialogHeader}>
               <div className={styles.dialogTitle}>
                 <BotRegular />
-                <Text>Jarvis - Asistente IA</Text>
+                <Text>{t('jarvis.title')}</Text>
               </div>
               <Button
                 appearance="subtle"
                 icon={<DismissRegular />}
                 onClick={() => setIsOpen(false)}
-                aria-label="Cerrar"
+                aria-label={t('jarvis.close')}
               />
             </div>
 
             {usage && (
               <div className={styles.usageInfo}>
                 <Text size={200} weight="semibold">
-                  Uso mensual
+                  {t('jarvis.monthlyUsage')}
                 </Text>
                 <div className={styles.usageBar}>
                   <ProgressBar
@@ -325,8 +327,8 @@ export const Jarvis = () => {
                   />
                 </div>
                 <div className={styles.usageText}>
-                  Tokens: {usage.monthlyUsageTokens} / {usage.maxTokensPerMonth ?? '∞'} (
-                  {usage.usagePercentageTokens}%) | Mensajes: {usage.monthlyUsageMessages} /{' '}
+                  {t('jarvis.tokens')}: {usage.monthlyUsageTokens} / {usage.maxTokensPerMonth ?? '∞'} (
+                  {usage.usagePercentageTokens}%) | {t('jarvis.messages')}: {usage.monthlyUsageMessages} /{' '}
                   {usage.maxMessagesPerMonth ?? '∞'} ({usage.usagePercentageMessages}%)
                 </div>
               </div>
@@ -347,11 +349,10 @@ export const Jarvis = () => {
                 <div className={styles.emptyState}>
                   <BotRegular fontSize={48} />
                   <Text size={400} weight="semibold">
-                    Hola, soy Jarvis
+                    {t('jarvis.greeting')}
                   </Text>
                   <Text size={300} align="center">
-                    Puedo ayudarte a consultar información, resolver problemas de logística y
-                    analizar datos del sistema. ¿En qué puedo ayudarte?
+                    {t('jarvis.greetingDescription')}
                   </Text>
                 </div>
               ) : (
@@ -369,7 +370,7 @@ export const Jarvis = () => {
 
               {isLoading && (
                 <div className={styles.loadingContainer}>
-                  <Spinner size="small" label="Jarvis está pensando..." />
+                  <Spinner size="small" label={t('jarvis.thinking')} />
                 </div>
               )}
 
@@ -379,7 +380,7 @@ export const Jarvis = () => {
             <div className={styles.inputContainer}>
               <Input
                 className={styles.input}
-                placeholder="Escribe tu mensaje..."
+                placeholder={t('jarvis.placeholder')}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -391,9 +392,9 @@ export const Jarvis = () => {
                 icon={<SendRegular />}
                 onClick={handleSend}
                 disabled={isLoading || !inputValue.trim()}
-                aria-label="Enviar mensaje"
+                aria-label={t('jarvis.sendMessage')}
               >
-                Enviar
+                {t('jarvis.send')}
               </Button>
             </div>
           </DialogBody>

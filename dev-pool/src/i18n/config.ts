@@ -1,14 +1,14 @@
 import { createI18nInstance } from '../../../i18n/index.ts';
-import enCommon from '../../../i18n/locales/en/common.json';
-import esCommon from '../../../i18n/locales/es/common.json';
-import deCommon from '../../../i18n/locales/de/common.json';
-import frCommon from '../../../i18n/locales/fr/common.json';
-import zhCommon from '../../../i18n/locales/zh/common.json';
-import enDevPool from '../../../i18n/locales/en/dev-pool.json';
-import esDevPool from '../../../i18n/locales/es/dev-pool.json';
-import deDevPool from '../../../i18n/locales/de/dev-pool.json';
-import frDevPool from '../../../i18n/locales/fr/dev-pool.json';
-import zhDevPool from '../../../i18n/locales/zh/dev-pool.json';
+import enCommon from './locales/en/common.json';
+import esCommon from './locales/es/common.json';
+import deCommon from './locales/de/common.json';
+import frCommon from './locales/fr/common.json';
+import zhCommon from './locales/zh/common.json';
+import enDevPool from './locales/en/dev-pool.json';
+import esDevPool from './locales/es/dev-pool.json';
+import deDevPool from './locales/de/dev-pool.json';
+import frDevPool from './locales/fr/dev-pool.json';
+import zhDevPool from './locales/zh/dev-pool.json';
 
 const resources = {
   en: { common: enCommon, 'dev-pool': enDevPool },

@@ -301,40 +301,40 @@ export const SubscriptionsPage = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <Text as="h1" size={800} weight="bold">
-          Gestión de Suscripciones
+          {t('subscriptions.title')}
         </Text>
         <Button
           appearance="primary"
           icon={<AddRegular />}
           onClick={() => setIsCreateDialogOpen(true)}
         >
-          Nueva Suscripción
+          {t('subscriptions.newSubscription')}
         </Button>
       </div>
 
       {error && (
         <MessageBar intent="error">
-          <MessageBarBody>{error}</MessageBarBody>
+          <MessageBarBody>{error.startsWith('common.') || error.startsWith('customers.') || error.startsWith('offices.') || error.startsWith('subscriptions.') ? t(error as any) : error}</MessageBarBody>
         </MessageBar>
       )}
 
       <Card className={styles.tableCard}>
         <div className={styles.searchContainer}>
           <SearchBox
-            placeholder="Buscar por tipo de suscripción o cliente..."
+            placeholder={t('subscriptions.searchPlaceholder')}
             value={searchText}
             onChange={(e, data) => setSearchText(data.value)}
             style={{ flex: 1 }}
           />
           <Combobox
-            placeholder="Filtrar por cliente"
+            placeholder={t('subscriptions.filterByCustomer')}
             value={selectedCustomer ? getCustomerName(selectedCustomer) : ''}
             onOptionSelect={(e, data) => {
               setSelectedCustomer(data.optionValue || '');
             }}
             style={{ width: '250px' }}
           >
-            <Option value="" text="Todos los clientes">Todos los clientes</Option>
+            <Option value="" text={t('subscriptions.allCustomers')}>{t('subscriptions.allCustomers')}</Option>
             {customers.map((customer) => (
               <Option key={customer.id} value={customer.id} text={customer.name}>
                 {customer.name}
@@ -347,33 +347,33 @@ export const SubscriptionsPage = () => {
             onClick={loadData}
             disabled={isLoading}
           >
-            Actualizar
+            {t('subscriptions.refresh')}
           </Button>
         </div>
 
         {isLoading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: tokens.spacingVerticalXXL }}>
-            <Spinner size="large" label="Cargando suscripciones..." />
+            <Spinner size="large" label={t('subscriptions.loadingSubscriptions')} />
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHeaderCell>Cliente</TableHeaderCell>
-                <TableHeaderCell>Tipo de Suscripción</TableHeaderCell>
-                <TableHeaderCell>Modelo</TableHeaderCell>
-                <TableHeaderCell>Estado</TableHeaderCell>
-                <TableHeaderCell>Fecha Inicio</TableHeaderCell>
-                <TableHeaderCell>Uso de Tokens</TableHeaderCell>
-                <TableHeaderCell>Uso de Mensajes</TableHeaderCell>
-                <TableHeaderCell>Acciones</TableHeaderCell>
+                <TableHeaderCell>{t('subscriptions.customer')}</TableHeaderCell>
+                <TableHeaderCell>{t('subscriptions.subscriptionType')}</TableHeaderCell>
+                <TableHeaderCell>{t('subscriptions.model')}</TableHeaderCell>
+                <TableHeaderCell>{t('subscriptions.status')}</TableHeaderCell>
+                <TableHeaderCell>{t('subscriptions.startDate')}</TableHeaderCell>
+                <TableHeaderCell>{t('subscriptions.tokenUsage')}</TableHeaderCell>
+                <TableHeaderCell>{t('subscriptions.messageUsage')}</TableHeaderCell>
+                <TableHeaderCell>{t('subscriptions.actions')}</TableHeaderCell>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredSubscriptions.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} align="center">
-                    <Text>No se encontraron suscripciones</Text>
+                    <Text>{t('subscriptions.noSubscriptionsFound')}</Text>
                   </TableCell>
                 </TableRow>
               ) : (
@@ -395,7 +395,7 @@ export const SubscriptionsPage = () => {
                         appearance="filled"
                         color={subscription.isActive ? 'success' : 'danger'}
                       >
-                        {subscription.isActive ? 'Activa' : 'Inactiva'}
+                        {subscription.isActive ? t('subscriptions.active') : t('subscriptions.inactive')}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -513,9 +513,9 @@ export const SubscriptionsPage = () => {
                 <MessageBarBody>{error}</MessageBarBody>
               </MessageBar>
             )}
-            <Field label="Cliente" required className={styles.formField}>
-              <Combobox
-                placeholder="Seleccionar cliente"
+            <Field label={t('subscriptions.customer')} required className={styles.formField}>
+                <Combobox
+                placeholder={t('subscriptions.selectCustomer')}
                 value={createFormData.customerId ? getCustomerName(createFormData.customerId) : ''}
                 onOptionSelect={(e, data) => {
                   setCreateFormData({ ...createFormData, customerId: data.optionValue || '' });
@@ -528,9 +528,9 @@ export const SubscriptionsPage = () => {
                 ))}
               </Combobox>
             </Field>
-            <Field label="Tipo de Suscripción" required className={styles.formField}>
-              <Combobox
-                placeholder="Seleccionar tipo de suscripción"
+            <Field label={t('subscriptions.subscriptionType')} required className={styles.formField}>
+                <Combobox
+                placeholder={t('subscriptions.selectSubscriptionType')}
                 value={createFormData.subscriptionTypeId ? subscriptionTypes.find(st => st.id === createFormData.subscriptionTypeId)?.name || '' : ''}
                 onOptionSelect={(e, data) => {
                   setCreateFormData({ ...createFormData, subscriptionTypeId: data.optionValue || '' });
@@ -546,7 +546,7 @@ export const SubscriptionsPage = () => {
                 })}
               </Combobox>
             </Field>
-            <Field label="Fecha de Inicio" className={styles.formField}>
+            <Field label={t('subscriptions.startDateLabel')} className={styles.formField}>
               <Input
                 type="date"
                 value={createFormData.startDate || ''}

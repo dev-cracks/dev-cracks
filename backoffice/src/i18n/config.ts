@@ -1,14 +1,14 @@
 import { createI18nInstance } from '../../../i18n/index.ts';
-import enCommon from '../../../i18n/locales/en/common.json';
-import esCommon from '../../../i18n/locales/es/common.json';
-import deCommon from '../../../i18n/locales/de/common.json';
-import frCommon from '../../../i18n/locales/fr/common.json';
-import zhCommon from '../../../i18n/locales/zh/common.json';
-import enBackoffice from '../../../i18n/locales/en/backoffice.json';
-import esBackoffice from '../../../i18n/locales/es/backoffice.json';
-import deBackoffice from '../../../i18n/locales/de/backoffice.json';
-import frBackoffice from '../../../i18n/locales/fr/backoffice.json';
-import zhBackoffice from '../../../i18n/locales/zh/backoffice.json';
+import enCommon from './locales/en/common.json';
+import esCommon from './locales/es/common.json';
+import deCommon from './locales/de/common.json';
+import frCommon from './locales/fr/common.json';
+import zhCommon from './locales/zh/common.json';
+import enBackoffice from './locales/en/backoffice.json';
+import esBackoffice from './locales/es/backoffice.json';
+import deBackoffice from './locales/de/backoffice.json';
+import frBackoffice from './locales/fr/backoffice.json';
+import zhBackoffice from './locales/zh/backoffice.json';
 
 // Recursos de traducción para backoffice
 const resources = {

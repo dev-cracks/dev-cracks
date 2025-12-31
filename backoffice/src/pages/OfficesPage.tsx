@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Card,
   CardHeader,
@@ -245,6 +246,7 @@ const useStyles = makeStyles({
 
 export const OfficesPage = () => {
   const styles = useStyles();
+  const { t } = useTranslation('backoffice');
   const { addGroup, removeGroup } = useRibbonMenu();
   
   // Hooks para restauración de foco en el Drawer
@@ -614,7 +616,7 @@ export const OfficesPage = () => {
       items: [
         {
           id: 'create',
-          label: 'Nuevo',
+          label: t('offices.new'),
           icon: <AddRegular />,
           action: () => {
             setFormData({
@@ -1093,12 +1095,12 @@ export const OfficesPage = () => {
       <div className={styles.container}>
         <div className={styles.header}>
           <LocationRegular fontSize={32} />
-          <h1 className={styles.title}>Sedes</h1>
+          <h1 className={styles.title}>{t('offices.title')}</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalM }}>
           <div style={{ flex: 1 }}>
             <SearchBox
-              placeholder="Buscar por nombre, cliente, dirección o ciudad..."
+              placeholder={t('offices.searchPlaceholder')}
               disabled
               size="large"
               style={{ width: '100%' }}
@@ -1106,10 +1108,10 @@ export const OfficesPage = () => {
           </div>
           <TabList selectedValue="table" disabled>
             <Tab value="table" icon={<TableRegular />}>
-              Vista de Tabla
+              {t('offices.tableView')}
             </Tab>
             <Tab value="flow" icon={<FlowchartRegular />}>
-              Vista Interactiva
+              {t('offices.interactiveView')}
             </Tab>
           </TabList>
         </div>
@@ -1127,13 +1129,13 @@ export const OfficesPage = () => {
       </div>
       <div className={styles.header}>
         <LocationRegular fontSize={32} />
-        <h1 className={styles.title}>Sedes</h1>
+        <h1 className={styles.title}>{t('offices.title')}</h1>
       </div>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalM }}>
         <div style={{ flex: 1 }}>
           <SearchBox
-            placeholder="Buscar por nombre, cliente, dirección o ciudad..."
+            placeholder={t('offices.searchPlaceholder')}
             value={searchTerm}
             onChange={(e, data) => setSearchTerm(data.value)}
             size="large"
@@ -1157,9 +1159,9 @@ export const OfficesPage = () => {
           disabled={isRefreshing}
           disabledFocusable={isRefreshing}
           loading={isRefreshing}
-          title="Actualizar lista de sedes"
+          title={t('offices.refreshTitle')}
         >
-          Actualizar
+          {t('offices.refresh')}
         </Button>
         <TabList
           selectedValue={selectedTabValue}
@@ -1170,10 +1172,10 @@ export const OfficesPage = () => {
           }}
         >
           <Tab value="table" icon={<TableRegular />}>
-            Vista de Tabla
+            {t('offices.tableView')}
           </Tab>
           <Tab value="flow" icon={<FlowchartRegular />}>
-            Vista Interactiva
+            {t('offices.interactiveView')}
           </Tab>
         </TabList>
       </div>
@@ -1183,7 +1185,7 @@ export const OfficesPage = () => {
           <div style={{ padding: tokens.spacingVerticalXL }}>
             {error && (
               <MessageBar intent="error" style={{ marginBottom: tokens.spacingVerticalM }}>
-                <MessageBarBody>{error}</MessageBarBody>
+                <MessageBarBody>{error.startsWith('common.') || error.startsWith('customers.') || error.startsWith('offices.') || error.startsWith('subscriptions.') ? t(error as any) : error}</MessageBarBody>
               </MessageBar>
             )}
 
@@ -1192,23 +1194,23 @@ export const OfficesPage = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHeaderCell>Nombre</TableHeaderCell>
-              <TableHeaderCell>País</TableHeaderCell>
-              <TableHeaderCell>Ciudad</TableHeaderCell>
-              <TableHeaderCell>Datos Contacto</TableHeaderCell>
-              <TableHeaderCell>Ubicación</TableHeaderCell>
-              <TableHeaderCell>Cliente</TableHeaderCell>
-              <TableHeaderCell>Tenants</TableHeaderCell>
-              <TableHeaderCell>Usuarios</TableHeaderCell>
-              <TableHeaderCell>Estado</TableHeaderCell>
-              <TableHeaderCell>Acciones</TableHeaderCell>
+              <TableHeaderCell>{t('offices.name')}</TableHeaderCell>
+              <TableHeaderCell>{t('offices.country')}</TableHeaderCell>
+              <TableHeaderCell>{t('offices.city')}</TableHeaderCell>
+              <TableHeaderCell>{t('offices.contactData')}</TableHeaderCell>
+              <TableHeaderCell>{t('offices.location')}</TableHeaderCell>
+              <TableHeaderCell>{t('offices.customers')}</TableHeaderCell>
+              <TableHeaderCell>{t('offices.tenants')}</TableHeaderCell>
+              <TableHeaderCell>{t('offices.users')}</TableHeaderCell>
+              <TableHeaderCell>{t('offices.status')}</TableHeaderCell>
+              <TableHeaderCell>{t('offices.actions')}</TableHeaderCell>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredOffices.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={10} style={{ textAlign: 'center', padding: tokens.spacingVerticalXXL }}>
-                  <Text>No se encontraron sedes</Text>
+                  <Text>{t('offices.noOfficesFound')}</Text>
                 </TableCell>
               </TableRow>
             ) : (
@@ -1294,7 +1296,7 @@ export const OfficesPage = () => {
                           <Button
                             appearance="subtle"
                             icon={<LocationRegular />}
-                            title="Ver/Editar ubicación"
+                            title={t('offices.viewEditLocation')}
                             style={{
                               padding: 0,
                               minWidth: 'auto',
@@ -1339,7 +1341,7 @@ export const OfficesPage = () => {
                         appearance="subtle"
                         icon={<LocationRegular />}
                         onClick={() => handleOpenLocationDialog(office)}
-                        title="Agregar ubicación"
+                        title={t('offices.addLocation')}
                         style={{
                           padding: 0,
                           minWidth: 'auto',
@@ -1371,7 +1373,7 @@ export const OfficesPage = () => {
                             </Button>
                           </TeachingPopoverTrigger>
                           <TeachingPopoverSurface>
-                            <TeachingPopoverHeader>Clientes Asociados</TeachingPopoverHeader>
+                            <TeachingPopoverHeader>{t('offices.associatedCustomers')}</TeachingPopoverHeader>
                             <TeachingPopoverBody>
                               <div style={{ maxWidth: '400px', maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS }}>
                                 {office.customers.map((customer) => (
@@ -2236,10 +2238,10 @@ export const OfficesPage = () => {
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHeaderCell>Nombre</TableHeaderCell>
-                                <TableHeaderCell>Email</TableHeaderCell>
-                                <TableHeaderCell>Rol</TableHeaderCell>
-                                <TableHeaderCell>Estado</TableHeaderCell>
+                                <TableHeaderCell>{t('offices.userName')}</TableHeaderCell>
+                                <TableHeaderCell>{t('offices.userEmail')}</TableHeaderCell>
+                                <TableHeaderCell>{t('offices.userRole')}</TableHeaderCell>
+                                <TableHeaderCell>{t('offices.userStatus')}</TableHeaderCell>
                                 <TableHeaderCell>Acciones</TableHeaderCell>
                               </TableRow>
                             </TableHeader>
@@ -2486,10 +2488,10 @@ export const OfficesPage = () => {
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHeaderCell>Nombre</TableHeaderCell>
-                                <TableHeaderCell>Email</TableHeaderCell>
-                                <TableHeaderCell>Rol</TableHeaderCell>
-                                <TableHeaderCell>Estado</TableHeaderCell>
+                                <TableHeaderCell>{t('offices.userName')}</TableHeaderCell>
+                                <TableHeaderCell>{t('offices.userEmail')}</TableHeaderCell>
+                                <TableHeaderCell>{t('offices.userRole')}</TableHeaderCell>
+                                <TableHeaderCell>{t('offices.userStatus')}</TableHeaderCell>
                                 <TableHeaderCell>Acciones</TableHeaderCell>
                               </TableRow>
                             </TableHeader>

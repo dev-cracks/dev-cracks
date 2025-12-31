@@ -88,6 +88,7 @@ tipica historia de usuario.
 
 
 ## reglas backend a tener en cuenta
+- Todos los mensajes harcodeados deben estar traducidos en los mismos idiomas del front
 - Implementar con TDD primero prueba unitaria y luego el código
 - Cada clase y metodo son su summary (en ingles)
 - Siempre qeu sea posible reutilizar el repositorio base y unidad de trabajo si no crear el repositorio extendido especializado
@@ -108,7 +109,12 @@ tipica historia de usuario.
 - **Siempre usar constantes para media types HTTP**: Nunca usar strings literales como "application/json" directamente. Usar la constante `HttpMediaTypes.ApplicationJson` de `Fractalize.EmailService.Infrastructure.Constants.HttpMediaTypes`. Esto aplica tanto para `StringContent` como para `MediaTypeWithQualityHeaderValue`.
 
 ## Reglas frontend
-- SIempre implementar lazy loading
+- Al crear un proyecto nuevo se debe tener en cuenta incluirlo en el _redirects
+- Siempre implementar lazy loading
+
+## Reglas comunes a frontend y backend
+- Los archivos deben terminar con una linea en blanco, no mas de una
+- Variables usings imports, todo lo que no se use se elimina
 
 ## Code Review
 For the code present, we get this error:
@@ -117,3 +123,4 @@ Redundant explicit property name
 Field  is never used
 ```
 Fix it, verify, and then give a concise explanation. 
+

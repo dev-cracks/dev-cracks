@@ -1,0 +1,205 @@
+{
+  "navigation": {
+    "home": "Inicio",
+    "services": "Servicios",
+    "products": "Productos",
+    "useCases": "Casos de Uso",
+    "whyUs": "Nosotros",
+    "contact": "Contacto"
+  },
+  "hero": {
+    "title": "DEV CRACKS",
+    "subtitle": "CODE // BREAKER",
+    "question": "¿Le temes a la IA, Automatización y la transformación digital?",
+    "badge1": "Partner de Transformación Digital",
+    "badge2": "Expertos en IA Aplicada",
+    "titleLine1": "Transformación Digital con IA",
+    "titleLine2": "De la Idea al Impacto Empresarial",
+    "slides": {
+      "automation": {
+        "title": "Automatización Inteligente",
+        "benefit": "Reduce costos operativos",
+        "percentage": "70%",
+        "description": "Las empresas que automatizan sus procesos reducen el tiempo de ejecución en un 70% y aumentan su productividad significativamente, generando ROI medible desde el primer trimestre."
+      },
+      "ai": {
+        "title": "Inteligencia Artificial Aplicada",
+        "benefit": "Decisiones basadas en datos",
+        "percentage": "85%",
+        "description": "La IA permite decisiones más precisas, reduciendo errores en un 85% y optimizando recursos empresariales. Transformamos datos en ventaja competitiva."
+      },
+      "agents": {
+        "title": "Agentes Orquestados de IA",
+        "benefit": "Optimización de flujos complejos",
+        "percentage": "60%",
+        "description": "Los sistemas de agentes coordinados reducen costos operativos hasta en un 60% mientras mejoran la eficiencia. Automatización que escala con tu negocio."
+      },
+      "cloud": {
+        "title": "Cloud & DevOps Enterprise",
+        "benefit": "Aceleración del time-to-market",
+        "percentage": "50%",
+        "description": "Las implementaciones en la nube reducen tiempos de despliegue en un 50% y mejoran la escalabilidad. Infraestructura que crece contigo."
+      },
+      "roi": {
+        "title": "ROI Promedio Verificado",
+        "benefit": "Retorno de inversión comprobado",
+        "percentage": "300%",
+        "description": "Las empresas que implementan nuestras soluciones obtienen un retorno de inversión promedio del 300% en el primer año. Resultados medibles, impacto real."
+      }
+    },
+    "fears": {
+      "fear": "Miedo",
+      "resistance": "Resistencia",
+      "obsolescence": "Obsolescencia",
+      "distrust": "Desconfianza",
+      "dread": "Temor",
+      "manualProcesses": "Procesos manuales",
+      "legacySystems": "Sistemas legacy",
+      "lackOfVision": "Falta de visión",
+      "culturalResistance": "Resistencia cultural"
+    }
+  },
+  "contact": {
+    "title": "Contacto",
+    "form": {
+      "name": "Nombre completo",
+      "namePlaceholder": "Ej: Juan Pérez",
+      "email": "Email corporativo",
+      "emailPlaceholder": "Ej: juan.perez@empresa.com",
+      "company": "Empresa",
+      "companyPlaceholder": "Ej: Mi Empresa S.A.",
+      "position": "Cargo / Posición",
+      "positionPlaceholder": "Ej: CTO, Head de Innovación",
+      "consultationType": "Tipo de Consultoría",
+      "selectOption": "Selecciona una opción",
+      "strategicConsulting": "Consultoría Estratégica en IA",
+      "customDevelopment": "Desarrollo de Soluciones a Medida",
+      "dataMl": "Data Engineering y ML",
+      "legacyIntegration": "Integración de Sistemas Legacy",
+      "automation": "Automatización de Procesos",
+      "aiAgents": "Agentes Orquestados de IA",
+      "cloudDevops": "Cloud & DevOps",
+      "security": "Seguridad y Auditoría",
+      "routeon": "Routeon Enterprise",
+      "devCoach": "Dev-Coach Pro",
+      "other": "Otro",
+      "message": "Mensaje",
+      "messagePlaceholder": "Cuéntanos sobre tu proyecto, desafíos o necesidades específicas...",
+      "submit": "Solicitar Consultoría",
+      "submitting": "Enviando…",
+      "success": "¡Gracias! Un consultor senior se pondrá en contacto contigo en menos de 24 horas."
+    },
+    "info": {
+      "title": "Información de Contacto",
+      "phone": "+34 647 007 280",
+      "email": "contacto@dev-cracks.com",
+      "website": "www.dev-cracks.com",
+      "downloadCard": "Descargar Tarjeta de Contacto",
+      "downloadWallet": "Añadir a Apple Wallet",
+      "downloadWalletAndroid": "Añadir a Google Wallet"
+    },
+    "wallet": {
+      "cardDescription": "Tarjeta de presentación Dev Cracks",
+      "phoneLabel": "Teléfono",
+      "descriptionLabel": "Descripción",
+      "descriptionValue": "Desarrollo de software y soluciones tecnológicas",
+      "certificatesNotConfigured": "Los certificados de Apple Wallet no están configurados. Por favor, contacta al administrador para configurar los certificados necesarios.",
+      "errorGenerating": "Error al generar el pass",
+      "unknownError": "Error desconocido"
+    }
+  },
+  "caseStudies": {
+    "title": "Casos de Uso y Resultados Comprobados",
+    "intro": "Transformamos empresas de diferentes industrias con soluciones de IA y automatización. Estos son ejemplos reales de impacto medible en operaciones empresariales.",
+    "challenge": "Desafío:",
+    "solution": "Solución:",
+    "results": "Resultados Medibles:",
+    "cta": "¿Quieres resultados similares en tu empresa?",
+    "ctaButton": "Solicitar Consultoría Estratégica",
+    "studies": {
+      "logistics": {
+        "industry": "Logística",
+        "title": "Optimización de Red de Franquicias de Paquetería",
+        "challenge": "Red de franquicias con procesos manuales, alta tasa de errores operativos y falta de visibilidad en tiempo real de la operación.",
+        "solution": "Implementación de Routeon Enterprise con ML para predicción de demanda, automatización de workflows y dashboard centralizado.",
+        "metrics": {
+          "operationalEfficiency": "Eficiencia Operativa",
+          "manualErrors": "Errores Manuales",
+          "managementTime": "Tiempo de Gestión",
+          "customerSatisfaction": "Satisfacción Cliente",
+          "increase": "Aumento",
+          "reduction": "Reducción"
+        }
+      },
+      "retail": {
+        "industry": "Retail",
+        "title": "Optimización de Inventario con Machine Learning",
+        "challenge": "Sobrestock y desabastecimiento frecuente, decisiones de compra basadas en intuición y pérdidas por obsolescencia.",
+        "solution": "Sistema de predicción de demanda con ML, optimización automática de inventario y alertas proactivas de reposición.",
+        "metrics": {
+          "costReduction": "Reducción de Costos",
+          "availability": "Disponibilidad",
+          "obsolescenceLosses": "Pérdidas por Obsolescencia",
+          "roi": "ROI",
+          "inventory": "Inventario",
+          "products": "Productos",
+          "firstYear": "Primer año"
+        }
+      },
+      "financial": {
+        "industry": "Servicios Financieros",
+        "title": "Automatización de Procesos Regulatorios",
+        "challenge": "Procesos regulatorios manuales, tiempos de cumplimiento prolongados y alto riesgo de errores en reportes.",
+        "solution": "Automatización inteligente de procesos regulatorios con agentes de IA orquestados y validación automática de compliance.",
+        "metrics": {
+          "complianceTime": "Tiempo de Cumplimiento",
+          "reportErrors": "Errores en Reportes",
+          "operationalCosts": "Costos Operativos",
+          "compliance": "Compliance",
+          "rate": "Tasa"
+        }
+      },
+      "manufacturing": {
+        "industry": "Manufacturing",
+        "title": "Predicción de Mantenimiento Preventivo",
+        "challenge": "Mantenimiento reactivo causando paradas inesperadas, altos costos de reparación y pérdida de productividad.",
+        "solution": "Sistema de ML para predicción de fallos, mantenimiento preventivo optimizado y reducción de downtime no planificado.",
+        "metrics": {
+          "downtime": "Downtime",
+          "maintenanceCosts": "Costos de Mantenimiento",
+          "availability": "Disponibilidad",
+          "productivity": "Productividad",
+          "equipment": "Equipos"
+        }
+      },
+      "ecommerce": {
+        "industry": "E-commerce",
+        "title": "Personalización y Recomendaciones con IA",
+        "challenge": "Bajas tasas de conversión, carritos abandonados frecuentes y falta de personalización en la experiencia del cliente.",
+        "solution": "Sistema de recomendaciones con ML, personalización dinámica de contenido y optimización de precios en tiempo real.",
+        "metrics": {
+          "conversionRate": "Tasa de Conversión",
+          "abandonedCarts": "Carritos Abandonados",
+          "averageOrderValue": "Valor Promedio Pedido",
+          "roi": "ROI",
+          "firstYear": "Primer año"
+        }
+      },
+      "healthcare": {
+        "industry": "Healthcare",
+        "title": "Optimización de Recursos Hospitalarios",
+        "challenge": "Ineficiencia en asignación de recursos, tiempos de espera prolongados y dificultad para predecir demanda de servicios.",
+        "solution": "Sistema de ML para predicción de demanda, optimización de agendas y asignación inteligente de recursos médicos.",
+        "metrics": {
+          "waitTimes": "Tiempos de Espera",
+          "resourceUtilization": "Utilización de Recursos",
+          "patientSatisfaction": "Satisfacción Paciente",
+          "operationalCosts": "Costos Operativos"
+        }
+      }
+    }
+  },
+  "common": {
+    "login": "Iniciar Sesión"
+  }
+}

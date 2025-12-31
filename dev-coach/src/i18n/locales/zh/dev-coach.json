@@ -1,0 +1,42 @@
+{
+  "welcome": "欢迎来到 Dev Coach",
+  "navigation": {
+    "routes": "路径",
+    "courses": "课程",
+    "resources": "资源",
+    "juniorToMid": "初级到中级",
+    "juniorToMidAria": "初级到中级培训路径",
+    "midToSenior": "中级到高级",
+    "midToSeniorAria": "中级到高级培训路径",
+    "allCourses": "所有课程",
+    "allCoursesAria": "查看所有课程",
+    "csharpFromZero": "C#从零到专家",
+    "csharpFromZeroAria": "完整的C#课程",
+    "architecture": "架构",
+    "architectureAria": "架构课程",
+    "frontend": "前端",
+    "frontendAria": "前端课程",
+    "documentation": "文档",
+    "documentationAria": "技术文档",
+    "community": "社区",
+    "communityAria": "开发者社区"
+  },
+  "courses": {
+    "title": "课程",
+    "category": "类别",
+    "level": "级别",
+    "duration": "时长",
+    "topics": "主题",
+    "viewCourse": "查看课程",
+    "noCourses": "没有可用课程"
+  },
+  "levels": {
+    "senior": "高级",
+    "architect": "架构师",
+    "techLead": "技术负责人"
+  },
+  "page": {
+    "title": "全栈 .NET React 开发者课程",
+    "subtitle": "将您的技能提升到新水平。从高级到架构师"
+  }
+}

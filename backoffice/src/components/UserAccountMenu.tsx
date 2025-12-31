@@ -11,6 +11,7 @@ import {
   AddRegular,
 } from '@fluentui/react-icons';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { useSettings } from '../contexts/SettingsContext';
 
@@ -158,6 +159,7 @@ const useStyles = makeStyles({
 
 export const UserAccountMenu = ({ trigger }: UserAccountMenuProps) => {
   const styles = useStyles();
+  const { t } = useTranslation('backoffice');
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { openSettings } = useSettings();
@@ -195,7 +197,7 @@ export const UserAccountMenu = ({ trigger }: UserAccountMenuProps) => {
         <div className={styles.header}>
           <Text className={styles.headerText}>{getDomain(user.email || 'dev-cracks.com')}</Text>
           <a className={styles.signOutLink} onClick={handleSignOut}>
-            Sign out
+            {t('userAccount.signOut')}
           </a>
         </div>
 
@@ -209,23 +211,23 @@ export const UserAccountMenu = ({ trigger }: UserAccountMenuProps) => {
               size={56}
             />
             <div className={styles.accountDetails}>
-              <Text className={styles.accountName}>{user.name || 'Usuario'}</Text>
+              <Text className={styles.accountName}>{user.name || t('users.user')}</Text>
               <Text className={styles.accountEmail}>{user.email}</Text>
             </div>
           </div>
           <div className={styles.accountLinks}>
             <a className={styles.accountLink} onClick={handleViewAccount}>
-              View account
+              {t('userAccount.viewAccount')}
             </a>
             <a className={styles.accountLink} onClick={() => console.log('Open another mailbox')}>
-              Open another mailbox
+              {t('userAccount.openAnotherMailbox')}
             </a>
           </div>
         </div>
 
         {/* Otras cuentas (sección opcional) */}
         <div className={styles.otherAccountsSection}>
-          <Text className={styles.otherAccountsTitle}>Other accounts</Text>
+          <Text className={styles.otherAccountsTitle}>{t('userAccount.otherAccounts')}</Text>
           {/* Aquí podrías agregar otras cuentas si las tienes */}
           {/* Por ahora dejamos un ejemplo estático o vacío */}
         </div>
@@ -239,7 +241,7 @@ export const UserAccountMenu = ({ trigger }: UserAccountMenuProps) => {
               size={32}
               color="brand"
             />
-            <Text className={styles.addAccountText}>Sign in with a different account</Text>
+            <Text className={styles.addAccountText}>{t('userAccount.signInDifferent')}</Text>
           </div>
         </div>
       </MenuPopover>

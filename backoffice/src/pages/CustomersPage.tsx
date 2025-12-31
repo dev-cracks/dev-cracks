@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Card,
   CardPreview,
@@ -672,6 +673,7 @@ const useStyles = makeStyles({
 
 export const CustomersPage = () => {
   const styles = useStyles();
+  const { t } = useTranslation('backoffice');
   const { addGroup, removeGroup } = useRibbonMenu();
   const { dispatchToast } = useToastController();
   
@@ -3196,12 +3198,12 @@ export const CustomersPage = () => {
       <div className={styles.container}>
         <div className={styles.header}>
           <BuildingRegular fontSize={32} />
-          <h1 className={styles.title}>Clientes</h1>
+          <h1 className={styles.title}>{t('customers.title')}</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalM }}>
           <div style={{ flex: 1 }}>
             <SearchBox
-              placeholder="Buscar por nombre, identificación o país..."
+              placeholder={t('customers.searchPlaceholder')}
               disabled
               size="large"
               style={{ width: '100%' }}
@@ -3209,10 +3211,10 @@ export const CustomersPage = () => {
           </div>
           <TabList selectedValue="table" disabled>
             <Tab value="table" icon={<TableRegular />}>
-              Vista de Tabla
+              {t('customers.tableView')}
             </Tab>
             <Tab value="flow" icon={<FlowchartRegular />}>
-              Vista Interactiva
+              {t('customers.interactiveView')}
             </Tab>
           </TabList>
         </div>
@@ -3230,13 +3232,13 @@ export const CustomersPage = () => {
       </div>
       <div className={styles.header}>
         <BuildingRegular fontSize={32} />
-        <h1 className={styles.title}>Clientes</h1>
+        <h1 className={styles.title}>{t('customers.title')}</h1>
       </div>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalM }}>
         <div style={{ flex: 1 }}>
           <SearchBox
-            placeholder="Buscar por nombre, identificación o país..."
+            placeholder={t('customers.searchPlaceholder')}
             value={searchTerm}
             onChange={(e, data) => setSearchTerm(data.value)}
             size="large"
@@ -3260,9 +3262,9 @@ export const CustomersPage = () => {
           disabled={isRefreshing}
           disabledFocusable={isRefreshing}
           loading={isRefreshing}
-          title="Actualizar lista de clientes"
+          title={t('customers.refreshTitle')}
         >
-          Actualizar
+          {t('customers.refresh')}
         </Button>
         <TabList
           selectedValue={selectedTabValue}
@@ -3273,10 +3275,10 @@ export const CustomersPage = () => {
           }}
         >
           <Tab value="table" icon={<TableRegular />}>
-            Vista de Tabla
+            {t('customers.tableView')}
           </Tab>
           <Tab value="flow" icon={<FlowchartRegular />}>
-            Vista Interactiva
+            {t('customers.interactiveView')}
           </Tab>
         </TabList>
       </div>
@@ -3286,7 +3288,7 @@ export const CustomersPage = () => {
           <div style={{ padding: tokens.spacingVerticalXL }}>
             {error && (
               <MessageBar intent="error" style={{ marginBottom: tokens.spacingVerticalM }}>
-                <MessageBarBody>{error}</MessageBarBody>
+                <MessageBarBody>{error.startsWith('common.') || error.startsWith('customers.') || error.startsWith('offices.') || error.startsWith('subscriptions.') ? t(error as any) : error}</MessageBarBody>
               </MessageBar>
             )}
 
@@ -3310,30 +3312,30 @@ export const CustomersPage = () => {
                 ...shorthands.borderRadius(tokens.borderRadiusMedium),
               }}
             >
-              <Spinner size="large" label={isReordering ? 'Reubicando cliente...' : 'Cargando clientes...'} />
+              <Spinner size="large" label={isReordering ? t('customers.reorderingCustomer') : t('customers.loadingCustomers')} />
             </div>
           )}
           {flattenedCustomers.length === 0 ? (
             <div style={{ padding: tokens.spacingVerticalXXL, textAlign: 'center' }}>
-              <Text>No se encontraron clientes</Text>
+              <Text>{t('customers.noCustomersFound')}</Text>
             </div>
           ) : (
             <Table style={{ tableLayout: 'auto', width: '100%' }}>
               <TableHeader>
                 <TableRow>
                   <TableHeaderCell style={{ width: '40px', minWidth: '40px' }}></TableHeaderCell>
-                  <TableHeaderCell style={{ width: '80px', minWidth: '80px' }}>Nivel</TableHeaderCell>
-                  <TableHeaderCell style={{ width: 'auto', minWidth: '150px' }}>Nombre</TableHeaderCell>
-                  <TableHeaderCell style={{ width: 'auto', minWidth: '150px' }}>Identificación</TableHeaderCell>
-                  <TableHeaderCell style={{ width: 'auto', minWidth: '120px' }}>País</TableHeaderCell>
-                  <TableHeaderCell style={{ width: 'auto', minWidth: '120px' }}>Ciudad</TableHeaderCell>
-                  <TableHeaderCell style={{ width: 'auto', minWidth: '130px' }}>Teléfono</TableHeaderCell>
-                  <TableHeaderCell style={{ width: 'auto', minWidth: '180px' }}>Email</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '80px', minWidth: '80px' }}>Tenants</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '80px', minWidth: '80px' }}>Sedes</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '80px', minWidth: '80px' }}>Usuarios</TableHeaderCell>
-                  <TableHeaderCell style={{ width: 'auto', minWidth: '110px' }}>Estado</TableHeaderCell>
-                  <TableHeaderCell style={{ width: '120px', minWidth: '120px' }}>Acciones</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '80px', minWidth: '80px' }}>{t('customers.level')}</TableHeaderCell>
+                  <TableHeaderCell style={{ width: 'auto', minWidth: '150px' }}>{t('customers.name')}</TableHeaderCell>
+                  <TableHeaderCell style={{ width: 'auto', minWidth: '150px' }}>{t('customers.identification')}</TableHeaderCell>
+                  <TableHeaderCell style={{ width: 'auto', minWidth: '120px' }}>{t('customers.country')}</TableHeaderCell>
+                  <TableHeaderCell style={{ width: 'auto', minWidth: '120px' }}>{t('customers.city')}</TableHeaderCell>
+                  <TableHeaderCell style={{ width: 'auto', minWidth: '130px' }}>{t('customers.phone')}</TableHeaderCell>
+                  <TableHeaderCell style={{ width: 'auto', minWidth: '180px' }}>{t('customers.email')}</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '80px', minWidth: '80px' }}>{t('customers.tenants')}</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '80px', minWidth: '80px' }}>{t('customers.offices')}</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '80px', minWidth: '80px' }}>{t('customers.users')}</TableHeaderCell>
+                  <TableHeaderCell style={{ width: 'auto', minWidth: '110px' }}>{t('customers.status')}</TableHeaderCell>
+                  <TableHeaderCell style={{ width: '120px', minWidth: '120px' }}>{t('customers.actions')}</TableHeaderCell>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -3375,7 +3377,7 @@ export const CustomersPage = () => {
                       </TableCell>
                       <TableCell>
                         {isRoot ? (
-                          <StarRegular fontSize={16} title="Cliente raíz" />
+                          <StarRegular fontSize={16} title={t('customers.rootCustomer')} />
                         ) : (
                           <Badge appearance="outline" size="small">
                             {customer.level}
@@ -3384,8 +3386,8 @@ export const CustomersPage = () => {
                       </TableCell>
                       <TableCell>{customer.name}</TableCell>
                       <TableCell>{customer.identification}</TableCell>
-                      <TableCell>{customer.countryName || 'N/A'}</TableCell>
-                      <TableCell>{customer.city || 'N/A'}</TableCell>
+                      <TableCell>{customer.countryName || t('common.notAvailable')}</TableCell>
+                      <TableCell>{customer.city || t('common.notAvailable')}</TableCell>
                       <TableCell>
                         {customer.phone ? (
                           <TeachingPopover
@@ -3404,32 +3406,32 @@ export const CustomersPage = () => {
                             </TeachingPopoverTrigger>
                             <TeachingPopoverSurface>
                               <TeachingPopoverHeader>
-                                Datos de Contacto: {customer.name}
+                                {t('customers.contactData')}: {customer.name}
                               </TeachingPopoverHeader>
                               <TeachingPopoverBody>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM }}>
                                   <div>
-                                    <Text weight="semibold">Teléfono:</Text>
-                                    <Text>{customer.phone || 'N/A'}</Text>
+                                    <Text weight="semibold">{t('customers.phoneLabel')}</Text>
+                                    <Text>{customer.phone || t('common.notAvailable')}</Text>
                                   </div>
                                   <div>
-                                    <Text weight="semibold">Email:</Text>
-                                    <Text>{customer.email || 'N/A'}</Text>
+                                    <Text weight="semibold">{t('customers.emailLabel')}</Text>
+                                    <Text>{customer.email || t('common.notAvailable')}</Text>
                                   </div>
                                   <div>
-                                    <Text weight="semibold">Ciudad:</Text>
-                                    <Text>{customer.city || 'N/A'}</Text>
+                                    <Text weight="semibold">{t('customers.cityLabel')}</Text>
+                                    <Text>{customer.city || t('common.notAvailable')}</Text>
                                   </div>
                                   <div>
-                                    <Text weight="semibold">Dirección:</Text>
-                                    <Text>N/A</Text>
+                                    <Text weight="semibold">{t('customers.addressLabel')}</Text>
+                                    <Text>{t('common.notAvailable')}</Text>
                                   </div>
                                 </div>
                               </TeachingPopoverBody>
                             </TeachingPopoverSurface>
                           </TeachingPopover>
                         ) : (
-                          'N/A'
+                          t('common.notAvailable')
                         )}
                       </TableCell>
                       <TableCell>
@@ -3450,32 +3452,32 @@ export const CustomersPage = () => {
                             </TeachingPopoverTrigger>
                             <TeachingPopoverSurface>
                               <TeachingPopoverHeader>
-                                Datos de Contacto: {customer.name}
+                                {t('customers.contactData')}: {customer.name}
                               </TeachingPopoverHeader>
                               <TeachingPopoverBody>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM }}>
                                   <div>
-                                    <Text weight="semibold">Teléfono:</Text>
-                                    <Text>{customer.phone || 'N/A'}</Text>
+                                    <Text weight="semibold">{t('customers.phoneLabel')}</Text>
+                                    <Text>{customer.phone || t('common.notAvailable')}</Text>
                                   </div>
                                   <div>
-                                    <Text weight="semibold">Email:</Text>
-                                    <Text>{customer.email || 'N/A'}</Text>
+                                    <Text weight="semibold">{t('customers.emailLabel')}</Text>
+                                    <Text>{customer.email || t('common.notAvailable')}</Text>
                                   </div>
                                   <div>
-                                    <Text weight="semibold">Ciudad:</Text>
-                                    <Text>{customer.city || 'N/A'}</Text>
+                                    <Text weight="semibold">{t('customers.cityLabel')}</Text>
+                                    <Text>{customer.city || t('common.notAvailable')}</Text>
                                   </div>
                                   <div>
-                                    <Text weight="semibold">Dirección:</Text>
-                                    <Text>N/A</Text>
+                                    <Text weight="semibold">{t('customers.addressLabel')}</Text>
+                                    <Text>{t('common.notAvailable')}</Text>
                                   </div>
                                 </div>
                               </TeachingPopoverBody>
                             </TeachingPopoverSurface>
                           </TeachingPopover>
                         ) : (
-                          'N/A'
+                          t('common.notAvailable')
                         )}
                       </TableCell>
                       <TableCell>
@@ -3608,11 +3610,11 @@ export const CustomersPage = () => {
                               </TeachingPopoverTrigger>
                               <TeachingPopoverSurface>
                                 <TeachingPopoverHeader>
-                                  Usuarios del Cliente: {customer.name}
+                                  {t('customers.customerUsers')}: {customer.name}
                                 </TeachingPopoverHeader>
                                 <TeachingPopoverBody>
                                   {isLoadingUsersForPopover ? (
-                                    <Spinner size="small" label="Cargando usuarios..." />
+                                    <Spinner size="small" label={t('customers.loadingUsers')} />
                                   ) : (
                                     <UsersListByTenantAndOffice users={usersForPopover} />
                                   )}
@@ -3624,11 +3626,11 @@ export const CustomersPage = () => {
                       </TableCell>
                       <TableCell>
                         {customer.isSuspended ? (
-                          <Badge appearance="filled" color="danger">Suspendido</Badge>
+                          <Badge appearance="filled" color="danger">{t('customers.suspended')}</Badge>
                         ) : customer.isActive ? (
-                          <Badge appearance="filled" color="success">Activo</Badge>
+                          <Badge appearance="filled" color="success">{t('customers.active')}</Badge>
                         ) : (
-                          <Badge appearance="outline">Inactivo</Badge>
+                          <Badge appearance="outline">{t('customers.inactive')}</Badge>
                         )}
                       </TableCell>
                       <TableCell>
@@ -3638,43 +3640,43 @@ export const CustomersPage = () => {
                               <Button
                                 appearance="subtle"
                                 icon={<MoreHorizontalRegular />}
-                                aria-label="Más acciones"
+                                aria-label={t('customers.actions')}
                               />
                             </MenuTrigger>
                             <MenuPopover>
                               <MenuList>
                                 <MenuItem icon={<EyeRegular />} onClick={() => handleViewDetails(customer)}>
-                                  Ver detalles
+                                  {t('customers.viewDetails')}
                                 </MenuItem>
                                 <MenuItem icon={<EditRegular />} onClick={() => handleEdit(customer)}>
-                                  Editar
+                                  {t('customers.edit')}
                                 </MenuItem>
                                 <MenuItem icon={<LocationRegular />} onClick={() => handleOpenCreateOffice(customer)}>
-                                  Agregar Sede
+                                  {t('customers.addOffice')}
                                 </MenuItem>
                                 <MenuItem icon={<BriefcaseRegular />} onClick={() => handleOpenCreateTenant(customer)}>
-                                  Agregar Tenant
+                                  {t('customers.addTenant')}
                                 </MenuItem>
                                 <MenuItem icon={<PeopleRegular />} onClick={() => handleViewUsers(customer)}>
-                                  Ver usuarios
+                                  {t('customers.viewUsers')}
                                 </MenuItem>
                                 <MenuItem icon={<PeopleRegular />} onClick={() => handleNotifyUsers(customer)}>
-                                  Enviar notificación
+                                  {t('customers.sendNotification')}
                                 </MenuItem>
                                 <MenuItem icon={<LinkRegular />} onClick={() => handleAssignParent(customer)}>
-                                  Asignar a otro cliente
+                                  {t('customers.assignToCustomer')}
                                 </MenuItem>
                                 {customer.isSuspended ? (
                                   <MenuItem icon={<PlayRegular />} onClick={() => handleActivate(customer)}>
-                                    Activar
+                                    {t('customers.activate')}
                                   </MenuItem>
                                 ) : (
                                   <MenuItem icon={<PauseRegular />} onClick={() => handleSuspend(customer)}>
-                                    Suspender
+                                    {t('customers.suspend')}
                                   </MenuItem>
                                 )}
                                 <MenuItem icon={<DeleteRegular />} onClick={() => handleDelete(customer)}>
-                                  Eliminar
+                                  {t('customers.delete')}
                                 </MenuItem>
                               </MenuList>
                             </MenuPopover>
@@ -3704,7 +3706,7 @@ export const CustomersPage = () => {
               color: tokens.colorNeutralForeground3,
             }}
           >
-            <Text>Arrastra aquí para convertir en cliente raíz (sin padre)</Text>
+            <Text>{t('customers.dragToRoot')}</Text>
           </div>
         </div>
           </>
@@ -3728,7 +3730,7 @@ export const CustomersPage = () => {
                       ...shorthands.borderRadius(tokens.borderRadiusMedium),
                     }}
                   >
-                    <Spinner size="large" label="Cargando clientes..." />
+                    <Spinner size="large" label={t('customers.loadingCustomers')} />
                   </div>
                 )}
                 {flowLoading ? (
@@ -3751,10 +3753,10 @@ export const CustomersPage = () => {
                       <MiniMap />
                       <Panel position="top-left">
                         <div style={{ backgroundColor: tokens.colorNeutralBackground1, padding: tokens.spacingVerticalS, ...shorthands.borderRadius(tokens.borderRadiusMedium) }}>
-                          <Text weight="semibold">Vista Interactiva: Clientes → Tenants → Usuarios</Text>
+                          <Text weight="semibold">{t('customers.interactiveViewTitle')}</Text>
                           <div style={{ marginTop: tokens.spacingVerticalXS }}>
                             <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-                              Nivel: Clientes (1) → Tenants (2) → Usuarios (3)
+                              {t('customers.interactiveViewLevel')}
                             </Text>
                           </div>
                         </div>
@@ -3790,7 +3792,7 @@ export const CustomersPage = () => {
               />
             }
           >
-            Nuevo
+            {t('customers.new')}
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>

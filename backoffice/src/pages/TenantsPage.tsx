@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Card,
   CardHeader,
@@ -245,6 +246,7 @@ const useStyles = makeStyles({
 
 export const TenantsPage = () => {
   const styles = useStyles();
+  const { t } = useTranslation('backoffice');
   const { addGroup, removeGroup } = useRibbonMenu();
   
   // Hooks para restauración de foco en el Drawer
@@ -430,7 +432,7 @@ export const TenantsPage = () => {
       items: [
         {
           id: 'create',
-          label: 'Nuevo',
+          label: t('tenants.new'),
           icon: <AddRegular />,
           action: () => {
             setFormData({
@@ -945,12 +947,12 @@ export const TenantsPage = () => {
       <div className={styles.container}>
         <div className={styles.header}>
           <BriefcaseRegular fontSize={32} />
-          <h1 className={styles.title}>Tenants</h1>
+          <h1 className={styles.title}>{t('tenants.title')}</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalM }}>
           <div style={{ flex: 1 }}>
             <SearchBox
-              placeholder="Buscar por nombre o cliente..."
+              placeholder={t('tenants.searchPlaceholder')}
               disabled
               size="large"
               style={{ width: '100%' }}
@@ -958,10 +960,10 @@ export const TenantsPage = () => {
           </div>
           <TabList selectedValue="table" disabled>
             <Tab value="table" icon={<TableRegular />}>
-              Vista de Tabla
+              {t('tenants.tableView')}
             </Tab>
             <Tab value="flow" icon={<FlowchartRegular />}>
-              Vista Interactiva
+              {t('tenants.interactiveView')}
             </Tab>
           </TabList>
         </div>
@@ -979,13 +981,13 @@ export const TenantsPage = () => {
       </div>
       <div className={styles.header}>
         <BriefcaseRegular fontSize={32} />
-        <h1 className={styles.title}>Tenants</h1>
+        <h1 className={styles.title}>{t('tenants.title')}</h1>
       </div>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalM }}>
         <div style={{ flex: 1 }}>
           <SearchBox
-            placeholder="Buscar por nombre o cliente..."
+            placeholder={t('tenants.searchPlaceholder')}
             value={searchTerm}
             onChange={(e, data) => setSearchTerm(data.value)}
             size="large"
@@ -1002,9 +1004,9 @@ export const TenantsPage = () => {
             }
           }}
           disabled={isLoading || flowLoading}
-          title="Actualizar lista de tenants"
+          title={t('tenants.refreshTitle')}
         >
-          Actualizar
+          {t('tenants.refresh')}
         </Button>
         <TabList
           selectedValue={selectedTabValue}
@@ -1015,10 +1017,10 @@ export const TenantsPage = () => {
           }}
         >
           <Tab value="table" icon={<TableRegular />}>
-            Vista de Tabla
+            {t('tenants.tableView')}
           </Tab>
           <Tab value="flow" icon={<FlowchartRegular />}>
-            Vista Interactiva
+            {t('tenants.interactiveView')}
           </Tab>
         </TabList>
       </div>
@@ -1062,14 +1064,14 @@ export const TenantsPage = () => {
                   <Table style={{ tableLayout: 'auto', width: '100%' }}>
                     <TableHeader>
                       <TableRow>
-                        <TableHeaderCell style={{ width: 'auto', minWidth: '200px' }}>Nombre</TableHeaderCell>
-                        <TableHeaderCell style={{ width: 'auto', minWidth: '180px' }}>Clientes</TableHeaderCell>
-                        <TableHeaderCell style={{ width: 'auto', minWidth: '80px' }}>Sedes</TableHeaderCell>
-                        <TableHeaderCell style={{ width: 'auto', minWidth: '80px' }}>Usuarios</TableHeaderCell>
-                        <TableHeaderCell style={{ width: 'auto', minWidth: '150px' }}>Fecha de Creación</TableHeaderCell>
-                        <TableHeaderCell style={{ width: 'auto', minWidth: '150px' }}>Última Actualización</TableHeaderCell>
-                        <TableHeaderCell style={{ width: 'auto', minWidth: '110px' }}>Estado</TableHeaderCell>
-                        <TableHeaderCell style={{ width: '120px', minWidth: '120px' }}>Acciones</TableHeaderCell>
+                        <TableHeaderCell style={{ width: 'auto', minWidth: '200px' }}>{t('tenants.name')}</TableHeaderCell>
+                        <TableHeaderCell style={{ width: 'auto', minWidth: '180px' }}>{t('tenants.customer')}</TableHeaderCell>
+                        <TableHeaderCell style={{ width: 'auto', minWidth: '80px' }}>{t('tenants.offices')}</TableHeaderCell>
+                        <TableHeaderCell style={{ width: 'auto', minWidth: '80px' }}>{t('tenants.users')}</TableHeaderCell>
+                        <TableHeaderCell style={{ width: 'auto', minWidth: '150px' }}>{t('users.creationDate')}</TableHeaderCell>
+                        <TableHeaderCell style={{ width: 'auto', minWidth: '150px' }}>{t('users.updated')}</TableHeaderCell>
+                        <TableHeaderCell style={{ width: 'auto', minWidth: '110px' }}>{t('tenants.status')}</TableHeaderCell>
+                        <TableHeaderCell style={{ width: '120px', minWidth: '120px' }}>{t('tenants.actions')}</TableHeaderCell>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -1116,24 +1118,24 @@ export const TenantsPage = () => {
                                     </TeachingPopoverTrigger>
                                     <TeachingPopoverSurface>
                                       <TeachingPopoverHeader>
-                                        Clientes Asociados
+                                        {t('offices.associatedCustomers')}
                                       </TeachingPopoverHeader>
                                       <TeachingPopoverBody>
                                         {isLoadingTenantCustomers === tenant.id ? (
                                           <div style={{ display: 'flex', justifyContent: 'center', padding: tokens.spacingVerticalL }}>
-                                            <Spinner size="small" label="Cargando clientes..." />
+                                            <Spinner size="small" label={t('customers.loadingCustomers')} />
                                           </div>
                                         ) : tenantCustomers.length === 0 ? (
-                                          <Text>No hay clientes asociados</Text>
+                                          <Text>{t('offices.associatedCustomers')}</Text>
                                         ) : (
                                           <div style={{ maxWidth: '600px', maxHeight: '400px', overflowY: 'auto' }}>
                                             <Table>
                                               <TableHeader>
                                                 <TableRow>
-                                                  <TableHeaderCell>Nombre</TableHeaderCell>
-                                                  <TableHeaderCell>Identificación</TableHeaderCell>
-                                                  <TableHeaderCell>País</TableHeaderCell>
-                                                  <TableHeaderCell>Estado</TableHeaderCell>
+                                                  <TableHeaderCell>{t('customers.name')}</TableHeaderCell>
+                                                  <TableHeaderCell>{t('customers.identification')}</TableHeaderCell>
+                                                  <TableHeaderCell>{t('customers.country')}</TableHeaderCell>
+                                                  <TableHeaderCell>{t('customers.status')}</TableHeaderCell>
                                                 </TableRow>
                                               </TableHeader>
                                               <TableBody>
@@ -1226,24 +1228,24 @@ export const TenantsPage = () => {
                                   </TeachingPopoverTrigger>
                                   <TeachingPopoverSurface>
                                     <TeachingPopoverHeader>
-                                      Sedes Asociadas
+                                      {t('users.associatedOffices')}
                                     </TeachingPopoverHeader>
                                     <TeachingPopoverBody>
                                       {isLoadingTenantOffices === tenant.id ? (
                                         <div style={{ display: 'flex', justifyContent: 'center', padding: tokens.spacingVerticalL }}>
-                                          <Spinner size="small" label="Cargando sedes..." />
+                                            <Spinner size="small" label={t('offices.loadingOffices')} />
                                         </div>
                                       ) : tenantOffices.length === 0 ? (
-                                        <Text>No hay sedes asociadas</Text>
+                                        <Text>{t('users.associatedOffices')}</Text>
                                       ) : (
                                         <div style={{ maxWidth: '600px', maxHeight: '400px', overflowY: 'auto' }}>
                                           <Table>
                                             <TableHeader>
                                               <TableRow>
-                                                <TableHeaderCell>Nombre</TableHeaderCell>
-                                                <TableHeaderCell>Dirección</TableHeaderCell>
-                                                <TableHeaderCell>Ciudad</TableHeaderCell>
-                                                <TableHeaderCell>Estado</TableHeaderCell>
+                                                <TableHeaderCell>{t('offices.name')}</TableHeaderCell>
+                                                <TableHeaderCell>{t('customers.addressLabel')}</TableHeaderCell>
+                                                <TableHeaderCell>{t('offices.city')}</TableHeaderCell>
+                                                <TableHeaderCell>{t('offices.status')}</TableHeaderCell>
                                               </TableRow>
                                             </TableHeader>
                                             <TableBody>
@@ -1322,7 +1324,7 @@ export const TenantsPage = () => {
                                     </Button>
                                   </TeachingPopoverTrigger>
                                   <TeachingPopoverSurface>
-                                    <TeachingPopoverHeader>Usuarios Asociados</TeachingPopoverHeader>
+                                    <TeachingPopoverHeader>{t('users.associatedTenants')}</TeachingPopoverHeader>
                                     <TeachingPopoverBody>
                                       <div style={{ maxWidth: '600px', maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM }}>
                                         {users.map((user: UserDto) => (
@@ -1362,15 +1364,15 @@ export const TenantsPage = () => {
                                   </TeachingPopoverTrigger>
                                   <TeachingPopoverSurface>
                                     <TeachingPopoverHeader>
-                                      Usuarios del Cliente: {tenant.customerName || 'N/A'}
+                                      {t('customers.customerUsers')}: {tenant.customerName || t('common.notAvailable')}
                                     </TeachingPopoverHeader>
                                     <TeachingPopoverBody>
                                       {isLoadingCustomerUsers ? (
                                         <div style={{ display: 'flex', justifyContent: 'center', padding: tokens.spacingVerticalL }}>
-                                          <Spinner size="small" label="Cargando usuarios..." />
+                                            <Spinner size="small" label={t('users.loadingUsers')} />
                                         </div>
                                       ) : customerUsersForPopover.length === 0 ? (
-                                        <Text>No hay usuarios disponibles en el cliente</Text>
+                                        <Text>{t('users.noUsersFound')}</Text>
                                       ) : (
                                         <div style={{ maxWidth: '600px', maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS }}>
                                           {customerUsersForPopover.map((user: UserDto) => {
@@ -1529,7 +1531,7 @@ export const TenantsPage = () => {
                       ...shorthands.borderRadius(tokens.borderRadiusMedium),
                     }}
                   >
-                    <Spinner size="large" label="Cargando tenants..." />
+                    <Spinner size="large" label={t('tenants.loadingTenants')} />
                   </div>
                 )}
                 {flowLoading ? (
@@ -1552,16 +1554,16 @@ export const TenantsPage = () => {
                       <MiniMap />
                       <Panel position="top-left">
                         <div style={{ backgroundColor: tokens.colorNeutralBackground1, padding: tokens.spacingVerticalS, ...shorthands.borderRadius(tokens.borderRadiusMedium) }}>
-                          <Text weight="semibold">Vista Interactiva: Tenants → Usuarios</Text>
-                          <div style={{ marginTop: tokens.spacingVerticalXS }}>
-                            <Text size={200} style={{ color: tokens.colorNeutralForeground3 }}>
-                              Nivel: Tenants (1) → Usuarios (2)
-                            </Text>
-                          </div>
+                          <Text weight="semibold">{t('tenants.interactiveViewTitle')}</Text>
                         </div>
                       </Panel>
                     </ReactFlow>
                   </ReactFlowProvider>
+                )}
+                {!flowLoading && flowNodes.length === 0 && (
+                  <div style={{ padding: tokens.spacingVerticalXXL, textAlign: 'center' }}>
+                    <Text>{t('tenants.noDataForInteractiveView')}</Text>
+                  </div>
                 )}
               </div>
             )}
@@ -1615,7 +1617,7 @@ export const TenantsPage = () => {
               />
             }
           >
-            Nuevo Tenant
+            {t('tenants.new')}
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
@@ -1938,9 +1940,9 @@ export const TenantsPage = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHeaderCell>Nombre</TableHeaderCell>
-                        <TableHeaderCell>Email</TableHeaderCell>
-                        <TableHeaderCell>Rol</TableHeaderCell>
+                        <TableHeaderCell>{t('users.name')}</TableHeaderCell>
+                        <TableHeaderCell>{t('users.email')}</TableHeaderCell>
+                        <TableHeaderCell>{t('users.role')}</TableHeaderCell>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -1965,7 +1967,7 @@ export const TenantsPage = () => {
             </DialogContent>
             <DialogActions>
               <Button appearance="primary" onClick={() => setIsUsersDialogOpen(false)}>
-                Cerrar
+                {t('common.close')}
               </Button>
           </DialogActions>
         </DialogBody>
@@ -1975,22 +1977,22 @@ export const TenantsPage = () => {
       {/* Dialog para ver sedes */}
       <Dialog open={isOfficesDialogOpen} onOpenChange={(_, data) => setIsOfficesDialogOpen(data.open)}>
         <DialogSurface style={{ maxWidth: '700px' }}>
-          <DialogTitle>Sedes del Tenant: {selectedTenant?.name}</DialogTitle>
+          <DialogTitle>{t('offices.title')}: {selectedTenant?.name}</DialogTitle>
           <DialogBody>
             <DialogContent>
               {isLoadingOffices ? (
                 <TableSkeleton rows={5} columns={4} />
               ) : tenantOffices.length === 0 ? (
-                <Text>No hay sedes asociadas a este tenant</Text>
+                <Text>{t('users.noOfficesAvailableForTenant')}</Text>
               ) : (
                 <div className={styles.usersList}>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHeaderCell>Nombre</TableHeaderCell>
-                        <TableHeaderCell>Dirección</TableHeaderCell>
-                        <TableHeaderCell>Ciudad</TableHeaderCell>
-                        <TableHeaderCell>Estado</TableHeaderCell>
+                        <TableHeaderCell>{t('offices.name')}</TableHeaderCell>
+                        <TableHeaderCell>{t('customers.addressLabel')}</TableHeaderCell>
+                        <TableHeaderCell>{t('offices.city')}</TableHeaderCell>
+                        <TableHeaderCell>{t('offices.status')}</TableHeaderCell>
                       </TableRow>
                     </TableHeader>
                     <TableBody>

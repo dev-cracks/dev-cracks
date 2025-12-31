@@ -1,0 +1,213 @@
+{
+  "nav": {
+    "ecosystem": "生态系统",
+    "modules": "模块",
+    "benefits": "优势",
+    "industry": "行业",
+    "pricing": "定价",
+    "requestDemo": "请求演示"
+  },
+  "hero": {
+    "title": "用模块化技术",
+    "titleHighlight": "转变您的物流运营",
+    "subtitle": "专为物流公司、运输、包裹递送和分销设计的模块化企业平台。只需为您需要的模块付费。",
+    "ctaPrimary": "请求演示",
+    "ctaSecondary": "探索模块"
+  },
+  "ecosystem": {
+    "title": "强大的模块化生态系统",
+    "subtitle": "通过我们的企业技术平台集中运营、优化流程并消除运营摩擦。",
+    "feature1": {
+      "title": "原子架构",
+      "description": "每个模块独立工作。只购买您需要的，并随着业务增长而扩展。"
+    },
+    "feature2": {
+      "title": "完全集成",
+      "description": "所有模块原生相互通信，消除信息孤岛。"
+    },
+    "feature3": {
+      "title": "物流焦点",
+      "description": "专门设计用于优化运输、仓储和分销运营。"
+    },
+    "benefit": "在单一平台上集中您的业务管理，降低成本并提高效率。"
+  },
+  "modules": {
+    "title": "强大的模块",
+    "subtitle": "选择您需要的模块。每个都是完整且独立的解决方案。",
+    "discover": "发现模块",
+    "crm": {
+      "title": "CRM",
+      "description": "完整的客户关系管理，针对物流行业优化。"
+    },
+    "erp": {
+      "title": "ERP",
+      "description": "企业资源规划，适用于复杂的物流运营。"
+    },
+    "inventory": {
+      "title": "库存管理",
+      "description": "实时全面控制库存、仓库和商品流动。"
+    },
+    "hr": {
+      "title": "人力资源",
+      "description": "完整的人员管理，从招聘到发展。"
+    },
+    "payroll": {
+      "title": "工资单",
+      "description": "自动计算工资、福利和法规合规性。"
+    },
+    "invoicing": {
+      "title": "电子发票",
+      "description": "电子发票的签发和管理，完全合规。"
+    },
+    "finance": {
+      "title": "财务",
+      "description": "完整的财务控制，实时报告和分析。"
+    },
+    "automation": {
+      "title": "运营自动化",
+      "description": "自动化重复流程并优化工作流。"
+    }
+  },
+  "benefits": {
+    "title": "战略优势",
+    "subtitle": "通过我们的平台优化运营、降低成本并扩展您的业务。",
+    "optimization": {
+      "title": "运营优化",
+      "description": "将执行时间减少高达70%，并显著提高生产力。"
+    },
+    "costs": {
+      "title": "成本降低",
+      "description": "消除冗余并优化资源，从第一季度开始产生可衡量的投资回报率。"
+    },
+    "integration": {
+      "title": "完全集成",
+      "description": "所有模块无缝协作，实时共享信息。"
+    },
+    "automation": {
+      "title": "智能自动化",
+      "description": "自动化复杂流程并实时做出数据驱动的决策。"
+    },
+    "security": {
+      "title": "安全性和稳定性",
+      "description": "强大的基础设施，符合企业安全标准。"
+    },
+    "scalability": {
+      "title": "真正的可扩展性",
+      "description": "与您的业务一起成长。在需要时添加模块，无限制。"
+    }
+  },
+  "industry": {
+    "title": "行业焦点",
+    "subtitle": "为每种类型的物流公司提供特定解决方案。",
+    "parcel": {
+      "title": "包裹和最后一英里",
+      "description": "通过实时跟踪优化最后一英里交付。",
+      "benefit1": "实时跟踪",
+      "benefit2": "路线优化",
+      "benefit3": "交付管理"
+    },
+    "operators": {
+      "title": "物流运营商",
+      "description": "从单一平台管理多个客户和复杂运营。",
+      "benefit1": "多客户",
+      "benefit2": "集中协调",
+      "benefit3": "高级KPI"
+    },
+    "transport": {
+      "title": "运输公司",
+      "description": "全面控制车队、路线和运输运营。",
+      "benefit1": "车队管理",
+      "benefit2": "路线规划",
+      "benefit3": "预防性维护"
+    },
+    "warehouse": {
+      "title": "仓储和分销",
+      "description": "使用先进技术优化仓库和分销中心。",
+      "benefit1": "库存控制",
+      "benefit2": "空间优化",
+      "benefit3": "订单管理"
+    },
+    "franchise": {
+      "title": "快递特许经营",
+      "description": "从控制中心管理多个销售点和运营。",
+      "benefit1": "多分支机构",
+      "benefit2": "合并报告",
+      "benefit3": "运营标准化"
+    }
+  },
+  "trust": {
+    "title": "信任和可信度",
+    "subtitle": "信任Fractalize转变其运营的公司。",
+    "metrics": {
+      "roi": "平均投资回报率",
+      "efficiency": "效率提升",
+      "satisfaction": "客户满意度"
+    },
+    "testimonial1": {
+      "initials": "JM",
+      "name": "张明",
+      "position": "首席执行官，快递物流",
+      "quote": "Fractalize完全改变了我们的运营。我们将成本降低了40%，并显著提高了运营效率。"
+    },
+    "testimonial2": {
+      "initials": "MC",
+      "name": "王梅",
+      "position": "运营总监，北方运输",
+      "quote": "Fractalize的模块化使我们能够从基础开始，并根据我们的需求增长。优秀的投资。"
+    }
+  },
+  "pricing": {
+    "title": "透明定价",
+    "subtitle": "选择最适合您公司的计划。无意外，无隐藏承诺。",
+    "popular": "最受欢迎",
+    "modular": {
+      "name": "模块化计划",
+      "description": "只需为您需要的模块付费",
+      "feature1": "单个模块",
+      "feature2": "灵活的月度付款",
+      "feature3": "标准支持",
+      "feature4": "包含更新",
+      "cta": "开始"
+    },
+    "complete": {
+      "name": "完整平台",
+      "description": "访问所有模块",
+      "feature1": "包含所有模块",
+      "feature2": "批量折扣",
+      "feature3": "优先支持",
+      "feature4": "个性化入门",
+      "cta": "请求演示"
+    },
+    "enterprise": {
+      "name": "企业计划",
+      "description": "为大型企业定制的解决方案",
+      "feature1": "完全定制",
+      "feature2": "专用24/7支持",
+      "feature3": "自定义集成",
+      "feature4": "专用客户经理",
+      "cta": "联系销售"
+    }
+  },
+  "cta": {
+    "title": "准备好转变您的物流运营了吗？",
+    "subtitle": "请求个性化演示，了解Fractalize如何优化您的业务。",
+    "requestDemo": "请求演示",
+    "contactAdvisor": "与顾问交谈"
+  },
+  "footer": {
+    "description": "面向物流和分销行业的模块化企业技术平台。",
+    "modules": "模块",
+    "inventory": "库存",
+    "hr": "人力资源",
+    "company": "公司",
+    "about": "关于",
+    "contact": "联系",
+    "careers": "职业",
+    "legal": "法律",
+    "privacy": "隐私",
+    "terms": "条款",
+    "cookies": "Cookie",
+    "rights": "保留所有权利。"
+  }
+}
+

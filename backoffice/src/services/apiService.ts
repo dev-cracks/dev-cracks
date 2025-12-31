@@ -74,15 +74,16 @@ export class ApiService {
         // Handle network errors (server unavailable, CORS, etc.)
         if (fetchError.name === 'AbortError') {
           const error: ApiError = {
-            message: 'Request timeout',
+            message: 'common.requestTimeout',
             statusCode: 408,
           };
           throw error;
         }
         
         // Network error (server unavailable)
+        // The message will be translated in the component that displays it
         const error: ApiError = {
-          message: 'Network error: Unable to connect to the server',
+          message: 'common.networkError',
           statusCode: undefined,
         };
         throw error;

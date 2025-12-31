@@ -16,6 +16,7 @@ import {
 } from '@fluentui/react-icons';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { useNotificationContext } from '../contexts/NotificationContext';
 import { useSettings } from '../contexts/SettingsContext';
@@ -120,6 +121,7 @@ const PARAM_KEYS = {
 export const RibbonBar = ({ onMenuToggle }: RibbonBarProps) => {
   const styles = useStyles();
   const navigate = useNavigate();
+  const { t } = useTranslation('backoffice');
   const { user, logout } = useAuth();
   const { unreadCount } = useNotificationContext();
   const { openSettings } = useSettings();
@@ -206,7 +208,7 @@ export const RibbonBar = ({ onMenuToggle }: RibbonBarProps) => {
       <div className={styles.searchSection}>
         <Input
           className={styles.searchInput}
-          placeholder="Search"
+          placeholder={t('ribbonBar.search')}
           contentBefore={<SearchRegular />}
           appearance="filled-darker"
         />
@@ -218,13 +220,13 @@ export const RibbonBar = ({ onMenuToggle }: RibbonBarProps) => {
           appearance="subtle"
           icon={<DocumentRegular />}
           className={styles.actionButton}
-          title="New"
+          title={t('ribbonBar.new')}
         />
         <Button
           appearance="subtle"
           icon={<CalendarRegular />}
           className={styles.actionButton}
-          title="Calendar"
+          title={t('ribbonBar.calendar')}
         />
         <div className={styles.badgeContainer}>
           <NotificationPanel
@@ -233,7 +235,7 @@ export const RibbonBar = ({ onMenuToggle }: RibbonBarProps) => {
                 appearance="subtle"
                 icon={<AlertRegular />}
                 className={styles.actionButton}
-                title="Notifications"
+                title={t('ribbonBar.notifications')}
               />
             }
           />
@@ -252,7 +254,7 @@ export const RibbonBar = ({ onMenuToggle }: RibbonBarProps) => {
           appearance="subtle"
           icon={<SettingsRegular />}
           className={styles.actionButton}
-          title="Settings"
+          title={t('ribbonBar.settings')}
           onClick={openSettings}
         />
         <LanguageSelector />

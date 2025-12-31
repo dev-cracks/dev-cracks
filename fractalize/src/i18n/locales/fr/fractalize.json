@@ -1,0 +1,213 @@
+{
+  "nav": {
+    "ecosystem": "Écosystème",
+    "modules": "Modules",
+    "benefits": "Avantages",
+    "industry": "Secteurs",
+    "pricing": "Tarifs",
+    "requestDemo": "Demander une démo"
+  },
+  "hero": {
+    "title": "Transformez votre opération logistique",
+    "titleHighlight": "avec une technologie modulaire",
+    "subtitle": "Plateforme d'entreprise modulaire conçue pour les entreprises de logistique, transport, messagerie et distribution. Payez uniquement pour les modules dont vous avez besoin.",
+    "ctaPrimary": "Demander une démo",
+    "ctaSecondary": "Explorer les modules"
+  },
+  "ecosystem": {
+    "title": "Un écosystème modulaire puissant",
+    "subtitle": "Centralisez les opérations, optimisez les processus et éliminez les frictions opérationnelles avec notre plateforme technologique d'entreprise.",
+    "feature1": {
+      "title": "Architecture atomique",
+      "description": "Chaque module fonctionne indépendamment. Achetez uniquement ce dont vous avez besoin et évoluez selon votre croissance."
+    },
+    "feature2": {
+      "title": "Intégration totale",
+      "description": "Tous les modules communiquent entre eux de manière native, éliminant les silos d'information."
+    },
+    "feature3": {
+      "title": "Focus logistique",
+      "description": "Conçu spécifiquement pour optimiser les opérations de transport, d'entreposage et de distribution."
+    },
+    "benefit": "Centralisez votre gestion d'entreprise sur une seule plateforme, réduisant les coûts et augmentant l'efficacité."
+  },
+  "modules": {
+    "title": "Modules puissants",
+    "subtitle": "Choisissez les modules dont vous avez besoin. Chacun est une solution complète et indépendante.",
+    "discover": "Découvrir le module",
+    "crm": {
+      "title": "CRM",
+      "description": "Gestion complète de la relation client, optimisée pour le secteur logistique."
+    },
+    "erp": {
+      "title": "ERP",
+      "description": "Planification des ressources d'entreprise pour les opérations logistiques complexes."
+    },
+    "inventory": {
+      "title": "Gestion des stocks",
+      "description": "Contrôle total des stocks, entrepôts et mouvements de marchandises en temps réel."
+    },
+    "hr": {
+      "title": "Ressources humaines",
+      "description": "Administration complète du personnel, du recrutement au développement."
+    },
+    "payroll": {
+      "title": "Paie",
+      "description": "Calcul automatique des salaires, avantages et conformité réglementaire."
+    },
+    "invoicing": {
+      "title": "Facturation électronique",
+      "description": "Émission et gestion de factures électroniques avec conformité totale."
+    },
+    "finance": {
+      "title": "Finance",
+      "description": "Contrôle financier complet avec rapports et analyses en temps réel."
+    },
+    "automation": {
+      "title": "Automatisation opérationnelle",
+      "description": "Automatisez les processus répétitifs et optimisez les flux de travail."
+    }
+  },
+  "benefits": {
+    "title": "Avantages stratégiques",
+    "subtitle": "Optimisez les opérations, réduisez les coûts et développez votre entreprise avec notre plateforme.",
+    "optimization": {
+      "title": "Optimisation opérationnelle",
+      "description": "Réduisez les temps d'exécution jusqu'à 70% et augmentez significativement la productivité."
+    },
+    "costs": {
+      "title": "Réduction des coûts",
+      "description": "Éliminez les redondances et optimisez les ressources, générant un ROI mesurable dès le premier trimestre."
+    },
+    "integration": {
+      "title": "Intégration totale",
+      "description": "Tous les modules travaillent ensemble sans friction, partageant des informations en temps réel."
+    },
+    "automation": {
+      "title": "Automatisation intelligente",
+      "description": "Automatisez les processus complexes et prenez des décisions basées sur les données en temps réel."
+    },
+    "security": {
+      "title": "Sécurité et stabilité",
+      "description": "Infrastructure robuste avec conformité aux normes de sécurité d'entreprise."
+    },
+    "scalability": {
+      "title": "Scalabilité réelle",
+      "description": "Grandissez avec votre entreprise. Ajoutez des modules quand vous en avez besoin, sans limites."
+    }
+  },
+  "industry": {
+    "title": "Focus sectoriel",
+    "subtitle": "Solutions spécifiques pour chaque type d'entreprise logistique.",
+    "parcel": {
+      "title": "Messagerie et dernier kilomètre",
+      "description": "Optimisez les livraisons du dernier kilomètre avec un suivi en temps réel.",
+      "benefit1": "Suivi en temps réel",
+      "benefit2": "Optimisation des itinéraires",
+      "benefit3": "Gestion des livraisons"
+    },
+    "operators": {
+      "title": "Opérateurs logistiques",
+      "description": "Gérez plusieurs clients et opérations complexes depuis une seule plateforme.",
+      "benefit1": "Multi-client",
+      "benefit2": "Coordination centralisée",
+      "benefit3": "KPI avancés"
+    },
+    "transport": {
+      "title": "Entreprises de transport",
+      "description": "Contrôle total des flottes, itinéraires et opérations de transport.",
+      "benefit1": "Gestion de flotte",
+      "benefit2": "Planification d'itinéraires",
+      "benefit3": "Maintenance préventive"
+    },
+    "warehouse": {
+      "title": "Entreposage et distribution",
+      "description": "Optimisez les entrepôts et centres de distribution avec une technologie avancée.",
+      "benefit1": "Contrôle des stocks",
+      "benefit2": "Optimisation de l'espace",
+      "benefit3": "Gestion des commandes"
+    },
+    "franchise": {
+      "title": "Franchises de messagerie",
+      "description": "Gérez plusieurs points de vente et opérations depuis un centre de contrôle.",
+      "benefit1": "Multi-succursale",
+      "benefit2": "Rapports consolidés",
+      "benefit3": "Standardisation opérationnelle"
+    }
+  },
+  "trust": {
+    "title": "Confiance et crédibilité",
+    "subtitle": "Entreprises qui font confiance à Fractalize pour transformer leurs opérations.",
+    "metrics": {
+      "roi": "ROI moyen",
+      "efficiency": "Amélioration de l'efficacité",
+      "satisfaction": "Satisfaction client"
+    },
+    "testimonial1": {
+      "initials": "JM",
+      "name": "Jean Martin",
+      "position": "PDG, Logistique Express",
+      "quote": "Fractalize a complètement transformé nos opérations. Nous avons réduit les coûts de 40% et amélioré significativement l'efficacité opérationnelle."
+    },
+    "testimonial2": {
+      "initials": "MC",
+      "name": "Marie Dubois",
+      "position": "Directrice des opérations, Transports du Nord",
+      "quote": "La modularité de Fractalize nous a permis de commencer par l'essentiel et de grandir selon nos besoins. Excellent investissement."
+    }
+  },
+  "pricing": {
+    "title": "Tarifs transparents",
+    "subtitle": "Choisissez le plan qui convient le mieux à votre entreprise. Pas de surprises, pas d'engagements cachés.",
+    "popular": "Le plus populaire",
+    "modular": {
+      "name": "Plan modulaire",
+      "description": "Payez uniquement pour les modules dont vous avez besoin",
+      "feature1": "Modules individuels",
+      "feature2": "Paiement mensuel flexible",
+      "feature3": "Support standard",
+      "feature4": "Mises à jour incluses",
+      "cta": "Commencer"
+    },
+    "complete": {
+      "name": "Plateforme complète",
+      "description": "Accès à tous les modules",
+      "feature1": "Tous les modules inclus",
+      "feature2": "Remise volume",
+      "feature3": "Support prioritaire",
+      "feature4": "Intégration personnalisée",
+      "cta": "Demander une démo"
+    },
+    "enterprise": {
+      "name": "Plan entreprise",
+      "description": "Solution personnalisée pour les grandes entreprises",
+      "feature1": "Personnalisation complète",
+      "feature2": "Support dédié 24/7",
+      "feature3": "Intégrations personnalisées",
+      "feature4": "Gestionnaire de compte dédié",
+      "cta": "Contacter les ventes"
+    }
+  },
+  "cta": {
+    "title": "Prêt à transformer votre opération logistique ?",
+    "subtitle": "Demandez une démo personnalisée et découvrez comment Fractalize peut optimiser votre entreprise.",
+    "requestDemo": "Demander une démo",
+    "contactAdvisor": "Parler à un conseiller"
+  },
+  "footer": {
+    "description": "Plateforme technologique d'entreprise modulaire pour le secteur de la logistique et de la distribution.",
+    "modules": "Modules",
+    "inventory": "Inventaire",
+    "hr": "RH",
+    "company": "Entreprise",
+    "about": "À propos",
+    "contact": "Contact",
+    "careers": "Carrières",
+    "legal": "Légal",
+    "privacy": "Confidentialité",
+    "terms": "Conditions",
+    "cookies": "Cookies",
+    "rights": "Tous droits réservés."
+  }
+}
+

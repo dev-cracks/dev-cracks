@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Card,
   CardPreview,
@@ -129,6 +130,7 @@ const useStyles = makeStyles({
 
 export const UsersPage = () => {
   const styles = useStyles();
+  const { t } = useTranslation('backoffice');
   const { addGroup, removeGroup } = useRibbonMenu();
   const { userDetails } = useAuth();
   const restoreFocusSourceAttributes = useRestoreFocusSource();
@@ -290,7 +292,7 @@ export const UsersPage = () => {
       items: [
         {
           id: 'create',
-          label: 'New',
+          label: t('ribbonBar.new'),
           icon: <AddRegular />,
           action: () => {
             setFormData({
@@ -752,12 +754,12 @@ export const UsersPage = () => {
       <div className={styles.container}>
         <div className={styles.header}>
           <PeopleRegular fontSize={32} />
-          <h1 className={styles.title}>Users</h1>
+          <h1 className={styles.title}>{t('users.title')}</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalM }}>
           <div style={{ flex: 1 }}>
             <SearchBox
-              placeholder="Search by email, name or role..."
+              placeholder={t('users.searchPlaceholder')}
               disabled
               size="large"
               style={{ width: '100%' }}
@@ -778,13 +780,13 @@ export const UsersPage = () => {
       </div>
       <div className={styles.header}>
         <PeopleRegular fontSize={32} />
-        <h1 className={styles.title}>Users</h1>
+        <h1 className={styles.title}>{t('users.title')}</h1>
       </div>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, marginBottom: tokens.spacingVerticalM }}>
         <div style={{ flex: 1 }}>
           <SearchBox
-            placeholder="Search by email, name or role..."
+            placeholder={t('users.searchPlaceholder')}
             value={searchTerm}
             onChange={(e, data) => setSearchTerm(data.value)}
             size="large"
@@ -796,9 +798,9 @@ export const UsersPage = () => {
           icon={<ArrowClockwiseRegular />}
           onClick={loadUsers}
           disabled={isLoading}
-          title="Refresh user list"
+          title={t('users.refreshTitle')}
         >
-          Refresh
+          {t('users.refresh')}
         </Button>
       </div>
 
@@ -807,7 +809,7 @@ export const UsersPage = () => {
           <div style={{ padding: tokens.spacingVerticalXL }}>
             {error && (
               <MessageBar intent="error" style={{ marginBottom: tokens.spacingVerticalM }}>
-                <MessageBarBody>{error}</MessageBarBody>
+                <MessageBarBody>{error.startsWith('common.') || error.startsWith('users.') || error.startsWith('customers.') || error.startsWith('offices.') || error.startsWith('subscriptions.') ? t(error as any) : error}</MessageBarBody>
               </MessageBar>
             )}
 
@@ -828,26 +830,26 @@ export const UsersPage = () => {
                     ...shorthands.borderRadius(tokens.borderRadiusMedium),
                   }}
                 >
-                  <Spinner size="large" label="Loading users..." />
+                  <Spinner size="large" label={t('users.loadingUsers')} />
                 </div>
               )}
               {filteredUsers.length === 0 ? (
                 <div style={{ padding: tokens.spacingVerticalXXL, textAlign: 'center' }}>
-                  <Text>No users found</Text>
+                  <Text>{t('users.noUsersFound')}</Text>
                 </div>
               ) : (
                 <Table style={{ tableLayout: 'auto', width: '100%' }}>
                   <TableHeader>
                     <TableRow>
-                      <TableHeaderCell>Name</TableHeaderCell>
-                      <TableHeaderCell>Phone</TableHeaderCell>
-                      <TableHeaderCell>Tenants</TableHeaderCell>
-                      <TableHeaderCell>Offices</TableHeaderCell>
-                      <TableHeaderCell>Role</TableHeaderCell>
-                      <TableHeaderCell>Status</TableHeaderCell>
-                      <TableHeaderCell>Auth0 ID</TableHeaderCell>
-                      <TableHeaderCell>Creation Date</TableHeaderCell>
-                      <TableHeaderCell>Actions</TableHeaderCell>
+                      <TableHeaderCell>{t('users.name')}</TableHeaderCell>
+                      <TableHeaderCell>{t('users.phone')}</TableHeaderCell>
+                      <TableHeaderCell>{t('users.tenants')}</TableHeaderCell>
+                      <TableHeaderCell>{t('users.offices')}</TableHeaderCell>
+                      <TableHeaderCell>{t('users.role')}</TableHeaderCell>
+                      <TableHeaderCell>{t('users.status')}</TableHeaderCell>
+                      <TableHeaderCell>{t('users.auth0Id')}</TableHeaderCell>
+                      <TableHeaderCell>{t('users.creationDate')}</TableHeaderCell>
+                      <TableHeaderCell>{t('users.actions')}</TableHeaderCell>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -865,7 +867,7 @@ export const UsersPage = () => {
                             />
                           </TableCell>
                           {/* Teléfono */}
-                          <TableCell>{user.phone || 'N/A'}</TableCell>
+                          <TableCell>{user.phone || t('common.notAvailable')}</TableCell>
                           {/* Tenants */}
                           <TableCell>
                             {associatedTenants.length > 0 ? (
@@ -888,14 +890,14 @@ export const UsersPage = () => {
                                   </Button>
                                 </TeachingPopoverTrigger>
                                 <TeachingPopoverSurface>
-                                  <TeachingPopoverHeader>Associated Tenants</TeachingPopoverHeader>
+                                  <TeachingPopoverHeader>{t('users.associatedTenants')}</TeachingPopoverHeader>
                                   <TeachingPopoverBody>
                                     <div style={{ maxWidth: '600px', maxHeight: '400px', overflowY: 'auto' }}>
                                       <Table size="small">
                                         <TableHeader>
                                           <TableRow>
-                                            <TableHeaderCell>Name</TableHeaderCell>
-                                            <TableHeaderCell>Customer</TableHeaderCell>
+                                            <TableHeaderCell>{t('users.name')}</TableHeaderCell>
+                                            <TableHeaderCell>{t('users.customerDetails')}</TableHeaderCell>
                                           </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -949,7 +951,7 @@ export const UsersPage = () => {
                                   </Button>
                                 </TeachingPopoverTrigger>
                                 <TeachingPopoverSurface>
-                                  <TeachingPopoverHeader>Associated Offices</TeachingPopoverHeader>
+                                  <TeachingPopoverHeader>{t('users.associatedOffices')}</TeachingPopoverHeader>
                                   <TeachingPopoverBody>
                                     <div style={{ maxWidth: '600px', maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM }}>
                                       {offices.map((office) => (
@@ -1016,7 +1018,7 @@ export const UsersPage = () => {
                               <MenuPopover>
                                 <MenuList>
                                   <MenuItem icon={<EyeRegular />} onClick={() => handleViewDetails(user)}>
-                                    View details
+                                    {t('users.viewDetails')}
                                   </MenuItem>
                                   <MenuItem icon={<EditRegular />} onClick={() => handleEdit(user)}>
                                     Edit
@@ -1075,7 +1077,7 @@ export const UsersPage = () => {
               />
             }
           >
-            New User
+            {t('users.newUser')}
           </DrawerHeaderTitle>
         </DrawerHeader>
         <DrawerBody>
@@ -1625,7 +1627,7 @@ export const UsersPage = () => {
           <div className={styles.detailsContent} style={{ padding: tokens.spacingVerticalXL }}>
             {error && (
               <MessageBar intent="error" style={{ marginBottom: tokens.spacingVerticalM }}>
-                <MessageBarBody>{error}</MessageBarBody>
+                <MessageBarBody>{error.startsWith('common.') || error.startsWith('users.') || error.startsWith('customers.') || error.startsWith('offices.') || error.startsWith('subscriptions.') ? t(error as any) : error}</MessageBarBody>
               </MessageBar>
             )}
             {selectedUserForAssign && (

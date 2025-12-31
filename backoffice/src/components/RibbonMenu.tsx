@@ -15,6 +15,7 @@ import {
   QuestionCircleRegular,
 } from '@fluentui/react-icons';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useSettings } from '../contexts/SettingsContext';
 import { useRibbonMenu } from '../contexts/RibbonMenuContext';
 
@@ -84,6 +85,7 @@ export const RibbonMenu = ({ onMenuToggle }: RibbonMenuProps) => {
   const styles = useStyles();
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation('backoffice');
   const { openSettings } = useSettings();
   const { groups } = useRibbonMenu();
 
@@ -91,31 +93,31 @@ export const RibbonMenu = ({ onMenuToggle }: RibbonMenuProps) => {
   const menuItems = [
     {
       id: 'file',
-      label: 'File',
+      label: t('ribbonMenu.file'),
       icon: <DocumentRegular />,
       items: [
-        { label: 'New', action: () => console.log('New') },
-        { label: 'Open', action: () => console.log('Open') },
-        { label: 'Save', action: () => console.log('Save') },
-        { label: 'Settings', action: () => openSettings() },
+        { label: t('ribbonMenu.new'), action: () => console.log('New') },
+        { label: t('ribbonMenu.open'), action: () => console.log('Open') },
+        { label: t('ribbonMenu.save'), action: () => console.log('Save') },
+        { label: t('ribbonMenu.settings'), action: () => openSettings() },
       ],
     },
     {
       id: 'view',
-      label: 'View',
+      label: t('ribbonMenu.view'),
       icon: <EyeRegular />,
       items: [
-        { label: 'Refresh', action: () => window.location.reload() },
-        { label: 'Toggle Sidebar', action: () => onMenuToggle?.() },
+        { label: t('ribbonMenu.refresh'), action: () => window.location.reload() },
+        { label: t('ribbonMenu.toggleSidebar'), action: () => onMenuToggle?.() },
       ],
     },
     {
       id: 'help',
-      label: 'Help',
+      label: t('ribbonMenu.help'),
       icon: <QuestionCircleRegular />,
       items: [
-        { label: 'Documentation', action: () => console.log('Docs') },
-        { label: 'About', action: () => console.log('About') },
+        { label: t('ribbonMenu.documentation'), action: () => console.log('Docs') },
+        { label: t('ribbonMenu.about'), action: () => console.log('About') },
       ],
     },
   ];

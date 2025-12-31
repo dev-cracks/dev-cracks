@@ -1,0 +1,205 @@
+{
+  "navigation": {
+    "home": "Home",
+    "services": "Services",
+    "products": "Products",
+    "useCases": "Use Cases",
+    "whyUs": "Why Choose Us",
+    "contact": "Contact"
+  },
+  "hero": {
+    "title": "DEV CRACKS",
+    "subtitle": "CODE // BREAKER",
+    "question": "Are you afraid of AI, Automation and digital transformation?",
+    "badge1": "Digital Transformation Partner",
+    "badge2": "Applied AI Experts",
+    "titleLine1": "Digital Transformation with AI",
+    "titleLine2": "From Idea to Business Impact",
+    "slides": {
+      "automation": {
+        "title": "Intelligent Automation",
+        "benefit": "Reduces operational costs",
+        "percentage": "70%",
+        "description": "Companies that automate their processes reduce execution time by 70% and significantly increase productivity, generating measurable ROI from the first quarter."
+      },
+      "ai": {
+        "title": "Applied Artificial Intelligence",
+        "benefit": "Data-driven decisions",
+        "percentage": "85%",
+        "description": "AI enables more accurate decisions, reducing errors by 85% and optimizing business resources. We transform data into competitive advantage."
+      },
+      "agents": {
+        "title": "Orchestrated AI Agents",
+        "benefit": "Complex flow optimization",
+        "percentage": "60%",
+        "description": "Coordinated agent systems reduce operational costs by up to 60% while improving efficiency. Automation that scales with your business."
+      },
+      "cloud": {
+        "title": "Cloud & DevOps Enterprise",
+        "benefit": "Time-to-market acceleration",
+        "percentage": "50%",
+        "description": "Cloud implementations reduce deployment times by 50% and improve scalability. Infrastructure that grows with you."
+      },
+      "roi": {
+        "title": "Verified Average ROI",
+        "benefit": "Proven return on investment",
+        "percentage": "300%",
+        "description": "Companies that implement our solutions achieve an average return on investment of 300% in the first year. Measurable results, real impact."
+      }
+    },
+    "fears": {
+      "fear": "Fear",
+      "resistance": "Resistance",
+      "obsolescence": "Obsolescence",
+      "distrust": "Distrust",
+      "dread": "Dread",
+      "manualProcesses": "Manual processes",
+      "legacySystems": "Legacy systems",
+      "lackOfVision": "Lack of vision",
+      "culturalResistance": "Cultural resistance"
+    }
+  },
+  "contact": {
+    "title": "Contact",
+    "form": {
+      "name": "Full name",
+      "namePlaceholder": "E.g: John Doe",
+      "email": "Corporate email",
+      "emailPlaceholder": "E.g: john.doe@company.com",
+      "company": "Company",
+      "companyPlaceholder": "E.g: My Company Inc.",
+      "position": "Position / Role",
+      "positionPlaceholder": "E.g: CTO, Head of Innovation",
+      "consultationType": "Consulting Type",
+      "selectOption": "Select an option",
+      "strategicConsulting": "Strategic AI Consulting",
+      "customDevelopment": "Custom Solution Development",
+      "dataMl": "Data Engineering and ML",
+      "legacyIntegration": "Legacy System Integration",
+      "automation": "Process Automation",
+      "aiAgents": "Orchestrated AI Agents",
+      "cloudDevops": "Cloud & DevOps",
+      "security": "Security and Audit",
+      "routeon": "Routeon Enterprise",
+      "devCoach": "Dev-Coach Pro",
+      "other": "Other",
+      "message": "Message",
+      "messagePlaceholder": "Tell us about your project, challenges or specific needs...",
+      "submit": "Request Consulting",
+      "submitting": "Sending…",
+      "success": "Thank you! A senior consultant will contact you within 24 hours."
+    },
+    "info": {
+      "title": "Contact Information",
+      "phone": "+34 647 007 280",
+      "email": "contact@dev-cracks.com",
+      "website": "www.dev-cracks.com",
+      "downloadCard": "Download Contact Card",
+      "downloadWallet": "Add to Apple Wallet",
+      "downloadWalletAndroid": "Add to Google Wallet"
+    },
+    "wallet": {
+      "cardDescription": "Dev Cracks business card",
+      "phoneLabel": "Phone",
+      "descriptionLabel": "Description",
+      "descriptionValue": "Software development and technology solutions",
+      "certificatesNotConfigured": "Apple Wallet certificates are not configured. Please contact the administrator to configure the necessary certificates.",
+      "errorGenerating": "Error generating pass",
+      "unknownError": "Unknown error"
+    }
+  },
+  "caseStudies": {
+    "title": "Use Cases and Proven Results",
+    "intro": "We transform companies from different industries with AI and automation solutions. These are real examples of measurable impact on business operations.",
+    "challenge": "Challenge:",
+    "solution": "Solution:",
+    "results": "Measurable Results:",
+    "cta": "Want similar results for your company?",
+    "ctaButton": "Request Strategic Consulting",
+    "studies": {
+      "logistics": {
+        "industry": "Logistics",
+        "title": "Parcel Franchise Network Optimization",
+        "challenge": "Franchise network with manual processes, high rate of operational errors and lack of real-time visibility of operations.",
+        "solution": "Implementation of Routeon Enterprise with ML for demand forecasting, workflow automation and centralized dashboard.",
+        "metrics": {
+          "operationalEfficiency": "Operational Efficiency",
+          "manualErrors": "Manual Errors",
+          "managementTime": "Management Time",
+          "customerSatisfaction": "Customer Satisfaction",
+          "increase": "Increase",
+          "reduction": "Reduction"
+        }
+      },
+      "retail": {
+        "industry": "Retail",
+        "title": "Inventory Optimization with Machine Learning",
+        "challenge": "Frequent overstock and stockouts, purchase decisions based on intuition and obsolescence losses.",
+        "solution": "ML demand forecasting system, automatic inventory optimization and proactive replenishment alerts.",
+        "metrics": {
+          "costReduction": "Cost Reduction",
+          "availability": "Availability",
+          "obsolescenceLosses": "Obsolescence Losses",
+          "roi": "ROI",
+          "inventory": "Inventory",
+          "products": "Products",
+          "firstYear": "First year"
+        }
+      },
+      "financial": {
+        "industry": "Financial Services",
+        "title": "Regulatory Process Automation",
+        "challenge": "Manual regulatory processes, prolonged compliance times and high risk of errors in reports.",
+        "solution": "Intelligent automation of regulatory processes with orchestrated AI agents and automatic compliance validation.",
+        "metrics": {
+          "complianceTime": "Compliance Time",
+          "reportErrors": "Report Errors",
+          "operationalCosts": "Operational Costs",
+          "compliance": "Compliance",
+          "rate": "Rate"
+        }
+      },
+      "manufacturing": {
+        "industry": "Manufacturing",
+        "title": "Predictive Maintenance",
+        "challenge": "Reactive maintenance causing unexpected shutdowns, high repair costs and loss of productivity.",
+        "solution": "ML system for failure prediction, optimized preventive maintenance and reduction of unplanned downtime.",
+        "metrics": {
+          "downtime": "Downtime",
+          "maintenanceCosts": "Maintenance Costs",
+          "availability": "Availability",
+          "productivity": "Productivity",
+          "equipment": "Equipment"
+        }
+      },
+      "ecommerce": {
+        "industry": "E-commerce",
+        "title": "AI Personalization and Recommendations",
+        "challenge": "Low conversion rates, frequent abandoned carts and lack of personalization in customer experience.",
+        "solution": "ML recommendation system, dynamic content personalization and real-time price optimization.",
+        "metrics": {
+          "conversionRate": "Conversion Rate",
+          "abandonedCarts": "Abandoned Carts",
+          "averageOrderValue": "Average Order Value",
+          "roi": "ROI",
+          "firstYear": "First year"
+        }
+      },
+      "healthcare": {
+        "industry": "Healthcare",
+        "title": "Hospital Resource Optimization",
+        "challenge": "Inefficiency in resource allocation, prolonged wait times and difficulty predicting service demand.",
+        "solution": "ML system for demand forecasting, schedule optimization and intelligent allocation of medical resources.",
+        "metrics": {
+          "waitTimes": "Wait Times",
+          "resourceUtilization": "Resource Utilization",
+          "patientSatisfaction": "Patient Satisfaction",
+          "operationalCosts": "Operational Costs"
+        }
+      }
+    }
+  },
+  "common": {
+    "login": "Login"
+  }
+}

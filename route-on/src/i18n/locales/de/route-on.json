@@ -1,0 +1,44 @@
+{
+  "welcome": "Willkommen bei Route On",
+  "navigation": {
+    "home": "Startseite",
+    "reception": "Empfang",
+    "shipments": "Sendungen",
+    "distribution": "Verteilung",
+    "tracking": "Verfolgung",
+    "map": "Karte",
+    "incidents": "Vorfälle",
+    "aiRoutes": "KI-Routen",
+    "homeAria": "Zur Startseite gehen",
+    "receptionAria": "Paketempfang verwalten",
+    "shipmentsAria": "Paketsendungen verwalten",
+    "distributionAria": "Paketverteilung verwalten",
+    "trackingAria": "Paketverfolgung",
+    "mapAria": "Punkte auf der Karte anzeigen",
+    "incidentsAria": "Paketvorfälle verwalten",
+    "aiRoutesAria": "Routen mit künstlicher Intelligenz organisieren"
+  },
+  "dock": {
+    "home": "Home",
+    "archive": "Archiv",
+    "profile": "Profil",
+    "settings": "Einstellungen",
+    "applicationDock": "Anwendungs-Dock"
+  },
+  "orbModal": {
+    "title": "Jarvis - KI-Assistent",
+    "close": "Modal schließen",
+    "placeholder": "Schreiben Sie Ihre Nachricht...",
+    "send": "Nachricht senden",
+    "greeting": "Hallo! Wie kann ich Ihnen heute helfen?",
+    "farewell": "Auf Wiedersehen! Haben Sie einen ausgezeichneten Tag.",
+    "thanks": "Gern geschehen! Ich bin hier, um Ihnen zu helfen.",
+    "capabilities": "Ich kann Ihnen bei verschiedenen Anfragen helfen, Fragen beantworten und Sie bei dem unterstützen, was Sie brauchen. Was möchten Sie wissen?",
+    "defaultResponse": "Ich verstehe, dass Sie \"{{message}}\" erwähnt haben. Ich bin hier, um Ihnen zu helfen. Könnten Sie mir mehr Details über das geben, was Sie brauchen?"
+  },
+  "staggeredMenu": {
+    "closeMenu": "Menü schließen",
+    "openMenu": "Menü öffnen",
+    "socialLinks": "Soziale Links"
+  }
+}

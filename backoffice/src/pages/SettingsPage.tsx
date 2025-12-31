@@ -32,6 +32,7 @@ import {
 } from '@fluentui/react-components';
 import { SettingsRegular, AddRegular, EditRegular, DeleteRegular, CheckmarkRegular, DismissRegular } from '@fluentui/react-icons';
 import { useEffect, useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { tenantService } from '../services/tenantService';
 import { customerParameterService } from '../services/customerService';
 import { shipmentService, ShipmentCategoryDto, ShipmentRateDto } from '../services/shipmentService';
@@ -106,6 +107,7 @@ const PARAM_KEYS = {
 
 export const SettingsPage = () => {
   const styles = useStyles();
+  const { t } = useTranslation('backoffice');
   const [siteName, setSiteName] = useState('');
   const [siteUrl, setSiteUrl] = useState('');
   const [siteLogo, setSiteLogo] = useState('');
@@ -655,20 +657,20 @@ export const SettingsPage = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <SettingsRegular fontSize={32} />
-        <h1 className={styles.title}>Configuración</h1>
+        <h1 className={styles.title}>{t('settings.title')}</h1>
       </div>
 
       <Card>
         <CardHeader
-          header={<Text weight="semibold">Configuración General</Text>}
-          description="Ajustes generales del sistema"
+          header={<Text weight="semibold">{t('settings.generalSettings')}</Text>}
+          description={t('settings.generalSettingsDescription')}
         />
         <div style={{ padding: '20px' }}>
           <div className={styles.formGroup}>
-            <Label htmlFor="siteLogo">Logo del Sitio (URL)</Label>
+            <Label htmlFor="siteLogo">{t('settings.siteLogo')}</Label>
             <Input 
               id="siteLogo" 
-              placeholder="https://example.com/logo.png"
+              placeholder={t('settings.siteLogoPlaceholder')}
               value={siteLogo}
               onChange={(e) => handleLogoChange(e.target.value)}
               onBlur={handleLogoBlur}
@@ -676,7 +678,7 @@ export const SettingsPage = () => {
             {siteLogo && (
               <Image
                 src={siteLogo}
-                alt="Vista previa del logo"
+                alt={t('settings.siteLogo')}
                 className={styles.logoPreview}
                 onError={(e) => {
                   // Ocultar la imagen si falla la carga
@@ -687,17 +689,17 @@ export const SettingsPage = () => {
           </div>
 
           <div className={styles.formGroup}>
-            <Label htmlFor="siteName">Nombre del Sitio</Label>
+            <Label htmlFor="siteName">{t('settings.siteName')}</Label>
             <Input 
               id="siteName" 
-              placeholder="Dev Cracks"
+              placeholder={t('settings.siteNamePlaceholder')}
               value={siteName}
               onChange={(e) => setSiteName(e.target.value)}
             />
           </div>
 
           <div className={styles.formGroup}>
-            <Label htmlFor="siteUrl">URL del Sitio</Label>
+            <Label htmlFor="siteUrl">{t('settings.siteUrl')}</Label>
             <Input 
               id="siteUrl" 
               placeholder="https://devcracks.com"
@@ -708,7 +710,7 @@ export const SettingsPage = () => {
 
           <div className={styles.formGroup}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Label htmlFor="maintenanceMode">Modo Mantenimiento</Label>
+              <Label htmlFor="maintenanceMode">{t('settings.maintenanceMode')}</Label>
               <Switch 
                 id="maintenanceMode" 
                 checked={maintenanceMode}
@@ -719,7 +721,7 @@ export const SettingsPage = () => {
 
           <div className={styles.formGroup}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Label htmlFor="emailNotifications">Notificaciones por Email</Label>
+              <Label htmlFor="emailNotifications">{t('settings.emailNotifications')}</Label>
               <Switch 
                 id="emailNotifications" 
                 checked={emailNotifications}
@@ -733,7 +735,7 @@ export const SettingsPage = () => {
             onClick={handleSave}
             disabled={isSaving}
           >
-            {isSaving ? 'Guardando...' : 'Guardar Cambios'}
+            {isSaving ? t('settings.saving') : t('settings.saveChanges')}
           </Button>
         </div>
       </Card>
@@ -741,15 +743,15 @@ export const SettingsPage = () => {
       {/* Categories Management */}
       <Card>
         <CardHeader
-          header={<Text weight="semibold">Categorías de Envío</Text>}
-          description="Gestiona las categorías de envío disponibles para este tenant"
+          header={<Text weight="semibold">{t('settings.shipmentCategories')}</Text>}
+          description={t('settings.shipmentCategoriesDescription')}
           action={
             <Button
               appearance="primary"
               icon={<AddRegular />}
               onClick={() => handleOpenCategoryDialog()}
             >
-              Nueva Categoría
+              {t('settings.newCategory')}
             </Button>
           }
         />
@@ -758,17 +760,17 @@ export const SettingsPage = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHeaderCell>Nombre</TableHeaderCell>
-                  <TableHeaderCell>Descripción</TableHeaderCell>
-                  <TableHeaderCell>Estado</TableHeaderCell>
-                  <TableHeaderCell>Acciones</TableHeaderCell>
+                  <TableHeaderCell>{t('settings.categoryName')}</TableHeaderCell>
+                  <TableHeaderCell>{t('settings.categoryDescription')}</TableHeaderCell>
+                  <TableHeaderCell>{t('settings.categoryStatus')}</TableHeaderCell>
+                  <TableHeaderCell>{t('settings.categoryActions')}</TableHeaderCell>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {categories.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4}>
-                      <Text>No hay categorías registradas</Text>
+                      <Text>{t('settings.noCategories')}</Text>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -785,7 +787,7 @@ export const SettingsPage = () => {
                           appearance={category.isActive ? 'filled' : 'outline'}
                           color={category.isActive ? 'success' : 'danger'}
                         >
-                          {category.isActive ? 'Activa' : 'Inactiva'}
+                          {category.isActive ? t('settings.active') : t('settings.inactive')}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -802,7 +804,7 @@ export const SettingsPage = () => {
                             icon={category.isActive ? <DismissRegular /> : <CheckmarkRegular />}
                             onClick={() => handleToggleCategoryStatus(category)}
                           >
-                            {category.isActive ? 'Desactivar' : 'Activar'}
+                            {category.isActive ? t('settings.deactivate') : t('settings.activate')}
                           </Button>
                         </div>
                       </TableCell>
@@ -818,15 +820,15 @@ export const SettingsPage = () => {
       {/* Rates Management */}
       <Card>
         <CardHeader
-          header={<Text weight="semibold">Tarifas de Envío</Text>}
-          description="Gestiona las tarifas de envío disponibles para este tenant"
+          header={<Text weight="semibold">{t('settings.shipmentRates')}</Text>}
+          description={t('settings.shipmentRatesDescription')}
           action={
             <Button
               appearance="primary"
               icon={<AddRegular />}
               onClick={() => handleOpenRateDialog()}
             >
-              Nueva Tarifa
+              {t('settings.newRate')}
             </Button>
           }
         />
@@ -835,19 +837,19 @@ export const SettingsPage = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHeaderCell>Nombre</TableHeaderCell>
-                  <TableHeaderCell>Descripción</TableHeaderCell>
-                  <TableHeaderCell>SLA (días)</TableHeaderCell>
-                  <TableHeaderCell>Costo Base</TableHeaderCell>
-                  <TableHeaderCell>Estado</TableHeaderCell>
-                  <TableHeaderCell>Acciones</TableHeaderCell>
+                  <TableHeaderCell>{t('settings.rateName')}</TableHeaderCell>
+                  <TableHeaderCell>{t('settings.rateDescription')}</TableHeaderCell>
+                  <TableHeaderCell>{t('settings.slaDays')}</TableHeaderCell>
+                  <TableHeaderCell>{t('settings.baseCost')}</TableHeaderCell>
+                  <TableHeaderCell>{t('settings.rateStatus')}</TableHeaderCell>
+                  <TableHeaderCell>{t('settings.rateActions')}</TableHeaderCell>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {rates.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6}>
-                      <Text>No hay tarifas registradas</Text>
+                      <Text>{t('settings.noRates')}</Text>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -870,7 +872,7 @@ export const SettingsPage = () => {
                           appearance={rate.isActive ? 'filled' : 'outline'}
                           color={rate.isActive ? 'success' : 'danger'}
                         >
-                          {rate.isActive ? 'Activa' : 'Inactiva'}
+                          {rate.isActive ? t('settings.active') : t('settings.inactive')}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -880,14 +882,14 @@ export const SettingsPage = () => {
                             icon={<EditRegular />}
                             onClick={() => handleOpenRateDialog(rate)}
                           >
-                            Editar
+                            {t('settings.editRate')}
                           </Button>
                           <Button
                             appearance="subtle"
                             icon={rate.isActive ? <DismissRegular /> : <CheckmarkRegular />}
                             onClick={() => handleToggleRateStatus(rate)}
                           >
-                            {rate.isActive ? 'Desactivar' : 'Activar'}
+                            {rate.isActive ? t('settings.deactivate') : t('settings.activate')}
                           </Button>
                         </div>
                       </TableCell>
@@ -904,36 +906,36 @@ export const SettingsPage = () => {
       <Dialog open={isCategoryDialogOpen} onOpenChange={(_, data) => !data.open && handleCloseCategoryDialog()}>
         <DialogSurface>
           <DialogTitle>
-            {selectedCategory ? 'Editar Categoría' : 'Nueva Categoría'}
+            {selectedCategory ? t('settings.editCategory') : t('settings.newCategory')}
           </DialogTitle>
           <DialogBody>
             <DialogContent>
-              <Field label="Nombre" required>
+              <Field label={t('settings.categoryName')} required>
                 <Input
                   value={categoryForm.name}
                   onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
-                  placeholder="Ej: Documento, Paquete, etc."
+                  placeholder={t('settings.categoryNamePlaceholder')}
                 />
               </Field>
-              <Field label="Descripción">
+              <Field label={t('settings.categoryDescription')}>
                 <Input
                   value={categoryForm.description}
                   onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
-                  placeholder="Descripción opcional"
+                  placeholder={t('settings.categoryDescription')}
                 />
               </Field>
             </DialogContent>
           </DialogBody>
           <DialogActions>
             <Button appearance="secondary" onClick={handleCloseCategoryDialog}>
-              Cancelar
+              {t('settings.cancel')}
             </Button>
             <Button
               appearance="primary"
               onClick={handleSaveCategory}
               disabled={isCategorySubmitting || !categoryForm.name.trim()}
             >
-              {isCategorySubmitting ? <Spinner size="tiny" /> : selectedCategory ? 'Actualizar' : 'Crear'}
+              {isCategorySubmitting ? <Spinner size="tiny" /> : selectedCategory ? t('settings.update') : t('settings.create')}
             </Button>
           </DialogActions>
         </DialogSurface>
@@ -943,19 +945,19 @@ export const SettingsPage = () => {
       <Dialog open={isRateDialogOpen} onOpenChange={(_, data) => !data.open && handleCloseRateDialog()}>
         <DialogSurface>
           <DialogTitle>
-            {selectedRate ? 'Editar Tarifa' : 'Nueva Tarifa'}
+            {selectedRate ? t('settings.editRate') : t('settings.newRate')}
           </DialogTitle>
           <DialogBody>
             <DialogContent>
               <div className={styles.formRow}>
-                <Field label="Nombre" required>
+                <Field label={t('settings.rateName')} required>
                   <Input
                     value={rateForm.name}
                     onChange={(e) => setRateForm({ ...rateForm, name: e.target.value })}
                     placeholder="Ej: Estándar, Express, etc."
                   />
                 </Field>
-                <Field label="SLA (días)" required>
+                <Field label={t('settings.slaDays')} required>
                   <Input
                     type="number"
                     min="1"
@@ -965,7 +967,7 @@ export const SettingsPage = () => {
                 </Field>
               </div>
               <div className={styles.formRow}>
-                <Field label="Costo Base (€)" required>
+                <Field label={t('settings.baseCost')} required>
                   <Input
                     type="number"
                     min="0"
@@ -974,11 +976,11 @@ export const SettingsPage = () => {
                     onChange={(e) => setRateForm({ ...rateForm, baseCost: parseFloat(e.target.value) || 0 })}
                   />
                 </Field>
-                <Field label="Descripción">
+                <Field label={t('settings.rateDescription')}>
                   <Input
                     value={rateForm.description}
                     onChange={(e) => setRateForm({ ...rateForm, description: e.target.value })}
-                    placeholder="Descripción opcional"
+                    placeholder={t('settings.rateDescription')}
                   />
                 </Field>
               </div>
@@ -986,14 +988,14 @@ export const SettingsPage = () => {
           </DialogBody>
           <DialogActions>
             <Button appearance="secondary" onClick={handleCloseRateDialog}>
-              Cancelar
+              {t('settings.cancel')}
             </Button>
             <Button
               appearance="primary"
               onClick={handleSaveRate}
               disabled={isRateSubmitting || !rateForm.name.trim() || rateForm.slaDays <= 0 || rateForm.baseCost < 0}
             >
-              {isRateSubmitting ? <Spinner size="tiny" /> : selectedRate ? 'Actualizar' : 'Crear'}
+              {isRateSubmitting ? <Spinner size="tiny" /> : selectedRate ? t('settings.update') : t('settings.create')}
             </Button>
           </DialogActions>
         </DialogSurface>
@@ -1002,15 +1004,15 @@ export const SettingsPage = () => {
       {/* Subscription Types Management */}
       <Card>
         <CardHeader
-          header={<Text weight="semibold">Tipos de Suscripción</Text>}
-          description="Gestiona los tipos de suscripción disponibles en el sistema"
+          header={<Text weight="semibold">{t('settings.subscriptionTypes')}</Text>}
+          description={t('settings.subscriptionTypesDescription')}
           action={
             <Button
               appearance="primary"
               icon={<AddRegular />}
               onClick={() => handleOpenSubscriptionTypeDialog()}
             >
-              Nuevo Tipo
+              {t('settings.newSubscriptionType')}
             </Button>
           }
         />
@@ -1019,21 +1021,21 @@ export const SettingsPage = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHeaderCell>Nombre</TableHeaderCell>
-                  <TableHeaderCell>Modelo</TableHeaderCell>
-                  <TableHeaderCell>Tokens/Mes</TableHeaderCell>
-                  <TableHeaderCell>Mensajes/Mes</TableHeaderCell>
-                  <TableHeaderCell>Tokens/Mensaje</TableHeaderCell>
-                  <TableHeaderCell>Precio/Mes</TableHeaderCell>
-                  <TableHeaderCell>Características</TableHeaderCell>
-                  <TableHeaderCell>Acciones</TableHeaderCell>
+                  <TableHeaderCell>{t('settings.subscriptionTypeName')}</TableHeaderCell>
+                  <TableHeaderCell>{t('settings.model')}</TableHeaderCell>
+                  <TableHeaderCell>{t('settings.tokensPerMonth')}</TableHeaderCell>
+                  <TableHeaderCell>{t('settings.messagesPerMonth')}</TableHeaderCell>
+                  <TableHeaderCell>{t('settings.tokensPerMessage')}</TableHeaderCell>
+                  <TableHeaderCell>{t('settings.price')}</TableHeaderCell>
+                  <TableHeaderCell>{t('settings.features')}</TableHeaderCell>
+                  <TableHeaderCell>{t('settings.categoryActions')}</TableHeaderCell>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {subscriptionTypes.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8}>
-                      <Text>No hay tipos de suscripción registrados</Text>
+                      <Text>{t('settings.noSubscriptionTypes')}</Text>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -1046,10 +1048,10 @@ export const SettingsPage = () => {
                         <Text>{type.allowedModelName}</Text>
                       </TableCell>
                       <TableCell>
-                        <Text>{type.maxTokensPerMonth?.toLocaleString() || '∞'}</Text>
+                        <Text>{type.maxTokensPerMonth?.toLocaleString() || t('settings.unlimited')}</Text>
                       </TableCell>
                       <TableCell>
-                        <Text>{type.maxMessagesPerMonth?.toLocaleString() || '∞'}</Text>
+                        <Text>{type.maxMessagesPerMonth?.toLocaleString() || t('settings.unlimited')}</Text>
                       </TableCell>
                       <TableCell>
                         <Text>{type.maxTokensPerMessage.toLocaleString()}</Text>
@@ -1081,7 +1083,7 @@ export const SettingsPage = () => {
                           icon={<EditRegular />}
                           onClick={() => handleOpenSubscriptionTypeDialog(type)}
                         >
-                          Editar
+                          {t('settings.editSubscriptionType')}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -1097,21 +1099,21 @@ export const SettingsPage = () => {
       <Dialog open={isSubscriptionTypeDialogOpen} onOpenChange={(_, data) => !data.open && handleCloseSubscriptionTypeDialog()}>
         <DialogSurface style={{ maxWidth: '600px', width: '90vw' }}>
           <DialogTitle>
-            {selectedSubscriptionType ? 'Editar Tipo de Suscripción' : 'Nuevo Tipo de Suscripción'}
+            {selectedSubscriptionType ? t('settings.editSubscriptionType') : t('settings.newSubscriptionType')}
           </DialogTitle>
           <DialogBody>
             <DialogContent>
               <div className={styles.formRow}>
-                <Field label="Nombre" required>
+                <Field label={t('settings.subscriptionTypeName')} required>
                   <Input
                     value={subscriptionTypeForm.name}
                     onChange={(e) => setSubscriptionTypeForm({ ...subscriptionTypeForm, name: e.target.value })}
-                    placeholder="Ej: Básico, Premium, etc."
+                    placeholder={t('settings.subscriptionTypeNamePlaceholder')}
                   />
                 </Field>
-                <Field label="Modelo Permitido" required>
+                <Field label={t('settings.allowedModel')} required>
                   <Combobox
-                    placeholder="Seleccionar modelo de OpenAI"
+                    placeholder={t('settings.allowedModelPlaceholder')}
                     value={subscriptionTypeForm.allowedModelId ? openAiModels.find(m => m.id === subscriptionTypeForm.allowedModelId)?.name || '' : ''}
                     onOptionSelect={(e, data) => {
                       setSubscriptionTypeForm({ ...subscriptionTypeForm, allowedModelId: data.optionValue || '' });
@@ -1126,7 +1128,7 @@ export const SettingsPage = () => {
                 </Field>
               </div>
               <div className={styles.formRow}>
-                <Field label="Tokens Máximos/Mes">
+                <Field label={t('settings.maxTokensPerMonth')}>
                   <Input
                     type="number"
                     min="0"
@@ -1135,10 +1137,10 @@ export const SettingsPage = () => {
                       ...subscriptionTypeForm,
                       maxTokensPerMonth: e.target.value ? parseInt(e.target.value) : undefined
                     })}
-                    placeholder="Sin límite si está vacío"
+                    placeholder={t('settings.maxTokensPerMonth')}
                   />
                 </Field>
-                <Field label="Mensajes Máximos/Mes">
+                <Field label={t('settings.maxMessagesPerMonth')}>
                   <Input
                     type="number"
                     min="0"
@@ -1147,12 +1149,12 @@ export const SettingsPage = () => {
                       ...subscriptionTypeForm,
                       maxMessagesPerMonth: e.target.value ? parseInt(e.target.value) : undefined
                     })}
-                    placeholder="Sin límite si está vacío"
+                    placeholder={t('settings.maxMessagesPerMonth')}
                   />
                 </Field>
               </div>
               <div className={styles.formRow}>
-                <Field label="Tokens Máximos/Mensaje" required>
+                <Field label={t('settings.maxTokensPerMessage')} required>
                   <Input
                     type="number"
                     min="1"
@@ -1163,7 +1165,7 @@ export const SettingsPage = () => {
                     })}
                   />
                 </Field>
-                <Field label="Precio Mensual (€)" required>
+                <Field label={t('settings.pricePerMonth')} required>
                   <Input
                     type="number"
                     min="0"
@@ -1176,13 +1178,13 @@ export const SettingsPage = () => {
                   />
                 </Field>
               </div>
-              <Field label="Características">
+              <Field label={t('settings.features')}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS }}>
                   <div style={{ display: 'flex', gap: tokens.spacingHorizontalS }}>
                     <Input
                       value={newFeature}
                       onChange={(e) => setNewFeature(e.target.value)}
-                      placeholder="Agregar característica"
+                      placeholder={t('settings.addFeaturePlaceholder')}
                       onKeyPress={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
@@ -1192,7 +1194,7 @@ export const SettingsPage = () => {
                       style={{ flex: 1 }}
                     />
                     <Button onClick={handleAddFeature} disabled={!newFeature.trim()}>
-                      Agregar
+                      {t('settings.addFeature')}
                     </Button>
                   </div>
                   {subscriptionTypeForm.features.length > 0 && (
@@ -1222,7 +1224,7 @@ export const SettingsPage = () => {
           </DialogBody>
           <DialogActions>
             <Button appearance="secondary" onClick={handleCloseSubscriptionTypeDialog}>
-              Cancelar
+              {t('settings.cancel')}
             </Button>
             <Button
               appearance="primary"
@@ -1235,7 +1237,7 @@ export const SettingsPage = () => {
                 subscriptionTypeForm.pricePerMonth < 0
               }
             >
-              {isSubscriptionTypeSubmitting ? <Spinner size="tiny" /> : selectedSubscriptionType ? 'Actualizar' : 'Crear'}
+              {isSubscriptionTypeSubmitting ? <Spinner size="tiny" /> : selectedSubscriptionType ? t('settings.update') : t('settings.create')}
             </Button>
           </DialogActions>
         </DialogSurface>
