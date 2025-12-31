@@ -340,8 +340,7 @@
     "initializeDefaultDescription": "创建默认客户、租户和办公室并将其分配给此用户",
     "assigning": "正在分配...",
     "assign": "分配",
-    "selectUserToAssign": "选择要分配的用户"
-  },
+    "selectUserToAssign": "选择要分配的用户",
     "errorLoadingUsers": "加载用户时出错",
     "errorCreatingUser": "创建用户时出错",
     "errorSavingUser": "保存用户时出错",

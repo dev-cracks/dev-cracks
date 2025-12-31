@@ -334,8 +334,7 @@
     "initializeDefaultDescription": "Crée un client, un locataire et un bureau par défaut et les assigne à cet utilisateur",
     "assigning": "Assignation...",
     "assign": "Assigner",
-    "selectUserToAssign": "Sélectionner un utilisateur à assigner"
-  },
+    "selectUserToAssign": "Sélectionner un utilisateur à assigner",
     "initializing": "Initialisation...",
     "initializeDefaultDescription": "Crée un client, un locataire et un bureau par défaut et les assigne à cet utilisateur",
     "assigning": "Assignation...",
