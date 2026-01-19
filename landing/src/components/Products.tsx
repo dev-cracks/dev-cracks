@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { FadeInSection } from './FadeInSection';
 
 interface Product {
@@ -11,70 +12,42 @@ interface Product {
   icon: string;
 }
 
-const products: Product[] = [
-  {
-    name: 'Routeon Enterprise',
-    tagline: 'Gestión Centralizada de Franquicias de Paquetería',
-    description: 'Plataforma SaaS para operación, visibilidad en tiempo real y optimización logística de redes de franquicias de paquetería.',
-    benefits: [
-      'Reducción de errores operativos mediante automatización inteligente',
-      'Predicción de demanda mediante Machine Learning',
-      'Automatización de workflows complejos',
-      'Visibilidad en tiempo real de toda la red'
-    ],
-    results: [
-      'Aumentos de eficiencia operativa del 30-40%',
-      'Reducción de tiempos de gestión en un 50%',
-      'Mayor satisfacción de franquiciados y clientes finales',
-      'ROI positivo desde el primer trimestre'
-    ],
-    cta: 'Solicitar Demo de Routeon Enterprise',
-    ctaLink: '#contacto',
-    icon: '📦'
-  },
-  {
-    name: 'Dev-Coach Pro',
-    tagline: 'Programa Acelerado de Formación Técnica',
-    description: 'Itinerario formativo orientado a proyectos reales con mentoría experta para desarrollar habilidades de ingeniería de software (de junior a senior).',
-    benefits: [
-      'Reducción de rotación de talento técnico',
-      'Talentos listos para producción desde el inicio',
-      'Pipeline de talento interno escalable',
-      'Enfoque en habilidades empresariales reales'
-    ],
-    results: [
-      'Reducción de brechas técnicas en 3-6 meses',
-      'Tiempo hasta impacto real reducido en un 60%',
-      'Aumento de productividad del equipo del 40%',
-      'ROI medible en costos de contratación y onboarding'
-    ],
-    cta: 'Conocer Programa Dev-Coach Pro',
-    ctaLink: '#contacto',
-    icon: '🎓'
-  },
-  {
-    name: 'DEV Community',
-    tagline: 'Comunidad de Desarrolladores y Recursos Técnicos',
-    description: 'Comunidad activa de desarrolladores con recursos técnicos, eventos, networking y acceso a contenido exclusivo sobre las últimas tecnologías.',
-    benefits: [
-      'Acceso a recursos técnicos exclusivos',
-      'Networking con desarrolladores top',
-      'Eventos y webinars especializados',
-      'Comunidad activa y colaborativa'
-    ],
-    results: [
-      'Actualización continua en tecnologías emergentes',
-      'Oportunidades de colaboración y proyectos',
-      'Acceso a mentores y expertos',
-      'Crecimiento profesional acelerado'
-    ],
-    cta: 'Unirse a la Comunidad',
-    ctaLink: 'https://discord.gg/9eaBf5qR',
-    icon: '👥'
-  }
-];
-
 export const Products = () => {
+  const { t } = useTranslation('landing');
+
+  const products: Product[] = [
+    {
+      name: t('products.items.routeon.name'),
+      tagline: t('products.items.routeon.tagline'),
+      description: t('products.items.routeon.description'),
+      benefits: t('products.items.routeon.benefits', { returnObjects: true }) as string[],
+      results: t('products.items.routeon.results', { returnObjects: true }) as string[],
+      cta: t('products.items.routeon.cta'),
+      ctaLink: '#contacto',
+      icon: '📦'
+    },
+    {
+      name: t('products.items.devcoach.name'),
+      tagline: t('products.items.devcoach.tagline'),
+      description: t('products.items.devcoach.description'),
+      benefits: t('products.items.devcoach.benefits', { returnObjects: true }) as string[],
+      results: t('products.items.devcoach.results', { returnObjects: true }) as string[],
+      cta: t('products.items.devcoach.cta'),
+      ctaLink: '#contacto',
+      icon: '🎓'
+    },
+    {
+      name: t('products.items.community.name'),
+      tagline: t('products.items.community.tagline'),
+      description: t('products.items.community.description'),
+      benefits: t('products.items.community.benefits', { returnObjects: true }) as string[],
+      results: t('products.items.community.results', { returnObjects: true }) as string[],
+      cta: t('products.items.community.cta'),
+      ctaLink: 'https://discord.gg/9eaBf5qR',
+      icon: '👥'
+    }
+  ];
+
   const handleCTAClick = (link: string) => {
     if (link.startsWith('#')) {
       const element = document.getElementById(link.substring(1));
@@ -89,10 +62,9 @@ export const Products = () => {
   return (
     <section id="productos" className="products">
       <div className="container">
-        <h2>Nuestros Productos Empresariales</h2>
+        <h2>{t('products.title')}</h2>
         <p className="products__intro">
-          Soluciones probadas y escalables diseñadas para resolver problemas reales de negocio. 
-          Cada producto está optimizado para generar impacto medible desde el primer día.
+          {t('products.intro')}
         </p>
 
         <div className="products-grid">
@@ -109,7 +81,7 @@ export const Products = () => {
               <p className="product-card__description">{product.description}</p>
 
               <div className="product-card__benefits">
-                <h4 className="product-card__section-title">Beneficios Clave:</h4>
+                <h4 className="product-card__section-title">{t('products.labels.benefits')}</h4>
                 <ul className="product-card__list">
                   {product.benefits.map((benefit, i) => (
                     <li key={i}>{benefit}</li>
@@ -118,7 +90,7 @@ export const Products = () => {
               </div>
 
               <div className="product-card__results">
-                <h4 className="product-card__section-title">Resultados Esperados:</h4>
+                <h4 className="product-card__section-title">{t('products.labels.results')}</h4>
                 <ul className="product-card__list product-card__list--results">
                   {product.results.map((result, i) => (
                     <li key={i}>{result}</li>
@@ -139,4 +111,3 @@ export const Products = () => {
     </section>
   );
 };
-

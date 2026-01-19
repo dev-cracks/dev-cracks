@@ -15,6 +15,8 @@
     "badge2": "Expertos en IA Aplicada",
     "titleLine1": "Transformación Digital con IA",
     "titleLine2": "De la Idea al Impacto Empresarial",
+    "ctaPrimary": "Solicitar Demo Corporativa",
+    "ctaSecondary": "Agendar Consultoría Estratégica",
     "slides": {
       "automation": {
         "title": "Automatización Inteligente",
@@ -59,8 +61,258 @@
       "culturalResistance": "Resistencia cultural"
     }
   },
+  "services": {
+    "title": "Servicios de Transformación Digital",
+    "intro": "Cada servicio está diseñado para resolver problemas reales de negocio con resultados medibles. Desde consultoría estratégica hasta implementación técnica, acompañamos tu transformación digital.",
+    "labels": {
+      "what": "¿Qué es?",
+      "problem": "Problema que resuelve:",
+      "how": "Cómo lo hacemos:",
+      "benefit": "Beneficio empresarial:",
+      "interactive": "✨ Experiencia Interactiva"
+    },
+    "items": {
+      "consulting": {
+        "title": "Consultoría Estratégica en IA y Automatización",
+        "what": "Asesoramiento estratégico para identificar oportunidades de implementación de IA y automatización en tu organización.",
+        "problem": "Falta de visión clara sobre dónde y cómo aplicar IA para maximizar ROI. Decisiones basadas en intuición en lugar de datos.",
+        "how": "Análisis exhaustivo de procesos, identificación de casos de uso de alto impacto, roadmap de implementación priorizado y proyección de ROI.",
+        "benefit": "Estrategia clara con ROI proyectado, priorización de iniciativas y roadmap ejecutable desde el primer día.",
+        "technologies": [
+          "Análisis de procesos",
+          "Roadmap estratégico",
+          "Proyección de ROI"
+        ]
+      },
+      "customDev": {
+        "title": "Desarrollo de Soluciones a Medida",
+        "what": "Software, APIs e integración de datos personalizados diseñados específicamente para tus necesidades empresariales.",
+        "problem": "Soluciones genéricas no se adaptan a necesidades específicas. Sistemas legacy limitan innovación y escalabilidad.",
+        "how": "Arquitectura moderna cloud-native, desarrollo ágil con metodologías probadas, integración seamless con sistemas existentes y escalabilidad desde el diseño.",
+        "benefit": "Soluciones que escalan con el negocio, integración sin interrupciones y mantenimiento simplificado.",
+        "technologies": [
+          "Cloud-native",
+          "Microservicios",
+          "APIs REST/GraphQL"
+        ]
+      },
+      "dataMl": {
+        "title": "Data Engineering y ML para Predicción y Optimización",
+        "what": "Pipelines de datos robustos y modelos de Machine Learning para decisiones inteligentes basadas en datos.",
+        "problem": "Datos sin explotar, decisiones basadas en intuición, falta de visibilidad en tiempo real y oportunidades perdidas de optimización.",
+        "how": "Ingesta y procesamiento de datos a escala, modelos ML entrenados con datos reales, dashboards en tiempo real y análisis predictivo continuo.",
+        "benefit": "Decisiones basadas en datos, optimización continua, predicción de tendencias y reducción de riesgos operacionales.",
+        "technologies": [
+          "Machine Learning",
+          "Análisis predictivo",
+          "Dashboards en tiempo real"
+        ]
+      },
+      "legacy": {
+        "title": "Integración de Sistemas Legacy con Plataformas Modernas",
+        "what": "Modernización de sistemas antiguos sin interrumpir operaciones, conectando lo antiguo con lo nuevo.",
+        "problem": "Sistemas legacy limitan innovación, alto costo de mantenimiento, dificultad para integrar nuevas tecnologías y riesgo operacional alto.",
+        "how": "APIs como capa de abstracción, arquitectura híbrida, migración gradual sin downtime y mantenimiento de sistemas críticos durante la transición.",
+        "benefit": "Innovación sin riesgo operacional, reducción de costos de mantenimiento, escalabilidad mejorada y preparación para el futuro.",
+        "technologies": [
+          "APIs",
+          "Microservicios",
+          "Arquitectura híbrida"
+        ]
+      },
+      "automation": {
+        "title": "Automatización de Procesos Empresariales",
+        "what": "Optimización y automatización de procesos empresariales con soluciones personalizadas que transforman operaciones.",
+        "problem": "Procesos manuales repetitivos, altos costos operativos, errores humanos frecuentes y tiempos de ejecución prolongados.",
+        "how": "Análisis de procesos, identificación de oportunidades de automatización, implementación de workflows inteligentes y monitoreo continuo de eficiencia.",
+        "benefit": "Reducción de costos operativos del 50-70%, eliminación de errores manuales, aumento de productividad y liberación de tiempo para tareas estratégicas.",
+        "technologies": [
+          "RPA",
+          "Workflows inteligentes",
+          "Automatización end-to-end"
+        ]
+      },
+      "agents": {
+        "title": "Agentes Orquestados de IA",
+        "what": "Sistemas inteligentes con múltiples agentes de IA que trabajan coordinados para resolver tareas complejas.",
+        "problem": "Tareas complejas requieren múltiples pasos manuales, coordinación entre equipos es ineficiente y escalabilidad limitada de procesos.",
+        "how": "Arquitectura de agentes especializados, orquestación inteligente de tareas, comunicación entre agentes y aprendizaje continuo del sistema.",
+        "benefit": "Automatización de flujos complejos, reducción de costos operativos hasta 60%, escalabilidad automática y resolución autónoma de problemas.",
+        "technologies": [
+          "Agentes de IA",
+          "Orquestación",
+          "Aprendizaje continuo"
+        ]
+      },
+      "cloud": {
+        "title": "Cloud & DevOps Enterprise",
+        "what": "Arquitecturas en la nube escalables y pipelines de DevOps para agilizar despliegue y operación.",
+        "problem": "Despliegues lentos y manuales, infraestructura rígida, dificultad para escalar y falta de visibilidad operacional.",
+        "how": "Arquitectura cloud-native, CI/CD automatizado, infraestructura como código, monitoreo y observabilidad en tiempo real.",
+        "benefit": "Reducción de tiempos de despliegue en 50%, escalabilidad automática, mayor confiabilidad y reducción de costos de infraestructura.",
+        "technologies": [
+          "Cloud-native",
+          "CI/CD",
+          "Infraestructura como código"
+        ]
+      },
+      "security": {
+        "title": "Seguridad y Auditoría de Código",
+        "what": "Garantizamos la robustez y seguridad de tus sistemas con auditorías exhaustivas y mejores prácticas.",
+        "problem": "Vulnerabilidades de seguridad, código sin estándares, falta de compliance y riesgos de seguridad no detectados.",
+        "how": "Auditorías de código exhaustivas, análisis de vulnerabilidades, implementación de mejores prácticas de seguridad y compliance con estándares.",
+        "benefit": "Sistemas seguros y robustos, compliance garantizado, reducción de riesgos y confianza de stakeholders.",
+        "technologies": [
+          "Auditoría de código",
+          "Análisis de vulnerabilidades",
+          "Mejores prácticas"
+        ]
+      }
+    }
+  },
+  "products": {
+    "title": "Nuestros Productos Empresariales",
+    "intro": "Soluciones probadas y escalables diseñadas para resolver problemas reales de negocio. Cada producto está optimizado para generar impacto medible desde el primer día.",
+    "labels": {
+      "benefits": "Beneficios Clave:",
+      "results": "Resultados Esperados:"
+    },
+    "items": {
+      "routeon": {
+        "name": "Routeon Enterprise",
+        "tagline": "Gestión Centralizada de Franquicias de Paquetería",
+        "description": "Plataforma SaaS para operación, visibilidad en tiempo real y optimización logística de redes de franquicias de paquetería.",
+        "benefits": [
+          "Reducción de errores operativos mediante automatización inteligente",
+          "Predicción de demanda mediante Machine Learning",
+          "Automatización de workflows complejos",
+          "Visibilidad en tiempo real de toda la red"
+        ],
+        "results": [
+          "Aumentos de eficiencia operativa del 30-40%",
+          "Reducción de tiempos de gestión en un 50%",
+          "Mayor satisfacción de franquiciados y clientes finales",
+          "ROI positivo desde el primer trimestre"
+        ],
+        "cta": "Solicitar Demo de Routeon Enterprise"
+      },
+      "devcoach": {
+        "name": "Dev-Coach Pro",
+        "tagline": "Programa Acelerado de Formación Técnica",
+        "description": "Itinerario formativo orientado a proyectos reales con mentoría experta para desarrollar habilidades de ingeniería de software (de junior a senior).",
+        "benefits": [
+          "Reducción de rotación de talento técnico",
+          "Talentos listos para producción desde el inicio",
+          "Pipeline de talento interno escalable",
+          "Enfoque en habilidades empresariales reales"
+        ],
+        "results": [
+          "Reducción de brechas técnicas en 3-6 meses",
+          "Tiempo hasta impacto real reducido en un 60%",
+          "Aumento de productividad del equipo del 40%",
+          "ROI medible en costos de contratación y onboarding"
+        ],
+        "cta": "Conocer Programa Dev-Coach Pro"
+      },
+      "community": {
+        "name": "DEV Community",
+        "tagline": "Comunidad de Desarrolladores y Recursos Técnicos",
+        "description": "Comunidad activa de desarrolladores con recursos técnicos, eventos, networking y acceso a contenido exclusivo sobre las últimas tecnologías.",
+        "benefits": [
+          "Acceso a recursos técnicos exclusivos",
+          "Networking con desarrolladores top",
+          "Eventos y webinars especializados",
+          "Comunidad activa y colaborativa"
+        ],
+        "results": [
+          "Actualización continua en tecnologías emergentes",
+          "Oportunidades de colaboración y proyectos",
+          "Acceso a mentores y expertos",
+          "Crecimiento profesional acelerado"
+        ],
+        "cta": "Unirse a la Comunidad"
+      }
+    }
+  },
+  "whyUs": {
+    "title": "¿Por Qué Elegir Dev-Cracks?",
+    "intro": "No somos otra agencia de software ni una consultora tradicional. Somos un partner estratégico de transformación digital con expertise técnico profundo y resultados comprobables.",
+    "table": {
+      "header": {
+        "feature": "Característica",
+        "devCracks": "Dev-Cracks",
+        "generic": "Agencias Genéricas",
+        "traditional": "Consultoras Tradicionales"
+      },
+      "rows": {
+        "technical": {
+          "feature": "Profundidad Técnica en IA y ML",
+          "devCracks": "Expertos certificados en IA aplicada, machine learning y automatización inteligente",
+          "generic": "Conocimiento superficial, enfoque en desarrollo web tradicional",
+          "traditional": "Teoría sin implementación práctica, dependencia de terceros"
+        },
+        "speed": {
+          "feature": "Velocidad de Implementación",
+          "devCracks": "Metodologías ágiles, prototipado rápido, MVP en semanas",
+          "generic": "Procesos lentos, burocracia interna, plazos extendidos",
+          "traditional": "Análisis prolongado, implementación lenta, meses hasta resultados"
+        },
+        "roi": {
+          "feature": "Resultados Medibles y ROI",
+          "devCracks": "Métricas claras desde el día 1, ROI promedio del 300% en primer año",
+          "generic": "Métricas vagas, difícil medir impacto real",
+          "traditional": "ROI difícil de cuantificar, resultados a largo plazo inciertos"
+        },
+        "automation": {
+          "feature": "Enfoque en Automatización Inteligente",
+          "devCracks": "Agentes orquestados de IA, automatización end-to-end",
+          "generic": "Automatización básica, scripts simples",
+          "traditional": "Recomendaciones sin implementación técnica"
+        },
+        "legacy": {
+          "feature": "Integración con Sistemas Legacy",
+          "devCracks": "Modernización sin interrupciones, arquitectura híbrida",
+          "generic": "Reemplazo completo, alto riesgo operacional",
+          "traditional": "Análisis sin ejecución técnica real"
+        },
+        "support": {
+          "feature": "Soporte y Evolución Continua",
+          "devCracks": "Partnership estratégico, evolución continua del producto",
+          "generic": "Soporte limitado post-entrega, costos adicionales",
+          "traditional": "Proyecto cerrado, sin seguimiento técnico"
+        }
+      }
+    },
+    "differentiators": {
+      "title": "Nuestros Diferenciadores Clave",
+      "items": {
+        "experts": {
+          "title": "Expertos de Élite",
+          "description": "Desarrolladores top con años de experiencia en tecnologías avanzadas de IA y automatización."
+        },
+        "innovation": {
+          "title": "Innovación Constante",
+          "description": "Al día con las últimas tendencias y metodologías para ofrecer soluciones vanguardistas."
+        },
+        "quality": {
+          "title": "Calidad Impecable",
+          "description": "Software robusto, escalable y con código limpio y eficiente desde el primer día."
+        },
+        "collaboration": {
+          "title": "Colaboración Transparente",
+          "description": "Comunicación abierta, procesos ágiles y trabajo codo a codo con tu equipo."
+        }
+      }
+    }
+  },
   "contact": {
     "title": "Contacto",
+    "header": {
+      "title": "¡Conectemos! Estamos aquí para ayudarte",
+      "text": "Tu transformación digital merece un partner estratégico. Hablemos y descubramos juntos cómo podemos generar impacto medible en tu empresa.",
+      "promiseTitle": "Respuesta garantizada en menos de 24 horas",
+      "promiseText": "Nuestro equipo de consultores senior revisará tu solicitud y te contactará directamente."
+    },
     "form": {
       "name": "Nombre completo",
       "namePlaceholder": "Ej: Juan Pérez",
@@ -94,6 +346,7 @@
       "phone": "+34 647 007 280",
       "email": "contacto@dev-cracks.com",
       "website": "www.dev-cracks.com",
+      "whatsapp": "WhatsApp",
       "downloadCard": "Descargar Tarjeta de Contacto",
       "downloadWallet": "Añadir a Apple Wallet",
       "downloadWalletAndroid": "Añadir a Google Wallet"
@@ -103,6 +356,10 @@
       "phoneLabel": "Teléfono",
       "descriptionLabel": "Descripción",
       "descriptionValue": "Desarrollo de software y soluciones tecnológicas",
+      "nameLabel": "Nombre",
+      "emailLabel": "Email",
+      "websiteLabel": "Web",
+      "contactLabel": "Contacto",
       "certificatesNotConfigured": "Los certificados de Apple Wallet no están configurados. Por favor, contacta al administrador para configurar los certificados necesarios.",
       "errorGenerating": "Error al generar el pass",
       "unknownError": "Error desconocido"
@@ -197,6 +454,37 @@
           "operationalCosts": "Costos Operativos"
         }
       }
+    }
+  },
+  "footer": {
+    "sections": {
+      "products": "Productos",
+      "services": "Servicios",
+      "resources": "Recursos",
+      "contact": "Contacto"
+    },
+    "links": {
+      "routeon": "Routeon Enterprise",
+      "devcoach": "Dev-Coach Pro",
+      "community": "DEV Community",
+      "consulting": "Consultoría Estratégica",
+      "customDev": "Desarrollo a Medida",
+      "dataMl": "Data Engineering & ML",
+      "automation": "Automatización Inteligente",
+      "useCases": "Casos de Uso",
+      "aboutUs": "Nosotros",
+      "aiCourse": "Curso de IA",
+      "requestConsultation": "Solicitar Consultoría"
+    },
+    "copyright": "© {{year}} Dev-Cracks. Todos los derechos reservados.",
+    "social": {
+      "youtube": "YouTube",
+      "instagram": "Instagram",
+      "facebook": "Facebook",
+      "twitter": "X (Twitter)",
+      "linkedin": "LinkedIn",
+      "hotmart": "Hotmart",
+      "discord": "Discord"
     }
   },
   "common": {

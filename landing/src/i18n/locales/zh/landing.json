@@ -3,48 +3,50 @@
     "home": "首页",
     "services": "服务",
     "products": "产品",
-    "useCases": "用例",
-    "whyUs": "为什么选择我们",
-    "contact": "联系"
+    "useCases": "案例",
+    "whyUs": "关于我们",
+    "contact": "联系我们"
   },
   "hero": {
     "title": "DEV CRACKS",
     "subtitle": "CODE // BREAKER",
-    "question": "您是否害怕AI、自动化和数字化转型？",
+    "question": "您是否对 AI、自动化和数字化转型感到担忧？",
     "badge1": "数字化转型合作伙伴",
-    "badge2": "应用AI专家",
-    "titleLine1": "AI驱动的数字化转型",
+    "badge2": "应用 AI 专家",
+    "titleLine1": "利用 AI 进行数字化转型",
     "titleLine2": "从想法到商业影响",
+    "ctaPrimary": "申请企业演示",
+    "ctaSecondary": "预约战略咨询",
     "slides": {
       "automation": {
         "title": "智能自动化",
         "benefit": "降低运营成本",
         "percentage": "70%",
-        "description": "自动化流程的企业将执行时间减少70%，并显著提高生产力，从第一季度开始产生可衡量的投资回报率。"
+        "description": "实施流程自动化的公司将执行时间缩短了 70%，并显著提高了生产力，从第一季度开始产生可衡量的投资回报率。"
       },
       "ai": {
         "title": "应用人工智能",
         "benefit": "数据驱动决策",
         "percentage": "85%",
-        "description": "AI使决策更加精确，减少85%的错误并优化业务资源。我们将数据转化为竞争优势。"
+        "description": "AI 能够实现更精准的决策，将错误减少 85% 并优化业务资源。我们将数据转化为竞争优势。"
       },
       "agents": {
-        "title": "编排AI代理",
+        "title": "编排 AI 代理",
         "benefit": "复杂流程优化",
         "percentage": "60%",
-        "description": "协调的代理系统将运营成本降低高达60%，同时提高效率。随业务扩展的自动化。"
+        "description": "协调的代理系统最多可将运营成本降低 60%，同时提高效率。随您的业务扩展的自动化。"
       },
       "cloud": {
-        "title": "云和DevOps企业版",
+        "title": "云与企业 DevOps",
         "benefit": "加速上市时间",
         "percentage": "50%",
-        "description": "云实施将部署时间减少50%并提高可扩展性。与您一起成长的基础设施。"
+        "description": "云实施将部署时间缩短了 50% 并提高了可扩展性。随您成长的基础设施。"
       },
       "roi": {
-        "title": "验证的平均投资回报率",
-        "benefit": "经过验证的投资回报",
+        "title": "验证平均 ROI",
+        "benefit": "经证实的投资回报",
         "percentage": "300%",
-        "description": "实施我们解决方案的企业在第一年获得平均300%的投资回报率。可衡量的结果，真正的影响。"
+        "description": "实施我们解决方案的公司在第一年实现了平均 300% 的投资回报率。可衡量的结果，真正的影响。"
       }
     },
     "fears": {
@@ -52,79 +54,330 @@
       "resistance": "阻力",
       "obsolescence": "过时",
       "distrust": "不信任",
-      "dread": "恐惧",
+      "dread": "担忧",
       "manualProcesses": "手动流程",
       "legacySystems": "遗留系统",
-      "lackOfVision": "缺乏远见",
+      "lackOfVision": "缺乏愿景",
       "culturalResistance": "文化阻力"
     }
   },
+  "services": {
+    "title": "数字化转型服务",
+    "intro": "每项服务都旨在通过可衡量的结果解决实际业务问题。从战略咨询到技术实施，我们全程陪伴您的数字化转型。",
+    "labels": {
+      "what": "这是什么？",
+      "problem": "解决的问题：",
+      "how": "我们如何做：",
+      "benefit": "商业利益：",
+      "interactive": "✨ 互动体验"
+    },
+    "items": {
+      "consulting": {
+        "title": "AI 与自动化战略咨询",
+        "what": "旨在识别组织中 AI 实施和自动化机会的战略建议。",
+        "problem": "对于在何处以及如何应用 AI 以最大化 ROI 缺乏清晰的愿景。决策基于直觉而非数据。",
+        "how": "详尽的流程分析，识别高影响力用例，优先实施路线图和 ROI 预测。",
+        "benefit": "具有预测 ROI 的清晰战略，计划优先级排序，以及从第一天起可执行的路线图。",
+        "technologies": [
+          "流程分析",
+          "战略路线图",
+          "ROI 预测"
+        ]
+      },
+      "customDev": {
+        "title": "定制解决方案开发",
+        "what": "专为您的业务需求设计的定制软件、API 和数据集成。",
+        "problem": "通用解决方案无法适应特定需求。遗留系统限制了创新和可扩展性。",
+        "how": "现代云原生架构，采用经过验证的方法进行敏捷开发，与现有系统无缝集成，以及设计上的可扩展性。",
+        "benefit": "随业务扩展的解决方案，无缝集成和简化的维护。",
+        "technologies": [
+          "云原生",
+          "微服务",
+          "REST/GraphQL API"
+        ]
+      },
+      "dataMl": {
+        "title": "用于预测和优化的数据工程与 ML",
+        "what": "用于智能数据驱动决策的强大数据管道和机器学习模型。",
+        "problem": "未开发的数据，基于直觉的决策，缺乏实时可见性以及错失优化机会。",
+        "how": "大规模数据摄取和处理，使用真实数据训练的 ML 模型，实时仪表板和持续预测分析。",
+        "benefit": "数据驱动决策，持续优化，趋势预测和运营风险降低。",
+        "technologies": [
+          "机器学习",
+          "预测分析",
+          "实时仪表板"
+        ]
+      },
+      "legacy": {
+        "title": "遗留系统与现代平台集成",
+        "what": "在不中断运营的情况下实现旧系统现代化，连接新旧系统。",
+        "problem": "遗留系统限制创新，维护成本高，难以集成新技术以及高运营风险。",
+        "how": "API 作为抽象层，混合架构，无停机逐步迁移，以及过渡期间关键系统的维护。",
+        "benefit": "无运营风险的创新，降低维护成本，提高可扩展性并面向未来。",
+        "technologies": [
+          "API",
+          "微服务",
+          "混合架构"
+        ]
+      },
+      "automation": {
+        "title": "业务流程自动化",
+        "what": "通过定制解决方案优化和自动化业务流程，从而改变运营。",
+        "problem": "重复的手动流程，高昂的运营成本，频繁的人为错误和延长的执行时间。",
+        "how": "流程分析，识别自动化机会，实施智能工作流和持续效率监控。",
+        "benefit": "运营成本降低 50-70%，消除人为错误，提高生产力并释放时间用于战略任务。",
+        "technologies": [
+          "RPA",
+          "智能工作流",
+          "端到端自动化"
+        ]
+      },
+      "agents": {
+        "title": "编排 AI 代理",
+        "what": "具有多个 AI 代理持续协作以解决复杂任务的智能系统。",
+        "problem": "复杂任务需要多个手动步骤，团队之间的协调效率低下，以及流程的可扩展性有限。",
+        "how": "专用代理架构，智能任务编排，代理通信和持续系统学习。",
+        "benefit": "复杂流程自动化，运营成本降低高达 60%，自动可扩展性和自主问题解决。",
+        "technologies": [
+          "AI 代理",
+          "编排",
+          "持续学习"
+        ]
+      },
+      "cloud": {
+        "title": "云与企业 DevOps",
+        "what": "可扩展的云架构和 DevOps 管道，以简化部署和运营。",
+        "problem": "缓慢的手动部署，僵化的基础设施，难以扩展以及缺乏运营可见性。",
+        "how": "云原生架构，自动化 CI/CD，基础设施即代码，实时监控和可观测性。",
+        "benefit": "部署时间缩短 50%，自动可扩展性，更高的可靠性和基础设施成本降低。",
+        "technologies": [
+          "云原生",
+          "CI/CD",
+          "基础设施即代码"
+        ]
+      },
+      "security": {
+        "title": "安全与代码审计",
+        "what": "通过全面的审计和最佳实践，我们保证您系统的稳健性和安全性。",
+        "problem": "安全漏洞，代码不达标，缺乏合规性以及未检测到的安全风险。",
+        "how": "全面的代码审计，漏洞分析，实施最佳安全实践以及符合标准。",
+        "benefit": "安全和稳健的系统，保证合规性，降低风险和利益相关者的信心。",
+        "technologies": [
+          "代码审计",
+          "漏洞分析",
+          "最佳实践"
+        ]
+      }
+    }
+  },
+  "products": {
+    "title": "我们的企业产品",
+    "intro": "经过验证且可扩展的解决方案，旨在解决实际业务问题。每种产品都经过优化，从第一天起就能产生可衡量的影响。",
+    "labels": {
+      "benefits": "主要优势：",
+      "results": "预期结果："
+    },
+    "items": {
+      "routeon": {
+        "name": "Routeon Enterprise",
+        "tagline": "包裹特许经营集中管理",
+        "description": "用于包裹特许经营网络的运营、实时可见性和物流优化的 SaaS 平台。",
+        "benefits": [
+          "通过智能自动化减少运营错误",
+          "利用机器学习进行需求预测",
+          "复杂工作流自动化",
+          "整个网络的实时可见性"
+        ],
+        "results": [
+          "运营效率提高 30-40%",
+          "管理时间减少 50%",
+          "特许经营商和最终客户满意度提高",
+          "从第一季度开始实现正 ROI"
+        ],
+        "cta": "申请 Routeon Enterprise 演示"
+      },
+      "devcoach": {
+        "name": "Dev-Coach Pro",
+        "tagline": "加速技术培训计划",
+        "description": "面向实际项目的培训路线，由专家指导开发软件工程技能（从初级到高级）。",
+        "benefits": [
+          "减少技术人才流失",
+          "从一开始就具备生产力的人才",
+          "可扩展的内部人才管道",
+          "专注于实际业务技能"
+        ],
+        "results": [
+          "在 3-6 个月内缩小技术差距",
+          "实现真正影响的时间缩短 60%",
+          "团队生产力提高 40%",
+          "在招聘和入职成本方面可衡量的 ROI"
+        ],
+        "cta": "了解 Dev-Coach Pro 计划"
+      },
+      "community": {
+        "name": "DEV Community",
+        "tagline": "开发者社区和技术资源",
+        "description": "活跃的开发者社区，提供技术资源、活动、网络以及获取有关最新技术的独家内容。",
+        "benefits": [
+          "获取独家技术资源",
+          "与顶尖开发者交流",
+          "专业活动和网络研讨会",
+          "活跃和协作的社区"
+        ],
+        "results": [
+          "持续更新新兴技术",
+          "合作和项目机会",
+          "接触导师和专家",
+          "加速职业成长"
+        ],
+        "cta": "加入社区"
+      }
+    }
+  },
+  "whyUs": {
+    "title": "为何选择 Dev-Cracks？",
+    "intro": "我们不仅仅是另一家软件代理机构或传统咨询公司。我们是具有深厚技术专长和经证实成果的战略数字化转型合作伙伴。",
+    "table": {
+      "header": {
+        "feature": "特征",
+        "devCracks": "Dev-Cracks",
+        "generic": "通用机构",
+        "traditional": "传统咨询公司"
+      },
+      "rows": {
+        "technical": {
+          "feature": "AI & ML 技术深度",
+          "devCracks": "应用 AI、机器学习和智能自动化认证专家",
+          "generic": "表面知识，专注于传统 Web 开发",
+          "traditional": "没有实际实施的理论，依赖第三方"
+        },
+        "speed": {
+          "feature": "实施速度",
+          "devCracks": "敏捷方法，快速原型设计，几周内完成 MVP",
+          "generic": "流程缓慢，内部官僚主义，期限延长",
+          "traditional": "分析时间长，实施缓慢，数月才能看到结果"
+        },
+        "roi": {
+          "feature": "可衡量的结果与 ROI",
+          "devCracks": "从第一天起就有清晰的指标，第一年平均 ROI 为 300%",
+          "generic": "指标模糊，难以衡量实际影响",
+          "traditional": "ROI 难以量化，长期结果不确定"
+        },
+        "automation": {
+          "feature": "专注于智能自动化",
+          "devCracks": "编排 AI 代理，端到端自动化",
+          "generic": "基本自动化，简单脚本",
+          "traditional": "没有技术实施的建议"
+        },
+        "legacy": {
+          "feature": "遗留系统集成",
+          "devCracks": "无缝现代化，混合架构",
+          "generic": "完全替换，高运营风险",
+          "traditional": "没有实际技术执行的分析"
+        },
+        "support": {
+          "feature": "支持与持续演进",
+          "devCracks": "战略合作伙伴关系，持续产品演进",
+          "generic": "交付后支持有限，额外费用",
+          "traditional": "项目结束，无技术跟进"
+        }
+      }
+    },
+    "differentiators": {
+      "title": "我们的关键差异化因素",
+      "items": {
+        "experts": {
+          "title": "精英专家",
+          "description": "在先进 AI 和自动化技术方面拥有多年经验的顶尖开发者。"
+        },
+        "innovation": {
+          "title": "持续创新",
+          "description": "紧跟最新趋势和方法，提供尖端解决方案。"
+        },
+        "quality": {
+          "title": "无可挑剔的质量",
+          "description": "从第一天起就提供稳健、可扩展且代码干净高效的软件。"
+        },
+        "collaboration": {
+          "title": "透明协作",
+          "description": "开放式沟通，敏捷流程，并与您的团队并肩工作。"
+        }
+      }
+    }
+  },
   "contact": {
-    "title": "联系",
+    "title": "联系我们",
+    "header": {
+      "title": "让我们建立联系！我们在这里为您提供帮助",
+      "text": "您的数字化转型值得拥有一个战略合作伙伴。让我们谈谈，共同发现我们如何在您的公司产生可衡量的影响。",
+      "promiseTitle": "保证在 24 小时内回复",
+      "promiseText": "我们的高级顾问团队将审核您的请求并直接与您联系。"
+    },
     "form": {
       "name": "全名",
       "namePlaceholder": "例如：张三",
-      "email": "企业邮箱",
+      "email": "公司邮箱",
       "emailPlaceholder": "例如：zhang.san@company.com",
       "company": "公司",
-      "companyPlaceholder": "例如：我的公司有限公司",
-      "position": "职位/角色",
-      "positionPlaceholder": "例如：CTO，创新负责人",
+      "companyPlaceholder": "例如：我的公司股份有限公司",
+      "position": "职位 / 角色",
+      "positionPlaceholder": "例如：CTO，创新主管",
       "consultationType": "咨询类型",
       "selectOption": "选择一个选项",
-      "strategicConsulting": "AI战略咨询",
+      "strategicConsulting": "战略 AI 咨询",
       "customDevelopment": "定制解决方案开发",
-      "dataMl": "数据工程和机器学习",
+      "dataMl": "数据工程与 ML",
       "legacyIntegration": "遗留系统集成",
       "automation": "流程自动化",
-      "aiAgents": "编排AI代理",
-      "cloudDevops": "云和DevOps",
-      "security": "安全和审计",
-      "routeon": "Routeon企业版",
-      "devCoach": "Dev-Coach专业版",
+      "aiAgents": "编排 AI 代理",
+      "cloudDevops": "云与 DevOps",
+      "security": "安全与审计",
+      "routeon": "Routeon Enterprise",
+      "devCoach": "Dev-Coach Pro",
       "other": "其他",
-      "message": "消息",
-      "messagePlaceholder": "告诉我们您的项目、挑战或特定需求...",
-      "submit": "请求咨询",
+      "message": "留言",
+      "messagePlaceholder": "告诉我们您的项目、挑战或具体需求...",
+      "submit": "申请咨询",
       "submitting": "发送中…",
-      "success": "谢谢！高级顾问将在24小时内与您联系。"
+      "success": "谢谢！高级顾问将在 24 小时内与您联系。"
     },
     "info": {
       "title": "联系信息",
       "phone": "+34 647 007 280",
-      "email": "contacto@dev-cracks.com",
+      "email": "contact@dev-cracks.com",
       "website": "www.dev-cracks.com",
-      "downloadCard": "下载联系卡",
-      "downloadWallet": "添加到Apple Wallet",
-      "downloadWalletAndroid": "添加到Google Wallet"
+      "whatsapp": "WhatsApp",
+      "downloadCard": "下载联系人名片",
+      "downloadWallet": "添加到 Apple Wallet",
+      "downloadWalletAndroid": "添加到 Google Wallet"
     },
     "wallet": {
-      "cardDescription": "Dev Cracks名片",
+      "cardDescription": "Dev Cracks 名片",
       "phoneLabel": "电话",
       "descriptionLabel": "描述",
-      "descriptionValue": "软件开发和技术解决方案",
-      "certificatesNotConfigured": "Apple Wallet证书未配置。请联系管理员配置必要的证书。",
-      "errorGenerating": "生成通行证时出错",
+      "descriptionValue": "软件开发与技术解决方案",
+      "certificatesNotConfigured": "Apple Wallet 证书未配置。请联系管理员配置必要的证书。",
+      "errorGenerating": "生成凭证时出错",
       "unknownError": "未知错误"
     }
   },
   "caseStudies": {
-    "title": "用例和已验证结果",
-    "intro": "我们通过AI和自动化解决方案改造不同行业的公司。这些是对业务运营产生可衡量影响的真实例子。",
+    "title": "用例和经证实的结果",
+    "intro": "我们利用 AI 和自动化解决方案为不同行业的公司进行转型。这些是对业务运营产生可衡量影响的真实示例。",
     "challenge": "挑战：",
     "solution": "解决方案：",
-    "results": "可衡量结果：",
-    "cta": "想为您的公司获得类似的结果吗？",
-    "ctaButton": "请求战略咨询",
+    "results": "可衡量的结果：",
+    "cta": "想要为您的公司获得类似的结果吗？",
+    "ctaButton": "申请战略咨询",
     "studies": {
       "logistics": {
         "industry": "物流",
         "title": "包裹特许经营网络优化",
-        "challenge": "具有手动流程的特许经营网络，运营错误率高，缺乏实时运营可见性。",
-        "solution": "实施Routeon Enterprise，使用ML进行需求预测、工作流自动化和集中式仪表板。",
+        "challenge": "特许经营网络流程手动，运营错误率高，缺乏运营的实时可见性。",
+        "solution": "实施 Routeon Enterprise，利用 ML 进行需求预测、工作流自动化和集中式仪表板。",
         "metrics": {
           "operationalEfficiency": "运营效率",
-          "manualErrors": "手动错误",
+          "manualErrors": "人工错误",
           "managementTime": "管理时间",
           "customerSatisfaction": "客户满意度",
           "increase": "增加",
@@ -133,14 +386,14 @@
       },
       "retail": {
         "industry": "零售",
-        "title": "使用机器学习的库存优化",
-        "challenge": "频繁的库存积压和缺货，基于直觉的采购决策和过时损失。",
-        "solution": "ML需求预测系统，自动库存优化和主动补货警报。",
+        "title": "利用机器学习优化库存",
+        "challenge": "频繁的库存过剩和缺货，基于直觉的采购决策以及过时损失。",
+        "solution": "ML 需求预测系统，自动库存优化和主动补货警报。",
         "metrics": {
           "costReduction": "成本降低",
           "availability": "可用性",
           "obsolescenceLosses": "过时损失",
-          "roi": "投资回报率",
+          "roi": "ROI",
           "inventory": "库存",
           "products": "产品",
           "firstYear": "第一年"
@@ -149,21 +402,21 @@
       "financial": {
         "industry": "金融服务",
         "title": "监管流程自动化",
-        "challenge": "手动监管流程，合规时间延长，报告错误风险高。",
-        "solution": "使用编排AI代理的智能监管流程自动化，以及自动合规验证。",
+        "challenge": "手动监管流程，合规时间长，报告错误风险高。",
+        "solution": "利用编排 AI 代理和自动合规验证对监管流程进行智能自动化。",
         "metrics": {
           "complianceTime": "合规时间",
           "reportErrors": "报告错误",
           "operationalCosts": "运营成本",
           "compliance": "合规性",
-          "rate": "比率"
+          "rate": "率"
         }
       },
       "manufacturing": {
-        "industry": "制造业",
+        "industry": "制造",
         "title": "预测性维护",
-        "challenge": "反应性维护导致意外停机，维修成本高，生产力损失。",
-        "solution": "用于故障预测的ML系统，优化的预防性维护和减少计划外停机时间。",
+        "challenge": "被动维护导致意外停机，高昂的维修成本和生产力损失。",
+        "solution": "用于故障预测、优化预防性维护和减少非计划停机的 ML 系统。",
         "metrics": {
           "downtime": "停机时间",
           "maintenanceCosts": "维护成本",
@@ -174,14 +427,14 @@
       },
       "ecommerce": {
         "industry": "电子商务",
-        "title": "AI个性化和推荐",
-        "challenge": "转化率低，频繁的废弃购物车，客户体验缺乏个性化。",
-        "solution": "ML推荐系统，动态内容个性化和实时价格优化。",
+        "title": "AI 个性化和推荐",
+        "challenge": "转化率低，购物车放弃频繁，客户体验缺乏个性化。",
+        "solution": "ML 推荐系统，动态内容个性化和实时价格优化。",
         "metrics": {
           "conversionRate": "转化率",
-          "abandonedCarts": "废弃购物车",
+          "abandonedCarts": "放弃的购物车",
           "averageOrderValue": "平均订单价值",
-          "roi": "投资回报率",
+          "roi": "ROI",
           "firstYear": "第一年"
         }
       },
@@ -189,7 +442,7 @@
         "industry": "医疗保健",
         "title": "医院资源优化",
         "challenge": "资源分配效率低下，等待时间长，难以预测服务需求。",
-        "solution": "用于需求预测的ML系统，时间表优化和智能医疗资源分配。",
+        "solution": "用于需求预测、时刻表优化和医疗资源智能分配的 ML 系统。",
         "metrics": {
           "waitTimes": "等待时间",
           "resourceUtilization": "资源利用率",
@@ -197,6 +450,37 @@
           "operationalCosts": "运营成本"
         }
       }
+    }
+  },
+  "footer": {
+    "sections": {
+      "products": "产品",
+      "services": "服务",
+      "resources": "资源",
+      "contact": "联系我们"
+    },
+    "links": {
+      "routeon": "Routeon Enterprise",
+      "devcoach": "Dev-Coach Pro",
+      "community": "DEV Community",
+      "consulting": "战略咨询",
+      "customDev": "定制开发",
+      "dataMl": "数据工程与 ML",
+      "automation": "智能自动化",
+      "useCases": "用例",
+      "aboutUs": "关于我们",
+      "aiCourse": "AI 课程",
+      "requestConsultation": "申请咨询"
+    },
+    "copyright": "© {{year}} Dev-Cracks。保留所有权利。",
+    "social": {
+      "youtube": "YouTube",
+      "instagram": "Instagram",
+      "facebook": "Facebook",
+      "twitter": "X (Twitter)",
+      "linkedin": "LinkedIn",
+      "hotmart": "Hotmart",
+      "discord": "Discord"
     }
   },
   "common": {

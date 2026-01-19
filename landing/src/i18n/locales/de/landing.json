@@ -4,7 +4,7 @@
     "services": "Dienstleistungen",
     "products": "Produkte",
     "useCases": "Anwendungsfälle",
-    "whyUs": "Warum uns wählen",
+    "whyUs": "Warum wir",
     "contact": "Kontakt"
   },
   "hero": {
@@ -14,37 +14,39 @@
     "badge1": "Partner für digitale Transformation",
     "badge2": "Experten für angewandte KI",
     "titleLine1": "Digitale Transformation mit KI",
-    "titleLine2": "Von der Idee zur Geschäftswirkung",
+    "titleLine2": "Von der Idee zum geschäftlichen Erfolg",
+    "ctaPrimary": "Unternehmens-Demo anfordern",
+    "ctaSecondary": "Strategische Beratung vereinbaren",
     "slides": {
       "automation": {
         "title": "Intelligente Automatisierung",
         "benefit": "Reduziert Betriebskosten",
         "percentage": "70%",
-        "description": "Unternehmen, die ihre Prozesse automatisieren, reduzieren die Ausführungszeit um 70% und steigern ihre Produktivität erheblich, was ab dem ersten Quartal messbare ROI generiert."
+        "description": "Unternehmen, die ihre Prozesse automatisieren, reduzieren die Ausführungszeit um 70 % und steigern die Produktivität erheblich, was bereits im ersten Quartal zu einem messbaren ROI führt."
       },
       "ai": {
         "title": "Angewandte künstliche Intelligenz",
-        "benefit": "Datenbasierte Entscheidungen",
+        "benefit": "Datengestützte Entscheidungen",
         "percentage": "85%",
-        "description": "KI ermöglicht präzisere Entscheidungen, reduziert Fehler um 85% und optimiert Geschäftsressourcen. Wir verwandeln Daten in Wettbewerbsvorteile."
+        "description": "KI ermöglicht präzisere Entscheidungen, reduziert Fehler um 85 % und optimiert Unternehmensressourcen. Wir verwandeln Daten in Wettbewerbsvorteile."
       },
       "agents": {
         "title": "Orchestrierte KI-Agenten",
         "benefit": "Optimierung komplexer Abläufe",
         "percentage": "60%",
-        "description": "Koordinierte Agentensysteme reduzieren Betriebskosten um bis zu 60% und verbessern gleichzeitig die Effizienz. Automatisierung, die mit Ihrem Geschäft skaliert."
+        "description": "Koordinierte Agentensysteme senken die Betriebskosten um bis zu 60 % und verbessern gleichzeitig die Effizienz. Automatisierung, die mit Ihrem Unternehmen wächst."
       },
       "cloud": {
-        "title": "Cloud & DevOps Enterprise",
-        "benefit": "Beschleunigung des Time-to-Market",
+        "title": "Cloud & Enterprise DevOps",
+        "benefit": "Beschleunigung der Markteinführung",
         "percentage": "50%",
-        "description": "Cloud-Implementierungen reduzieren Bereitstellungszeiten um 50% und verbessern die Skalierbarkeit. Infrastruktur, die mit Ihnen wächst."
+        "description": "Cloud-Implementierungen verkürzen die Bereitstellungszeiten um 50 % und verbessern die Skalierbarkeit. Infrastruktur, die mit Ihnen wächst."
       },
       "roi": {
         "title": "Verifizierter durchschnittlicher ROI",
-        "benefit": "Bewährte Kapitalrendite",
+        "benefit": "Nachgewiesene Kapitalrendite",
         "percentage": "300%",
-        "description": "Unternehmen, die unsere Lösungen implementieren, erzielen eine durchschnittliche Kapitalrendite von 300% im ersten Jahr. Messbare Ergebnisse, echte Wirkung."
+        "description": "Unternehmen, die unsere Lösungen implementieren, erzielen im ersten Jahr eine durchschnittliche Kapitalrendite von 300 %. Messbare Ergebnisse, echte Wirkung."
       }
     },
     "fears": {
@@ -54,46 +56,297 @@
       "distrust": "Misstrauen",
       "dread": "Furcht",
       "manualProcesses": "Manuelle Prozesse",
-      "legacySystems": "Legacy-Systeme",
-      "lackOfVision": "Mangel an Vision",
+      "legacySystems": "Altsysteme",
+      "lackOfVision": "Fehlende Vision",
       "culturalResistance": "Kultureller Widerstand"
+    }
+  },
+  "services": {
+    "title": "Dienstleistungen zur digitalen Transformation",
+    "intro": "Jeder Dienst ist darauf ausgelegt, echte Geschäftsprobleme mit messbaren Ergebnissen zu lösen. Von der strategischen Beratung bis zur technischen Umsetzung begleiten wir Ihre digitale Transformation.",
+    "labels": {
+      "what": "Was ist das?",
+      "problem": "Problem, das es löst:",
+      "how": "Wie wir es machen:",
+      "benefit": "Geschäftlicher Nutzen:",
+      "interactive": "✨ Interaktives Erlebnis"
+    },
+    "items": {
+      "consulting": {
+        "title": "Strategische KI- & Automatisierungsberatung",
+        "what": "Strategische Beratung zur Identifizierung von Möglichkeiten für KI-Implementierung und Automatisierung in Ihrem Unternehmen.",
+        "problem": "Mangel an klarer Vision, wo und wie KI eingesetzt werden soll, um den ROI zu maximieren. Entscheidungen basieren auf Intuition statt auf Daten.",
+        "how": "Umfassende Prozessanalyse, Identifizierung von Anwendungsfällen mit hohem Einfluss, priorisierte Implementierungs-Roadmap und ROI-Prognose.",
+        "benefit": "Klare Strategie mit prognostiziertem ROI, Priorisierung von Initiativen und ausführbare Roadmap ab dem ersten Tag.",
+        "technologies": [
+          "Prozessanalyse",
+          "Strategische Roadmap",
+          "ROI-Prognose"
+        ]
+      },
+      "customDev": {
+        "title": "Entwicklung maßgeschneiderter Lösungen",
+        "what": "Maßgeschneiderte Software, APIs und Datenintegration, die speziell auf Ihre Geschäftsanforderungen zugeschnitten sind.",
+        "problem": "Generische Lösungen passen nicht zu spezifischen Anforderungen. Altsysteme begrenzen Innovation und Skalierbarkeit.",
+        "how": "Moderne Cloud-native Architektur, agile Entwicklung mit bewährten Methoden, nahtlose Integration in bestehende Systeme und Skalierbarkeit durch Design.",
+        "benefit": "Lösungen, die mit dem Unternehmen skalieren, nahtlose Integration und vereinfachte Wartung.",
+        "technologies": [
+          "Cloud-native",
+          "Microservices",
+          "REST/GraphQL APIs"
+        ]
+      },
+      "dataMl": {
+        "title": "Data Engineering & ML für Vorhersage und Optimierung",
+        "what": "Robuste Datenpipelines und Machine-Learning-Modelle für intelligente datengestützte Entscheidungen.",
+        "problem": "Ungenutzte Daten, entscheidungen basierend auf Intuition, fehlende Echtzeitsichtbarkeit und verpasste Optimierungschancen.",
+        "how": "Datenaufnahme und -verarbeitung im großen Maßstab, ML-Modelle trainiert mit realen Daten, Echtzeit-Dashboards und kontinuierliche prädiktive Analyse.",
+        "benefit": "Datengestützte Entscheidungen, kontinuierliche Optimierung, Trendvorhersage und Reduzierung operativer Risiken.",
+        "technologies": [
+          "Machine Learning",
+          "Prädiktive Analyse",
+          "Echtzeit-Dashboards"
+        ]
+      },
+      "legacy": {
+        "title": "Integration von Altsystemen mit modernen Plattformen",
+        "what": "Modernisierung alter Systeme ohne Unterbrechung des Betriebs, Verbindung von Alt und Neu.",
+        "problem": "Altsysteme begrenzen Innovation, hohe Wartungskosten, Schwierigkeiten bei der Integration neuer Technologien und hohes operatives Risiko.",
+        "how": "APIs als Abstraktionsschicht, hybride Architektur, schrittweise Migration ohne Ausfallzeiten und Wartung kritischer Systeme während des Übergangs.",
+        "benefit": "Innovation ohne operatives Risiko, reduzierte Wartungskosten, verbesserte Skalierbarkeit und Zukunftssicherheit.",
+        "technologies": [
+          "APIs",
+          "Microservices",
+          "Hybride Architektur"
+        ]
+      },
+      "automation": {
+        "title": "Geschäftsprozessautomatisierung",
+        "what": "Optimierung und Automatisierung von Geschäftsprozessen mit maßgeschneiderten Lösungen, die den Betrieb transformieren.",
+        "problem": "Repetitive manuelle Prozesse, hohe Betriebskosten, häufige menschliche Fehler und verlängerte Ausführungszeiten.",
+        "how": "Prozessanalyse, Identifizierung von Automatisierungsmöglichkeiten, Implementierung intelligenter Workflows und kontinuierliche Effizienzüberwachung.",
+        "benefit": "Reduzierung der Betriebskosten um 50-70 %, Eliminierung manueller Fehler, Steigerung der Produktivität und Freisetzung von Zeit für strategische Aufgaben.",
+        "technologies": [
+          "RPA",
+          "Intelligente Workflows",
+          "End-to-End-Automatisierung"
+        ]
+      },
+      "agents": {
+        "title": "Orchestrierte KI-Agenten",
+        "what": "Intelligente Systeme mit mehreren KI-Agenten, die kontinuierlich zusammenarbeiten, um komplexe Aufgaben zu lösen.",
+        "problem": "Komplexe Aufgaben erfordern mehrere manuelle Schritte, die Koordination zwischen Teams ist ineffizient und die Skalierbarkeit von Prozessen ist begrenzt.",
+        "how": "Spezialisierte Agentenarchitektur, intelligente Aufgabenorchestrierung, Agentenkommunikation und kontinuierliches Systemlernen.",
+        "benefit": "Automatisierung komplexer Abläufe, Reduzierung der Betriebskosten um bis zu 60 %, automatische Skalierbarkeit und autonome Problemlösung.",
+        "technologies": [
+          "KI-Agenten",
+          "Orchestrierung",
+          "Kontinuierliches Lernen"
+        ]
+      },
+      "cloud": {
+        "title": "Cloud & Enterprise DevOps",
+        "what": "Skalierbare Cloud-Architekturen und DevOps-Pipelines zur Rationalisierung von Bereitstellung und Betrieb.",
+        "problem": "Langsame und manuelle Bereitstellungen, starre Infrastruktur, Schwierigkeiten bei der Skalierung und mangelnde operative Sichtbarkeit.",
+        "how": "Cloud-native Architektur, automatisiertes CI/CD, Infrastructure as Code, Echtzeitüberwachung und Observability.",
+        "benefit": "Reduzierung der Bereitstellungszeit um 50 %, automatische Skalierbarkeit, höhere Zuverlässigkeit und Reduzierung der Infrastrukturkosten.",
+        "technologies": [
+          "Cloud-native",
+          "CI/CD",
+          "Infrastructure as Code"
+        ]
+      },
+      "security": {
+        "title": "Sicherheit und Code-Audit",
+        "what": "Wir garantieren die Robustheit und Sicherheit Ihrer Systeme mit umfassenden Audits und Best Practices.",
+        "problem": "Sicherheitslücken, minderwertiger Code, fehlende Compliance und unentdeckte Sicherheitsrisiken.",
+        "how": "Umfassende Code-Audits, Schwachstellenanalyse, Implementierung von Sicherheits-Best-Practices und Einhaltung von Standards.",
+        "benefit": "Sichere und robuste Systeme, garantierte Compliance, Risikominderung und Vertrauen der Stakeholder.",
+        "technologies": [
+          "Code-Audit",
+          "Schwachstellenanalyse",
+          "Best Practices"
+        ]
+      }
+    }
+  },
+  "products": {
+    "title": "Unsere Unternehmensprodukte",
+    "intro": "Bewährte und skalierbare Lösungen, die entwickelt wurden, um echte Geschäftsprobleme zu lösen. Jedes Produkt ist darauf optimiert, ab dem ersten Tag messbare Ergebnisse zu erzielen.",
+    "labels": {
+      "benefits": "Hauptvorteile:",
+      "results": "Erwartete Ergebnisse:"
+    },
+    "items": {
+      "routeon": {
+        "name": "Routeon Enterprise",
+        "tagline": "Zentralisiertes Management für Paket-Franchises",
+        "description": "SaaS-Plattform für Betrieb, Echtzeitsichtbarkeit und Logistikoptimierung von Paket-Franchise-Netzwerken.",
+        "benefits": [
+          "Reduzierung operativer Fehler durch intelligente Automatisierung",
+          "Nachfrageprognose mittels Machine Learning",
+          "Automatisierung komplexer Workflows",
+          "Echtzeitsichtbarkeit des gesamten Netzwerks"
+        ],
+        "results": [
+          "Steigerung der operativen Effizienz um 30-40 %",
+          "Reduzierung der Verwaltungszeit um 50 %",
+          "Höhere Zufriedenheit von Franchisenehmern und Endkunden",
+          "Positiver ROI ab dem ersten Quartal"
+        ],
+        "cta": "Routeon Enterprise Demo anfordern"
+      },
+      "devcoach": {
+        "name": "Dev-Coach Pro",
+        "tagline": "Beschleunigtes technisches Schulungsprogramm",
+        "description": "Schulungsprogramm orientiert an realen Projekten mit Experten-Mentoring zur Entwicklung von Software-Engineering-Fähigkeiten (von Junior zu Senior).",
+        "benefits": [
+          "Reduzierung der Fluktuation technischer Talente",
+          "Produktionsreife Talente von Anfang an",
+          "Skalierbare interne Talent-Pipeline",
+          "Fokus auf echte geschäftliche Fähigkeiten"
+        ],
+        "results": [
+          "Reduzierung technischer Lücken in 3-6 Monaten",
+          "Zeit bis zur echten Wirkung um 60 % reduziert",
+          "Steigerung der Teamproduktivität um 40 %",
+          "Messbarer ROI bei Einstellungs- und Onboarding-Kosten"
+        ],
+        "cta": "Mehr über das Dev-Coach Pro Programm erfahren"
+      },
+      "community": {
+        "name": "DEV Community",
+        "tagline": "Entwickler-Community und technische Ressourcen",
+        "description": "Aktive Entwickler-Community mit technischen Ressourcen, Events, Networking und Zugang zu exklusiven Inhalten über die neuesten Technologien.",
+        "benefits": [
+          "Zugang zu exklusiven technischen Ressourcen",
+          "Networking mit Top-Entwicklern",
+          "Spezialisierte Events und Webinare",
+          "Aktive und kollaborative Community"
+        ],
+        "results": [
+          "Kontinuierliche Aktualisierung zu neuen Technologien",
+          "Kooperations- und Projektmöglichkeiten",
+          "Zugang zu Mentoren und Experten",
+          "Beschleunigtes berufliches Wachstum"
+        ],
+        "cta": "Der Community beitreten"
+      }
+    }
+  },
+  "whyUs": {
+    "title": "Warum Dev-Cracks wählen?",
+    "intro": "Wir sind nicht nur eine weitere Software-Agentur oder eine traditionelle Beratungsfirma. Wir sind ein strategischer Partner für die digitale Transformation mit tiefem technischem Fachwissen und nachweisbaren Ergebnissen.",
+    "table": {
+      "header": {
+        "feature": "Merkmal",
+        "devCracks": "Dev-Cracks",
+        "generic": "Generische Agenturen",
+        "traditional": "Traditionelle Beratungsfirmen"
+      },
+      "rows": {
+        "technical": {
+          "feature": "Technische Tiefe in KI & ML",
+          "devCracks": "Zertifizierte Experten für angewandte KI, Machine Learning und intelligente Automatisierung",
+          "generic": "Oberflächliches Wissen, Fokus auf traditionelle Webentwicklung",
+          "traditional": "Theorie ohne praktische Umsetzung, Abhängigkeit von Dritten"
+        },
+        "speed": {
+          "feature": "Implementierungsgeschwindigkeit",
+          "devCracks": "Agile Methoden, Rapid Prototyping, MVP in Wochen",
+          "generic": "Langsame Prozesse, interne Bürokratie, verlängerte Fristen",
+          "traditional": "Verlängerte Analyse, langsame Implementierung, Monate bis zu Ergebnissen"
+        },
+        "roi": {
+          "feature": "Messbare Ergebnisse & ROI",
+          "devCracks": "Klare Metriken ab Tag 1, durchschnittlich 300 % ROI im ersten Jahr",
+          "generic": "Vage Metriken, schwer messbare tatsächliche Auswirkung",
+          "traditional": "ROI schwer zu quantifizieren, unsichere langfristige Ergebnisse"
+        },
+        "automation": {
+          "feature": "Fokus auf intelligente Automatisierung",
+          "devCracks": "Orchestrierte KI-Agenten, End-to-End-Automatisierung",
+          "generic": "Grundlegende Automatisierung, einfache Skripte",
+          "traditional": "Empfehlungen ohne technische Umsetzung"
+        },
+        "legacy": {
+          "feature": "Integration von Altsystemen",
+          "devCracks": "Nahtlose Modernisierung, hybride Architektur",
+          "generic": "Vollständiger Ersatz, hohes operatives Risiko",
+          "traditional": "Analyse ohne echte technische Ausführung"
+        },
+        "support": {
+          "feature": "Support & kontinuierliche Entwicklung",
+          "devCracks": "Strategische Partnerschaft, kontinuierliche Produktentwicklung",
+          "generic": "Begrenzter Support nach Lieferung, zusätzliche Kosten",
+          "traditional": "Abgeschlossenes Projekt, keine technische Nachverfolgung"
+        }
+      }
+    },
+    "differentiators": {
+      "title": "Unsere Hauptunterscheidungsmerkmale",
+      "items": {
+        "experts": {
+          "title": "Elite-Experten",
+          "description": "Top-Entwickler mit jahrelanger Erfahrung in fortschrittlichen KI- und Automatisierungstechnologien."
+        },
+        "innovation": {
+          "title": "Ständige Innovation",
+          "description": "Auf dem neuesten Stand der Trends und Methoden, um innovative Lösungen anzubieten."
+        },
+        "quality": {
+          "title": "Tadellose Qualität",
+          "description": "Robuste, skalierbare Software mit sauberem und effizientem Code ab dem ersten Tag."
+        },
+        "collaboration": {
+          "title": "Transparente Zusammenarbeit",
+          "description": "Offene Kommunikation, agile Prozesse und enge Zusammenarbeit mit Ihrem Team."
+        }
+      }
     }
   },
   "contact": {
     "title": "Kontakt",
+    "header": {
+      "title": "Lassen Sie uns verbinden! Wir sind hier, um Ihnen zu helfen",
+      "text": "Ihre digitale Transformation verdient einen strategischen Partner. Lassen Sie uns sprechen und gemeinsam entdecken, wie wir in Ihrem Unternehmen messbare Wirkung erzielen können.",
+      "promiseTitle": "Garantierte Antwort in weniger als 24 Stunden",
+      "promiseText": "Unser Team von Senior-Beratern wird Ihre Anfrage prüfen und Sie direkt kontaktieren."
+    },
     "form": {
       "name": "Vollständiger Name",
-      "namePlaceholder": "z.B.: Max Mustermann",
-      "email": "Geschäfts-E-Mail",
-      "emailPlaceholder": "z.B.: max.mustermann@unternehmen.com",
-      "company": "Unternehmen",
-      "companyPlaceholder": "z.B.: Meine Firma GmbH",
+      "namePlaceholder": "Z.B.: Max Mustermann",
+      "email": "Firmen-E-Mail",
+      "emailPlaceholder": "Z.B.: max.mustermann@firma.com",
+      "company": "Firma",
+      "companyPlaceholder": "Z.B.: Meine Firma GmbH",
       "position": "Position / Rolle",
-      "positionPlaceholder": "z.B.: CTO, Leiter Innovation",
-      "consultationType": "Beratungstyp",
+      "positionPlaceholder": "Z.B.: CTO, Leiter Innovation",
+      "consultationType": "Beratungsart",
       "selectOption": "Wählen Sie eine Option",
       "strategicConsulting": "Strategische KI-Beratung",
       "customDevelopment": "Entwicklung maßgeschneiderter Lösungen",
       "dataMl": "Data Engineering und ML",
-      "legacyIntegration": "Integration von Legacy-Systemen",
+      "legacyIntegration": "Integration von Altsystemen",
       "automation": "Prozessautomatisierung",
       "aiAgents": "Orchestrierte KI-Agenten",
       "cloudDevops": "Cloud & DevOps",
       "security": "Sicherheit und Audit",
       "routeon": "Routeon Enterprise",
       "devCoach": "Dev-Coach Pro",
-      "other": "Andere",
+      "other": "Sonstiges",
       "message": "Nachricht",
       "messagePlaceholder": "Erzählen Sie uns von Ihrem Projekt, Herausforderungen oder spezifischen Bedürfnissen...",
       "submit": "Beratung anfordern",
       "submitting": "Wird gesendet…",
-      "success": "Vielen Dank! Ein Senior-Berater wird sich innerhalb von 24 Stunden bei Ihnen melden."
+      "success": "Vielen Dank! Ein Senior-Berater wird Sie innerhalb von 24 Stunden kontaktieren."
     },
     "info": {
       "title": "Kontaktinformationen",
       "phone": "+34 647 007 280",
-      "email": "contacto@dev-cracks.com",
+      "email": "contact@dev-cracks.com",
       "website": "www.dev-cracks.com",
+      "whatsapp": "WhatsApp",
       "downloadCard": "Kontaktkarte herunterladen",
       "downloadWallet": "Zu Apple Wallet hinzufügen",
       "downloadWalletAndroid": "Zu Google Wallet hinzufügen"
@@ -104,13 +357,13 @@
       "descriptionLabel": "Beschreibung",
       "descriptionValue": "Softwareentwicklung und Technologielösungen",
       "certificatesNotConfigured": "Apple Wallet-Zertifikate sind nicht konfiguriert. Bitte kontaktieren Sie den Administrator, um die erforderlichen Zertifikate zu konfigurieren.",
-      "errorGenerating": "Fehler beim Generieren des Passes",
+      "errorGenerating": "Fehler beim Erstellen des Passes",
       "unknownError": "Unbekannter Fehler"
     }
   },
   "caseStudies": {
-    "title": "Anwendungsfälle und bewährte Ergebnisse",
-    "intro": "Wir transformieren Unternehmen aus verschiedenen Branchen mit KI- und Automatisierungslösungen. Dies sind echte Beispiele für messbare Auswirkungen auf Geschäftsabläufe.",
+    "title": "Anwendungsfälle und nachgewiesene Ergebnisse",
+    "intro": "Wir transformieren Unternehmen aus verschiedenen Branchen mit KI- und Automatisierungslösungen. Hier sind echte Beispiele für messbare Auswirkungen auf den Geschäftsbetrieb.",
     "challenge": "Herausforderung:",
     "solution": "Lösung:",
     "results": "Messbare Ergebnisse:",
@@ -120,12 +373,12 @@
       "logistics": {
         "industry": "Logistik",
         "title": "Optimierung des Paket-Franchise-Netzwerks",
-        "challenge": "Franchise-Netzwerk mit manuellen Prozessen, hoher Fehlerrate und fehlender Echtzeit-Transparenz der Abläufe.",
-        "solution": "Implementierung von Routeon Enterprise mit ML für Nachfrageprognose, Workflow-Automatisierung und zentralisiertes Dashboard.",
+        "challenge": "Franchise-Netzwerk mit manuellen Prozessen, hoher operativer Fehlerrate und mangelnder Echtzeitsichtbarkeit der Vorgänge.",
+        "solution": "Implementierung von Routeon Enterprise mit ML für Nachfrageprognose, Workflow-Automatisierung und zentralisiertem Dashboard.",
         "metrics": {
-          "operationalEfficiency": "Betriebseffizienz",
+          "operationalEfficiency": "Operative Effizienz",
           "manualErrors": "Manuelle Fehler",
-          "managementTime": "Management-Zeit",
+          "managementTime": "Verwaltungszeit",
           "customerSatisfaction": "Kundenzufriedenheit",
           "increase": "Steigerung",
           "reduction": "Reduzierung"
@@ -133,9 +386,9 @@
       },
       "retail": {
         "industry": "Einzelhandel",
-        "title": "Inventaroptimierung mit maschinellem Lernen",
-        "challenge": "Häufige Überbestände und Fehlbestände, Einkaufsentscheidungen basierend auf Intuition und Veralterungsverluste.",
-        "solution": "ML-Nachfrageprognosesystem, automatische Inventaroptimierung und proaktive Nachbestellungsbenachrichtigungen.",
+        "title": "Bestandsoptimierung mit Machine Learning",
+        "challenge": "Häufige Überbestände und Fehlbestände, Kaufentscheidungen basierend auf Intuition und Verluste durch Veralterung.",
+        "solution": "ML-Nachfrageprognosesystem, automatische Bestandsoptimierung und proaktive Nachschubwarnungen.",
         "metrics": {
           "costReduction": "Kostenreduzierung",
           "availability": "Verfügbarkeit",
@@ -149,10 +402,10 @@
       "financial": {
         "industry": "Finanzdienstleistungen",
         "title": "Automatisierung regulatorischer Prozesse",
-        "challenge": "Manuelle regulatorische Prozesse, verlängerte Compliance-Zeiten und hohes Fehlerrisiko in Berichten.",
+        "challenge": "Manuelle regulatorische Prozesse, verlängerte Einhaltungszeiten und hohes Risiko von Fehlern in Berichten.",
         "solution": "Intelligente Automatisierung regulatorischer Prozesse mit orchestrierten KI-Agenten und automatischer Compliance-Validierung.",
         "metrics": {
-          "complianceTime": "Compliance-Zeit",
+          "complianceTime": "Einhaltungszeit",
           "reportErrors": "Berichtsfehler",
           "operationalCosts": "Betriebskosten",
           "compliance": "Compliance",
@@ -161,9 +414,9 @@
       },
       "manufacturing": {
         "industry": "Fertigung",
-        "title": "Vorhersagende Wartung",
-        "challenge": "Reaktive Wartung verursacht unerwartete Ausfälle, hohe Reparaturkosten und Produktivitätsverlust.",
-        "solution": "ML-System zur Fehlerprognose, optimierte vorbeugende Wartung und Reduzierung ungeplanter Ausfallzeiten.",
+        "title": "Vorausschauende Wartung",
+        "challenge": "Reaktive Wartung verursacht unerwartete Stillstände, hohe Reparaturkosten und Produktivitätsverluste.",
+        "solution": "ML-System zur Fehlervorhersage, optimierte vorbeugende Wartung und Reduzierung ungeplanter Ausfallzeiten.",
         "metrics": {
           "downtime": "Ausfallzeit",
           "maintenanceCosts": "Wartungskosten",
@@ -175,11 +428,11 @@
       "ecommerce": {
         "industry": "E-Commerce",
         "title": "KI-Personalisierung und Empfehlungen",
-        "challenge": "Niedrige Konversionsraten, häufige verlassene Warenkörbe und mangelnde Personalisierung im Kundenerlebnis.",
-        "solution": "ML-Empfehlungssystem, dynamische Content-Personalisierung und Echtzeit-Preisoptimierung.",
+        "challenge": "Niedrige Konversionsraten, häufig abgebrochene Warenkörbe und mangelnde Personalisierung im Kundenerlebnis.",
+        "solution": "ML-Empfehlungssystem, dynamische Inhaltspersonalisierung und Echtzeit-Preisoptimierung.",
         "metrics": {
           "conversionRate": "Konversionsrate",
-          "abandonedCarts": "Verlassene Warenkörbe",
+          "abandonedCarts": "Abgebrochene Warenkörbe",
           "averageOrderValue": "Durchschnittlicher Bestellwert",
           "roi": "ROI",
           "firstYear": "Erstes Jahr"
@@ -187,9 +440,9 @@
       },
       "healthcare": {
         "industry": "Gesundheitswesen",
-        "title": "Optimierung der Krankenhausressourcen",
-        "challenge": "Ineffizienz bei der Ressourcenallokation, verlängerte Wartezeiten und Schwierigkeiten bei der Vorhersage der Servicenachfrage.",
-        "solution": "ML-System zur Nachfrageprognose, Terminoptimierung und intelligente Zuteilung medizinischer Ressourcen.",
+        "title": "Optimierung von Krankenhausressourcen",
+        "challenge": "Ineffizienz bei der Ressourcenzuweisung, verlängerte Wartezeiten und Schwierigkeiten bei der Vorhersage der Serviceneachfrage.",
+        "solution": "ML-System für Nachfrageprognose, Terminplanoptimierung und intelligente Zuweisung medizinischer Ressourcen.",
         "metrics": {
           "waitTimes": "Wartezeiten",
           "resourceUtilization": "Ressourcennutzung",
@@ -197,6 +450,37 @@
           "operationalCosts": "Betriebskosten"
         }
       }
+    }
+  },
+  "footer": {
+    "sections": {
+      "products": "Produkte",
+      "services": "Dienstleistungen",
+      "resources": "Ressourcen",
+      "contact": "Kontakt"
+    },
+    "links": {
+      "routeon": "Routeon Enterprise",
+      "devcoach": "Dev-Coach Pro",
+      "community": "DEV Community",
+      "consulting": "Strategische Beratung",
+      "customDev": "Maßgeschneiderte Entwicklung",
+      "dataMl": "Data Engineering & ML",
+      "automation": "Intelligente Automatisierung",
+      "useCases": "Anwendungsfälle",
+      "aboutUs": "Über uns",
+      "aiCourse": "KI-Kurs",
+      "requestConsultation": "Beratung anfordern"
+    },
+    "copyright": "© {{year}} Dev-Cracks. Alle Rechte vorbehalten.",
+    "social": {
+      "youtube": "YouTube",
+      "instagram": "Instagram",
+      "facebook": "Facebook",
+      "twitter": "X (Twitter)",
+      "linkedin": "LinkedIn",
+      "hotmart": "Hotmart",
+      "discord": "Discord"
     }
   },
   "common": {

@@ -168,15 +168,15 @@ export const Hero = () => {
 
         <div className="hero__ctas">
           <a className="btn-primary" href="#contacto">
-            Solicitar Demo Corporativa
+            {t('hero.ctaPrimary')}
           </a>
-          <a 
-            className="btn-secondary btn-secondary--outline" 
+          <a
+            className="btn-secondary btn-secondary--outline"
             href="https://calendly.com/dev-cracks"
             target="_blank"
             rel="noopener noreferrer"
           >
-            Agendar Consultoría Estratégica
+            {t('hero.ctaSecondary')}
           </a>
         </div>
       </div>
