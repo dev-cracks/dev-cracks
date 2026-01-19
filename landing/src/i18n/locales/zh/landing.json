@@ -356,6 +356,10 @@
       "phoneLabel": "电话",
       "descriptionLabel": "描述",
       "descriptionValue": "软件开发与技术解决方案",
+      "nameLabel": "姓名",
+      "emailLabel": "电子邮件",
+      "websiteLabel": "网站",
+      "contactLabel": "联系方式",
       "certificatesNotConfigured": "Apple Wallet 证书未配置。请联系管理员配置必要的证书。",
       "errorGenerating": "生成凭证时出错",
       "unknownError": "未知错误"

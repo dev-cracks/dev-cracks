@@ -356,6 +356,10 @@
       "phoneLabel": "Téléphone",
       "descriptionLabel": "Description",
       "descriptionValue": "Développement de logiciels et solutions technologiques",
+      "nameLabel": "Nom",
+      "emailLabel": "Email",
+      "websiteLabel": "Site Web",
+      "contactLabel": "Contact",
       "certificatesNotConfigured": "Les certificats Apple Wallet ne sont pas configurés. Veuillez contacter l'administrateur pour configurer les certificats nécessaires.",
       "errorGenerating": "Erreur lors de la génération du pass",
       "unknownError": "Erreur inconnue"

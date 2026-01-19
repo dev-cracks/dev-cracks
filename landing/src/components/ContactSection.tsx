@@ -59,7 +59,7 @@ export const ContactSection = () => {
         primaryFields: [
           {
             key: 'name',
-            label: 'Nombre',
+            label: t('contact.wallet.nameLabel'),
             value: env.contactRecipientName
           }
         ],
@@ -71,14 +71,14 @@ export const ContactSection = () => {
           },
           {
             key: 'email',
-            label: 'Email',
+            label: t('contact.wallet.emailLabel'),
             value: env.contactRecipient
           }
         ],
         auxiliaryFields: [
           {
             key: 'website',
-            label: 'Web',
+            label: t('contact.wallet.websiteLabel'),
             value: 'www.dev-cracks.com'
           }
         ],
@@ -90,7 +90,7 @@ export const ContactSection = () => {
           },
           {
             key: 'contact',
-            label: 'Contacto',
+            label: t('contact.wallet.contactLabel'),
             value: `${env.contactRecipient}\n+34 647 007 280`
           }
         ]
@@ -148,7 +148,7 @@ export const ContactSection = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Error desconocido' }));
+        const errorData = await response.json().catch(() => ({ message: t('contact.wallet.unknownError') }));
         if (response.status === 503) {
           alert(t('contact.wallet.certificatesNotConfigured'));
         } else {

@@ -356,6 +356,10 @@
       "phoneLabel": "Telefon",
       "descriptionLabel": "Beschreibung",
       "descriptionValue": "Softwareentwicklung und Technologielösungen",
+      "nameLabel": "Name",
+      "emailLabel": "E-Mail",
+      "websiteLabel": "Webseite",
+      "contactLabel": "Kontakt",
       "certificatesNotConfigured": "Apple Wallet-Zertifikate sind nicht konfiguriert. Bitte kontaktieren Sie den Administrator, um die erforderlichen Zertifikate zu konfigurieren.",
       "errorGenerating": "Fehler beim Erstellen des Passes",
       "unknownError": "Unbekannter Fehler"
