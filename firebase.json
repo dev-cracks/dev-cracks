@@ -1,0 +1,55 @@
+{
+    "hosting": {
+        "public": "dist",
+        "ignore": [
+            "firebase.json",
+            "**/.*",
+            "**/node_modules/**"
+        ],
+        "rewrites": [
+            {
+                "source": "/api/**",
+                "run": {
+                    "serviceId": "dev-cracks-api",
+                    "region": "us-central1"
+                }
+            },
+            {
+                "source": "/landing/**",
+                "destination": "/landing/index.html"
+            },
+            {
+                "source": "/portal/**",
+                "destination": "/portal/index.html"
+            },
+            {
+                "source": "/backoffice/**",
+                "destination": "/backoffice/index.html"
+            },
+            {
+                "source": "/dev-coach/**",
+                "destination": "/dev-coach/index.html"
+            },
+            {
+                "source": "/dev-pool/**",
+                "destination": "/dev-pool/index.html"
+            },
+            {
+                "source": "/route-on/**",
+                "destination": "/route-on/index.html"
+            },
+            {
+                "source": "/fractalize/**",
+                "destination": "/fractalize/index.html"
+            },
+            {
+                "source": "/signatures/**",
+                "destination": "/signatures/index.html"
+            },
+            {
+                "source": "**",
+                "destination": "/index.html"
+            }
+        ]
+    }
+}
