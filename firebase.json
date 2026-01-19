@@ -1,5 +1,6 @@
 {
     "hosting": {
+        "site": "dev-cracks-web-app",
         "public": "dist",
         "ignore": [
             "firebase.json",

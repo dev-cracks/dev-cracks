@@ -1,5 +1,15 @@
 {
   "projects": {
-    "default": "dev-cracks"
-  }
+    "default": "dev-cracks-live-2026"
+  },
+  "targets": {
+    "dev-cracks": {
+      "hosting": {
+        "app": [
+          "dev-cracks-7821"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

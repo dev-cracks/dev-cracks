@@ -21,9 +21,12 @@ if ($LASTEXITCODE -ne 0) { Write-Error "Build failed"; exit 1 }
 
 # 3. Deploy Hosting
 Write-Host "Deploying Hosting..." -ForegroundColor Cyan
-# Use npx to avoid path issues with global install immediately
-npx -y firebase-tools deploy --only hosting
-if ($LASTEXITCODE -ne 0) { Write-Error "Hosting deploy failed"; exit 1 }
+# Try deployment, if it requires interaction it might fail in non-interactive mode
+npx -y firebase-tools deploy --only hosting --project dev-cracks-live-2026
+if ($LASTEXITCODE -ne 0) { 
+    Write-Warning "Hosting deploy might require manual setup. Please run 'npx firebase deploy --only hosting' manually after this script finishes."
+    # Do not exit, continue to Backend deploy
+}
 
 # 4. Deploy Backend
 Write-Host "Deploying Backend to Cloud Run..." -ForegroundColor Cyan
@@ -34,6 +37,7 @@ gcloud run deploy dev-cracks-api `
     --platform managed `
     --region us-central1 `
     --allow-unauthenticated `
+    --project dev-cracks-live-2026 `
     --set-env-vars NODE_ENV=production `
     --quiet
 

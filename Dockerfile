@@ -1,45 +1,21 @@
-# Etapa de construcción
-FROM --platform=linux/amd64 node:20-alpine AS build
+# Dockerfile for GCP Cloud Run (API only)
+FROM --platform=linux/amd64 node:20-alpine
 
 WORKDIR /app
 
-# Argumentos de build para variables de entorno de Vite
-ARG VITE_EMAIL_API_BASE_URL=http://localhost:5020
-ARG VITE_CONTACT_RECIPIENT=contacto@devcracks.com
-ARG VITE_CONTACT_RECIPIENT_NAME=Equipo Dev Cracks
-
-# Establecer variables de entorno para Vite
-ENV VITE_EMAIL_API_BASE_URL=$VITE_EMAIL_API_BASE_URL
-ENV VITE_CONTACT_RECIPIENT=$VITE_CONTACT_RECIPIENT
-ENV VITE_CONTACT_RECIPIENT_NAME=$VITE_CONTACT_RECIPIENT_NAME
-
-# Copiar archivos de dependencias (el package.json está en la raíz)
+# Copy package files
 COPY package*.json ./
 
-# Instalar dependencias
-RUN npm ci
+# Install ONLY production dependencies
+# This connects to the same package.json but we only need dependencies, not devDependencies
+RUN npm install --omit=dev
 
-# Copiar código fuente
+# Copy source code
 COPY . .
 
-# Construir la aplicación (el script build está en package.json de la raíz)
-RUN npm run build
+# Environment variables (can be overridden at runtime)
+ENV PORT=8080
+ENV NODE_ENV=production
 
-# Etapa de producción con nginx
-FROM --platform=linux/amd64 nginx:alpine
-
-# Copiar los archivos construidos de la web principal
-COPY --from=build /app/dist /usr/share/nginx/html
-
-# Copiar los archivos construidos del backoffice
-# Vite con base: '/backoffice/' genera los archivos directamente en dist-backoffice
-# pero con rutas relativas que incluyen /backoffice/
-COPY --from=build /app/dist-backoffice /usr/share/nginx/html/backoffice
-
-# Copiar configuración de nginx
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
-
+# Start the API server
+CMD ["node", "api-server.js"]
