@@ -1,4 +1,11 @@
 {
-  "welcome": "Welcome to Dev Pool"
+  "welcome": "Welcome to Dev Pool",
+  "roles": {
+    "fullstack": "Full Stack Developer",
+    "devops": "DevOps Engineer",
+    "uiux": "UI/UX Designer",
+    "datascientist": "Data Scientist",
+    "mobile": "Mobile Developer",
+    "cloud": "Cloud Architect"
+  }
 }
-

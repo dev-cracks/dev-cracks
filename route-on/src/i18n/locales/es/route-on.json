@@ -39,6 +39,10 @@
   "staggeredMenu": {
     "closeMenu": "Cerrar menú",
     "openMenu": "Abrir menú",
-    "socialLinks": "Enlaces sociales"
+    "socialLinks": "Enlaces sociales",
+    "menu": "Menú",
+    "close": "Cerrar",
+    "noItems": "No hay elementos",
+    "socialsTitle": "Redes Sociales"
   }
 }

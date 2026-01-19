@@ -49,7 +49,7 @@ export const StaggeredMenu = ({
   const iconRef = useRef<HTMLSpanElement | null>(null);
   const textInnerRef = useRef<HTMLSpanElement | null>(null);
   const textWrapRef = useRef<HTMLSpanElement | null>(null);
-  const [textLines, setTextLines] = useState(['Menu', 'Close']);
+  const [textLines, setTextLines] = useState([t('staggeredMenu.menu'), t('staggeredMenu.close')]);
   const openTlRef = useRef<gsap.core.Timeline | null>(null);
   const closeTweenRef = useRef<gsap.core.Tween | null>(null);
   const spinTweenRef = useRef<gsap.core.Tween | null>(null);
@@ -321,15 +321,15 @@ export const StaggeredMenu = ({
 
     textCycleAnimRef.current?.kill();
 
-    const currentLabel = opening ? 'Menu' : 'Close';
-    const targetLabel = opening ? 'Close' : 'Menu';
+    const currentLabel = opening ? t('staggeredMenu.menu') : t('staggeredMenu.close');
+    const targetLabel = opening ? t('staggeredMenu.close') : t('staggeredMenu.menu');
 
     const cycles = 3;
     const seq = [currentLabel];
     let last = currentLabel;
 
     for (let i = 0; i < cycles; i++) {
-      last = last === 'Menu' ? 'Close' : 'Menu';
+      last = last === t('staggeredMenu.menu') ? t('staggeredMenu.close') : t('staggeredMenu.menu');
       seq.push(last);
     }
 
@@ -469,7 +469,7 @@ export const StaggeredMenu = ({
             ) : (
               <li className="sm-panel-itemWrap" aria-hidden="true">
                 <span className="sm-panel-item">
-                  <span className="sm-panel-itemLabel">No items</span>
+                  <span className="sm-panel-itemLabel">{t('staggeredMenu.noItems')}</span>
                 </span>
               </li>
             )}
@@ -477,7 +477,7 @@ export const StaggeredMenu = ({
 
           {displaySocials && socialItems && socialItems.length > 0 && (
             <div className="sm-socials" aria-label={t('staggeredMenu.socialLinks')}>
-              <h3 className="sm-socials-title">Socials</h3>
+              <h3 className="sm-socials-title">{t('staggeredMenu.socialsTitle')}</h3>
               <ul className="sm-socials-list" role="list">
                 {socialItems.map((s, i) => (
                   <li key={s.label + i} className="sm-socials-item">

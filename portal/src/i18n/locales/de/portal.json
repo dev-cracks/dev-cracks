@@ -75,5 +75,98 @@
     "saveError": "Fehler beim Speichern der Daten. Bitte versuchen Sie es erneut.",
     "emailPlaceholder": "email@beispiel.com",
     "phonePlaceholder": "+49 600 000 000"
+  },
+  "magicBento": {
+    "analytics": {
+      "title": "Analytik",
+      "description": "Benutzerverhalten verfolgen",
+      "label": "Einblicke"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "Zentralisierte Datenansicht",
+      "label": "Übersicht"
+    },
+    "collaboration": {
+      "title": "Zusammenarbeit",
+      "description": "Nahtlos zusammenarbeiten",
+      "label": "Teamarbeit"
+    },
+    "automation": {
+      "title": "Automatisierung",
+      "description": "Arbeitsabläufe optimieren",
+      "label": "Effizienz"
+    },
+    "integration": {
+      "title": "Integration",
+      "description": "Lieblingstools verbinden",
+      "label": "Konnektivität"
+    },
+    "security": {
+      "title": "Sicherheit",
+      "description": "Schutz auf Unternehmensebene",
+      "label": "Schutz"
+    }
+  },
+  "account": {
+    "title": "Mein Konto",
+    "subtitle": "Profilinformationen",
+    "loading": "Laden...",
+    "profile": {
+      "name": "Benutzer"
+    },
+    "personalInfo": {
+      "title": "Persönliche Informationen",
+      "name": "Name",
+      "email": "E-Mail",
+      "userId": "Benutzer-ID"
+    },
+    "contactInfo": {
+      "title": "Kontaktinformationen"
+    },
+    "authInfo": {
+      "title": "Authentifizierungsinformationen",
+      "status": "Status",
+      "authenticated": "Authentifiziert",
+      "provider": "Anbieter",
+      "sub": "Auth0 Sub"
+    },
+    "picture": {
+      "title": "Profilbild",
+      "providedBy": "Profilbild von Auth0 bereitgestellt",
+      "unavailable": "Kein Profilbild verfügbar"
+    },
+    "gravatar": {
+      "title": "Gravatar-Profil",
+      "loading": "Gravatar-Profil wird geladen...",
+      "displayName": "Gravatar-Name",
+      "location": "Standort",
+      "preferredUsername": "Bevorzugter Benutzername",
+      "biography": "Biografie",
+      "links": "Links",
+      "social": "Soziale Netzwerke",
+      "verified": "Verifiziert",
+      "fullProfile": "Vollständiges Profil",
+      "viewProfile": "Vollständiges Profil auf Gravatar anzeigen"
+    },
+    "history": {
+      "title": "Änderungsverlauf"
+    }
+  },
+  "support": {
+    "title": "Support",
+    "subtitle": "Hilfe- und Supportcenter",
+    "documentation": {
+      "title": "Dokumentation",
+      "description": "Anleitungen und technische Dokumentation"
+    },
+    "contact": {
+      "title": "Kontakt",
+      "description": "Kontaktieren Sie unser Team"
+    },
+    "faq": {
+      "title": "FAQ",
+      "description": "Häufig gestellte Fragen"
+    }
   }
 }

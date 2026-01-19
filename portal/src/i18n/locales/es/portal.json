@@ -75,5 +75,98 @@
     "saveError": "Error al guardar los datos. Por favor, intenta de nuevo.",
     "emailPlaceholder": "correo@ejemplo.com",
     "phonePlaceholder": "+34 600 000 000"
+  },
+  "magicBento": {
+    "analytics": {
+      "title": "Analítica",
+      "description": "Rastrea el comportamiento del usuario",
+      "label": "Insights"
+    },
+    "dashboard": {
+      "title": "Panel de Control",
+      "description": "Vista de datos centralizada",
+      "label": "Resumen"
+    },
+    "collaboration": {
+      "title": "Colaboración",
+      "description": "Trabaja en equipo sin problemas",
+      "label": "Trabajo en equipo"
+    },
+    "automation": {
+      "title": "Automatización",
+      "description": "Optimiza flujos de trabajo",
+      "label": "Eficiencia"
+    },
+    "integration": {
+      "title": "Integración",
+      "description": "Conecta tus herramientas favoritas",
+      "label": "Conectividad"
+    },
+    "security": {
+      "title": "Seguridad",
+      "description": "Protección de grado empresarial",
+      "label": "Protección"
+    }
+  },
+  "account": {
+    "title": "Mi Cuenta",
+    "subtitle": "Información de tu perfil",
+    "loading": "Cargando...",
+    "profile": {
+      "name": "Usuario"
+    },
+    "personalInfo": {
+      "title": "Información Personal",
+      "name": "Nombre",
+      "email": "Email",
+      "userId": "ID de Usuario"
+    },
+    "contactInfo": {
+      "title": "Datos de Contacto"
+    },
+    "authInfo": {
+      "title": "Información de Autenticación",
+      "status": "Estado",
+      "authenticated": "Autenticado",
+      "provider": "Proveedor",
+      "sub": "Auth0 Sub"
+    },
+    "picture": {
+      "title": "Foto de Perfil",
+      "providedBy": "Foto de perfil proporcionada por Auth0",
+      "unavailable": "No hay foto de perfil disponible"
+    },
+    "gravatar": {
+      "title": "Perfil de Gravatar",
+      "loading": "Cargando perfil de Gravatar...",
+      "displayName": "Nombre de Gravatar",
+      "location": "Ubicación",
+      "preferredUsername": "Usuario Preferido",
+      "biography": "Biografía",
+      "links": "Enlaces",
+      "social": "Redes Sociales",
+      "verified": "Verificado",
+      "fullProfile": "Perfil Completo",
+      "viewProfile": "Ver perfil completo en Gravatar"
+    },
+    "history": {
+      "title": "Historial de Cambios"
+    }
+  },
+  "support": {
+    "title": "Soporte",
+    "subtitle": "Centro de ayuda y soporte",
+    "documentation": {
+      "title": "Documentación",
+      "description": "Guías y documentación técnica"
+    },
+    "contact": {
+      "title": "Contacto",
+      "description": "Ponte en contacto con nuestro equipo"
+    },
+    "faq": {
+      "title": "FAQ",
+      "description": "Preguntas frecuentes"
+    }
   }
 }

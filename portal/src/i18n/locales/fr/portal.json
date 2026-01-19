@@ -75,5 +75,98 @@
     "saveError": "Erreur lors de l'enregistrement des données. Veuillez réessayer.",
     "emailPlaceholder": "email@exemple.com",
     "phonePlaceholder": "+33 6 00 00 00 00"
+  },
+  "magicBento": {
+    "analytics": {
+      "title": "Analytique",
+      "description": "Suivre le comportement des utilisateurs",
+      "label": "Insights"
+    },
+    "dashboard": {
+      "title": "Tableau de bord",
+      "description": "Vue centralisée des données",
+      "label": "Aperçu"
+    },
+    "collaboration": {
+      "title": "Collaboration",
+      "description": "Travailler ensemble sans heurts",
+      "label": "Travail d'équipe"
+    },
+    "automation": {
+      "title": "Automatisation",
+      "description": "Rationaliser les flux de travail",
+      "label": "Efficacité"
+    },
+    "integration": {
+      "title": "Intégration",
+      "description": "Connecter vos outils préférés",
+      "label": "Connectivité"
+    },
+    "security": {
+      "title": "Sécurité",
+      "description": "Protection de niveau entreprise",
+      "label": "Protection"
+    }
+  },
+  "account": {
+    "title": "Mon Compte",
+    "subtitle": "Informations de profil",
+    "loading": "Chargement...",
+    "profile": {
+      "name": "Utilisateur"
+    },
+    "personalInfo": {
+      "title": "Informations personnelles",
+      "name": "Nom",
+      "email": "Email",
+      "userId": "ID utilisateur"
+    },
+    "contactInfo": {
+      "title": "Coordonnées"
+    },
+    "authInfo": {
+      "title": "Informations d'authentification",
+      "status": "Statut",
+      "authenticated": "Authentifié",
+      "provider": "Fournisseur",
+      "sub": "Auth0 Sub"
+    },
+    "picture": {
+      "title": "Photo de profil",
+      "providedBy": "Photo de profil fournie par Auth0",
+      "unavailable": "Aucune photo de profil disponible"
+    },
+    "gravatar": {
+      "title": "Profil Gravatar",
+      "loading": "Chargement du profil Gravatar...",
+      "displayName": "Nom Gravatar",
+      "location": "Emplacement",
+      "preferredUsername": "Nom d'utilisateur préféré",
+      "biography": "Biographie",
+      "links": "Liens",
+      "social": "Réseaux sociaux",
+      "verified": "Vérifié",
+      "fullProfile": "Profil complet",
+      "viewProfile": "Voir le profil complet sur Gravatar"
+    },
+    "history": {
+      "title": "Historique des modifications"
+    }
+  },
+  "support": {
+    "title": "Support",
+    "subtitle": "Centre d'aide et de support",
+    "documentation": {
+      "title": "Documentation",
+      "description": "Guides et documentation technique"
+    },
+    "contact": {
+      "title": "Contact",
+      "description": "Contactez notre équipe"
+    },
+    "faq": {
+      "title": "FAQ",
+      "description": "Foire aux questions"
+    }
   }
 }

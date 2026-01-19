@@ -75,5 +75,98 @@
     "saveError": "Error saving data. Please try again.",
     "emailPlaceholder": "email@example.com",
     "phonePlaceholder": "+1 555 000 0000"
+  },
+  "magicBento": {
+    "analytics": {
+      "title": "Analytics",
+      "description": "Track user behavior",
+      "label": "Insights"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "Centralized data view",
+      "label": "Overview"
+    },
+    "collaboration": {
+      "title": "Collaboration",
+      "description": "Work together seamlessly",
+      "label": "Teamwork"
+    },
+    "automation": {
+      "title": "Automation",
+      "description": "Streamline workflows",
+      "label": "Efficiency"
+    },
+    "integration": {
+      "title": "Integration",
+      "description": "Connect favorite tools",
+      "label": "Connectivity"
+    },
+    "security": {
+      "title": "Security",
+      "description": "Enterprise-grade protection",
+      "label": "Protection"
+    }
+  },
+  "account": {
+    "title": "My Account",
+    "subtitle": "Profile information",
+    "loading": "Loading...",
+    "profile": {
+      "name": "User"
+    },
+    "personalInfo": {
+      "title": "Personal Information",
+      "name": "Name",
+      "email": "Email",
+      "userId": "User ID"
+    },
+    "contactInfo": {
+      "title": "Contact Information"
+    },
+    "authInfo": {
+      "title": "Authentication Information",
+      "status": "Status",
+      "authenticated": "Authenticated",
+      "provider": "Provider",
+      "sub": "Auth0 Sub"
+    },
+    "picture": {
+      "title": "Profile Picture",
+      "providedBy": "Profile picture provided by Auth0",
+      "unavailable": "No profile picture available"
+    },
+    "gravatar": {
+      "title": "Gravatar Profile",
+      "loading": "Loading Gravatar profile...",
+      "displayName": "Gravatar Name",
+      "location": "Location",
+      "preferredUsername": "Preferred Username",
+      "biography": "Biography",
+      "links": "Links",
+      "social": "Social Networks",
+      "verified": "Verified",
+      "fullProfile": "Full Profile",
+      "viewProfile": "View full profile on Gravatar"
+    },
+    "history": {
+      "title": "Change History"
+    }
+  },
+  "support": {
+    "title": "Support",
+    "subtitle": "Help and support center",
+    "documentation": {
+      "title": "Documentation",
+      "description": "Guides and technical documentation"
+    },
+    "contact": {
+      "title": "Contact",
+      "description": "Get in touch with our team"
+    },
+    "faq": {
+      "title": "FAQ",
+      "description": "Frequently asked questions"
+    }
   }
 }

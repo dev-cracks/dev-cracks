@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, Link } from 'react-router-dom';
 import { CodeEditor, type ProjectFile } from '../components/CodeEditor';
 import { Preview } from '../components/Preview';
@@ -318,6 +319,7 @@ console.log('¡Hola desde el curso!');
 };
 
 export const CoursePage = () => {
+  const { t } = useTranslation('dev-coach');
   const { courseId } = useParams<{ courseId: string }>();
   const [course, setCourse] = useState<Course | null>(null);
   const [files, setFiles] = useState<ProjectFile[]>([]);
@@ -333,18 +335,18 @@ export const CoursePage = () => {
 
   if (!course) {
     return (
-      <div style={{ 
-        minHeight: '100vh', 
-        background: 'transparent', 
-        display: 'flex', 
-        alignItems: 'center', 
+      <div style={{
+        minHeight: '100vh',
+        background: 'transparent',
+        display: 'flex',
+        alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'column',
         gap: '1rem'
       }}>
-        <h1 style={{ color: '#fff' }}>Curso no encontrado</h1>
+        <h1 style={{ color: '#fff' }}>{t('courses.notFound')}</h1>
         <Link to="/courses" style={{ color: '#B19EEF' }}>
-          Volver a los cursos
+          {t('courses.back')}
         </Link>
       </div>
     );
@@ -352,31 +354,31 @@ export const CoursePage = () => {
 
   const items = [
     {
-      label: "Rutas",
+      label: t('navigation.routes'),
       bgColor: "#0D0716",
       textColor: "#fff",
       links: [
-        { label: "Junior a Mid", ariaLabel: "Ruta de formación Junior a Mid", href: "/challenge/1" },
-        { label: "Mid a Senior", ariaLabel: "Ruta de formación Mid a Senior", href: "/challenge/2" }
+        { label: t('navigation.juniorToMid'), ariaLabel: t('navigation.juniorToMidAria'), href: "/challenge/1" },
+        { label: t('navigation.midToSenior'), ariaLabel: t('navigation.midToSeniorAria'), href: "/challenge/2" }
       ]
     },
     {
-      label: "Cursos",
+      label: t('navigation.courses'),
       bgColor: "#170D27",
       textColor: "#fff",
       links: [
-        { label: "Todos los Cursos", ariaLabel: "Ver todos los cursos", href: "/courses" },
-        { label: "Arquitectura", ariaLabel: "Cursos de arquitectura", href: "/courses#arquitectura" },
-        { label: "Frontend", ariaLabel: "Cursos de frontend", href: "/courses#frontend" }
+        { label: t('navigation.allCourses'), ariaLabel: t('navigation.allCoursesAria'), href: "/courses" },
+        { label: t('navigation.architecture'), ariaLabel: t('navigation.architectureAria'), href: "/courses#arquitectura" },
+        { label: t('navigation.frontend'), ariaLabel: t('navigation.frontendAria'), href: "/courses#frontend" }
       ]
     },
     {
-      label: "Recursos",
+      label: t('navigation.resources'),
       bgColor: "#271E37",
       textColor: "#fff",
       links: [
-        { label: "Documentación", ariaLabel: "Documentación técnica", href: "#" },
-        { label: "Comunidad", ariaLabel: "Comunidad de desarrolladores", href: "#" }
+        { label: t('navigation.documentation'), ariaLabel: t('navigation.documentationAria'), href: "#" },
+        { label: t('navigation.community'), ariaLabel: t('navigation.communityAria'), href: "#" }
       ]
     }
   ];
@@ -411,27 +413,29 @@ export const CoursePage = () => {
         <div className="course-info-section">
           <div className="course-info-header">
             <Link to="/courses" className="back-link">
-              ← Volver a cursos
+              {t('courses.backLink')}
             </Link>
             <div className="course-badges">
               <span
                 className="course-level-badge"
                 style={{ backgroundColor: getLevelColor(course.level) }}
               >
-                {course.level}
+                {course.level === 'Senior' && t('levels.senior')}
+                {course.level === 'Arquitecto' && t('levels.architect')}
+                {course.level === 'Tech Lead' && t('levels.techLead')}
               </span>
-              <span className="course-category-badge">{course.category}</span>
+              <span className="course-category-badge">{t(`categories.${course.category}`)}</span>
               <span className="course-duration-badge">{course.duration}</span>
             </div>
           </div>
 
-          <h1 className="course-page-title">{course.title}</h1>
-          <p className="course-page-description">{course.description}</p>
+          <h1 className="course-page-title">{t(`coursesList.${course.id}.title`)}</h1>
+          <p className="course-page-description">{t(`coursesList.${course.id}.description`)}</p>
 
           <div className="course-topics-section">
-            <h2 className="course-topics-title">Temas del Curso</h2>
+            <h2 className="course-topics-title">{t('courses.topics')}</h2>
             <ul className="course-topics-full-list">
-              {course.topics.map((topic, idx) => (
+              {(t(`coursesList.${course.id}.topics`, { returnObjects: true }) as string[]).map((topic, idx) => (
                 <li key={idx}>{topic}</li>
               ))}
             </ul>
@@ -441,7 +445,7 @@ export const CoursePage = () => {
             className="open-editor-button"
             onClick={() => setShowEditor(!showEditor)}
           >
-            {showEditor ? 'Ocultar Editor' : 'Abrir Editor de Código'}
+            {showEditor ? t('editor.hide') : t('editor.open')}
           </button>
         </div>
 

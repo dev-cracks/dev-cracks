@@ -28,15 +28,245 @@
     "duration": "Duración",
     "topics": "Temas",
     "viewCourse": "Ver Curso",
-    "noCourses": "No hay cursos disponibles"
+    "noCourses": "No hay cursos disponibles",
+    "notFound": "Curso no encontrado",
+    "back": "Volver a los cursos",
+    "backLink": "← Volver a cursos"
+  },
+  "editor": {
+    "open": "Abrir Editor de Código",
+    "hide": "Ocultar Editor"
   },
   "levels": {
     "senior": "Senior",
     "architect": "Arquitecto",
     "techLead": "Tech Lead"
   },
-  "page": {
-    "title": "Cursos para Desarrolladores Fullstack .NET React",
-    "subtitle": "Lleva tus habilidades al siguiente nivel. De Senior a Arquitecto"
+  "categories": {
+    "Arquitectura": "Arquitectura",
+    "Frontend": "Frontend",
+    "Backend": "Backend",
+    "Seguridad": "Seguridad",
+    "Calidad": "Calidad",
+    "Performance": "Performance",
+    "DevOps": "DevOps",
+    "Cloud": "Cloud"
+  },
+  "home": {
+    "title": "Formación de Desarrolladores",
+    "subtitle": "Lleva tu carrera de Junior a Senior, Tech Lead o Arquitecto",
+    "cta": "Explorar Cursos"
+  },
+  "highlight": {
+    "badge": "⭐ CURSO DESTACADO",
+    "duration": "Completo",
+    "title": "C# de cero a experto",
+    "description": "Guía completa de aprendizaje desde fundamentos hasta arquitectura empresarial. Domina C# desde Trainee hasta Arquitecto con contenido teórico y challenges prácticos.",
+    "topicsLabel": "Niveles incluidos:",
+    "link": "Comenzar curso →",
+    "levels": {
+      "trainee": "Trainee - Fundamentos del lenguaje",
+      "junior": "Junior - POO, excepciones, colecciones",
+      "middle": "Middle - Async/await, pattern matching",
+      "senior": "Senior - Reflexión, performance",
+      "techLead": "Tech Lead - SOLID, arquitectura",
+      "architect": "Arquitecto - Microservicios, diseño de sistemas"
+    }
+  },
+  "coursesList": {
+    "clean-architecture": {
+      "title": "Clean Architecture y DDD",
+      "description": "Aprende a diseñar arquitecturas limpias y escalables usando Domain Driven Design",
+      "topics": [
+        "Principios SOLID",
+        "Domain Driven Design (DDD)",
+        "Clean Architecture",
+        "CQRS y Event Sourcing",
+        "Bounded Contexts",
+        "Aggregates y Entities"
+      ]
+    },
+    "microservices": {
+      "title": "Arquitectura de Microservicios",
+      "description": "Diseña y construye sistemas distribuidos escalables con microservicios",
+      "topics": [
+        "Diseño de microservicios",
+        "Service Discovery",
+        "API Gateway",
+        "Message Queues (RabbitMQ, Azure Service Bus)",
+        "Distributed Tracing",
+        "Circuit Breaker Pattern",
+        "Saga Pattern"
+      ]
+    },
+    "react-advanced": {
+      "title": "React Avanzado y Optimización",
+      "description": "Domina React a nivel senior: hooks avanzados, performance y patrones",
+      "topics": [
+        "Hooks personalizados avanzados",
+        "Context API y State Management",
+        "React.memo y useMemo",
+        "Code Splitting y Lazy Loading",
+        "Suspense y Concurrent Features",
+        "Performance Optimization",
+        "Testing con React Testing Library"
+      ]
+    },
+    "dotnet-advanced": {
+      "title": ".NET Core Avanzado",
+      "description": "Profundiza en .NET Core: performance, async/await, y patrones avanzados",
+      "topics": [
+        "Async/Await y Task Parallel Library",
+        "Dependency Injection avanzado",
+        "Middleware y Pipeline",
+        "Entity Framework Core avanzado",
+        "Performance y Memory Management",
+        "Background Services",
+        "SignalR para tiempo real"
+      ]
+    },
+    "api-design": {
+      "title": "Diseño de APIs REST y GraphQL",
+      "description": "Crea APIs robustas, escalables y bien documentadas",
+      "topics": [
+        "RESTful API Design",
+        "GraphQL Schema Design",
+        "API Versioning",
+        "Rate Limiting y Throttling",
+        "OpenAPI/Swagger",
+        "API Security Best Practices",
+        "Error Handling y Status Codes"
+      ]
+    },
+    "authentication": {
+      "title": "Autenticación y Autorización",
+      "description": "Implementa sistemas seguros de autenticación y autorización",
+      "topics": [
+        "OAuth 2.0 y OpenID Connect",
+        "JWT Tokens",
+        "Identity Server",
+        "Role-Based Access Control (RBAC)",
+        "Policy-Based Authorization",
+        "Multi-tenancy",
+        "SSO (Single Sign-On)"
+      ]
+    },
+    "testing": {
+      "title": "Testing Avanzado",
+      "description": "Estrategias completas de testing: unit, integration y E2E",
+      "topics": [
+        "Unit Testing con xUnit y Jest",
+        "Integration Testing",
+        "E2E Testing con Playwright/Cypress",
+        "Test-Driven Development (TDD)",
+        "Mocking y Stubbing",
+        "Test Coverage y Quality Gates",
+        "Testing de APIs"
+      ]
+    },
+    "performance": {
+      "title": "Performance y Optimización",
+      "description": "Optimiza aplicaciones para máximo rendimiento",
+      "topics": [
+        "Profiling y Performance Analysis",
+        "Database Optimization",
+        "Caching Strategies (Redis, Memory Cache)",
+        "CDN y Asset Optimization",
+        "Lazy Loading y Code Splitting",
+        "Database Indexing",
+        "Query Optimization"
+      ]
+    },
+    "devops": {
+      "title": "DevOps y CI/CD",
+      "description": "Automatiza el despliegue y gestión de infraestructura",
+      "topics": [
+        "Docker y Containerization",
+        "Kubernetes",
+        "CI/CD con GitHub Actions/Azure DevOps",
+        "Infrastructure as Code (Terraform)",
+        "Monitoring y Logging",
+        "Blue-Green Deployments",
+        "Feature Flags"
+      ]
+    },
+    "cloud-azure": {
+      "title": "Cloud Computing con Azure",
+      "description": "Despliega y gestiona aplicaciones en la nube con Azure",
+      "topics": [
+        "Azure App Service",
+        "Azure Functions y Serverless",
+        "Azure SQL Database",
+        "Azure Service Bus",
+        "Azure Key Vault",
+        "Azure Active Directory",
+        "Azure DevOps"
+      ]
+    },
+    "databases": {
+      "title": "Bases de Datos Avanzadas",
+      "description": "Diseño y optimización de bases de datos SQL y NoSQL",
+      "topics": [
+        "SQL Server avanzado",
+        "PostgreSQL y MySQL",
+        "NoSQL (MongoDB, Cosmos DB)",
+        "Database Sharding",
+        "Read Replicas",
+        "Transaction Management",
+        "Data Modeling"
+      ]
+    },
+    "message-queues": {
+      "title": "Message Queues y Event-Driven Architecture",
+      "description": "Construye sistemas asíncronos y desacoplados",
+      "topics": [
+        "RabbitMQ",
+        "Azure Service Bus",
+        "Apache Kafka",
+        "Event-Driven Architecture",
+        "Pub/Sub Patterns",
+        "Message Ordering y Delivery Guarantees",
+        "Dead Letter Queues"
+      ]
+    },
+    "security": {
+      "title": "Seguridad en Aplicaciones",
+      "description": "Protege tus aplicaciones contra vulnerabilidades comunes",
+      "topics": [
+        "OWASP Top 10",
+        "SQL Injection Prevention",
+        "XSS y CSRF Protection",
+        "Secure Coding Practices",
+        "Encryption y Hashing",
+        "Security Headers",
+        "Penetration Testing"
+      ]
+    },
+    "typescript-advanced": {
+      "title": "TypeScript Avanzado",
+      "description": "Domina TypeScript: tipos avanzados, generics y utilidades",
+      "topics": [
+        "Advanced Types",
+        "Generics y Constraints",
+        "Utility Types",
+        "Type Guards y Type Assertions",
+        "Decorators",
+        "Module Resolution",
+        "TypeScript Compiler Options"
+      ]
+    },
+    "state-management": {
+      "title": "State Management Avanzado",
+      "description": "Gestiona estado complejo con Redux, Zustand y Context API",
+      "topics": [
+        "Redux Toolkit",
+        "Zustand",
+        "Context API Patterns",
+        "State Normalization",
+        "Middleware y Enhancers",
+        "Time Travel Debugging",
+        "State Persistence"
+      ]
+    }
   }
 }

@@ -94,7 +94,8 @@
       "creating": "Creando...",
       "allRecipientsRequired": "Todos los recipients deben tener first_name, last_name y email",
       "addAtLeastOne": "Por favor agrega al menos un recipient",
-      "validateIdentifierFirst": "Por favor valida el identificador primero"
+      "validateIdentifierFirst": "Por favor valida el identificador primero",
+      "invalidEmail": "El email {{email}} no es válido"
     },
     "step4": {
       "title": "4. Actualizar los Campos",

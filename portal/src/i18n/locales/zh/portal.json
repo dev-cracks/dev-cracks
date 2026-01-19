@@ -75,5 +75,98 @@
     "saveError": "保存数据时出错。请重试。",
     "emailPlaceholder": "email@example.com",
     "phonePlaceholder": "+86 138 0000 0000"
+  },
+  "magicBento": {
+    "analytics": {
+      "title": "分析",
+      "description": "跟踪用户行为",
+      "label": "洞察"
+    },
+    "dashboard": {
+      "title": "仪表板",
+      "description": "集中数据视图",
+      "label": "概览"
+    },
+    "collaboration": {
+      "title": "协作",
+      "description": "无缝协同工作",
+      "label": "团队合作"
+    },
+    "automation": {
+      "title": "自动化",
+      "description": "简化工作流程",
+      "label": "效率"
+    },
+    "integration": {
+      "title": "集成",
+      "description": "连接您最喜欢的工具",
+      "label": "连接性"
+    },
+    "security": {
+      "title": "安全",
+      "description": "企业级保护",
+      "label": "保护"
+    }
+  },
+  "account": {
+    "title": "我的账户",
+    "subtitle": "个人资料信息",
+    "loading": "正在加载...",
+    "profile": {
+      "name": "用户"
+    },
+    "personalInfo": {
+      "title": "个人信息",
+      "name": "姓名",
+      "email": "电子邮件",
+      "userId": "用户 ID"
+    },
+    "contactInfo": {
+      "title": "联系信息"
+    },
+    "authInfo": {
+      "title": "验证信息",
+      "status": "状态",
+      "authenticated": "已验证",
+      "provider": "提供商",
+      "sub": "Auth0 Sub"
+    },
+    "picture": {
+      "title": "个人资料图片",
+      "providedBy": "Auth0 提供的个人资料图片",
+      "unavailable": "没有可用的个人资料图片"
+    },
+    "gravatar": {
+      "title": "Gravatar 个人资料",
+      "loading": "正在加载 Gravatar 个人资料...",
+      "displayName": "Gravatar 名称",
+      "location": "位置",
+      "preferredUsername": "首选用户名",
+      "biography": "个人简介",
+      "links": "链接",
+      "social": "社交网络",
+      "verified": "已验证",
+      "fullProfile": "完整个人资料",
+      "viewProfile": "在 Gravatar 上查看完整相关资料"
+    },
+    "history": {
+      "title": "更改历史记录"
+    }
+  },
+  "support": {
+    "title": "支持",
+    "subtitle": "帮助和支持中心",
+    "documentation": {
+      "title": "文档",
+      "description": "指南和技术文档"
+    },
+    "contact": {
+      "title": "联系我们",
+      "description": "联系我们的团队"
+    },
+    "faq": {
+      "title": "常见问题解答",
+      "description": "常见问题"
+    }
   }
 }

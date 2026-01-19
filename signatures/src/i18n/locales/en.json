@@ -94,7 +94,8 @@
       "creating": "Creating...",
       "allRecipientsRequired": "All recipients must have first_name, last_name and email",
       "addAtLeastOne": "Please add at least one recipient",
-      "validateIdentifierFirst": "Please validate identifier first"
+      "validateIdentifierFirst": "Please validate the identifier first",
+      "invalidEmail": "The email {{email}} is not valid"
     },
     "step4": {
       "title": "4. Update Fields",

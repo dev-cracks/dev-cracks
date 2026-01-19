@@ -277,7 +277,7 @@ export const courses: Course[] = [
 
 export const CoursesPage = () => {
   const { t } = useTranslation('dev-coach');
-  
+
   const items = [
     {
       label: t('navigation.routes'),
@@ -344,7 +344,7 @@ export const CoursesPage = () => {
         buttonTextColor="#fff"
         ease="power3.out"
       />
-      
+
       <div className="courses-container">
         <div className="courses-header">
           <h1 className="courses-title">
@@ -357,7 +357,7 @@ export const CoursesPage = () => {
 
         {Object.entries(coursesByCategory).map(([category, categoryCourses]) => (
           <section key={category} id={category.toLowerCase()} className="courses-section">
-            <h2 className="courses-section-title">{category}</h2>
+            <h2 className="courses-section-title">{t(`categories.${category}`)}</h2>
             <div className="courses-grid">
               {/* Tarjeta destacada para C# de cero a experto en la sección Backend */}
               {category === 'Backend' && (
@@ -371,7 +371,7 @@ export const CoursesPage = () => {
                   <Link
                     to="/csharp-course"
                     className="course-card featured-course-card"
-                    style={{ 
+                    style={{
                       background: 'rgba(13, 7, 22, 0.95)',
                       border: 'none',
                       position: 'relative',
@@ -381,7 +381,7 @@ export const CoursesPage = () => {
                     <div className="course-card-header">
                       <span
                         className="course-level-badge"
-                        style={{ 
+                        style={{
                           backgroundColor: '#7df9ff',
                           color: '#000',
                           fontWeight: '700',
@@ -389,41 +389,40 @@ export const CoursesPage = () => {
                           padding: '0.5rem 1rem'
                         }}
                       >
-                        ⭐ CURSO DESTACADO
+                        {t('highlight.badge')}
                       </span>
-                      <span className="course-duration" style={{ color: '#7df9ff' }}>Completo</span>
+                      <span className="course-duration" style={{ color: '#7df9ff' }}>{t('highlight.duration')}</span>
                     </div>
-                    <h3 className="course-card-title" style={{ 
+                    <h3 className="course-card-title" style={{
                       fontSize: '1.75rem',
                       background: 'linear-gradient(135deg, #7df9ff 0%, #B19EEF 100%)',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       backgroundClip: 'text'
                     }}>
-                      C# de cero a experto
+                      {t('highlight.title')}
                     </h3>
                     <p className="course-card-description" style={{ fontSize: '1.1rem', lineHeight: '1.6' }}>
-                      Guía completa de aprendizaje desde fundamentos hasta arquitectura empresarial. 
-                      Domina C# desde Trainee hasta Arquitecto con contenido teórico y challenges prácticos.
+                      {t('highlight.description')}
                     </p>
                     <div className="course-topics">
-                      <span className="course-topics-label">Niveles incluidos:</span>
+                      <span className="course-topics-label">{t('highlight.topicsLabel')}</span>
                       <ul className="course-topics-list">
-                        <li>Trainee - Fundamentos del lenguaje</li>
-                        <li>Junior - POO, excepciones, colecciones</li>
-                        <li>Middle - Async/await, pattern matching</li>
-                        <li>Senior - Reflexión, performance</li>
-                        <li>Tech Lead - SOLID, arquitectura</li>
-                        <li>Arquitecto - Microservicios, diseño de sistemas</li>
+                        <li>{t('highlight.levels.trainee')}</li>
+                        <li>{t('highlight.levels.junior')}</li>
+                        <li>{t('highlight.levels.middle')}</li>
+                        <li>{t('highlight.levels.senior')}</li>
+                        <li>{t('highlight.levels.techLead')}</li>
+                        <li>{t('highlight.levels.architect')}</li>
                       </ul>
                     </div>
                     <div className="course-card-footer">
-                      <span className="course-card-link" style={{ 
+                      <span className="course-card-link" style={{
                         color: '#7df9ff',
                         fontSize: '1.1rem',
                         fontWeight: '600'
                       }}>
-                        Comenzar curso → 
+                        {t('highlight.link')}
                       </span>
                     </div>
                   </Link>
@@ -440,28 +439,30 @@ export const CoursesPage = () => {
                       className="course-level-badge"
                       style={{ backgroundColor: getLevelColor(course.level) }}
                     >
-                      {course.level}
+                      {course.level === 'Senior' && t('levels.senior')}
+                      {course.level === 'Arquitecto' && t('levels.architect')}
+                      {course.level === 'Tech Lead' && t('levels.techLead')}
                     </span>
                     <span className="course-duration">{course.duration}</span>
                   </div>
-                  <h3 className="course-card-title">{course.title}</h3>
-                  <p className="course-card-description">{course.description}</p>
+                  <h3 className="course-card-title">{t(`coursesList.${course.id}.title`)}</h3>
+                  <p className="course-card-description">{t(`coursesList.${course.id}.description`)}</p>
                   <div className="course-topics">
-                    <span className="course-topics-label">Temas principales:</span>
+                    <span className="course-topics-label">{t('courses.topics')}:</span>
                     <ul className="course-topics-list">
-                      {course.topics.slice(0, 4).map((topic, idx) => (
+                      {(t(`coursesList.${course.id}.topics`, { returnObjects: true }) as string[]).slice(0, 4).map((topic, idx) => (
                         <li key={idx}>{topic}</li>
                       ))}
-                      {course.topics.length > 4 && (
+                      {(t(`coursesList.${course.id}.topics`, { returnObjects: true }) as string[]).length > 4 && (
                         <li className="course-topics-more">
-                          +{course.topics.length - 4} más
+                          +{(t(`coursesList.${course.id}.topics`, { returnObjects: true }) as string[]).length - 4} más
                         </li>
                       )}
                     </ul>
                   </div>
                   <div className="course-card-footer">
                     <span className="course-card-link">
-                      Ver curso →
+                      {t('courses.viewCourse')} →
                     </span>
                   </div>
                 </Link>

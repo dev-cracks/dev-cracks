@@ -52,8 +52,8 @@ export const AccountPage = () => {
       <main className="account-page__content-wrapper">
         <div className="account-page__container">
           <div className="account-page__header">
-            <h1>Mi Cuenta</h1>
-            <p>Información de tu perfil</p>
+            <h1>{t('account.title')}</h1>
+            <p>{t('account.subtitle')}</p>
           </div>
 
           <div className="account-page__content">
@@ -70,7 +70,7 @@ export const AccountPage = () => {
                 </div>
                 <div className="account-page__profile-info">
                   <h2 className="account-page__profile-name">
-                    {user.name || 'Usuario'}
+                    {user.name || t('account.profile.name')}
                   </h2>
                   <p className="account-page__profile-email">{user.email}</p>
                 </div>
@@ -78,33 +78,33 @@ export const AccountPage = () => {
             </div>
 
             <div className="account-page__card">
-              <h3 className="account-page__card-title">Información Personal</h3>
+              <h3 className="account-page__card-title">{t('account.personalInfo.title')}</h3>
               <div className="account-page__info-grid">
                 <div className="account-page__info-item">
-                  <label className="account-page__info-label">Nombre</label>
+                  <label className="account-page__info-label">{t('account.personalInfo.name')}</label>
                   <div className="account-page__info-value">
                     {user.name || t('userDataEditor.notSpecified')}
                   </div>
                 </div>
 
                 <div className="account-page__info-item">
-                  <label className="account-page__info-label">Email</label>
+                  <label className="account-page__info-label">{t('account.personalInfo.email')}</label>
                   <div className="account-page__info-value">
                     {user.email}
                   </div>
                 </div>
 
                 <div className="account-page__info-item">
-                  <label className="account-page__info-label">ID de Usuario</label>
+                  <label className="account-page__info-label">{t('account.personalInfo.userId')}</label>
                   <div className="account-page__info-value account-page__info-value--mono">
                     {user.id}
                   </div>
                 </div>
               </div>
-              
+
               <div className="account-page__section-divider"></div>
-              
-              <div className="account-page__section-subtitle">Datos de Contacto</div>
+
+              <div className="account-page__section-subtitle">{t('account.contactInfo.title')}</div>
               <UserDataEditor
                 userId={user.id}
                 initialEmail={user.email}
@@ -115,33 +115,33 @@ export const AccountPage = () => {
             </div>
 
             <div className="account-page__card">
-              <h3 className="account-page__card-title">Información de Autenticación</h3>
+              <h3 className="account-page__card-title">{t('account.authInfo.title')}</h3>
               <div className="account-page__info-grid">
                 <div className="account-page__info-item">
-                  <label className="account-page__info-label">Estado</label>
+                  <label className="account-page__info-label">{t('account.authInfo.status')}</label>
                   <div className="account-page__info-value">
                     <span className="account-page__status account-page__status--active">
-                      Autenticado
+                      {t('account.authInfo.authenticated')}
                     </span>
                   </div>
                 </div>
 
                 <div className="account-page__info-item">
-                  <label className="account-page__info-label">Proveedor</label>
+                  <label className="account-page__info-label">{t('account.authInfo.provider')}</label>
                   <div className="account-page__info-value">Auth0</div>
                 </div>
 
                 <div className="account-page__info-item">
-                  <label className="account-page__info-label">Auth0 Sub</label>
+                  <label className="account-page__info-label">{t('account.authInfo.sub')}</label>
                   <div className="account-page__info-value account-page__info-value--mono">
                     {user.sub}
                   </div>
                 </div>
               </div>
-              
+
               <div className="account-page__section-divider"></div>
-              
-              <div className="account-page__section-subtitle">Foto de Perfil</div>
+
+              <div className="account-page__section-subtitle">{t('account.picture.title')}</div>
               <div className="account-page__picture-section">
                 <Avatar
                   picture={user.picture}
@@ -152,24 +152,24 @@ export const AccountPage = () => {
                   className="account-page__picture-avatar"
                 />
                 <p className="account-page__picture-note">
-                  {user.picture 
-                    ? 'Foto de perfil proporcionada por Auth0' 
-                    : 'No hay foto de perfil disponible'}
+                  {user.picture
+                    ? t('account.picture.providedBy')
+                    : t('account.picture.unavailable')}
                 </p>
               </div>
             </div>
 
             {gravatarProfile && (
               <div className="account-page__card">
-                <h3 className="account-page__card-title">Perfil de Gravatar</h3>
+                <h3 className="account-page__card-title">{t('account.gravatar.title')}</h3>
                 {isLoadingGravatar ? (
-                  <p style={{ color: 'rgba(255, 255, 255, 0.7)', textAlign: 'center' }}>Cargando perfil de Gravatar...</p>
+                  <p style={{ color: 'rgba(255, 255, 255, 0.7)', textAlign: 'center' }}>{t('account.gravatar.loading')}</p>
                 ) : (
                   <>
                     <div className="account-page__info-grid">
                       {gravatarProfile.displayName && (
                         <div className="account-page__info-item">
-                          <label className="account-page__info-label">Nombre de Gravatar</label>
+                          <label className="account-page__info-label">{t('account.gravatar.displayName')}</label>
                           <div className="account-page__info-value">
                             {gravatarProfile.displayName}
                           </div>
@@ -178,7 +178,7 @@ export const AccountPage = () => {
 
                       {gravatarProfile.currentLocation && (
                         <div className="account-page__info-item">
-                          <label className="account-page__info-label">Ubicación</label>
+                          <label className="account-page__info-label">{t('account.gravatar.location')}</label>
                           <div className="account-page__info-value">
                             {gravatarProfile.currentLocation}
                           </div>
@@ -187,7 +187,7 @@ export const AccountPage = () => {
 
                       {gravatarProfile.preferredUsername && (
                         <div className="account-page__info-item">
-                          <label className="account-page__info-label">Usuario Preferido</label>
+                          <label className="account-page__info-label">{t('account.gravatar.preferredUsername')}</label>
                           <div className="account-page__info-value">
                             {gravatarProfile.preferredUsername}
                           </div>
@@ -198,8 +198,8 @@ export const AccountPage = () => {
                     {gravatarProfile.aboutMe && (
                       <>
                         <div className="account-page__section-divider"></div>
-                        <div className="account-page__section-subtitle">Biografía</div>
-                        <div className="account-page__info-value" style={{ 
+                        <div className="account-page__section-subtitle">{t('account.gravatar.biography')}</div>
+                        <div className="account-page__info-value" style={{
                           lineHeight: '1.6',
                           padding: '1rem',
                           background: 'rgba(0, 0, 0, 0.2)',
@@ -214,17 +214,17 @@ export const AccountPage = () => {
                     {gravatarProfile.urls && gravatarProfile.urls.length > 0 && (
                       <>
                         <div className="account-page__section-divider"></div>
-                        <div className="account-page__section-subtitle">Enlaces</div>
+                        <div className="account-page__section-subtitle">{t('account.gravatar.links')}</div>
                         <div className="account-page__info-grid">
                           {gravatarProfile.urls.map((url, index) => (
                             <div key={index} className="account-page__info-item">
                               <label className="account-page__info-label">{url.title || 'Enlace'}</label>
                               <div className="account-page__info-value">
-                                <a 
-                                  href={url.value} 
-                                  target="_blank" 
+                                <a
+                                  href={url.value}
+                                  target="_blank"
                                   rel="noopener noreferrer"
-                                  style={{ 
+                                  style={{
                                     color: '#4A90E2',
                                     textDecoration: 'none',
                                     wordBreak: 'break-all'
@@ -242,7 +242,7 @@ export const AccountPage = () => {
                     {gravatarProfile.accounts && gravatarProfile.accounts.length > 0 && (
                       <>
                         <div className="account-page__section-divider"></div>
-                        <div className="account-page__section-subtitle">Redes Sociales</div>
+                        <div className="account-page__section-subtitle">{t('account.gravatar.social')}</div>
                         <div className="account-page__info-grid">
                           {gravatarProfile.accounts
                             .filter(account => account.verified)
@@ -251,20 +251,20 @@ export const AccountPage = () => {
                                 <label className="account-page__info-label">
                                   {account.domain}
                                   {account.verified && (
-                                    <span style={{ 
+                                    <span style={{
                                       marginLeft: '0.5rem',
                                       color: '#4A90E2',
                                       fontSize: '0.75rem'
-                                    }}>✓ Verificado</span>
+                                    }}>✓ {t('account.gravatar.verified')}</span>
                                   )}
                                 </label>
                                 <div className="account-page__info-value">
                                   {account.url ? (
-                                    <a 
-                                      href={account.url} 
-                                      target="_blank" 
+                                    <a
+                                      href={account.url}
+                                      target="_blank"
                                       rel="noopener noreferrer"
-                                      style={{ 
+                                      style={{
                                         color: '#4A90E2',
                                         textDecoration: 'none',
                                         wordBreak: 'break-all'
@@ -285,19 +285,19 @@ export const AccountPage = () => {
                     {gravatarProfile.profileUrl && (
                       <>
                         <div className="account-page__section-divider"></div>
-                        <div className="account-page__section-subtitle">Perfil Completo</div>
+                        <div className="account-page__section-subtitle">{t('account.gravatar.fullProfile')}</div>
                         <div className="account-page__info-value">
-                          <a 
-                            href={gravatarProfile.profileUrl} 
-                            target="_blank" 
+                          <a
+                            href={gravatarProfile.profileUrl}
+                            target="_blank"
                             rel="noopener noreferrer"
-                            style={{ 
+                            style={{
                               color: '#4A90E2',
                               textDecoration: 'none',
                               wordBreak: 'break-all'
                             }}
                           >
-                            Ver perfil completo en Gravatar
+                            {t('account.gravatar.viewProfile')}
                           </a>
                         </div>
                       </>
@@ -308,7 +308,7 @@ export const AccountPage = () => {
             )}
 
             <div className="account-page__card">
-              <h3 className="account-page__card-title">Historial de Cambios</h3>
+              <h3 className="account-page__card-title">{t('account.history.title')}</h3>
               <ChangeHistory userId={user.id} refreshTrigger={historyRefreshTrigger} />
             </div>
           </div>

@@ -28,12 +28,246 @@
     "duration": "Duration",
     "topics": "Topics",
     "viewCourse": "View Course",
-    "noCourses": "No courses available"
+    "noCourses": "No courses available",
+    "notFound": "Course not found",
+    "back": "Back to courses",
+    "backLink": "← Back to courses"
+  },
+  "editor": {
+    "open": "Open Code Editor",
+    "hide": "Hide Editor"
   },
   "levels": {
     "senior": "Senior",
     "architect": "Architect",
     "techLead": "Tech Lead"
+  },
+  "categories": {
+    "Arquitectura": "Architecture",
+    "Frontend": "Frontend",
+    "Backend": "Backend",
+    "Seguridad": "Security",
+    "Calidad": "Quality",
+    "Performance": "Performance",
+    "DevOps": "DevOps",
+    "Cloud": "Cloud"
+  },
+  "home": {
+    "title": "Developer Training",
+    "subtitle": "Take your career from Junior to Senior, Tech Lead or Architect",
+    "cta": "Explore Courses"
+  },
+  "highlight": {
+    "badge": "⭐ FEATURED COURSE",
+    "duration": "Complete",
+    "title": "C# from zero to expert",
+    "description": "Complete learning guide from fundamentals to enterprise architecture. Master C# from Trainee to Architect with theoretical content and practical challenges.",
+    "topicsLabel": "Levels included:",
+    "link": "Start course →",
+    "levels": {
+      "trainee": "Trainee - Language Fundamentals",
+      "junior": "Junior - OOP, exceptions, collections",
+      "middle": "Middle - Async/await, pattern matching",
+      "senior": "Senior - Reflection, performance",
+      "techLead": "Tech Lead - SOLID, architecture",
+      "architect": "Architect - Microservices, system design"
+    }
+  },
+  "coursesList": {
+    "clean-architecture": {
+      "title": "Clean Architecture and DDD",
+      "description": "Learn to design clean and scalable architectures using Domain Driven Design",
+      "topics": [
+        "SOLID Principles",
+        "Domain Driven Design (DDD)",
+        "Clean Architecture",
+        "CQRS and Event Sourcing",
+        "Bounded Contexts",
+        "Aggregates and Entities"
+      ]
+    },
+    "microservices": {
+      "title": "Microservices Architecture",
+      "description": "Design and build scalable distributed systems with microservices",
+      "topics": [
+        "Microservices Design",
+        "Service Discovery",
+        "API Gateway",
+        "Message Queues (RabbitMQ, Azure Service Bus)",
+        "Distributed Tracing",
+        "Circuit Breaker Pattern",
+        "Saga Pattern"
+      ]
+    },
+    "react-advanced": {
+      "title": "Advanced React and Optimization",
+      "description": "Master React at a senior level: advanced hooks, performance and patterns",
+      "topics": [
+        "Advanced Custom Hooks",
+        "Context API and State Management",
+        "React.memo and useMemo",
+        "Code Splitting and Lazy Loading",
+        "Suspense and Concurrent Features",
+        "Performance Optimization",
+        "Testing with React Testing Library"
+      ]
+    },
+    "dotnet-advanced": {
+      "title": "Advanced .NET Core",
+      "description": "Deep dive into .NET Core: performance, async/await, and advanced patterns",
+      "topics": [
+        "Async/Await and Task Parallel Library",
+        "Advanced Dependency Injection",
+        "Middleware and Pipeline",
+        "Advanced Entity Framework Core",
+        "Performance and Memory Management",
+        "Background Services",
+        "SignalR for Real-time"
+      ]
+    },
+    "api-design": {
+      "title": "REST and GraphQL API Design",
+      "description": "Create robust, scalable and well-documented APIs",
+      "topics": [
+        "RESTful API Design",
+        "GraphQL Schema Design",
+        "API Versioning",
+        "Rate Limiting and Throttling",
+        "OpenAPI/Swagger",
+        "API Security Best Practices",
+        "Error Handling and Status Codes"
+      ]
+    },
+    "authentication": {
+      "title": "Authentication and Authorization",
+      "description": "Implement secure authentication and authorization systems",
+      "topics": [
+        "OAuth 2.0 and OpenID Connect",
+        "JWT Tokens",
+        "Identity Server",
+        "Role-Based Access Control (RBAC)",
+        "Policy-Based Authorization",
+        "Multi-tenancy",
+        "SSO (Single Sign-On)"
+      ]
+    },
+    "testing": {
+      "title": "Advanced Testing",
+      "description": "Complete testing strategies: unit, integration and E2E",
+      "topics": [
+        "Unit Testing with xUnit and Jest",
+        "Integration Testing",
+        "E2E Testing with Playwright/Cypress",
+        "Test-Driven Development (TDD)",
+        "Mocking and Stubbing",
+        "Test Coverage and Quality Gates",
+        "API Testing"
+      ]
+    },
+    "performance": {
+      "title": "Performance and Optimization",
+      "description": "Optimize applications for maximum performance",
+      "topics": [
+        "Profiling and Performance Analysis",
+        "Database Optimization",
+        "Caching Strategies (Redis, Memory Cache)",
+        "CDN and Asset Optimization",
+        "Lazy Loading and Code Splitting",
+        "Database Indexing",
+        "Query Optimization"
+      ]
+    },
+    "devops": {
+      "title": "DevOps and CI/CD",
+      "description": "Automate infrastructure deployment and management",
+      "topics": [
+        "Docker and Containerization",
+        "Kubernetes",
+        "CI/CD with GitHub Actions/Azure DevOps",
+        "Infrastructure as Code (Terraform)",
+        "Monitoring and Logging",
+        "Blue-Green Deployments",
+        "Feature Flags"
+      ]
+    },
+    "cloud-azure": {
+      "title": "Cloud Computing with Azure",
+      "description": "Deploy and manage applications in the cloud with Azure",
+      "topics": [
+        "Azure App Service",
+        "Azure Functions and Serverless",
+        "Azure SQL Database",
+        "Azure Service Bus",
+        "Azure Key Vault",
+        "Azure Active Directory",
+        "Azure DevOps"
+      ]
+    },
+    "databases": {
+      "title": "Advanced Databases",
+      "description": "Design and optimization of SQL and NoSQL databases",
+      "topics": [
+        "Advanced SQL Server",
+        "PostgreSQL and MySQL",
+        "NoSQL (MongoDB, Cosmos DB)",
+        "Database Sharding",
+        "Read Replicas",
+        "Transaction Management",
+        "Data Modeling"
+      ]
+    },
+    "message-queues": {
+      "title": "Message Queues and Event-Driven Architecture",
+      "description": "Build asynchronous and decoupled systems",
+      "topics": [
+        "RabbitMQ",
+        "Azure Service Bus",
+        "Apache Kafka",
+        "Event-Driven Architecture",
+        "Pub/Sub Patterns",
+        "Message Ordering and Delivery Guarantees",
+        "Dead Letter Queues"
+      ]
+    },
+    "security": {
+      "title": "Application Security",
+      "description": "Protect your applications against common vulnerabilities",
+      "topics": [
+        "OWASP Top 10",
+        "SQL Injection Prevention",
+        "XSS and CSRF Protection",
+        "Secure Coding Practices",
+        "Encryption and Hashing",
+        "Security Headers",
+        "Penetration Testing"
+      ]
+    },
+    "typescript-advanced": {
+      "title": "Advanced TypeScript",
+      "description": "Master TypeScript: advanced types, generics and utilities",
+      "topics": [
+        "Advanced Types",
+        "Generics and Constraints",
+        "Utility Types",
+        "Type Guards and Type Assertions",
+        "Decorators",
+        "Module Resolution",
+        "TypeScript Compiler Options"
+      ]
+    },
+    "state-management": {
+      "title": "Advanced State Management",
+      "description": "Manage complex state with Redux, Zustand and Context API",
+      "topics": [
+        "Redux Toolkit",
+        "Zustand",
+        "Context API Patterns",
+        "State Normalization",
+        "Middleware and Enhancers",
+        "Time Travel Debugging",
+        "State Persistence"
+      ]
+    }
   },
   "page": {
     "title": "Courses for Fullstack .NET React Developers",

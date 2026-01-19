@@ -36,7 +36,7 @@ import SigningRequestEditor from '../components/SigningRequestEditor';
 export default function RequestSignature() {
   const { t } = useTranslation();
   const { isAuthenticated, getAccessToken } = useAuth();
-  
+
   const steps = [
     t('requestSignature.steps.identifier'),
     t('requestSignature.steps.workspaceTemplate'),
@@ -55,7 +55,7 @@ export default function RequestSignature() {
   const [templateFields, setTemplateFields] = useState<any[]>([]);
   const [fieldValues, setFieldValues] = useState<Record<string, any>>({});
   const [createdSigningRequest, setCreatedSigningRequest] = useState<FirmaSigningRequestResponse | null>(null);
-  
+
   const [loadingWorkspaces, setLoadingWorkspaces] = useState(false);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
   const [creatingRequest, setCreatingRequest] = useState(false);
@@ -123,7 +123,7 @@ export default function RequestSignature() {
 
       setTemplates(enrichedTemplates);
     } catch (err: any) {
-      setError(`Error al cargar plantillas: ${err.message}`);
+      setError(`${t('requestSignature.errors.loadTemplates')}: ${err.message}`);
       setTemplates([]);
     } finally {
       setLoadingTemplates(false);
@@ -132,7 +132,7 @@ export default function RequestSignature() {
 
   const loadTemplateFields = async () => {
     if (!selectedWorkspaceId || !selectedTemplateId) return;
-    
+
     setError(null);
     try {
       const fields = await firmaApi.getFirmaTemplateFields(selectedWorkspaceId, selectedTemplateId);
@@ -183,13 +183,13 @@ export default function RequestSignature() {
   const validateRecipients = (): boolean => {
     for (const recipient of recipients) {
       if (!recipient.first_name.trim() || !recipient.last_name.trim() || !recipient.email.trim()) {
-        setError('Todos los recipients deben tener first_name, last_name y email');
+        setError(t('requestSignature.step3.allRecipientsRequired'));
         return false;
       }
       // Validar email básico
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(recipient.email)) {
-        setError(`El email ${recipient.email} no es válido`);
+        setError(t('requestSignature.step3.invalidEmail', { email: recipient.email }));
         return false;
       }
     }
@@ -198,17 +198,17 @@ export default function RequestSignature() {
 
   const handleCreateSigningRequest = async () => {
     if (!selectedWorkspaceId || !selectedTemplateId) {
-      setError('Por favor selecciona un workspace y una plantilla');
+      setError(t('requestSignature.step2.selectWorkspaceTemplate'));
       return;
     }
 
     if (!identificador.trim() || !identificadorValidated) {
-      setError('Por favor valida el identificador primero');
+      setError(t('requestSignature.step3.validateIdentifierFirst'));
       return;
     }
 
     if (recipients.length === 0) {
-      setError('Por favor agrega al menos un recipient');
+      setError(t('requestSignature.step3.addAtLeastOne'));
       return;
     }
 
@@ -233,7 +233,7 @@ export default function RequestSignature() {
       const response = await firmaApi.createFirmaSigningRequest(selectedWorkspaceId, request);
       setCreatedSigningRequest(response);
       setFirmaSigningRequestId(response.id);
-      
+
       // Actualizar recipients con los IDs de la respuesta si están disponibles
       if (response.recipients && Array.isArray(response.recipients)) {
         const updatedRecipients = recipients.map((recipient, index) => {
@@ -280,7 +280,7 @@ export default function RequestSignature() {
     try {
       // Obtener recipients de la signing request creada si están disponibles
       const requestRecipients = (createdSigningRequest as any)?.recipients || recipients;
-      
+
       // Convertir templateFields a SigningRequestField con los valores editados
       const fields: SigningRequestField[] = templateFields
         .map((field, index) => {
@@ -288,20 +288,20 @@ export default function RequestSignature() {
           // Asignar campos a recipients según el orden
           const recipientIndex = index % requestRecipients.length;
           const recipient = requestRecipients[recipientIndex];
-          
+
           // Obtener el valor del campo desde fieldValues
           const fieldValue = fieldValues[fieldId];
           let fieldType = field.type || field.fieldType || field.FieldType || 'text';
-          
+
           // Mapear tipos no válidos a tipos válidos para firma.dev
           // firma.dev no acepta "number", se mapea a "text"
           if (fieldType === 'number') {
             fieldType = 'text';
           }
-          
+
           // Usar el recipient_id del campo original si existe, sino usar el del recipient asignado
           const recipientId = field.recipientId || field.RecipientId || recipient?.id || '';
-          
+
           // Construir el objeto del campo
           const fieldObj: SigningRequestField = {
             id: fieldId, // Incluir ID si existe para actualizar campos existentes
@@ -321,7 +321,7 @@ export default function RequestSignature() {
           if (fieldType !== 'signature' && fieldType !== 'initial') {
             if (fieldValue !== undefined && fieldValue !== null && fieldValue !== '') {
               let processedValue = String(fieldValue);
-              
+
               // Validar y corregir formato de fechas
               if (fieldType === 'date') {
                 // Verificar que la fecha tenga un formato válido (YYYY-MM-DD)
@@ -345,7 +345,7 @@ export default function RequestSignature() {
                   }
                 }
               }
-              
+
               fieldObj.value = processedValue;
             }
           }
@@ -396,7 +396,7 @@ export default function RequestSignature() {
       setSuccessMessage(t('requestSignature.step4.requestSent'));
       setError(null);
       setRequestSent(true);
-      
+
       // Actualizar el estado de la signing request
       if (createdSigningRequest) {
         setCreatedSigningRequest({
@@ -524,9 +524,9 @@ export default function RequestSignature() {
       {/* Accordion con los pasos */}
       <Box>
         {/* Paso 1: Identificador */}
-        <Accordion 
-          expanded={activeStep === 0 && !requestSent} 
-          onChange={() => handleStepChange(0)} 
+        <Accordion
+          expanded={activeStep === 0 && !requestSent}
+          onChange={() => handleStepChange(0)}
           disabled={requestSent}
           sx={{ mb: 2 }}
         >
@@ -571,9 +571,9 @@ export default function RequestSignature() {
         </Accordion>
 
         {/* Paso 2: Workspace y Template */}
-        <Accordion 
-          expanded={activeStep === 1 && !requestSent} 
-          onChange={() => handleStepChange(1)} 
+        <Accordion
+          expanded={activeStep === 1 && !requestSent}
+          onChange={() => handleStepChange(1)}
           disabled={requestSent || !identificadorValidated}
           sx={{ mb: 2 }}
         >
@@ -637,9 +637,9 @@ export default function RequestSignature() {
         </Accordion>
 
         {/* Paso 3: Recipientes */}
-        <Accordion 
-          expanded={activeStep === 2 && !requestSent} 
-          onChange={() => handleStepChange(2)} 
+        <Accordion
+          expanded={activeStep === 2 && !requestSent}
+          onChange={() => handleStepChange(2)}
           disabled={requestSent}
           sx={{ mb: 2 }}
         >
@@ -672,84 +672,84 @@ export default function RequestSignature() {
               <Card key={index} sx={{ mb: 2 }}>
                 <CardContent>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="subtitle2">{t('requestSignature.step3.recipient')} {index + 1}</Typography>
-                  <IconButton
-                    size="small"
-                    onClick={() => handleRemoveRecipient(index)}
-                    color="error"
-                    disabled={requestSent}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </Box>
+                    <Typography variant="subtitle2">{t('requestSignature.step3.recipient')} {index + 1}</Typography>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleRemoveRecipient(index)}
+                      color="error"
+                      disabled={requestSent}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
 
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <TextField
-                      fullWidth
-                      label={`${t('requestSignature.step3.firstName')} *`}
-                      value={recipient.first_name}
-                      onChange={(e) => handleRecipientChange(index, 'first_name', e.target.value)}
-                      size="small"
-                      disabled={requestSent}
-                    />
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <TextField
+                        fullWidth
+                        label={`${t('requestSignature.step3.firstName')} *`}
+                        value={recipient.first_name}
+                        onChange={(e) => handleRecipientChange(index, 'first_name', e.target.value)}
+                        size="small"
+                        disabled={requestSent}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        fullWidth
+                        label={`${t('requestSignature.step3.lastName')} *`}
+                        value={recipient.last_name}
+                        onChange={(e) => handleRecipientChange(index, 'last_name', e.target.value)}
+                        size="small"
+                        disabled={requestSent}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label={`${t('requestSignature.step3.email')} *`}
+                        type="email"
+                        value={recipient.email}
+                        onChange={(e) => handleRecipientChange(index, 'email', e.target.value)}
+                        size="small"
+                        disabled={requestSent}
+                      />
+                    </Grid>
+                    <Grid item xs={8}>
+                      <FormControl fullWidth size="small" disabled={requestSent}>
+                        <InputLabel>{t('requestSignature.step3.designation')}</InputLabel>
+                        <Select
+                          value={recipient.designation}
+                          label={t('requestSignature.step3.designation')}
+                          onChange={(e) => handleRecipientChange(index, 'designation', e.target.value)}
+                        >
+                          <MenuItem value="Signer">{t('requestSignature.step3.designationSigner')}</MenuItem>
+                          <MenuItem value="CC">{t('requestSignature.step3.designationCC')}</MenuItem>
+                          <MenuItem value="Approver">{t('requestSignature.step3.designationApprover')}</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        fullWidth
+                        label={t('requestSignature.step3.order')}
+                        type="number"
+                        value={recipient.order || index + 1}
+                        onChange={(e) => handleRecipientChange(index, 'order', parseInt(e.target.value) || index + 1)}
+                        size="small"
+                        disabled={requestSent}
+                      />
+                    </Grid>
                   </Grid>
-                  <Grid item xs={6}>
-                    <TextField
-                      fullWidth
-                      label={`${t('requestSignature.step3.lastName')} *`}
-                      value={recipient.last_name}
-                      onChange={(e) => handleRecipientChange(index, 'last_name', e.target.value)}
-                      size="small"
-                      disabled={requestSent}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      label={`${t('requestSignature.step3.email')} *`}
-                      type="email"
-                      value={recipient.email}
-                      onChange={(e) => handleRecipientChange(index, 'email', e.target.value)}
-                      size="small"
-                      disabled={requestSent}
-                    />
-                  </Grid>
-                  <Grid item xs={8}>
-                    <FormControl fullWidth size="small" disabled={requestSent}>
-                      <InputLabel>{t('requestSignature.step3.designation')}</InputLabel>
-                      <Select
-                        value={recipient.designation}
-                        label={t('requestSignature.step3.designation')}
-                        onChange={(e) => handleRecipientChange(index, 'designation', e.target.value)}
-                      >
-                        <MenuItem value="Signer">{t('requestSignature.step3.designationSigner')}</MenuItem>
-                        <MenuItem value="CC">{t('requestSignature.step3.designationCC')}</MenuItem>
-                        <MenuItem value="Approver">{t('requestSignature.step3.designationApprover')}</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <TextField
-                      fullWidth
-                      label={t('requestSignature.step3.order')}
-                      type="number"
-                      value={recipient.order || index + 1}
-                      onChange={(e) => handleRecipientChange(index, 'order', parseInt(e.target.value) || index + 1)}
-                      size="small"
-                      disabled={requestSent}
-                    />
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
             ))}
 
             {recipients.length === 0 && (
               <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
                 {t('requestSignature.step3.noRecipients')}
-                </Typography>
-              )}
+              </Typography>
+            )}
 
             <Button
               variant="contained"
@@ -772,9 +772,9 @@ export default function RequestSignature() {
 
         {/* Paso 4: Actualizar Campos */}
         {createdSigningRequest && (
-          <Accordion 
-            expanded={activeStep === 3 && !requestSent} 
-            onChange={() => handleStepChange(3)} 
+          <Accordion
+            expanded={activeStep === 3 && !requestSent}
+            onChange={() => handleStepChange(3)}
             disabled={requestSent}
             sx={{ mb: 2 }}
           >
@@ -794,7 +794,7 @@ export default function RequestSignature() {
                 <Box sx={{ mb: 1 }}>
                   <Typography component="span" variant="body1">
                     <strong>{t('requestSignature.step4.name')}:</strong> {createdSigningRequest.name}
-                </Typography>
+                  </Typography>
                 </Box>
                 <Box sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography component="span" variant="body1">
@@ -817,12 +817,12 @@ export default function RequestSignature() {
               {/* Campos del Template - Formulario Editable */}
               {templateFields.length > 0 && (
                 <Box sx={{ mb: 2 }}>
-                  <Paper 
-                    elevation={2} 
-                    sx={{ 
-                      p: 2, 
-                      mb: 2, 
-                      bgcolor: 'primary.light', 
+                  <Paper
+                    elevation={2}
+                    sx={{
+                      p: 2,
+                      mb: 2,
+                      bgcolor: 'primary.light',
                       background: 'linear-gradient(135deg, rgba(25, 118, 210, 0.1) 0%, rgba(25, 118, 210, 0.05) 100%)',
                       border: '2px solid',
                       borderColor: 'primary.main',
@@ -846,73 +846,73 @@ export default function RequestSignature() {
                         return 0;
                       })
                       .map((field, index) => {
-                      const fieldId = field.id || field.Id || `field-${index}`;
-                      const fieldType = field.type || field.fieldType || field.FieldType || 'text';
-                      const fieldName = field.fieldName || field.variableName || field.FieldName || field.VariableName || `Campo ${index + 1}`;
-                      const pageNumber = field.page_number || field.pageNumber || field.PageNumber || 1;
-                      const isRequired = field.required || field.Required || false;
-                      const isReadOnly = field.readOnly || field.ReadOnly || false;
-                      const currentValue = fieldValues[fieldId] || '';
+                        const fieldId = field.id || field.Id || `field-${index}`;
+                        const fieldType = field.type || field.fieldType || field.FieldType || 'text';
+                        const fieldName = field.fieldName || field.variableName || field.FieldName || field.VariableName || `Campo ${index + 1}`;
+                        const pageNumber = field.page_number || field.pageNumber || field.PageNumber || 1;
+                        const isRequired = field.required || field.Required || false;
+                        const isReadOnly = field.readOnly || field.ReadOnly || false;
+                        const currentValue = fieldValues[fieldId] || '';
 
-                      return (
-                        <Grid item xs={12} sm={6} md={4} key={fieldId}>
-                          <Card variant="outlined">
-                            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                              <Box sx={{ mb: 1 }}>
-                                <Typography variant="caption" color="text.secondary">
-                                  {fieldName} ({fieldType}) - {t('requestSignature.step4.page')} {pageNumber}
-                                  {isRequired && <span style={{ color: 'red' }}> {t('requestSignature.step4.required')}</span>}
-                                </Typography>
-                              </Box>
-                              {fieldType === 'dropdown' && field.dropdownOptions ? (
-                                <FormControl fullWidth size="small">
-                                  <Select
+                        return (
+                          <Grid item xs={12} sm={6} md={4} key={fieldId}>
+                            <Card variant="outlined">
+                              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                                <Box sx={{ mb: 1 }}>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {fieldName} ({fieldType}) - {t('requestSignature.step4.page')} {pageNumber}
+                                    {isRequired && <span style={{ color: 'red' }}> {t('requestSignature.step4.required')}</span>}
+                                  </Typography>
+                                </Box>
+                                {fieldType === 'dropdown' && field.dropdownOptions ? (
+                                  <FormControl fullWidth size="small">
+                                    <Select
+                                      value={currentValue}
+                                      onChange={(e) => handleFieldValueChange(fieldId, e.target.value)}
+                                      disabled={isReadOnly || requestSent}
+                                    >
+                                      {field.dropdownOptions.map((option: string, optIndex: number) => (
+                                        <MenuItem key={optIndex} value={option}>
+                                          {option}
+                                        </MenuItem>
+                                      ))}
+                                    </Select>
+                                  </FormControl>
+                                ) : fieldType === 'date' ? (
+                                  <TextField
+                                    fullWidth
+                                    type="date"
+                                    size="small"
                                     value={currentValue}
                                     onChange={(e) => handleFieldValueChange(fieldId, e.target.value)}
                                     disabled={isReadOnly || requestSent}
-                                  >
-                                    {field.dropdownOptions.map((option: string, optIndex: number) => (
-                                      <MenuItem key={optIndex} value={option}>
-                                        {option}
-                                      </MenuItem>
-                                    ))}
-                                  </Select>
-                                </FormControl>
-                              ) : fieldType === 'date' ? (
-                                <TextField
-                                  fullWidth
-                                  type="date"
-                                  size="small"
-                                  value={currentValue}
-                                  onChange={(e) => handleFieldValueChange(fieldId, e.target.value)}
-                                  disabled={isReadOnly || requestSent}
-                                  InputLabelProps={{ shrink: true }}
-                                />
-                              ) : fieldType === 'signature' || fieldType === 'initial' ? (
-                                <TextField
-                                  fullWidth
-                                  size="small"
-                                  value={currentValue || `[${t('requestSignature.step4.signatureRequired')}]`}
-                                  disabled
-                                  helperText={t('requestSignature.step4.signatureRequired')}
-                                />
-                              ) : (
-                                <TextField
-                                  fullWidth
-                                  size="small"
-                                  value={currentValue}
-                                  onChange={(e) => handleFieldValueChange(fieldId, e.target.value)}
-                                  disabled={isReadOnly || requestSent}
-                                  placeholder={`${t('requestSignature.step4.enterValue')} ${fieldName}`}
-                                  multiline={fieldType === 'textarea' || fieldType === 'text'}
-                                  rows={fieldType === 'textarea' ? 3 : 1}
-                                />
-                              )}
-                            </CardContent>
-                          </Card>
-                        </Grid>
-                      );
-                    })}
+                                    InputLabelProps={{ shrink: true }}
+                                  />
+                                ) : fieldType === 'signature' || fieldType === 'initial' ? (
+                                  <TextField
+                                    fullWidth
+                                    size="small"
+                                    value={currentValue || `[${t('requestSignature.step4.signatureRequired')}]`}
+                                    disabled
+                                    helperText={t('requestSignature.step4.signatureRequired')}
+                                  />
+                                ) : (
+                                  <TextField
+                                    fullWidth
+                                    size="small"
+                                    value={currentValue}
+                                    onChange={(e) => handleFieldValueChange(fieldId, e.target.value)}
+                                    disabled={isReadOnly || requestSent}
+                                    placeholder={`${t('requestSignature.step4.enterValue')} ${fieldName}`}
+                                    multiline={fieldType === 'textarea' || fieldType === 'text'}
+                                    rows={fieldType === 'textarea' ? 3 : 1}
+                                  />
+                                )}
+                              </CardContent>
+                            </Card>
+                          </Grid>
+                        );
+                      })}
                   </Grid>
                 </Box>
               )}
@@ -920,36 +920,36 @@ export default function RequestSignature() {
               {/* Editor de Signing Request */}
               {editorJwtToken && firmaSigningRequestId && (
                 <Box sx={{ mb: 2 }}>
-              <SigningRequestEditor
-                signingRequestId={firmaSigningRequestId}
-                jwt={editorJwtToken}
-                theme="light"
-                readOnly={requestSent}
+                  <SigningRequestEditor
+                    signingRequestId={firmaSigningRequestId}
+                    jwt={editorJwtToken}
+                    theme="light"
+                    readOnly={requestSent}
                     height="400px"
-                width="100%"
-                onSave={(data) => {
-                  console.log('Signing request saved:', data);
-                }}
-                onSend={(data) => {
-                  console.log('Signing request sent:', data);
-                }}
-                onError={(error) => {
-                  console.error('Editor error:', error);
-                  setError(`${t('requestSignature.step4.editorError')}: ${error?.message || t('requestSignature.step4.editorError')}`);
-                }}
-                onLoad={(signingRequest) => {
-                  console.log('Editor loaded successfully:', signingRequest);
-                }}
-              />
+                    width="100%"
+                    onSave={(data) => {
+                      console.log('Signing request saved:', data);
+                    }}
+                    onSend={(data) => {
+                      console.log('Signing request sent:', data);
+                    }}
+                    onError={(error) => {
+                      console.error('Editor error:', error);
+                      setError(`${t('requestSignature.step4.editorError')}: ${error?.message || t('requestSignature.step4.editorError')}`);
+                    }}
+                    onLoad={(signingRequest) => {
+                      console.log('Editor loaded successfully:', signingRequest);
+                    }}
+                  />
                 </Box>
               )}
 
               {/* Botón para actualizar campos */}
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  onClick={handleUpdateFields}
-                  disabled={updatingRequest || sendingRequest || requestSent}
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={handleUpdateFields}
+                disabled={updatingRequest || sendingRequest || requestSent}
                 fullWidth
                 sx={{ mt: 2 }}
               >

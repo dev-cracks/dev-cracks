@@ -39,6 +39,10 @@
   "staggeredMenu": {
     "closeMenu": "关闭菜单",
     "openMenu": "打开菜单",
-    "socialLinks": "社交链接"
+    "socialLinks": "社交链接",
+    "menu": "菜单",
+    "close": "关闭",
+    "noItems": "没有项目",
+    "socialsTitle": "社交网络"
   }
 }
