@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PillNav } from '../components/PillNav';
-import DarkVeil from '../components/DarkVeil';
-import MagicBento from '../components/MagicBento';
-import { useAuth } from '../hooks/useAuth';
-import { getDashboardData, ClickUpDashboardData, ClickUpTask, ClickUpStatus } from '../services/clickUpService';
+import { PillNav } from '../components/PillNav.js';
+import DarkVeil from '../components/DarkVeil.js';
+import MagicBento from '../components/MagicBento.js';
+import { useAuth } from '../hooks/useAuth.js';
+import { getDashboardData, ClickUpDashboardData, ClickUpTask, ClickUpStatus } from '../services/clickUpService.js';
 import './DashboardPage.css';
 
 export const DashboardPage = () => {
@@ -62,7 +62,7 @@ export const DashboardPage = () => {
         <div className="dashboard-page__container">
           <h1 className="dashboard-page__title">{t('dashboard.title')}</h1>
           <p className="dashboard-page__subtitle">{t('dashboard.subtitle')}</p>
-          
+
           {isLoading && (
             <div className="dashboard-page__loading">
               <p>{t('dashboard.loading')}</p>
@@ -129,18 +129,18 @@ export const DashboardPage = () => {
                       <div key={task.id} className="dashboard-page__task-card">
                         <div className="dashboard-page__task-header">
                           <h3 className="dashboard-page__task-name">
-                            <a 
-                              href={task.url} 
-                              target="_blank" 
+                            <a
+                              href={task.url}
+                              target="_blank"
                               rel="noopener noreferrer"
                               className="dashboard-page__task-link"
                             >
                               {task.name}
                             </a>
                           </h3>
-                          <span 
+                          <span
                             className="dashboard-page__task-status"
-                            style={{ 
+                            style={{
                               backgroundColor: getStatusColor(task.status),
                               color: '#fff',
                               padding: '4px 12px',
@@ -195,7 +195,7 @@ export const DashboardPage = () => {
             </>
           )}
 
-          <MagicBento 
+          <MagicBento
             textAutoHide={true}
             enableStars={true}
             enableSpotlight={true}

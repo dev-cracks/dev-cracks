@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, Link } from 'react-router-dom';
-import { CodeEditor, type ProjectFile } from '../components/CodeEditor';
-import { Preview } from '../components/Preview';
-import { courses, type Course } from './CoursesPage';
-import CardNav from '../components/CardNav';
+import { CodeEditor, type ProjectFile } from '../components/CodeEditor.js';
+import { Preview } from '../components/Preview.js';
+import { courses, type Course } from './CoursesPage.js';
+import CardNav from '../components/CardNav.js';
 import './CoursePage.css';
 
 // Logo placeholder

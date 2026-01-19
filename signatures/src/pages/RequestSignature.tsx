@@ -29,9 +29,9 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { firmaApi, Template, Workspace, Recipient, CreateFirmaSigningRequestRequest, FirmaSigningRequestResponse, UpdateSigningRequestRequest, SigningRequestField } from '../services/firmaApi';
-import { useAuth } from '../hooks/useAuth';
-import SigningRequestEditor from '../components/SigningRequestEditor';
+import { firmaApi, Template, Workspace, Recipient, CreateFirmaSigningRequestRequest, FirmaSigningRequestResponse, UpdateSigningRequestRequest, SigningRequestField } from '../services/firmaApi.js';
+import { useAuth } from '../hooks/useAuth.js';
+import SigningRequestEditor from '../components/SigningRequestEditor.js';
 
 export default function RequestSignature() {
   const { t } = useTranslation();

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import CardNav from '../components/CardNav';
+import CardNav from '../components/CardNav.js';
 
 // Logo placeholder - deberías reemplazar esto con tu logo real
 const logo = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="30"%3E%3Ctext x="0" y="20" font-family="Arial" font-size="20" fill="%23fff"%3EDev Coach%3C/text%3E%3C/svg%3E';

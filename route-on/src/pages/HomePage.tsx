@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import StaggeredMenu from '../components/StaggeredMenu';
-import FloatingIcon from '../components/FloatingIcon';
-import Dock from '../components/Dock';
+import StaggeredMenu from '../components/StaggeredMenu.js';
+import FloatingIcon from '../components/FloatingIcon.js';
+import Dock from '../components/Dock.js';
 import { VscHome, VscArchive, VscAccount, VscSettingsGear } from 'react-icons/vsc';
 
 // Logo placeholder - deberías reemplazar esto con tu logo real
@@ -9,7 +9,7 @@ const logoUrl = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" wi
 
 export const HomePage = () => {
   const { t } = useTranslation('route-on');
-  
+
   const menuItems = [
     { label: t('navigation.home'), ariaLabel: t('navigation.homeAria'), link: '/' },
     { label: t('navigation.reception'), ariaLabel: t('navigation.receptionAria'), link: '/recepcion' },
@@ -51,10 +51,10 @@ export const HomePage = () => {
         onMenuOpen={() => console.log('Menu opened')}
         onMenuClose={() => console.log('Menu closed')}
       />
-      
+
       <FloatingIcon />
 
-      <Dock 
+      <Dock
         items={dockItems}
         panelHeight={68}
         baseItemSize={50}

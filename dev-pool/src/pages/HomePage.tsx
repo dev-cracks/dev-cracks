@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import ChromaGrid from '../components/ChromaGrid';
+import ChromaGrid from '../components/ChromaGrid.js';
 
 export const HomePage = () => {
   const { t } = useTranslation('dev-pool');
