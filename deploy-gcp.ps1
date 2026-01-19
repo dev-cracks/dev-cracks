@@ -22,7 +22,7 @@ if ($LASTEXITCODE -ne 0) { Write-Error "Build failed"; exit 1 }
 # 3. Deploy Hosting
 Write-Host "Deploying Hosting..." -ForegroundColor Cyan
 # Try deployment, if it requires interaction it might fail in non-interactive mode
-npx -y firebase-tools deploy --only hosting --project dev-cracks-live-2026
+npx -y firebase-tools deploy --only hosting --project dev-cracks
 if ($LASTEXITCODE -ne 0) { 
     Write-Warning "Hosting deploy might require manual setup. Please run 'npx firebase deploy --only hosting' manually after this script finishes."
     # Do not exit, continue to Backend deploy
@@ -37,7 +37,7 @@ gcloud run deploy dev-cracks-api `
     --platform managed `
     --region us-central1 `
     --allow-unauthenticated `
-    --project dev-cracks-live-2026 `
+    --project dev-cracks `
     --set-env-vars NODE_ENV=production `
     --quiet
 

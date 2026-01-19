@@ -1,6 +1,6 @@
 {
   "projects": {
-    "default": "dev-cracks-live-2026"
+    "default": "dev-cracks"
   },
   "targets": {
     "dev-cracks": {
